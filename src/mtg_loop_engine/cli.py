@@ -1,4 +1,4 @@
-"""CLI entrypoints for corpus ingest and verification demos."""
+"""CLI entrypoints for ingest, verification, discovery, and M4 evaluation."""
 
 from __future__ import annotations
 
@@ -125,6 +125,75 @@ def cmd_discover_gold(_: argparse.Namespace) -> int:
     return 1 if missing else 0
 
 
+def cmd_eval_gold_extras(_: argparse.Namespace) -> int:
+    from mtg_loop_engine.eval.gold_extras import persist_gold_pool_extras
+    from mtg_loop_engine.eval.metrics import precision_from_records
+    from mtg_loop_engine.eval.store import DEFAULT_JSONL, AdjudicationStore
+
+    store = AdjudicationStore()
+    extras = persist_gold_pool_extras(store)
+    adjs = {
+        record.candidate_id: store.get_adjudication(record.candidate_id)
+        for record in extras
+    }
+    report = precision_from_records(extras, {k: v for k, v in adjs.items() if v})
+    print(
+        json.dumps(
+            {
+                "extras": len(extras),
+                "adjudicated": report.adjudicated,
+                "valid": report.valid,
+                "precision": report.precision,
+                "by_class": report.by_class,
+                "jsonl": str(DEFAULT_JSONL),
+            },
+            indent=2,
+        )
+    )
+    store.close()
+    return 0
+
+
+def cmd_eval_spellbook(args: argparse.Namespace) -> int:
+    from pathlib import Path
+
+    from mtg_loop_engine.eval.spellbook_eval import (
+        evaluate_reference_subset,
+        fixtures_by_name,
+        load_variant_jsonl,
+    )
+
+    path = Path(args.variants)
+    if not path.exists():
+        print(f"missing variants jsonl: {path}", file=sys.stderr)
+        print(
+            "Provide a conventional two-card JSONL (see eval/fixtures/) "
+            "or fetch-spellbook and point at data/spellbook/latest/variants_two_card.jsonl",
+            file=sys.stderr,
+        )
+        return 1
+    variants = load_variant_jsonl(path)
+    cards = fixtures_by_name()
+    if args.fetch_oracle:
+        from mtg_loop_engine.eval.oracle_lookup import fetch_named_semantics, names_from_variants
+
+        fetched = fetch_named_semantics(names_from_variants(variants))
+        cards = {**cards, **fetched}
+    report = evaluate_reference_subset(variants, cards_by_name=cards)
+    print(report.model_dump_json(indent=2))
+    if args.out:
+        Path(args.out).write_text(report.model_dump_json(indent=2) + "\n", encoding="utf-8")
+    return 0
+
+
+def cmd_adjudicate_workbench(_: argparse.Namespace) -> int:
+    from pathlib import Path
+    import subprocess
+
+    app = Path(__file__).resolve().parent / "eval" / "workbench.py"
+    return subprocess.call([sys.executable, "-m", "streamlit", "run", str(app)])
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="mtg-loop-engine")
     parser.add_argument("--version", action="version", version=__version__)
@@ -150,6 +219,35 @@ def main(argv: list[str] | None = None) -> None:
         help="Blind-discover gold_core pairs (no pair labels)",
     )
     p_disc.set_defaults(func=cmd_discover_gold)
+
+    p_ex = sub.add_parser(
+        "eval-gold-extras",
+        help="Snapshot and adjudicate extra gold-pool discoveries",
+    )
+    p_ex.set_defaults(func=cmd_eval_gold_extras)
+
+    p_sp = sub.add_parser(
+        "eval-spellbook",
+        help="Reference recovery on a conventional two-card JSONL",
+    )
+    p_sp.add_argument(
+        "--variants",
+        default="eval/fixtures/spellbook_conventional_sample.jsonl",
+        help="JSONL of Spellbook-shaped variants (pair labels used only for scoring)",
+    )
+    p_sp.add_argument(
+        "--fetch-oracle",
+        action="store_true",
+        help="Resolve missing names via Scryfall collection API, then compile deterministically",
+    )
+    p_sp.add_argument("--out", help="Write RecoveryReport JSON to this path")
+    p_sp.set_defaults(func=cmd_eval_spellbook)
+
+    p_wb = sub.add_parser(
+        "adjudicate-workbench",
+        help="Launch the local Streamlit M4 adjudication workbench",
+    )
+    p_wb.set_defaults(func=cmd_adjudicate_workbench)
 
     args = parser.parse_args(argv)
     raise SystemExit(args.func(args))

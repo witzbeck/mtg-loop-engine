@@ -21,6 +21,9 @@ build-backend = "uv_build"
 dev = [
     "pytest>=9.1.1",
 ]
+eval = [
+    "streamlit>=1.40",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
