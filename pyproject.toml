@@ -1,0 +1,27 @@
+[project]
+name = "mtg-loop-engine"
+version = "0.1.0"
+description = "Explainable two-card MTG loop discovery: compile, verify, and prove repeatable interactions."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "duckdb>=1.5.5",
+    "httpx>=0.28.1",
+    "pydantic>=2.13.4",
+]
+
+[project.scripts]
+mtg-loop-engine = "mtg_loop_engine.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.9.18,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
