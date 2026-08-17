@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Core library: card ingest, semantic IR, game state, rules surface, witness verification, proofs, benchmarks, and curated gold corpora.
+Core library: card ingest, semantic IR, capability joins, bounded discovery, game state, rules surface, witness verification, proofs, benchmarks, and curated gold corpora.
 
 ## Context
 

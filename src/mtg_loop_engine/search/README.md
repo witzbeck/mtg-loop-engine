@@ -17,9 +17,11 @@ graph TB;
 
 ## What belongs here
 
-- Pair enumeration from capability joins
-- Bounded action search that emits witnesses
-- Orchestration that feeds the same conservative verifier
+- `discover.py`: orchestrates pool → pairs → explorer → verifier
+- `explorer.py`: bounded legal-action BFS that emits witnesses
+- `pruning.py`: reusable-state fingerprints
+
+Pair enumeration is owned by `interactions/`; this package consumes those pairs.
 
 ## What does not belong here
 

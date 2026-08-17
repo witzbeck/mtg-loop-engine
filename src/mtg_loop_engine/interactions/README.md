@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Capability signatures and inverted indexes used to prune two-card pair generation before search.
+Capability signatures and inverted-index neighborhoods used to propose two-card pairs before search. `join_reasons` confirms each neighborhood pair.
 
 ## Context
 
@@ -10,14 +10,16 @@ Capability signatures and inverted indexes used to prune two-card pair generatio
 graph TB;
   ir[CardSemantics] --> caps[capabilities];
   caps --> idx[index];
-  idx --> pairs[candidatePairs];
+  idx --> neigh[invertedNeighborhood];
+  neigh --> reasons[joinReasons];
+  reasons --> pairs[candidatePairs];
   pairs --> search[search];
 ```
 
 ## What belongs here
 
-- `capabilities.py`: produces / requires / triggers / modifies extracted from IR
-- `index.py`: inverted maps and complementary pair joins
+- `capabilities.py`: produces / requires / triggers / modifies extracted from IR; `join_reasons`
+- `index.py`: inverted maps (`by_produces`, `by_requires`, `by_triggers`, `by_modifies`) and `candidate_pairs()`
 
 ## What does not belong here
 

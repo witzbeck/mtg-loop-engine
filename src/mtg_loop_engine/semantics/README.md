@@ -11,6 +11,7 @@ graph TB;
   oracleText[OracleText] --> compiler[compiler];
   patterns[patterns] --> compiler;
   compiler --> ir[CardSemantics];
+  ir --> interactions[interactions];
   ir --> verify[verify];
   ir --> proofs[proofs models];
   ir --> rules[rules executor];

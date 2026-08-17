@@ -4,6 +4,17 @@
 
 Blind rediscovery tests: gold_core cards without pair labels must still yield verified two-card witnesses via search + the same verifier.
 
+## Context
+
+```mermaid
+graph TB;
+  pool[goldCoreCardPool] --> index[InteractionIndex];
+  index --> discover[discoverLoops];
+  discover --> verifier[Verifier];
+  goldKeys[goldCorePairKeys] --> recall[recallAssert];
+  verifier --> recall;
+```
+
 ## What belongs here
 
 - Join-index coverage and discovery-recall tests
