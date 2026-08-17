@@ -8,7 +8,9 @@ Domain enums and intermediate representation (IR) for card abilities, costs, eff
 
 ```mermaid
 graph TB;
-  enums[enums] --> ir[ir CardSemantics];
+  oracleText[OracleText] --> compiler[compiler];
+  patterns[patterns] --> compiler;
+  compiler --> ir[CardSemantics];
   ir --> verify[verify];
   ir --> proofs[proofs models];
   ir --> rules[rules executor];
@@ -16,9 +18,10 @@ graph TB;
 
 ## What belongs here
 
-- `enums.py`, `ir.py`, manual fixture helpers consumed by `corpus/`
+- `enums.py`, `ir.py`, `compiler.py`, `coverage.py`, `oracle_fixtures.py`
+- Deterministic `patterns/` for gold_core ability families
 
 ## What does not belong here
 
-- Full Oracle text parser (M2+)
+- Full Oracle text parser completeness (grow patterns incrementally)
 - LLM proposal paths (blocked through M3)
