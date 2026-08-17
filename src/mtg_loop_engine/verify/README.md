@@ -19,4 +19,5 @@ graph TB;
 
 ## What does not belong here
 
-- Candidate pair search (M3)
+- Candidate pair search or action-space exploration (see `search/`)
+- Gold pair labels

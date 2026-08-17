@@ -1,4 +1,10 @@
-"""Shared builders for gold corpus witnesses."""
+"""Shared builders for gold fixtures and discovered witnesses.
+
+Search imports `bf` / `two_card` from here on purpose: a discovered
+`LoopWitness` is constructed with the same board and classification
+vocabulary as gold_core, so verifier inputs stay comparable. This package
+still must not leak pair labels into search.
+"""
 
 from __future__ import annotations
 

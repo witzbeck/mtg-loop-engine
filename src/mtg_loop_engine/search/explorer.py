@@ -4,12 +4,15 @@ from __future__ import annotations
 
 from collections import deque
 
-from mtg_loop_engine.corpus.builders import bf, two_card
+from pydantic import BaseModel
+
+from mtg_loop_engine.corpus.builders import bf, two_card  # shared with gold fixtures
 from mtg_loop_engine.interactions.capabilities import extract_capabilities
 from mtg_loop_engine.proofs.models import (
     ActionStep,
     EssentialCardRef,
     InitialStateSpec,
+    LoopProof,
     LoopRelevantState,
     LoopWitness,
     OutputDelta,
@@ -17,11 +20,27 @@ from mtg_loop_engine.proofs.models import (
     StateDimension,
 )
 from mtg_loop_engine.rules.executor import Executor
-from mtg_loop_engine.verify.verifier import Verifier
 from mtg_loop_engine.search.pruning import reusable_fingerprint
-from mtg_loop_engine.semantics.enums import ComparisonOp, OutputType, Zone
+from mtg_loop_engine.semantics.enums import (
+    ComparisonOp,
+    OutputType,
+    VerificationStatus,
+    Zone,
+)
 from mtg_loop_engine.semantics.ir import ActivatedAbility, CardSemantics, SacrificeCost
 from mtg_loop_engine.state.game import GameState
+from mtg_loop_engine.verify.verifier import Verifier
+
+
+class ExploredWitness(BaseModel):
+    """First sequence the injected verifier accepts for this pair.
+
+    Explorer is the only verification call on the discovery path. `discover_loops`
+    attaches join reasons; it does not verify again.
+    """
+
+    witness: LoopWitness
+    proof: LoopProof
 
 
 OUTPUT_EVENT_KEYS = {
@@ -279,8 +298,8 @@ def explore_pair(
     max_depth: int = 6,
     max_states: int = 4000,
     verifier: Verifier | None = None,
-) -> LoopWitness | None:
-    """Search one unordered pair. Returns the first witness that looks productive."""
+) -> ExploredWitness | None:
+    """Search one unordered pair. Returns the first verifier-accepted loop."""
     check = verifier or Verifier()
     spec = default_initial_state(a, b)
     semantics = {a.oracle_id: a, b.oracle_id: b}
@@ -302,8 +321,8 @@ def explore_pair(
             if outputs:
                 witness = build_witness(a, b, spec, actions, start, state)
                 proof = check.verify(witness)
-                if proof.status.value == "verified":
-                    return witness
+                if proof.status == VerificationStatus.VERIFIED:
+                    return ExploredWitness(witness=witness, proof=proof)
         if len(actions) >= max_depth:
             continue
         fp = reusable_fingerprint(state)

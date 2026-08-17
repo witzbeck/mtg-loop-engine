@@ -7,7 +7,6 @@ from pydantic import BaseModel, Field
 from mtg_loop_engine.interactions.index import InteractionIndex
 from mtg_loop_engine.proofs.models import LoopProof, LoopWitness
 from mtg_loop_engine.search.explorer import explore_pair
-from mtg_loop_engine.semantics.enums import VerificationStatus
 from mtg_loop_engine.semantics.ir import CardSemantics
 from mtg_loop_engine.verify.verifier import Verifier
 
@@ -40,8 +39,9 @@ def discover_loops(
 ) -> DiscoveryReport:
     """Find two-card loops without known pairing information.
 
-    Pair labels must not be passed in. The verifier is the same conservative
-    witness-in engine used for gold_core.
+    Pair labels must not be passed in. The injected verifier is the same
+    conservative witness-in engine used for gold_core, and it is the search
+    acceptance oracle (one verify per candidate sequence; no second pass).
     """
     check = verifier or Verifier()
     index = InteractionIndex(cards)
@@ -55,12 +55,14 @@ def discover_loops(
         left = index.cards[pair.left_id]
         right = index.cards[pair.right_id]
         report.searched_pairs += 1
-        witness = explore_pair(left, right, max_depth=max_depth, verifier=check)
-        if witness is None:
+        found = explore_pair(left, right, max_depth=max_depth, verifier=check)
+        if found is None:
             continue
-        proof = check.verify(witness)
-        if proof.status == VerificationStatus.VERIFIED:
-            report.verified.append(
-                DiscoveryHit(witness=witness, proof=proof, reasons=pair.reasons)
+        report.verified.append(
+            DiscoveryHit(
+                witness=found.witness,
+                proof=found.proof,
+                reasons=pair.reasons,
             )
+        )
     return report

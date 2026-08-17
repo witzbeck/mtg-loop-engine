@@ -1,21 +1,17 @@
-"""Search must not leak into the verifier module."""
+"""The verify package must not import or mention the search package."""
 
-import mtg_loop_engine.verify.verifier as verifier_mod
+from pathlib import Path
+
+import mtg_loop_engine.verify as verify_pkg
 
 
-def test_verifier_module_does_not_import_search():
-    assert not any(
-        name.startswith("mtg_loop_engine.search")
-        for name in verifier_mod.__dict__.values()
-        if isinstance(name, str)
-    )
-    assert "mtg_loop_engine.search" not in getattr(verifier_mod, "__name__", "")
-    import sys
-
-    # Imported modules from verifier's file should not include search.
-    import inspect
-
-    src = inspect.getsource(verifier_mod)
-    assert "mtg_loop_engine.search" not in src
-    assert "from mtg_loop_engine.search" not in src
-    _ = sys
+def test_verify_package_does_not_import_search():
+    root = Path(verify_pkg.__file__).resolve().parent
+    offenders: list[str] = []
+    for path in root.rglob("*"):
+        if path.suffix not in {".py", ".md"}:
+            continue
+        text = path.read_text(encoding="utf-8")
+        if "mtg_loop_engine.search" in text:
+            offenders.append(str(path.relative_to(root)))
+    assert not offenders, f"verify package mentions search: {offenders}"

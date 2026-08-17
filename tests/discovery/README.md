@@ -10,7 +10,8 @@ Blind rediscovery tests: gold_core cards without pair labels must still yield ve
 graph TB;
   pool[goldCoreCardPool] --> index[InteractionIndex];
   index --> discover[discoverLoops];
-  discover --> verifier[Verifier];
+  discover --> explorer[explorer];
+  explorer --> verifier[Verifier];
   goldKeys[goldCorePairKeys] --> recall[recallAssert];
   verifier --> recall;
 ```
