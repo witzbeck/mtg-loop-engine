@@ -10,10 +10,14 @@ Core library: card ingest, semantic IR, game state, rules surface, witness verif
 graph TB;
   cards[cards] --> semantics[semantics];
   semantics --> verify[verify];
+  semantics --> interactions[interactions];
+  interactions --> search[search];
+  search --> verify;
   state[state] --> verify;
   rules[rules] --> verify;
   verify --> proofs[proofs];
   corpus[corpus] --> verify;
+  corpus --> search;
   benchmark[benchmark] --> corpus;
 ```
 
