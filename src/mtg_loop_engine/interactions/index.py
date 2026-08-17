@@ -40,27 +40,62 @@ class InteractionIndex:
             for tag in cap.modifies:
                 self.by_modifies[tag].add(oid)
 
+    def _complement_ids(self, oid: str) -> set[str]:
+        """Inverted-index neighborhood that might join with oid."""
+        cap = self.caps[oid]
+        out: set[str] = set()
+        if cap.produces & {"etb", "token"}:
+            out |= self.by_triggers["enter_battlefield"]
+        if "enter_battlefield" in cap.triggers_on:
+            out |= self.by_produces["etb"] | self.by_produces["token"]
+        if "tap" in cap.requires:
+            out |= self.by_produces["untap"]
+        if "untap" in cap.produces:
+            out |= self.by_requires["tap"]
+        if cap.requires & {"sac_creature", "sac_self", "sac_token"}:
+            out |= (
+                self.by_produces["gy_return"]
+                | self.by_produces["dies_return"]
+                | self.by_triggers["dies"]
+            )
+        if cap.produces & {"gy_return", "dies_return"} or "dies" in cap.triggers_on:
+            out |= (
+                self.by_requires["sac_creature"]
+                | self.by_requires["sac_self"]
+                | self.by_requires["sac_token"]
+            )
+        if "remove_counter" in cap.requires:
+            out |= self.by_produces["add_counter"]
+        if "add_counter" in cap.produces:
+            out |= self.by_requires["remove_counter"]
+        if "mana" in cap.requires:
+            out |= self.by_modifies["reduce_activation_cost"] | self.by_produces["mana"]
+        if "reduce_activation_cost" in cap.modifies:
+            out |= self.by_requires["mana"]
+        if "mana" in cap.produces:
+            out |= self.by_requires["mana"]
+        out.discard(oid)
+        return out
+
     def candidate_pairs(self) -> list[CandidatePair]:
         """Unordered complementary pairs. Does not consult known combo labels."""
         seen: set[tuple[str, str]] = set()
         pairs: list[CandidatePair] = []
-        ids = sorted(self.cards)
-        for i, left_id in enumerate(ids):
-            for right_id in ids[i + 1 :]:
-                reasons = join_reasons(self.caps[left_id], self.caps[right_id])
-                reasons += join_reasons(self.caps[right_id], self.caps[left_id])
-                # Unique while preserving order
-                uniq: list[str] = []
-                for r in reasons:
-                    if r not in uniq:
-                        uniq.append(r)
-                if not uniq:
-                    continue
-                key = (left_id, right_id)
+        for left_id in sorted(self.cards):
+            for right_id in sorted(self._complement_ids(left_id)):
+                key = tuple(sorted((left_id, right_id)))
                 if key in seen:
                     continue
                 seen.add(key)
+                reasons = join_reasons(self.caps[key[0]], self.caps[key[1]])
+                reasons += join_reasons(self.caps[key[1]], self.caps[key[0]])
+                uniq: list[str] = []
+                for reason in reasons:
+                    if reason not in uniq:
+                        uniq.append(reason)
+                if not uniq:
+                    continue
                 pairs.append(
-                    CandidatePair(left_id=left_id, right_id=right_id, reasons=uniq)
+                    CandidatePair(left_id=key[0], right_id=key[1], reasons=uniq)
                 )
         return pairs

@@ -43,7 +43,7 @@ def discover_loops(
     Pair labels must not be passed in. The verifier is the same conservative
     witness-in engine used for gold_core.
     """
-    _ = verifier  # reserved; explorer already uses Verifier()
+    check = verifier or Verifier()
     index = InteractionIndex(cards)
     pairs = index.candidate_pairs()
     report = DiscoveryReport(
@@ -55,10 +55,10 @@ def discover_loops(
         left = index.cards[pair.left_id]
         right = index.cards[pair.right_id]
         report.searched_pairs += 1
-        witness = explore_pair(left, right, max_depth=max_depth)
+        witness = explore_pair(left, right, max_depth=max_depth, verifier=check)
         if witness is None:
             continue
-        proof = Verifier().verify(witness)
+        proof = check.verify(witness)
         if proof.status == VerificationStatus.VERIFIED:
             report.verified.append(
                 DiscoveryHit(witness=witness, proof=proof, reasons=pair.reasons)

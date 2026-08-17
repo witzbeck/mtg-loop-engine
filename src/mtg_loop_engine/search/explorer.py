@@ -17,6 +17,7 @@ from mtg_loop_engine.proofs.models import (
     StateDimension,
 )
 from mtg_loop_engine.rules.executor import Executor
+from mtg_loop_engine.verify.verifier import Verifier
 from mtg_loop_engine.search.pruning import reusable_fingerprint
 from mtg_loop_engine.semantics.enums import ComparisonOp, OutputType, Zone
 from mtg_loop_engine.semantics.ir import ActivatedAbility, CardSemantics, SacrificeCost
@@ -277,8 +278,10 @@ def explore_pair(
     *,
     max_depth: int = 6,
     max_states: int = 4000,
+    verifier: Verifier | None = None,
 ) -> LoopWitness | None:
     """Search one unordered pair. Returns the first witness that looks productive."""
+    check = verifier or Verifier()
     spec = default_initial_state(a, b)
     semantics = {a.oracle_id: a, b.oracle_id: b}
     executor = Executor(semantics)
@@ -298,9 +301,7 @@ def explore_pair(
             outputs = derive_outputs(start, state)
             if outputs:
                 witness = build_witness(a, b, spec, actions, start, state)
-                from mtg_loop_engine.verify.verifier import Verifier
-
-                proof = Verifier().verify(witness)
+                proof = check.verify(witness)
                 if proof.status.value == "verified":
                     return witness
         if len(actions) >= max_depth:
