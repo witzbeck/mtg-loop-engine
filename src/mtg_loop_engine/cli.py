@@ -97,6 +97,34 @@ def cmd_compile_coverage(_: argparse.Namespace) -> int:
     return 0 if metrics.fragment_coverage == 1.0 else 1
 
 
+def cmd_discover_gold(_: argparse.Namespace) -> int:
+    from mtg_loop_engine.corpus import gold_core_card_pool, gold_core_pair_keys
+    from mtg_loop_engine.search.discover import discover_loops
+
+    gold = gold_core_pair_keys()
+    report = discover_loops(gold_core_card_pool())
+    found = report.verified_pairs
+    missing = gold - found
+    print(
+        json.dumps(
+            {
+                "cards": report.cards,
+                "candidate_pairs": report.candidate_pairs,
+                "searched_pairs": report.searched_pairs,
+                "verified": len(report.verified),
+                "gold_pairs": len(gold),
+                "rediscovered": len(gold & found),
+                "missing": [sorted(p) for p in sorted(missing, key=lambda s: tuple(sorted(s)))],
+            },
+            indent=2,
+        )
+    )
+    for hit in report.verified:
+        names = " + ".join(c.name for c in hit.witness.essential_cards)
+        print(f"VERIFIED  {names}  reasons={hit.reasons}")
+    return 1 if missing else 0
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="mtg-loop-engine")
     parser.add_argument("--version", action="version", version=__version__)
@@ -116,6 +144,12 @@ def main(argv: list[str] | None = None) -> None:
         "compile-coverage", help="Report M2 pattern coverage on gold fixtures"
     )
     p_cov.set_defaults(func=cmd_compile_coverage)
+
+    p_disc = sub.add_parser(
+        "discover-gold",
+        help="Blind-discover gold_core pairs (no pair labels)",
+    )
+    p_disc.set_defaults(func=cmd_discover_gold)
 
     args = parser.parse_args(argv)
     raise SystemExit(args.func(args))

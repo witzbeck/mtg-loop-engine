@@ -1,0 +1,13 @@
+# discovery
+
+## Purpose
+
+Blind rediscovery tests: gold_core cards without pair labels must still yield verified two-card witnesses via search + the same verifier.
+
+## What belongs here
+
+- Join-index coverage and discovery-recall tests
+
+## What does not belong here
+
+- Tests that pass known pairings into the explorer
