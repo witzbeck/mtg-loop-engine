@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Pytest suites for M0–M3 gates: unit helpers, gold_core VERIFIED, hard-negative typed rejections, gold_extended UNSUPPORTED, golden proof JSON, semantic compiler, and blind discovery recall.
+Pytest suites for M0–M4 gates: unit helpers, gold_core VERIFIED, hard-negative typed rejections, gold_extended UNSUPPORTED, golden proof JSON, semantic compiler, blind discovery recall, and M4 evaluation/adjudication.
 
 ## Context
 
@@ -16,6 +16,9 @@ graph TB;
   semantic[semantic] --> compiler[compiler];
   discovery[discovery] --> search[search];
   search --> verifier;
+  evalTests[eval] --> evalPkg[eval];
+  evalPkg --> search;
+  evalPkg --> verifier;
 ```
 
 ## What belongs here
