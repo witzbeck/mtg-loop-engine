@@ -1,0 +1,40 @@
+{
+  "snapshot": "local data/spellbook/latest (2 pages, 200 raw variants, gitignored)",
+  "filter": "conventional two-card, zero templates, repeatable feature, distinct names",
+  "counts": {
+    "selected": 99,
+    "cards_resolved_from_scryfall": 96,
+    "supported_complete_semantics": 0,
+    "eligible": 0,
+    "rediscovered": 0,
+    "compiler_unsupported": 99,
+    "recall_eligible": null
+  },
+  "stage_breakdown": {
+    "compiler_unsupported": 99,
+    "candidate_join_miss": 0,
+    "search_miss": 0,
+    "verifier_rejection": 0,
+    "prerequisite_classification_mismatch": 0,
+    "recovered": 0
+  },
+  "examples": [
+    {
+      "names": ["Gravecrawler", "Phyrexian Altar"],
+      "stage": "compiler_unsupported",
+      "note": "Real Oracle has extra clauses vs gold fixtures; fail-closed."
+    },
+    {
+      "names": ["Basalt Monolith", "Forsaken Monument"],
+      "stage": "compiler_unsupported",
+      "note": "Monument text is outside current patterns."
+    },
+    {
+      "names": ["Isochron Scepter", "Dramatic Reversal"],
+      "stage": "compiler_unsupported",
+      "note": "Imprint/copy is gold_extended, not modeled."
+    }
+  ],
+  "reference_absent_sample": "none — zero eligible/supported entries, so no accepted discoveries to adjudicate from this subset",
+  "notes": "Recall is defined only over eligible/supported entries. Spellbook absence is not a false positive. Gold-fixture eval-spellbook sample still recovers 2/2 eligible rows."
+}

@@ -20,6 +20,8 @@ graph TB;
   verifyPkg --> proofsPkg[proofs];
   corpusPkg[corpus] --> verifyPkg;
   corpusPkg --> searchPkg;
+  searchPkg --> evalPkg[eval];
+  verifyPkg --> evalPkg;
 ```
 
 ## Quick start
@@ -30,6 +32,9 @@ uv run pytest
 uv run mtg-loop-engine verify-gold
 uv run mtg-loop-engine compile-coverage
 uv run mtg-loop-engine discover-gold
+uv run mtg-loop-engine eval-gold-extras
+uv run mtg-loop-engine eval-spellbook --variants eval/fixtures/spellbook_conventional_sample.jsonl
+uv run --group eval mtg-loop-engine adjudicate-workbench
 uv run mtg-loop-engine fetch-scryfall
 uv run mtg-loop-engine fetch-spellbook --pages 3
 ```

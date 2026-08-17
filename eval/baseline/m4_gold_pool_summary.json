@@ -1,0 +1,11 @@
+{
+  "extras": 24,
+  "adjudicated": 24,
+  "valid": 7,
+  "precision": 0.2916666666666667,
+  "by_class": {
+    "duplicate_or_equivalent_interaction": 17,
+    "valid_strict_two_card": 7
+  },
+  "notes": "Adjudication of unlabeled gold-pool extras. Joins were not tightened to chase this distribution. Spellbook absence is ABSENT_FROM_REFERENCE."
+}

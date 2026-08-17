@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Core library: card ingest, semantic IR, capability joins, bounded discovery, game state, rules surface, witness verification, proofs, benchmarks, and curated gold corpora.
+Core library: card ingest, semantic IR, capability joins, bounded discovery, game state, rules surface, witness verification, proofs, benchmarks, curated gold corpora, and M4 evaluation.
 
 ## Context
 
@@ -18,6 +18,9 @@ graph TB;
   verify --> proofs[proofs];
   corpus[corpus] --> verify;
   corpus --> search;
+  search --> evalPkg[eval];
+  proofs --> evalPkg;
+  corpus --> evalPkg;
   benchmark[benchmark] --> corpus;
 ```
 
@@ -25,8 +28,9 @@ graph TB;
 
 - Library modules imported as `mtg_loop_engine.*`
 - Manual gold fixtures under `corpus/`
+- M4 evaluation (`eval/`): adjudication store, Spellbook recovery, Streamlit workbench
 
 ## What does not belong here
 
 - CLI-only scripts that belong in `scripts/`
-- UI / API apps
+- FastAPI / Postgres / general M7 explorer

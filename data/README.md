@@ -22,3 +22,5 @@ Populate with:
 uv run mtg-loop-engine fetch-scryfall
 uv run mtg-loop-engine fetch-spellbook --pages 3
 ```
+
+M4 working adjudications default to gitignored `data/eval/adjudications.duckdb`. Committed copies live under repo-root `eval/`.
