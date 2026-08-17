@@ -24,7 +24,7 @@ graph TB;
 
 - Manually authored `LoopWitness` fixtures and card IR
 - `builders.py`: shared board/classification helpers for gold fixtures **and** discovery (intentional: search emits the same witness shape the verifier already trusts)
-- `gold_core_card_pool()` / `gold_core_pair_keys()` for CLI and tests only (not search internals)
+- `gold_core_card_pool()` / `gold_core_compiled_card_pool()` / `gold_core_pair_keys()` for CLI and tests only (not search internals)
 
 ## What does not belong here
 

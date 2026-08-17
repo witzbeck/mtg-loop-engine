@@ -19,6 +19,7 @@ graph TB;
 ## What belongs here
 
 - Join-index coverage and discovery-recall tests
+- `test_compiled_discovery.py`: M3.5 seam (Oracle fixtures → compiler → blind search)
 
 ## What does not belong here
 

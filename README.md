@@ -36,8 +36,8 @@ uv run mtg-loop-engine fetch-spellbook --pages 3
 
 ## What belongs here
 
-- Python package `mtg_loop_engine` (M0–M3: corpus, witness verifier, compiler, blind discovery)
-- Tests, scripts, and gitignored local `data/` snapshots
+- Python package `mtg_loop_engine` (M0–M4: corpus, verifier, compiler, blind discovery, evaluation)
+- Tests, scripts, gitignored local `data/` snapshots, and committed evaluation metadata under `eval/`
 
 ## What does not belong here
 
@@ -52,3 +52,7 @@ uv run mtg-loop-engine fetch-spellbook --pages 3
 ## M3 contract
 
 Semantic cards with hidden pair labels → capability joins → bounded search → the same conservative verifier.
+
+## M4 contract
+
+Gold Oracle → compiler → blind discovery → verifier (M3.5 seam). Spellbook reference recovery is measured only on eligible/supported entries. Precision is human-adjudicated; Spellbook absence is `ABSENT_FROM_REFERENCE`, not a false positive.
