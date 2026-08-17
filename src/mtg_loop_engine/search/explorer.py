@@ -7,9 +7,11 @@ from collections import deque
 from pydantic import BaseModel
 
 from mtg_loop_engine.corpus.builders import bf, two_card  # shared with gold fixtures
+from mtg_loop_engine.eval.classify import analyze_prerequisites
 from mtg_loop_engine.interactions.capabilities import extract_capabilities
 from mtg_loop_engine.proofs.models import (
     ActionStep,
+    Classification,
     EssentialCardRef,
     InitialStateSpec,
     LoopProof,
@@ -277,7 +279,7 @@ def build_witness(
         EssentialCardRef(oracle_id=b.oracle_id, name=b.name),
     ]
     pair_id = "__".join(sorted([a.oracle_id, b.oracle_id]))
-    return LoopWitness(
+    witness = LoopWitness(
         id=f"discover_{pair_id}",
         classification=two_card(essential=refs, generic=generic),
         essential_cards=refs,
@@ -289,6 +291,26 @@ def build_witness(
         assumptions=["discovered_without_pair_labels"],
         prerequisites=generic,
     )
+    analysis = analyze_prerequisites(witness)
+    functional = [
+        Prerequisite(kind="functional", description=item)
+        for item in analysis.functional_external_requirements
+    ]
+    generic_prereqs = [
+        Prerequisite(kind="board", description=item)
+        for item in analysis.generic_prerequisites
+    ] or generic
+    witness.classification = Classification(
+        essential_card_count=max(analysis.essential_functional_count, 1),
+        strict_two_card=analysis.strict_two_card,
+        generic_prerequisites=generic_prereqs,
+        functional_external_requirements=functional,
+    )
+    witness.prerequisites = generic_prereqs + functional
+    witness.assumptions = ["discovered_without_pair_labels"] + [
+        f"{item.kind.value}: {item.description}" for item in analysis.assumptions
+    ]
+    return witness
 
 
 def explore_pair(
