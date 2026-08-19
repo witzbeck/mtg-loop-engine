@@ -1,11 +1,13 @@
 {
-  "extras": 24,
-  "adjudicated": 24,
-  "valid": 7,
-  "precision": 0.2916666666666667,
+  "extras_total": 24,
+  "extras_real_card_pairs": 8,
+  "extras_fixture_pairs": 16,
+  "adjudicated": 8,
+  "valid": 3,
+  "precision": 0.375,
   "by_class": {
-    "duplicate_or_equivalent_interaction": 17,
-    "valid_strict_two_card": 7
+    "duplicate_or_equivalent_interaction": 5,
+    "valid_strict_two_card": 3
   },
-  "notes": "Adjudication of unlabeled gold-pool extras. Joins were not tightened to chase this distribution. Spellbook absence is ABSENT_FROM_REFERENCE."
+  "notes": "Precision computed over real-card pairs only; fixture pairs (is_fixture=True) are INVALID_CANDIDATE_DATA and excluded. Joins were not tightened to chase this distribution."
 }

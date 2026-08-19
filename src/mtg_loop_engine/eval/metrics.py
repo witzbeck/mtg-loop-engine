@@ -67,6 +67,13 @@ VALID_CLASSES = {
     AdjudicationClass.VALID_GENERIC_PREREQUISITE,
 }
 
+# Excluded from the precision denominator: the candidate data itself is bad
+# (non-existent card, missing oracle text, fixture stand-in, lookup failure).
+# These are not meaningful discoveries and should not penalise or inflate precision.
+EXCLUDED_FROM_PRECISION = {
+    AdjudicationClass.INVALID_CANDIDATE_DATA,
+}
+
 
 def precision_from_records(
     candidates: list[CandidateRecord],
@@ -82,6 +89,9 @@ def precision_from_records(
             continue
         if adj.skipped:
             skipped += 1
+            continue
+        if adj.adjudication in EXCLUDED_FROM_PRECISION:
+            by_class[adj.adjudication.value] += 1
             continue
         adjudicated += 1
         by_class[adj.adjudication.value] += 1

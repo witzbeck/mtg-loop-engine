@@ -17,6 +17,7 @@ class AdjudicationClass(StrEnum):
     UNJUSTIFIED_INITIAL_STATE = "unjustified_initial_state"
     RULES_OR_SEMANTICS_FALSE_POSITIVE = "rules_or_semantics_false_positive"
     DUPLICATE_OR_EQUIVALENT_INTERACTION = "duplicate_or_equivalent_interaction"
+    INVALID_CANDIDATE_DATA = "invalid_candidate_data"
     NEEDS_RULES_RESEARCH = "needs_rules_research"
 
 
