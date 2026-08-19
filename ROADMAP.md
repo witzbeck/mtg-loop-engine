@@ -154,5 +154,5 @@ Once M4 correctness fixes are in:
 
 - **Review at milestone start:** before implementation begins on any milestone, re-read this file and confirm goals, constraints, and deferred items are still accurate.
 - **Update at milestone exit:** the PR that completes a milestone must include a `ROADMAP.md` update marking it done and refreshing the next milestone's goals.
-- **Feature branches:** all non-trivial work on a branch; CI green before merge into `main`. See `.cursor/rules/feature-branches.mdc`.
+- **Feature branches:** all non-trivial work on a `feature/<slug>` branch; CI green before merge into `main`. See `.cursor/rules/feature-branches.mdc`.
 - **Plan file:** `~/.cursor/plans/mtg_loop_engine_cc3ab45a.plan.md` tracks in-session todos. This file tracks durable strategy. Both should stay consistent.
