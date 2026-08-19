@@ -11,6 +11,13 @@ class OracleFixture:
     name: str
     types: list[str]
     oracle_text: str
+    is_fixture: bool = False
+    """True when the card is a simplified test stand-in with no real Oracle equivalent.
+
+    Pairs where either card has is_fixture=True should be labelled
+    INVALID_CANDIDATE_DATA and excluded from precision metrics.
+    Real cards that happen to be in the test corpus have is_fixture=False.
+    """
 
 
 # Wording is intentionally close to real Oracle, tuned to deterministic patterns.
@@ -38,6 +45,7 @@ GOLD_ORACLE_FIXTURES: dict[str, OracleFixture] = {
         name="Eager Apprentice",
         types=["Creature"],
         oracle_text="{T}: Create a 1/1 Homunculus creature token.",
+        is_fixture=True,
     ),
     "oracle:phyrexian-altar": OracleFixture(
         oracle_id="oracle:phyrexian-altar",
@@ -105,12 +113,14 @@ GOLD_ORACLE_FIXTURES: dict[str, OracleFixture] = {
         name="Impact Tremors Lite",
         types=["Enchantment"],
         oracle_text="Whenever a creature enters the battlefield, Impact Tremors Lite deals 1 damage to each opponent.",
+        is_fixture=True,
     ),
     "oracle:self-untap-tapper": OracleFixture(
         oracle_id="oracle:self-untap-tapper",
         name="Perpetual Apprentice",
         types=["Creature"],
         oracle_text="{T}: Create a 1/1 Homunculus creature token. Untap Perpetual Apprentice.",
+        is_fixture=True,
     ),
     "oracle:soul-warden": OracleFixture(
         oracle_id="oracle:soul-warden",
@@ -126,12 +136,14 @@ GOLD_ORACLE_FIXTURES: dict[str, OracleFixture] = {
             "Sacrifice Ember Phoenix:\n"
             "Whenever Ember Phoenix dies, return it to the battlefield."
         ),
+        is_fixture=True,
     ),
     "oracle:token-breeder": OracleFixture(
         oracle_id="oracle:token-breeder",
         name="Token Breeder",
         types=["Creature"],
         oracle_text="{T}, Sacrifice a creature token: Create two 1/1 Spawn creature tokens.",
+        is_fixture=True,
     ),
 }
 
