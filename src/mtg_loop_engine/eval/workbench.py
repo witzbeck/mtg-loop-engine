@@ -56,6 +56,13 @@ _CLASS_GUIDE: list[tuple[str, str, str]] = [
         "Basalt Monolith loops by itself; the second card just watches.",
     ),
     (
+        AdjudicationClass.INVALID_CANDIDATE_DATA.value,
+        "One or both cards don't exist as real Magic cards — e.g. a test fixture "
+        "stand-in, a missing oracle text, or a lookup failure. "
+        "Excluded from precision calculations entirely.",
+        "\"Impact Tremors Lite\" is a gold-core fixture, not a real card.",
+    ),
+    (
         AdjudicationClass.NEEDS_RULES_RESEARCH.value,
         "You're not sure — leave it here and come back after checking the rules.",
         "(use liberally; it's better than a wrong label)",
