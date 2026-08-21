@@ -2,49 +2,102 @@
 
 ## Purpose
 
-M4 evaluation layer: compiled-pool helpers live in `corpus/`; this package owns adjudication persistence, prerequisite analysis, Spellbook reference recovery, and the Streamlit workbench. It is a research instrument, not the M7 explorer.
+M4 research instrumentation: prerequisite analysis, Spellbook **reference recovery**, human-adjudicated **precision**, persistence, and the Streamlit workbench.
 
-## Context
+This package measures the engine. It is not the M7 explorer.
+
+## Role in pipeline
+
+Discoveries / Spellbook subsets / adjudications → **THIS** → recovery & precision reports → committed artifacts under repo-root `eval/` + optional `data/eval/` DuckDB.
 
 ```mermaid
 graph TB;
-  discover[search.discover] --> candidates[candidateRecords];
-  candidates --> duck[duckdbStore];
-  duck --> jsonl[committedJsonl];
-  duck --> workbench[streamlitWorkbench];
-  workbench --> adj[adjudications];
-  spellbook[spellbookSubset] --> recovery[referenceRecovery];
+  discover[search.discover] --> records[candidateRecords];
+  records --> store[duckdbJsonlStore];
+  store --> workbench[streamlitWorkbench];
+  workbench --> adj[humanAdjudications];
   adj --> precision[adjudicatedPrecision];
-  narrate[narrate.py] --> workbench;
-  glossary[glossary.py] --> workbench;
+  spellbook[spellbookSubset] --> recovery[referenceRecovery];
+  recovery --> baseline[eval/baseline];
 ```
 
-## What belongs here
+## Inputs
 
-- `schema.py`: adjudication classes and evaluation records
-- `classify.py`: starting-state assumptions and essential-piece analysis
-- `explain.py`: reviewer-facing proof prose (JSON is secondary)
-- `store.py`: DuckDB + JSONL persistence
-- `gold_extras.py`: snapshot gold-pool extras (no pair labels into search)
-- `metrics.py` / `spellbook_eval.py`: reference recovery and precision reports
-- `oracle_lookup.py`: optional Scryfall named lookup for real Oracle text
-- `narrate.py`: plain-English loop narrative and Scryfall card image URL helper
-- `glossary.py`: MTG jargon definitions (tap, sacrifice, ETB, …) for the tutorial workbench
-- `workbench.py`: Streamlit adjudication UI with tutorial mode — card images, plain-English steps, inline glossary, adjudication class guide, and a gold-core study tab
+- Discovered witnesses / proofs
+- Spellbook conventional rows (snapshot or fixtures)
+- Human adjudication classes
 
-## Tutorial mode (workbench)
+## Outputs
 
-The workbench has two tabs:
+- `RecoveryReport`, `PrecisionReport`
+- JSONL / DuckDB records
+- Workbench UI narratives
 
-1. **Review candidates** — the adjudication queue. Each card shows a Scryfall image, oracle text with highlighted jargon, a plain-English loop walkthrough, and collapsible technical detail. Adjudication controls are unchanged.
-2. **Study gold-core loops** — browse all 10 verified gold-core loops by name. Useful before reviewing any new candidates — these are the "ground truth" examples.
+## Responsibilities
 
-The sidebar also includes:
-- **How to adjudicate** — a guide to each `AdjudicationClass` with a worked example.
-- **MTG glossary** — definitions for common jargon (tap, sacrifice, ETB, mana ability, etc.).
+| Concern | Module | Meaning |
+| --- | --- | --- |
+| Reference recovery | `spellbook_eval.py`, `metrics.py` | Among **eligible/supported** reference rows, how many rediscover? Stages: compile → join → search → optional prerequisite mismatch → recovered. |
+| Human-adjudicated precision | `metrics.precision_from_records` | Among adjudicated **real-card** accepted discoveries, how many are valid classes? |
+| Prerequisite analysis | `classify.py` | Participation / assumptions / `strict_two_card` **detection** |
+| Persistence / UX | `store.py`, `workbench.py`, `narrate.py`, `glossary.py`, `explain.py` | Reviewer workflow |
 
-## What does not belong here
+### Spellbook absence ≠ false positive
 
-- FastAPI, Postgres, React, auth, or a public explorer (M7)
+Accepted discoveries missing from Spellbook are `ABSENT_FROM_REFERENCE` (or similar reference status). They are **not** counted as false positives. `NOVEL` requires human adjudication (M5). See [`docs/EVALUATION.md`](../../../docs/EVALUATION.md).
+
+### Detection vs enforcement
+
+`analyze_prerequisites` detects unused searched cards and sets `strict_two_card`. Search stamps this onto witnesses but **does not reject** bystanders. Spellbook recovery may label non-strict hits as `PREREQUISITE_MISMATCH` for scoring — that is measurement, not search acceptance.
+
+## Non-responsibilities
+
+- FastAPI / Postgres / public explorer (M7)
 - LLM parsing
 - Tightening joins to chase unlabeled extras
+- Enforcing participant / `strict_two_card` gates in search or verify (this package **detects**; engine acceptance is a separate M4 follow-through)
+
+Committed baseline *files* live under repo-root `eval/baseline/`. This package **does** write/read them (e.g. `gold_extras.persist_gold_pool_extras` → `m4_gold_pool_summary.json`); the artifact tree is the committed home, not a separate owner.
+
+## Core invariants
+
+- Precision denominator excludes skipped and `INVALID_CANDIDATE_DATA` (fixture pairs).
+- Recovery recall is undefined / null when eligible count is 0.
+- Gold-extra persistence expects adjudications to cover discovered extras (24-row contract in tests).
+
+## Main entry points
+
+| Module | Role |
+| --- | --- |
+| `classify.py` | `analyze_prerequisites` |
+| `schema.py` | Adjudication classes / records |
+| `metrics.py` | Recovery + precision reports |
+| `spellbook_eval.py` | Reference subset evaluation |
+| `gold_extras.py` | Gold-pool extras snapshot / summary |
+| `store.py` | DuckDB + JSONL |
+| `workbench.py` | Streamlit UI |
+| `oracle_lookup.py` | Optional real Oracle text lookup |
+
+CLI: `eval-gold-extras`, `eval-spellbook`, `adjudicate-workbench`.
+
+## Data contracts
+
+Committed outputs land in repo-root `eval/` (fixtures, adjudications, baselines). Working DuckDB defaults under gitignored `data/eval/`.
+
+## Failure behavior
+
+`RuntimeError` when gold extras count disagrees with adjudication coverage. Recovery stages record miss reasons without claiming precision.
+
+## Testing
+
+`tests/eval/` — classify (including bystander detection), store roundtrip, sample recovery 2/2, extras↔adjudications, narrate helpers.
+
+## Extension guide
+
+1. Change denominators only with docs + baseline updates.
+2. Keep workbench educational; do not hide adjudication classes.
+3. Participant enforcement belongs in search/verify — update classify tests when it lands.
+
+## Bigger-picture relationship
+
+Eval sits above the engine. Architecture: [`docs/ARCHITECTURE.md`](../../../docs/ARCHITECTURE.md). Artifact layout: [`../../../eval/README.md`](../../../eval/README.md).

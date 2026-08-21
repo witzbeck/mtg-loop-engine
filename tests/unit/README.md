@@ -2,27 +2,57 @@
 
 ## Purpose
 
-Fast tests for filters, ingest helpers, recurrence projection, capability joins, explorer primitives, and module-boundary checks without full gold suites.
+Focused unit tests for helpers, joins, explorer mechanics, ingest, recurrence, and **layer boundaries**.
 
-## Context
+## Role in pipeline
 
-```mermaid
-graph TB;
-  interactions[test_interactions] --> index[InteractionIndex];
-  explorer[test_explorer] --> search[explorer];
-  explorer --> verifier[Verifier];
-  boundary[test_search_boundary] --> verifyPkg[verify];
-  recurrence[test_recurrence] --> verifier;
-```
+Individual modules → **THIS** → fast regression signals.
 
-## What belongs here
+## Inputs
 
-- `test_spellbook_filter.py`, `test_scryfall_ingest.py`, `test_recurrence.py`
-- `test_search_boundary.py` (the `verify` package must not import search)
-- `test_interactions.py` (inverted-index neighborhoods and `join_reasons`)
-- `test_explorer.py` (default board, legal steps, fingerprints, injected verifier)
+- Library units (`interactions`, `search`, `verify`, `cards`, `state`, …)
 
-## What does not belong here
+## Outputs
 
-- Full witness verification (see `gold_core/`, `hard_negatives/`)
-- Blind rediscovery recall (see `discovery/`)
+- Narrow asserts (including spies for verifier injection)
+
+## Responsibilities
+
+- Lock capability joins and inverted-index behavior.
+- Prove explorer treats injected verifier as acceptance oracle and does not double-verify.
+- Enforce `verify` does not import `search` (`test_search_boundary.py`).
+- Cover ingest hashing and recurrence helpers.
+
+## Non-responsibilities
+
+- Full gold recall (see `../discovery/`)
+- Adjudication precision (see `../eval/`)
+
+## Core invariants
+
+- Boundary test is load-bearing architecture.
+- Reject-all verifier ⇒ no discovery hits.
+
+## Main entry points
+
+- `test_interactions.py`, `test_explorer.py`, `test_search_boundary.py`, `test_scryfall_ingest.py`, `test_recurrence.py`, `test_spellbook_filter.py`, …
+
+## Data contracts
+
+Match module APIs; spies must not weaken production contracts.
+
+## Failure behavior
+
+Unit failures block CI like any other contract.
+
+## Testing
+
+This suite.
+
+## Extension guide
+
+Prefer unit tests for local mechanics; put cross-package seams in `semantic/` or `discovery/`.
+
+## Bigger-picture relationship
+
+Parent: [`../README.md`](../README.md).
