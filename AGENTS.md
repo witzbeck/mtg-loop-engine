@@ -55,6 +55,10 @@ Do not leave the next reader to reverse-engineer a contract change from diffs al
 - Read live baselines under [`eval/baseline/`](eval/baseline/) (and regenerate STATUS/eval docs only when your change actually affects metrics — follow eval package docs).
 - When reporting recovery, precision, or gold-pool rates, cite the baseline files (or freshly produced summaries), not memorized percentages.
 
+## Tests
+
+Treat tests as epistemic contracts. Map critical behavior to the owning suite under `tests/`; do not add vacuous or coverage-padding tests. See [`tests/README.md`](tests/README.md) and [`.cursor/rules/test-quality.mdc`](.cursor/rules/test-quality.mdc).
+
 ## Scope
 
 - No deferred architecture scaffolding (LLM-on-`VERIFIED`, three-card discovery, Z3/SMT, full Comprehensive Rules, ManaBox, deployed UI, premature perf passes — see `ROADMAP.md`).

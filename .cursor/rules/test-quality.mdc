@@ -1,0 +1,47 @@
+---
+description: Prefer epistemic contract tests over coverage padding; ban useless tests.
+alwaysApply: true
+---
+
+# Test quality
+
+This project treats tests as **executable epistemic contracts**, not line-coverage theater. Pair with [`tests/README.md`](../../tests/README.md) and [`CONTRIBUTING.md`](../../CONTRIBUTING.md). Pytest mechanics live in `pyproject.toml` `[tool.pytest.ini_options]`.
+
+## Critical functionality (must be CI-covered)
+
+When behavior changes, add or update tests in the suite that owns that contract:
+
+| Critical path | Prefer |
+| --- | --- |
+| Verifier accepts / rejects | `tests/gold_core/`, `tests/hard_negatives/`, relevant `unit/` |
+| Compiler / patterns | `tests/semantic/` |
+| Blind discovery / seams | `tests/discovery/` (+ semantic compile→verify) |
+| Search ↛ verify boundary | `tests/unit/test_search_boundary.py` (and kin) |
+| Eval / adjudication / recovery | `tests/eval/` |
+| Proof shape / hash stability | `tests/golden_proofs/` |
+
+Green CI is merge-OK only if this table’s row for the PR is exercised — see `ci-merge-gate.mdc`.
+
+## Good tests
+
+- Assert **outcomes**: `VerificationStatus`, typed rejection reasons, rediscovery counts, coverage enums, proof hashes, join reasons.
+- Prefer **one clear contract** per test (or parametrize over corpus cases).
+- Pair positives with hard negatives when adding acceptance behavior.
+- Regress **adjudicated failures** with real witnesses when fixing precision bugs.
+
+## Useless tests (do not add)
+
+- Assertions that cannot fail meaningfully (`assert True`, empty bodies, “runs without exception” with no oracle).
+- Tests that only prove a mock was called, without a domain outcome.
+- Pure coverage padding for private helpers already exercised by gold/seam tests.
+- Duplicating an existing gold_core/discovery case under a new name with no new contract.
+- Weakening expected status/reason so a broken verifier still “passes.”
+- Broadening modeled rules/patterns solely to green a test (expand deliberately with docs).
+
+## Coverage % policy
+
+Do **not** chase a global line-coverage number as the merge bar. Optional local coverage reports are fine for finding gaps; they are not a substitute for the suites above. If a coverage tool is added later, keep it advisory until the team chooses an explicit CI gate.
+
+## Authority
+
+[`tests/README.md`](../../tests/README.md), [`CONTRIBUTING.md`](../../CONTRIBUTING.md). Merge coupling: `ci-merge-gate.mdc`.

@@ -34,7 +34,8 @@ If critical behavior is **not** covered, do **not** merge on green alone: add te
 - Merge with red or pending required checks
 - Assume “tests exist somewhere” if they are not run in CI
 - Weaken or skip tests to manufacture a green badge
+- Prefer contract tests over coverage padding — see `test-quality.mdc`
 
 ## Authority
 
-[`CONTRIBUTING.md`](../../CONTRIBUTING.md). Pair with `land-and-return.mdc` (lifecycle after land) and `merge-strategy.mdc` (squash default).
+[`CONTRIBUTING.md`](../../CONTRIBUTING.md). Pair with `land-and-return.mdc` (lifecycle after land), `merge-strategy.mdc` (squash default), and `test-quality.mdc` (what counts as coverage).

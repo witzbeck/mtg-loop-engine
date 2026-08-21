@@ -28,3 +28,19 @@ eval = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+# Mechanical preferences: fail on unknown markers/config; treat warnings as
+# errors so silent deprecations cannot hide contract drift. Policy for *what*
+# to test (critical path, ban useless tests) lives in CONTRIBUTING.md,
+# tests/README.md, and .cursor/rules/test-quality.mdc — not in coverage %.
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+]
+xfail_strict = true
+filterwarnings = [
+    "error",
+]
+markers = [
+    "slow: heavier optional checks; default CI runs the full suite without needing this mark today",
+]

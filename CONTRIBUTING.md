@@ -49,6 +49,8 @@ Green CI authorizes merge only when critical path behavior is exercised by what 
 - Behavior changes need tests in the same change (regression tests preferred when fixing adjudicated or gold failures).
 - Do not weaken assertions or broaden modeled rules solely to pass existing tests — see [`AGENTS.md`](AGENTS.md).
 - Critical path for a PR must be covered by the CI suite before treating green CI as merge OK (see **CI merge gate** above).
+- Prefer epistemic contract tests (status, typed rejection, rediscovery, coverage, hashes) over coverage-padding or mock-only tests. Details: [`tests/README.md`](tests/README.md), [`.cursor/rules/test-quality.mdc`](.cursor/rules/test-quality.mdc).
+- Pytest mechanical preferences (`strict-markers`, `xfail_strict`, warnings as errors) live in `pyproject.toml`; do not treat a global line-coverage percentage as the merge bar.
 
 ## Documentation expectations
 

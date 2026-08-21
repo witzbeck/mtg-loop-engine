@@ -54,6 +54,19 @@ graph TB;
 - Discovery tests must not pass known pairings into the explorer.
 - Boundary test forbids `verify` importing `search`.
 - Eval tests may document bystander acceptance (`strict_two_card is False` with a found witness) until participant enforcement ships — that is a regression signal for the open defect, not proof the gate exists.
+- Tests assert **contracts** (status, typed rejection, rediscovery, coverage, hashes). Do not add vacuous or mock-only tests to pad coverage.
+
+## Test quality (what to write / avoid)
+
+**Critical path → suite:** verifier → `gold_core` / `hard_negatives`; compiler → `semantic`; discovery/seams → `discovery`; eval → `eval`; proof artifacts → `golden_proofs`; layer boundaries → `unit`.
+
+**Prefer:** outcome assertions; positive + hard-negative pairs for new acceptance behavior; regressions from real adjudications.
+
+**Avoid:** `assert True` / “doesn’t throw” with no oracle; mock-call-only tests; duplicating gold cases without a new contract; weakening expectations to green CI; expanding patterns only to pass a test.
+
+**Coverage %:** optional local reports may help find gaps; they are not the merge bar. See [`.cursor/rules/test-quality.mdc`](../.cursor/rules/test-quality.mdc) and [`CONTRIBUTING.md`](../CONTRIBUTING.md).
+
+Pytest mechanics (`--strict-markers`, `xfail_strict`, warnings-as-errors) are configured in `pyproject.toml`.
 
 ## Main entry points
 
