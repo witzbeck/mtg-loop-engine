@@ -17,6 +17,7 @@ CLASSES = list(AdjudicationClass)
 
 # ---------------------------------------------------------------------------
 # Adjudication class guide: one sentence + example pair for each class
+# Durable docs (decision rules for every class + ReferenceStatus): docs/ADJUDICATION.md
 # ---------------------------------------------------------------------------
 
 _CLASS_GUIDE: list[tuple[str, str, str]] = [
@@ -196,6 +197,10 @@ def _render_adjudication_controls(st, store, candidate, existing, queue, review_
 
 def _render_sidebar_guide(st) -> None:
     with st.sidebar.expander(":material/menu_book: How to adjudicate", expanded=False):
+        st.markdown(
+            "Full decision rules: repository file "
+            "`docs/ADJUDICATION.md` (classes, reference statuses, examples)."
+        )
         for cls_val, explanation, example in _CLASS_GUIDE:
             st.markdown(f"**`{cls_val}`**")
             st.caption(explanation)
