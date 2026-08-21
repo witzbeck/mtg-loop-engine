@@ -75,7 +75,7 @@ graph TB;
 
 **Example:** Basalt Monolith loops by itself; the second searched card just watches.
 
-**Counts toward precision:** no. M4 follow-through must enforce participant filters and regress real cases in this class.
+**Counts toward precision:** no. Discovery now rejects these via the search participant gate; remaining historical labels are regression fixtures only until the next baseline freeze.
 
 ### `invalid_candidate_data`
 

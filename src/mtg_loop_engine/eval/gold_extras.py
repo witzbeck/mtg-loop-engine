@@ -34,9 +34,15 @@ def _pair_has_fixture(left_id: str, right_id: str) -> bool:
     return bool({left_id, right_id} & FIXTURE_ORACLE_IDS)
 
 
-# Human adjudication of the 24 extra accepted pairs from the unlabeled gold pool.
-# Keys are frozensets of oracle ids. Notes explain the class; they are not search hints.
+# Human adjudication of extras still accepted after the participant gate
+# (search requires strict_two_card). Keys are frozensets of oracle ids.
+# Notes explain the class; they are not search hints.
 # Pairs containing fictional fixture cards are INVALID_CANDIDATE_DATA.
+#
+# Pre-gate bystander duplicates (Basalt self-untap + spectator) are no longer
+# discovered; they are regression-locked in tests/eval/test_classify_store.py.
+# Frozen baselines under eval/baseline/ remain the historical M4 snapshot until
+# the planned post-eligibility re-freeze (ROADMAP M4 item 5).
 GOLD_EXTRA_ADJUDICATIONS: dict[frozenset[str], tuple[AdjudicationClass, str]] = {
     # ---- Real-card pairs (precision-eligible) --------------------------------
     frozenset({"oracle:ashnods-altar", "oracle:phoenix"}): (
@@ -50,26 +56,6 @@ GOLD_EXTRA_ADJUDICATIONS: dict[frozenset[str], tuple[AdjudicationClass, str]] = 
     frozenset({"oracle:phyrexian-altar", "oracle:reassembling-skeleton"}): (
         AdjudicationClass.VALID_STRICT_TWO_CARD,
         "Altar sacrifice plus Skeleton's graveyard return. Distinct from Ashnod gold pair.",
-    ),
-    frozenset({"oracle:ashnods-altar", "oracle:basalt-monolith"}): (
-        AdjudicationClass.DUPLICATE_OR_EQUIVALENT_INTERACTION,
-        "Loop body is only Basalt tap/untap. Altar is a spectator; not two essential pieces.",
-    ),
-    frozenset({"oracle:basalt-monolith", "oracle:gravecrawler"}): (
-        AdjudicationClass.DUPLICATE_OR_EQUIVALENT_INTERACTION,
-        "Basalt self-untap only. Gravecrawler never acts.",
-    ),
-    frozenset({"oracle:basalt-monolith", "oracle:intruder-alarm"}): (
-        AdjudicationClass.DUPLICATE_OR_EQUIVALENT_INTERACTION,
-        "Basalt self-untap only. Alarm never acts.",
-    ),
-    frozenset({"oracle:basalt-monolith", "oracle:phyrexian-altar"}): (
-        AdjudicationClass.DUPLICATE_OR_EQUIVALENT_INTERACTION,
-        "Basalt self-untap only. Altar never acts.",
-    ),
-    frozenset({"oracle:basalt-monolith", "oracle:reassembling-skeleton"}): (
-        AdjudicationClass.DUPLICATE_OR_EQUIVALENT_INTERACTION,
-        "Basalt self-untap only. Skeleton never acts.",
     ),
     # ---- Fixture pairs (excluded from precision) -----------------------------
     frozenset({"oracle:ashnods-altar", "oracle:suicidal-phoenix"}): (
@@ -88,45 +74,9 @@ GOLD_EXTRA_ADJUDICATIONS: dict[frozenset[str], tuple[AdjudicationClass, str]] = 
         AdjudicationClass.INVALID_CANDIDATE_DATA,
         "Ember Phoenix (oracle:suicidal-phoenix) is a gold-core fixture with no real Oracle card.",
     ),
-    frozenset({"oracle:basalt-monolith", "oracle:token-breeder"}): (
-        AdjudicationClass.INVALID_CANDIDATE_DATA,
-        "Token Breeder (oracle:token-breeder) is a gold-core fixture with no real Oracle card.",
-    ),
-    frozenset({"oracle:basalt-monolith", "oracle:token-tapper"}): (
-        AdjudicationClass.INVALID_CANDIDATE_DATA,
-        "Eager Apprentice (oracle:token-tapper) is a gold-core fixture with no real Oracle card.",
-    ),
     frozenset({"oracle:basalt-monolith", "oracle:self-untap-tapper"}): (
         AdjudicationClass.INVALID_CANDIDATE_DATA,
         "Perpetual Apprentice (oracle:self-untap-tapper) is a gold-core fixture with no real Oracle card.",
-    ),
-    frozenset({"oracle:self-untap-tapper", "oracle:token-breeder"}): (
-        AdjudicationClass.INVALID_CANDIDATE_DATA,
-        "Both cards are gold-core fixtures (Perpetual Apprentice, Token Breeder); no real Oracle cards.",
-    ),
-    frozenset({"oracle:self-untap-tapper", "oracle:token-tapper"}): (
-        AdjudicationClass.INVALID_CANDIDATE_DATA,
-        "Both cards are gold-core fixtures (Perpetual Apprentice, Eager Apprentice); no real Oracle cards.",
-    ),
-    frozenset({"oracle:gravecrawler", "oracle:suicidal-phoenix"}): (
-        AdjudicationClass.INVALID_CANDIDATE_DATA,
-        "Ember Phoenix (oracle:suicidal-phoenix) is a gold-core fixture with no real Oracle card.",
-    ),
-    frozenset({"oracle:phoenix", "oracle:suicidal-phoenix"}): (
-        AdjudicationClass.INVALID_CANDIDATE_DATA,
-        "Ember Phoenix (oracle:suicidal-phoenix) is a gold-core fixture with no real Oracle card.",
-    ),
-    frozenset({"oracle:reassembling-skeleton", "oracle:suicidal-phoenix"}): (
-        AdjudicationClass.INVALID_CANDIDATE_DATA,
-        "Ember Phoenix (oracle:suicidal-phoenix) is a gold-core fixture with no real Oracle card.",
-    ),
-    frozenset({"oracle:suicidal-phoenix", "oracle:token-breeder"}): (
-        AdjudicationClass.INVALID_CANDIDATE_DATA,
-        "Both cards are gold-core fixtures (Ember Phoenix, Token Breeder); no real Oracle cards.",
-    ),
-    frozenset({"oracle:suicidal-phoenix", "oracle:viscera-seer"}): (
-        AdjudicationClass.INVALID_CANDIDATE_DATA,
-        "Ember Phoenix (oracle:suicidal-phoenix) is a gold-core fixture with no real Oracle card.",
     ),
     frozenset({"oracle:intruder-alarm", "oracle:self-untap-tapper"}): (
         AdjudicationClass.INVALID_CANDIDATE_DATA,

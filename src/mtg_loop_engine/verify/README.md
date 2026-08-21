@@ -39,7 +39,7 @@ graph TB;
 - Candidate pair enumeration or action-space BFS (`search/`)
 - Gold pair labels
 - Human adjudication
-- **Participant / `strict_two_card` enforcement** (today that flag is stamped by search/eval classify and is not a verifier gate — open defect; see `search/README.md`)
+- **Participant / `strict_two_card` enforcement** — discovery applies that gate in `search.explore_pair`; this package judges physics/coverage/externals only (see `search/README.md`)
 
 ## Core invariants
 
@@ -49,7 +49,7 @@ graph TB;
 - Non-empty `functional_external_requirements` → `EXTERNAL_FUNCTIONAL_PIECE_REQUIRED`
 - Nondeterministic witnesses rejected
 - `verify` package must not import `search` (`tests/unit/test_search_boundary.py`)
-- **Does not** enforce `strict_two_card` / unused participant IDs today (open defect; stamped labels only)
+- Does **not** enforce `strict_two_card` / unused participant IDs (intentional; search-only gate). Hand-authored bystander witnesses may still `VERIFIED`.
 
 ## Main entry points
 
@@ -73,7 +73,7 @@ Always returns a `LoopProof` for ordinary verification attempts — typed reject
 
 ## Extension guide
 
-Add acceptance gates here when they are truth conditions (physics, coverage, externals). Do not pull exploration into this package. If adding participant enforcement, decide explicitly whether it belongs in search pre-filter, verifier gate, or both — document the choice.
+Add acceptance gates here when they are truth conditions (physics, coverage, externals). Do not pull exploration into this package. Participant enforcement for discovery lives in `search.explore_pair`; adding a verifier-side participant gate is an optional follow-up if hand-authored bystanders must also fail closed.
 
 ## Bigger-picture relationship
 

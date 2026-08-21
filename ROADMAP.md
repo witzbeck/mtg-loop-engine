@@ -74,26 +74,25 @@ M4 is **not** complete because evaluation infrastructure exists. Exit requires p
 - Frozen baselines under `eval/baseline/` (authoritative measured counts — see [`docs/STATUS.md`](docs/STATUS.md)).
 - GitHub Actions CI (`uv run pytest` + docs/status checks).
 
+### Completed (precision follow-through)
+
+1. **Participant enforcement** — `explore_pair` accepts only `VERIFIED` + `strict_two_card`; bystander-verified sequences are skipped (search-only gate; silent continue).
+2. **Regress real duplicate cases** — five adjudicated real-card Basalt bystander pairs locked in `tests/eval/test_classify_store.py`.
+
 ### Remaining before M5
 
-1. **Participant enforcement** — reject witnesses where an essential card never acts (condition detected in adjudication; not yet enforced in search).
-2. **Regress real duplicate cases** — tests from adjudicated *real-card* `duplicate_or_equivalent_interaction` extras (not fixture-invalid rows).
 3. **Deterministic real-Oracle compiler expansion** — curriculum from unsupported Spellbook/Oracle fragments, not only gold-fixture wording.
 4. **≥1 eligible Spellbook pair** on the conventional sample (today: selected ≫ 0, eligible = 0 — details in STATUS).
-5. **Re-run and freeze** truthful post-fix baselines; refresh STATUS via `scripts/render_status.py`.
+5. **Re-run and freeze** truthful post-fix baselines; refresh STATUS via `scripts/render_status.py`. (Frozen baselines still reflect the pre-gate snapshot until this step.)
 6. **Reconcile docs/status** with the new freeze.
 
 Playbook: [`docs/runbooks/M4_FOLLOW_THROUGH.md`](docs/runbooks/M4_FOLLOW_THROUGH.md).
 
-### Next engineering plan (after docs)
+### Next engineering plan
 
 ```mermaid
 graph TB;
-  docs[Documentation system complete]
-    --> participant[Enforce essential participant gate];
-  participant
-    --> regression[Regress adjudicated real duplicate cases];
-  regression
+  participant[Participant gate shipped]
     --> patterns[Real Oracle deterministic compiler curriculum];
   patterns
     --> eligible[Achieve real Spellbook eligibility];

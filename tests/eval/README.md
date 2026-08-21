@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Tests for evaluation instrumentation: prerequisite **detection**, store roundtrips, Spellbook sample recovery, gold-extra adjudication coverage, fixture precision exclusions, narrate helpers.
+Tests for evaluation instrumentation: prerequisite **detection**, search participant-gate regressions, store roundtrips, Spellbook sample recovery, gold-extra adjudication coverage, fixture precision exclusions, narrate helpers.
 
 ## Role in pipeline
 
@@ -14,18 +14,17 @@ Tests for evaluation instrumentation: prerequisite **detection**, store roundtri
 
 ## Outputs
 
-- Asserts on recovery stages, precision denominators, and classify flags
+- Asserts on recovery stages, precision denominators, and classify / acceptance flags
 
 ## Responsibilities
 
-- Document that bystander pairs can explore successfully while `strict_two_card is False` (`test_basalt_altar_is_not_strict_two_card`) — **detection without enforcement**.
-- Keep sample recovery (2/2) and extras↔adjudications (24) locked.
+- Regress that real bystander pairs are **not** accepted (`test_bystander_pairs_are_not_accepted`).
+- Keep sample recovery (2/2) and extras↔adjudications (10 post-gate) locked.
 - Ensure fixture pairs do not inflate precision.
 
 ## Non-responsibilities
 
-- Implementing participant enforcement (engine change tracked in ROADMAP)
-- Freezing baseline JSON (manual/eval persist; checked via status scripts)
+- Freezing baseline JSON (manual/eval persist; checked via status scripts). Committed baselines remain the pre-gate snapshot until ROADMAP M4 item 5.
 
 ## Core invariants
 
@@ -38,7 +37,7 @@ Tests for evaluation instrumentation: prerequisite **detection**, store roundtri
 
 ## Data contracts
 
-Aligned with `eval/baseline` notes and `eval.schema`.
+Aligned with `eval/baseline` notes and `eval.schema`. Live discovery extras count may differ from frozen baseline until re-freeze.
 
 ## Failure behavior
 
@@ -50,7 +49,7 @@ This suite.
 
 ## Extension guide
 
-When participant enforcement ships, invert the bystander test into an acceptance rejection regression.
+When baselines are re-frozen after compiler/eligibility work, update extras count expectations and STATUS together.
 
 ## Bigger-picture relationship
 

@@ -41,7 +41,7 @@ graph TB;
 ## Core invariants
 
 - Witness carries `semantic_coverage` and `classification` for verifier gates.
-- `strict_two_card` on classification is a **label**; today it is not alone sufficient to force verifier rejection (see search open defect).
+- `strict_two_card` on classification is a **label** used by search acceptance; the verifier does not reject on it alone (search-only participant gate).
 - Normalization must be deterministic for golden proofs.
 
 ## Main entry points

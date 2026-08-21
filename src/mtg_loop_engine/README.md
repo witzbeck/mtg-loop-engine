@@ -56,7 +56,7 @@ graph TB;
 - **`search → verify` allowed; `verify → search` forbidden.**
 - Fail-closed: `PARTIAL_RELEVANT_TO_PROOF` never yields `VERIFIED`.
 - Pair labels must not enter the discovery path.
-- Open defect: participant / `strict_two_card` is **detected** (classify) but **not enforced** in search acceptance. See `search/README.md` and [`docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md).
+- Discovery acceptance requires `strict_two_card` (search participant gate). See `search/README.md` and [`docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md).
 
 ## Main entry points
 
