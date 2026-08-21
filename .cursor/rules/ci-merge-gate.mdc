@@ -1,0 +1,40 @@
+---
+description: Green CI authorizes merge only when critical behavior is covered by the CI test suite.
+alwaysApply: true
+---
+
+# CI merge gate
+
+Standing merge permission for this repo: when the user asks to open a PR or finish the branch, **green CI is sufficient authorization to land** — *provided* the change’s critical behavior is actually exercised by what CI runs.
+
+## What CI runs today
+
+See [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml):
+
+- `uv run pytest` — executable contracts (gold, hard negatives, discovery, semantics, eval, …)
+- `uv run python scripts/check_docs.py` — docs hygiene
+- `uv run python scripts/render_status.py --check` — STATUS ↔ baseline sync
+
+## Before treating green CI as merge OK
+
+Confirm the PR’s **critical path** is covered by that suite (or by a CI step added in the same PR):
+
+| Change kind | Expect coverage in CI |
+| --- | --- |
+| Verifier / rules / proofs | Tests that assert `VERIFIED` or typed rejection |
+| Compiler / patterns | Semantic / gold compile tests |
+| Search / joins | Discovery or seam tests |
+| Eval metrics / baselines | Eval tests and/or STATUS check |
+| Docs / governance only | Docs + STATUS checks (pytest may be unchanged) |
+
+If critical behavior is **not** covered, do **not** merge on green alone: add tests (preferred) or ask for an explicit “merge anyway.”
+
+## Do not
+
+- Merge with red or pending required checks
+- Assume “tests exist somewhere” if they are not run in CI
+- Weaken or skip tests to manufacture a green badge
+
+## Authority
+
+[`CONTRIBUTING.md`](../../CONTRIBUTING.md). Pair with `land-and-return.mdc` (lifecycle after land) and `merge-strategy.mdc` (squash default).

@@ -33,17 +33,22 @@ See the root [`README.md`](README.md) for the full CLI quick-start list. Keep Or
 
 When a feature branch is finished, close the loop so the next change starts from current `main`:
 
-1. Open a PR against `main` (when asked).
-2. Merge only with **explicit** authorization (“merge it,” “land it,” etc.) and only when CI is green. Opening a PR is not merge permission.
+1. Open a PR against `main` (when asked to finish or open a PR).
+2. **Standing merge permission:** once required CI is green **and** the change’s critical behavior is covered by the CI suite (see below), land the PR (squash by default) without waiting for a second “merge it,” unless the user said to wait or hold.
 3. After merge: check out `main`, fast-forward/pull from `origin`, delete the local feature branch, and leave a clean tree ready for the next `feature/<slug>`.
 
-Cursor adapter: [`.cursor/rules/land-and-return.mdc`](.cursor/rules/land-and-return.mdc).
+Cursor adapters: [`.cursor/rules/land-and-return.mdc`](.cursor/rules/land-and-return.mdc), [`.cursor/rules/ci-merge-gate.mdc`](.cursor/rules/ci-merge-gate.mdc).
+
+## CI merge gate
+
+Green CI authorizes merge only when critical path behavior is exercised by what CI runs today (`pytest`, `scripts/check_docs.py`, `scripts/render_status.py --check`). If a behavior change is not covered, add tests (or a CI step) in the same PR, or get an explicit “merge anyway.” Do not weaken tests to green the badge.
 
 ## Testing
 
 - Run `uv run pytest` locally before opening or updating a PR.
 - Behavior changes need tests in the same change (regression tests preferred when fixing adjudicated or gold failures).
 - Do not weaken assertions or broaden modeled rules solely to pass existing tests — see [`AGENTS.md`](AGENTS.md).
+- Critical path for a PR must be covered by the CI suite before treating green CI as merge OK (see **CI merge gate** above).
 
 ## Documentation expectations
 

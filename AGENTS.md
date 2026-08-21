@@ -66,7 +66,7 @@ For any package under `src/mtg_loop_engine/`, the package `README.md` is the ope
 
 ## Land and return
 
-When feature work is complete and a PR has landed (or the user authorizes merge), switch back to up-to-date `main` and delete the local feature branch. Do not remain parked on a merged branch. See [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`.cursor/rules/land-and-return.mdc`](.cursor/rules/land-and-return.mdc).
+When feature work is complete and the user has asked to open a PR or finish the branch: land once CI is green **and** the CI merge gate is satisfied, then switch back to up-to-date `main` and delete the local feature branch. Do not remain parked on a merged branch. See [`CONTRIBUTING.md`](CONTRIBUTING.md), [`.cursor/rules/land-and-return.mdc`](.cursor/rules/land-and-return.mdc), and [`.cursor/rules/ci-merge-gate.mdc`](.cursor/rules/ci-merge-gate.mdc).
 
 ## Related
 
