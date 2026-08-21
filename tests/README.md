@@ -53,7 +53,7 @@ graph TB;
 
 - Discovery tests must not pass known pairings into the explorer.
 - Boundary test forbids `verify` importing `search`.
-- Eval tests may document bystander acceptance (`strict_two_card is False` with a found witness) until participant enforcement ships — that is a regression signal for the open defect, not proof the gate exists.
+- Eval tests regress participant enforcement (bystander pairs must not be accepted) and lock gold-extra adjudication coverage for the post-gate extras set.
 - Tests assert **contracts** (status, typed rejection, rediscovery, coverage, hashes). Do not add vacuous or mock-only tests to pad coverage.
 
 ## Test quality (what to write / avoid)

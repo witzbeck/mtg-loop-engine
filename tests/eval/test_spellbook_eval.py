@@ -37,4 +37,4 @@ def test_gold_extra_adjudications_cover_discovered_extras():
     extras = collect_gold_pool_extras()
     keys = {frozenset({r.left_id, r.right_id}) for r in extras}
     assert keys == set(GOLD_EXTRA_ADJUDICATIONS)
-    assert len(extras) == 24
+    assert len(extras) == 10

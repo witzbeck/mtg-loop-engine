@@ -35,12 +35,12 @@ graph TB;
 ## Non-responsibilities
 
 - Tests that inject known pairings into the explorer
-- Claiming participant enforcement (bystander acceptance is still possible; gold recall does not prove that gate)
+- Replacing participant-gate regressions (those live in `tests/eval/test_classify_store.py`)
 
 ## Core invariants
 
 - No gold pair keys on the discovery path.
-- Injected verifier remains the acceptance oracle.
+- Injected verifier remains the physics acceptance oracle; search also requires `strict_two_card`.
 
 ## Main entry points
 

@@ -23,7 +23,7 @@ graph TB;
 
 ## Outputs
 
-- `gold_pool_extras.jsonl` (24 rows in the frozen M4 set)
+- `gold_pool_extras.jsonl` (24 rows in the frozen pre-gate M4 set; live discovery extras are fewer after the participant gate — see `gold_extras.GOLD_EXTRA_ADJUDICATIONS`)
 
 ## Responsibilities
 
@@ -39,7 +39,7 @@ graph TB;
 ## Core invariants
 
 - Fixture pairs excluded from precision denominator.
-- Many duplicates historically reflect bystander-card acceptance (participant **detection** without **enforcement**) — see [`../../src/mtg_loop_engine/search/README.md`](../../src/mtg_loop_engine/search/README.md).
+- Historical duplicates in the frozen JSONL reflect pre-gate bystander acceptance; discovery now rejects those pairs (`search` participant gate). Re-freeze under ROADMAP M4 item 5 will drop them from live extras.
 - Spellbook absence is **not** represented here as a false-positive class. Reference absence (`ABSENT_FROM_REFERENCE`) is an eval/reference concern; precision uses human `AdjudicationClass` values.
 - Working DuckDB under `data/eval/` may diverge from this committed JSONL until operators re-persist.
 

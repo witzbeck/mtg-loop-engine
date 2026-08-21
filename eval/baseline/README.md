@@ -25,7 +25,7 @@ graph TB;
 
 | File | Frozen meaning (current) |
 | --- | --- |
-| `m4_gold_pool_summary.json` | 24 extras; 8 real / 16 fixture; precision **0.375** (3 valid / 8 real); 5 duplicates |
+| `m4_gold_pool_summary.json` | **Pre-gate freeze:** 24 extras; 8 real / 16 fixture; precision **0.375** (3 valid / 8 real); 5 duplicates. Live discovery after participant enforcement yields fewer extras (see `GOLD_EXTRA_ADJUDICATIONS`); do not treat this file as current until ROADMAP item 5 re-freeze. |
 | `m4_spellbook_recovery_summary.json` | 99 selected; **0 eligible**; all `compiler_unsupported`; recall null |
 
 ## Responsibilities

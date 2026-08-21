@@ -26,17 +26,15 @@ graph TB;
     --> m5[M5 reference-absent candidate discovery];
 ```
 
-### 1. Participant enforcement
+### 1. Participant enforcement ✓
 
-**Problem:** search can accept a witness where one alleged essential card never acts (`duplicate_or_equivalent_interaction` on real pairs).
-
-**Work:** after a witness is built, require every essential oracle ID to appear as an actor in at least one loop step; reject otherwise.
+**Shipped:** after a witness is built, `explore_pair` requires `VERIFIED` and `strict_two_card` before acceptance; bystander-verified sequences are skipped silently (BFS continues). Verifier physics unchanged.
 
 **Do not:** start M5 or chase join-tuning to hide bystanders.
 
-### 2. Regress real duplicate cases
+### 2. Regress real duplicate cases ✓
 
-Use the **real-card** adjudicated duplicates from the frozen gold-pool extras (not fixture-invalid rows). Add regression tests that fail if those bystander witnesses are accepted again.
+Five real-card Basalt bystander pairs are regression-locked in `tests/eval/test_classify_store.py` (must not be accepted again).
 
 ### 3. Real Oracle compiler curriculum
 

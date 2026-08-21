@@ -321,7 +321,12 @@ def explore_pair(
     max_states: int = 4000,
     verifier: Verifier | None = None,
 ) -> ExploredWitness | None:
-    """Search one unordered pair. Returns the first verifier-accepted loop."""
+    """Search one unordered pair.
+
+    Returns the first verifier-accepted loop where both searched essentials
+    participate (`strict_two_card`). Bystander-verified sequences are skipped
+    silently so BFS can continue; if none qualify, returns ``None``.
+    """
     check = verifier or Verifier()
     spec = default_initial_state(a, b)
     semantics = {a.oracle_id: a, b.oracle_id: b}
@@ -343,7 +348,13 @@ def explore_pair(
             if outputs:
                 witness = build_witness(a, b, spec, actions, start, state)
                 proof = check.verify(witness)
-                if proof.status == VerificationStatus.VERIFIED:
+                # Participant gate (search-only): physics may verify a one-card
+                # self-loop while the other searched card never acts. Detection
+                # already stamps strict_two_card; enforce it before acceptance.
+                if (
+                    proof.status == VerificationStatus.VERIFIED
+                    and witness.classification.strict_two_card
+                ):
                     return ExploredWitness(witness=witness, proof=proof)
         if len(actions) >= max_depth:
             continue

@@ -87,14 +87,14 @@ Solid arrows are intended production dependencies. The dashed `search → eval` 
 | `eval` (package) | Recovery metrics + human-adjudicated precision. |
 | `eval/` (repo root) | Committed fixtures, adjudications, frozen baselines. |
 
-## Critical open defect (document, do not paper over)
+## Participant gate (search acceptance)
 
-**Participant condition is detected, not enforced.**
+**Both searched essentials must participate before discovery accepts a hit.**
 
-- **Detection:** `mtg_loop_engine.eval.classify.analyze_prerequisites` computes `used_oracle_ids` / `unused_oracle_ids` / `strict_two_card` from which searched cards act in loop steps. Explorer stamps `Classification.strict_two_card` (and related counts/prereqs) onto the witness. `unused_oracle_ids` remain on `PrerequisiteAnalysis` only — re-run classify to inspect them; they are **not** fields on `LoopWitness`.
-- **Non-enforcement:** `explore_pair` accepts the first sequence where `Verifier.verify` returns `VERIFIED`. Neither search nor verify rejects unused searched cards. Classify currently leaves `functional_external_requirements` empty for bystanders, so the verifier’s external-piece gate does not catch them either.
-- **Evidence:** `tests/eval/test_classify_store.py::test_basalt_altar_is_not_strict_two_card` — explore succeeds while `strict_two_card is False`.
-- **Product intent:** require every essential oracle ID to act in the loop before acceptance (see `ROADMAP.md` M4 follow-through). Until then, docs and eval must treat bystander acceptance as a known gap.
+- **Detection:** `mtg_loop_engine.eval.classify.analyze_prerequisites` computes `used_oracle_ids` / `unused_oracle_ids` / `strict_two_card` from which searched cards act in loop steps (including continuous cost-reduction participation). Explorer stamps `Classification.strict_two_card` onto the witness. `unused_oracle_ids` remain on `PrerequisiteAnalysis` only.
+- **Enforcement (search-only):** `explore_pair` accepts only when `Verifier.verify` returns `VERIFIED` **and** `strict_two_card`. Bystander-verified sequences are skipped; BFS continues. The verifier does not read participation flags (hand-authored bystander witnesses can still verify).
+- **Evidence:** `tests/eval/test_classify_store.py` — five real Basalt bystander pairs → no hit; Basalt + Training Grounds still accepted.
+- **Baselines:** committed `eval/baseline/` numbers remain the pre-gate M4 freeze until roadmap item 5 (post-eligibility re-freeze).
 
 ## Fail-closed coverage
 

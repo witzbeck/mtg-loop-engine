@@ -17,6 +17,7 @@ graph TB;
 ## What belongs here
 
 - Numbered ADRs (`NNNN-title.md`) with Context, Decision, Consequences, and Status
+- Pre-ADR review matrices under [`reviews/`](reviews/) (see `.cursor/skills/design-decision-review/SKILL.md`)
 - This index README
 
 ## What does not belong here

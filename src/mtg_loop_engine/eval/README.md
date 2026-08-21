@@ -48,14 +48,14 @@ Accepted discoveries missing from Spellbook are `ABSENT_FROM_REFERENCE` (or simi
 
 ### Detection vs enforcement
 
-`analyze_prerequisites` detects unused searched cards and sets `strict_two_card`. Search stamps this onto witnesses but **does not reject** bystanders. Spellbook recovery may label non-strict hits as `PREREQUISITE_MISMATCH` for scoring — that is measurement, not search acceptance.
+`analyze_prerequisites` detects unused searched cards and sets `strict_two_card`. **Search enforces** that flag in `explore_pair` (accept only `VERIFIED` + `strict_two_card`). This package still owns detection and measurement; it does not own the acceptance gate.
 
 ## Non-responsibilities
 
 - FastAPI / Postgres / public explorer (M7)
 - LLM parsing
 - Tightening joins to chase unlabeled extras
-- Enforcing participant / `strict_two_card` gates in search or verify (this package **detects**; engine acceptance is a separate M4 follow-through)
+- Verifier-side participant rejection (optional follow-up; discovery already filters)
 
 Committed baseline *files* live under repo-root `eval/baseline/`. This package **does** write/read them (e.g. `gold_extras.persist_gold_pool_extras` → `m4_gold_pool_summary.json`); the artifact tree is the committed home, not a separate owner.
 
@@ -63,7 +63,7 @@ Committed baseline *files* live under repo-root `eval/baseline/`. This package *
 
 - Precision denominator excludes skipped and `INVALID_CANDIDATE_DATA` (fixture pairs).
 - Recovery recall is undefined / null when eligible count is 0.
-- Gold-extra persistence expects adjudications to cover discovered extras (24-row contract in tests).
+- Gold-extra persistence expects adjudications to cover **currently discovered** extras (10-row post-gate contract in tests). Frozen baseline JSON may still show the pre-gate 24-row snapshot until ROADMAP item 5.
 
 ## Main entry points
 
