@@ -1,0 +1,5 @@
+# Default merge strategy
+
+- Prefer **squash merge** for pull requests by default to keep main-branch history concise and easy to scan.
+- Keep separate commits only when preserving commit-by-commit history provides clear review, rollback, or auditing value.
+- If using a non-squash strategy, state the reason in the PR description before merging.
