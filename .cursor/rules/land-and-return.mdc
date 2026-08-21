@@ -1,0 +1,35 @@
+---
+description: After a feature lands via PR, sync local main and leave the tree ready for the next branch.
+alwaysApply: true
+---
+
+# Land and return
+
+When a feature branch’s work is complete, finish the branch lifecycle — do not leave the session parked on a merged or abandoned feature branch.
+
+## When this applies
+
+After the user asks to open a PR, merge/land the work, or otherwise declare the branch complete.
+
+## Sequence
+
+1. **Ensure the branch is pushed** and a PR against `main` exists (create one if asked).
+2. **Merge only with explicit authorization.** Do not merge because CI is green or the PR exists. Wait for clear language such as “merge it,” “land it,” or “squash and merge.” Prefer the repo default (squash) unless the PR says otherwise.
+3. **Require green CI** before merging. If checks are red or pending, stop and report; do not merge around them.
+4. **After the PR is merged** (by you under step 2, or by the human):
+   - `git checkout main`
+   - `git pull` (or `git pull --ff-only origin main`) so local `main` matches the remote
+   - Delete the local feature branch (`git branch -d feature/<slug>`; use `-D` only if the user confirms it is obsolete)
+   - Optionally delete the remote feature branch if it still exists and the user wants cleanup
+5. **Confirm** with `git status` / `git branch` that the working tree is on up-to-date `main` and ready for the next `feature/<slug>`.
+
+## Do not
+
+- Stay checked out on a merged feature branch “for convenience”
+- Force-push or delete `main`
+- Merge with a dirty working tree that would be lost; commit, stash, or ask first
+- Treat opening a PR as authorization to merge
+
+## Authority
+
+Full contributor policy: [`CONTRIBUTING.md`](../../CONTRIBUTING.md). This file is a Cursor adapter. Branch creation: `feature-branches.mdc`. Merge style: `merge-strategy.mdc`.
