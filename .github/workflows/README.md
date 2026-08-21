@@ -6,12 +6,12 @@ GitHub Actions job definitions for the repository merge gate.
 
 ## Role in pipeline
 
-`.github` event hooks → **THIS (`ci.yml`)** → install → pytest → docs hygiene → STATUS freshness.
+`.github` event hooks → **THIS (`ci.yml`)** → install → pytest+coverage → docs hygiene → STATUS freshness.
 
 ```mermaid
 graph LR;
   checkout[checkout] --> uv[uv sync];
-  uv --> pytest[pytest];
+  uv --> pytest[pytest cov>=90%];
   pytest --> checkDocs[check_docs.py];
   checkDocs --> status[render_status.py --check];
 ```
@@ -29,7 +29,7 @@ graph LR;
 
 - `ci.yml` currently:
   1. `uv sync --frozen --group dev`
-  2. `uv run pytest`
+  2. `uv run pytest` (includes `--cov-fail-under=90` from `pyproject.toml`)
   3. `uv run python scripts/check_docs.py`
   4. `uv run python scripts/render_status.py --check`
 

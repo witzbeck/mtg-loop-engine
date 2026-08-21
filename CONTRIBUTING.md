@@ -50,7 +50,7 @@ Green CI authorizes merge only when critical path behavior is exercised by what 
 - Do not weaken assertions or broaden modeled rules solely to pass existing tests — see [`AGENTS.md`](AGENTS.md).
 - Critical path for a PR must be covered by the CI suite before treating green CI as merge OK (see **CI merge gate** above).
 - Prefer epistemic contract tests (status, typed rejection, rediscovery, coverage, hashes) over coverage-padding or mock-only tests. Details: [`tests/README.md`](tests/README.md), [`.cursor/rules/test-quality.mdc`](.cursor/rules/test-quality.mdc).
-- Pytest mechanical preferences (`strict-markers`, `xfail_strict`, warnings as errors) live in `pyproject.toml`; do not treat a global line-coverage percentage as the merge bar.
+- Pytest enforces `--cov-fail-under=90` on measured library code (CLI/UI/network ingest omitted — see `pyproject.toml`). The floor is a backstop; do not pad or widen omits to pass it.
 
 ## Documentation expectations
 

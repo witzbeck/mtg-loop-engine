@@ -40,7 +40,11 @@ Green CI is merge-OK only if this table’s row for the PR is exercised — see 
 
 ## Coverage % policy
 
-Do **not** chase a global line-coverage number as the merge bar. Optional local coverage reports are fine for finding gaps; they are not a substitute for the suites above. If a coverage tool is added later, keep it advisory until the team chooses an explicit CI gate.
+CI enforces a **90% line-coverage floor** on measured `mtg_loop_engine` code (`--cov-fail-under=90` in `pyproject.toml`).
+
+That floor is a **backstop**, not a substitute for the suites above. Still ban vacuous and mock-only tests.
+
+Intentionally omitted from the %-gate (see `[tool.coverage.run] omit`): CLI entrypoint, Streamlit workbench, and network snapshot download helpers. Do not widen that omit list to green CI — raise coverage with real contract tests instead.
 
 ## Authority
 

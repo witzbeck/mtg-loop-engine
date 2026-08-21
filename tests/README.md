@@ -64,9 +64,9 @@ graph TB;
 
 **Avoid:** `assert True` / “doesn’t throw” with no oracle; mock-call-only tests; duplicating gold cases without a new contract; weakening expectations to green CI; expanding patterns only to pass a test.
 
-**Coverage %:** optional local reports may help find gaps; they are not the merge bar. See [`.cursor/rules/test-quality.mdc`](../.cursor/rules/test-quality.mdc) and [`CONTRIBUTING.md`](../CONTRIBUTING.md).
+**Coverage %:** CI requires **≥ 90%** line coverage on measured `mtg_loop_engine` modules (`pyproject.toml`). That is a backstop alongside contract suites — not permission to add vacuous tests. See [`.cursor/rules/test-quality.mdc`](../.cursor/rules/test-quality.mdc) and [`CONTRIBUTING.md`](../CONTRIBUTING.md).
 
-Pytest mechanics (`--strict-markers`, `xfail_strict`, warnings-as-errors) are configured in `pyproject.toml`.
+Pytest mechanics (`--strict-markers`, `xfail_strict`, warnings-as-errors, coverage fail-under) are configured in `pyproject.toml`.
 
 ## Main entry points
 

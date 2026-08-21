@@ -11,7 +11,7 @@ Standing merge permission for this repo: when the user asks to open a PR or fini
 
 See [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml):
 
-- `uv run pytest` — executable contracts (gold, hard negatives, discovery, semantics, eval, …)
+- `uv run pytest` — executable contracts (gold, hard negatives, discovery, semantics, eval, …) **and** ≥90% line coverage on measured library code
 - `uv run python scripts/check_docs.py` — docs hygiene
 - `uv run python scripts/render_status.py --check` — STATUS ↔ baseline sync
 
