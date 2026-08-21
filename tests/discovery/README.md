@@ -2,25 +2,67 @@
 
 ## Purpose
 
-Blind rediscovery tests: gold_core cards without pair labels must still yield verified two-card witnesses via search + the same verifier.
+Blind rediscovery and M3.5 seam tests: gold cards without pair labels still yield verifier-accepted witnesses; compiled Oracle fixtures rediscover gold_core.
 
-## Context
+## Role in pipeline
+
+Card pool → joins → search → verifier → **THIS asserts recall**.
 
 ```mermaid
 graph TB;
   pool[goldCoreCardPool] --> index[InteractionIndex];
-  index --> discover[discoverLoops];
+  index --> discover[discover_loops];
   discover --> explorer[explorer];
   explorer --> verifier[Verifier];
   goldKeys[goldCorePairKeys] --> recall[recallAssert];
   verifier --> recall;
 ```
 
-## What belongs here
+## Inputs
 
-- Join-index coverage and discovery-recall tests
-- `test_compiled_discovery.py`: M3.5 seam (Oracle fixtures → compiler → blind search)
+- Gold card pools / compiled pools
+- Eval-only pair keys for recall scoring (not passed into explorer)
 
-## What does not belong here
+## Outputs
 
-- Tests that pass known pairings into the explorer
+- Asserts on join coverage and 10/10 rediscovery
+
+## Responsibilities
+
+- Prove search does not need pair labels for gold_core.
+- Prove compiler → discovery → verifier seam (M3.5).
+
+## Non-responsibilities
+
+- Tests that inject known pairings into the explorer
+- Claiming participant enforcement (bystander acceptance is still possible; gold recall does not prove that gate)
+
+## Core invariants
+
+- No gold pair keys on the discovery path.
+- Injected verifier remains the acceptance oracle.
+
+## Main entry points
+
+- `test_blind_discovery.py`
+- `test_compiled_discovery.py`
+
+## Data contracts
+
+Discovery hits align with gold pair keys for recall only.
+
+## Failure behavior
+
+Missed gold pairs fail CI.
+
+## Testing
+
+This suite.
+
+## Extension guide
+
+When adding gold_core positives, extend recall expectations here.
+
+## Bigger-picture relationship
+
+Parent: [`../README.md`](../README.md). Search contract: [`../../src/mtg_loop_engine/search/README.md`](../../src/mtg_loop_engine/search/README.md).

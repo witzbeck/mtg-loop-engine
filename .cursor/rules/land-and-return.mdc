@@ -1,0 +1,44 @@
+---
+description: After a feature lands via PR, sync local main and leave the tree ready for the next branch.
+alwaysApply: true
+---
+
+# Land and return
+
+When a feature branch’s work is complete, finish the branch lifecycle — do not leave the session parked on a merged or abandoned feature branch.
+
+## When this applies
+
+After the user asks to open a PR, land the work, or otherwise declare the branch complete.
+
+## Merge authorization (standing preference)
+
+When the user has asked to open a PR or finish the branch:
+
+1. Wait until required CI checks are **green**.
+2. Confirm the **CI merge gate** (`ci-merge-gate.mdc`): critical behavior for this PR is covered by what CI runs.
+3. Then **land** (prefer squash unless the PR says otherwise) without waiting for a second “merge it,” unless the user said to wait, review first, or hold.
+
+If CI is red/pending, or critical behavior is untested in CI, stop and report — do not merge around the gate.
+
+## Sequence
+
+1. **Ensure the branch is pushed** and a PR against `main` exists (create one when asked to finish/open a PR).
+2. **Land under the authorization above** once CI + coverage gate pass.
+3. **After the PR is merged**:
+   - `git checkout main`
+   - `git pull` (or `git pull --ff-only origin main`) so local `main` matches the remote
+   - Delete the local feature branch (`git branch -d feature/<slug>`; use `-D` only if the user confirms it is obsolete)
+   - Delete the remote feature branch when GitHub did not already
+4. **Confirm** with `git status` / `git branch` that the working tree is on up-to-date `main` and ready for the next `feature/<slug>`.
+
+## Do not
+
+- Stay checked out on a merged feature branch “for convenience”
+- Force-push or delete `main`
+- Merge with a dirty working tree that would be lost; commit, stash, or ask first
+- Treat a draft PR, “WIP,” or “do not merge” label as landable
+
+## Authority
+
+Full contributor policy: [`CONTRIBUTING.md`](../../CONTRIBUTING.md). This file is a Cursor adapter. Branch creation: `feature-branches.mdc`. Merge permission + coverage: `ci-merge-gate.mdc`. Merge style: `merge-strategy.mdc`.

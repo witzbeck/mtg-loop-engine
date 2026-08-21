@@ -1,4 +1,4 @@
-# MTG Loop Engine — Roadmap
+# MTG Loop Engine — Roadmap (gate document)
 
 ## North star
 
@@ -22,6 +22,10 @@ graph TB;
   M5 --> M6[M6 Incremental Scans];
   M6 --> M7[M7 Explorer];
 ```
+
+**Active milestone:** M4 — Evaluation ◐ **IN PROGRESS**
+
+Quantitative snapshot (baselines): [`docs/STATUS.md`](docs/STATUS.md). Do not paste volatile counts into this file.
 
 ---
 
@@ -56,45 +60,58 @@ graph TB;
 - Explorer is the single acceptance oracle; `discover_loops` does not re-verify.
 - `corpus.builders` shared between gold fixtures and discovery so witness shapes stay comparable.
 
-### M4 — Evaluation ✓
-
-- **M3.5 seam gate:** Oracle fixtures → compiler → blind discovery → verifier (10/10 still).
-- Prerequisite analysis: `strict_two_card` derived from essential-piece participation, not raw card count.
-- Adjudication schema (`VALID_STRICT_TWO_CARD`, `DUPLICATE_OR_EQUIVALENT_INTERACTION`, …).
-- DuckDB + JSONL persistence; local Streamlit adjudication workbench.
-- 24 gold-pool extras adjudicated: **7 valid (29%), 17 duplicates (71%)**.
-  - Root cause: join proposes pairs but search accepts witnesses where one card never acts.
-- Spellbook conventional two-card recovery: 99 selected, **0 eligible** (compiler coverage is the bottleneck).
-- Baselines frozen: `eval/baseline/m4_gold_pool_summary.json`, `m4_spellbook_recovery_summary.json`.
-- GitHub Actions CI (`uv run pytest`) added.
-
 ---
 
-## Next: M4 follow-through (correctness fixes before M5)
+## M4 — Evaluation ◐ IN PROGRESS
 
-These items are the direct consequence of M4 adjudication findings. They are not a new milestone — they are M4 bugs that must be fixed before M5 can be meaningful.
+M4 is **not** complete because evaluation infrastructure exists. Exit requires precision correctness closure and minimum real-Oracle eligibility.
 
-### 1. Participant filter (correctness)
+### Completed (instrumentation)
 
-**Problem:** search accepts a witness even when one of the two searched cards never activates. 17/24 extras were `DUPLICATE_OR_EQUIVALENT_INTERACTION` for this reason.
+- **M3.5 seam gate:** Oracle fixtures → compiler → blind discovery → verifier (10/10 still).
+- Evaluation / adjudication schema (`AdjudicationClass`, `ReferenceStatus`, prerequisite analysis).
+- DuckDB + JSONL persistence; local Streamlit adjudication workbench.
+- Frozen baselines under `eval/baseline/` (authoritative measured counts — see [`docs/STATUS.md`](docs/STATUS.md)).
+- GitHub Actions CI (`uv run pytest` + docs/status checks).
 
-**Fix:** after a witness is built, require that every essential oracle ID appears as an actor in at least one loop step. Reject otherwise. Add regression tests from the 17 adjudicated duplicates.
+### Remaining before M5
 
-**Why before M5:** M5 labels new discoveries as `NOVEL`; that label only means something if precision is already trustworthy.
+1. **Participant enforcement** — reject witnesses where an essential card never acts (condition detected in adjudication; not yet enforced in search).
+2. **Regress real duplicate cases** — tests from adjudicated *real-card* `duplicate_or_equivalent_interaction` extras (not fixture-invalid rows).
+3. **Deterministic real-Oracle compiler expansion** — curriculum from unsupported Spellbook/Oracle fragments, not only gold-fixture wording.
+4. **≥1 eligible Spellbook pair** on the conventional sample (today: selected ≫ 0, eligible = 0 — details in STATUS).
+5. **Re-run and freeze** truthful post-fix baselines; refresh STATUS via `scripts/render_status.py`.
+6. **Reconcile docs/status** with the new freeze.
 
-### 2. Compiler patterns for real Oracle (coverage)
+Playbook: [`docs/runbooks/M4_FOLLOW_THROUGH.md`](docs/runbooks/M4_FOLLOW_THROUGH.md).
 
-**Problem:** the compiler matches gold-fixture wording, not real card text. Gravecrawler + Phyrexian Altar compile with the fixture text but fail on real Oracle (extra clauses).
+### Next engineering plan (after docs)
 
-**Fix:** extend deterministic patterns to cover common real-Oracle fragments. Use Spellbook failure taxonomy as the curriculum — pick the most-common unsupported family first (e.g. `{B}: Return [cardname] from your graveyard…` with zone-restriction clauses). Validate with `eval-spellbook --fetch-oracle`: target at least one eligible pair from the 99-row Spellbook sample.
+```mermaid
+graph TB;
+  docs[Documentation system complete]
+    --> participant[Enforce essential participant gate];
+  participant
+    --> regression[Regress adjudicated real duplicate cases];
+  regression
+    --> patterns[Real Oracle deterministic compiler curriculum];
+  patterns
+    --> eligible[Achieve real Spellbook eligibility];
+  eligible
+    --> baseline[Re-run and freeze M4 baseline];
+  baseline
+    --> m4exit[M4 precision/coverage review];
+  m4exit
+    --> m5[M5 reference-absent candidate discovery];
+```
 
-**Sequence:** participant filter first (it is pure correctness); then compiler expansion (it adds recall).
+Do not begin M5 merely because evaluation tooling exists.
 
 ---
 
 ## M5 — Novel candidate adjudication
 
-Once M4 correctness fixes are in:
+Once M4 correctness and eligibility gates are in:
 
 - Run discovery on real compiled Oracle cards from Spellbook entries.
 - Accepted pairs not in Spellbook start as `ABSENT_FROM_REFERENCE`.
@@ -148,11 +165,13 @@ Once M4 correctness fixes are in:
 | Spellbook absence | `ABSENT_FROM_REFERENCE`, not false positive; `NOVEL` only after adjudication |
 | Precision goal | Adjudicated precision over raw recall |
 
+Longer rationale: [`docs/decisions/`](docs/decisions/) and [`docs/EVALUATION.md`](docs/EVALUATION.md).
+
 ---
 
 ## Governance
 
-- **Review at milestone start:** before implementation begins on any milestone, re-read this file and confirm goals, constraints, and deferred items are still accurate.
-- **Update at milestone exit:** the PR that completes a milestone must include a `ROADMAP.md` update marking it done and refreshing the next milestone's goals.
-- **Feature branches:** all non-trivial work on a `feature/<slug>` branch; CI green before merge into `main`. See `.cursor/rules/feature-branches.mdc`.
-- **Plan file:** `~/.cursor/plans/mtg_loop_engine_cc3ab45a.plan.md` tracks in-session todos. This file tracks durable strategy. Both should stay consistent.
+- **Review at milestone start:** re-read this file and confirm goals, constraints, and deferred items are still accurate.
+- **Update at milestone exit:** the PR that completes a milestone must mark it done and refresh the next milestone's gates.
+- **Feature branches:** all non-trivial work on a `feature/<slug>` branch; CI green before merge into `main`. Policy: [`CONTRIBUTING.md`](CONTRIBUTING.md); Cursor adapters: [`.cursor/rules/feature-branches.mdc`](.cursor/rules/feature-branches.mdc), [`.cursor/rules/ci-merge-gate.mdc`](.cursor/rules/ci-merge-gate.mdc), [`.cursor/rules/land-and-return.mdc`](.cursor/rules/land-and-return.mdc).
+- **Canonical docs:** In-repository documentation is canonical. Agent/session plans under a developer's home directory are ephemeral execution aids—not durable strategy. Durable decisions land in this roadmap, ADRs, `docs/`, and issues/PRs.

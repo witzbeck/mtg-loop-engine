@@ -2,22 +2,79 @@
 
 ## Purpose
 
-Witness-in / proof-out verifier. No search lives here.
+**The verifier is the acceptance boundary.**
 
-## Context
+Witness-in / proof-out. No discovery logic here. Search may call this package; this package must never import or embed search.
+
+## Role in pipeline
+
+`LoopWitness` → **THIS (`Verifier.verify`)** → `LoopProof` (`VERIFIED` or typed rejection).
 
 ```mermaid
 graph TB;
   witness[LoopWitness] --> verifier[Verifier];
-  executor[Executor] --> verifier;
+  executor[rules.Executor] --> verifier;
+  state[GameState] --> verifier;
   verifier --> proof[LoopProof];
 ```
 
-## What belongs here
+## Inputs
 
-- `Verifier`, recurrence checks, fail-closed coverage gates
+- Fully formed `LoopWitness` (cards, IR, setup, loop actions, relevant state, expected outputs, classification, coverage)
 
-## What does not belong here
+## Outputs
 
-- Candidate pair search or action-space exploration (see `search/`)
+- `LoopProof` with status, rejection reason (if any), recurrence details, proof hash, version identity
+
+## Responsibilities
+
+- Fail-closed semantic coverage gates
+- Functional-external and essential-count gates
+- Execute setup + loop via `rules.Executor`
+- Check proof-specific recurrence (`LoopRelevantState`) and expected outputs
+- Hash proofs for stability tracking
+
+## Non-responsibilities
+
+- Candidate pair enumeration or action-space BFS (`search/`)
 - Gold pair labels
+- Human adjudication
+- **Participant / `strict_two_card` enforcement** (today that flag is stamped by search/eval classify and is not a verifier gate — open defect; see `search/README.md`)
+
+## Core invariants
+
+- Module contract: `"Witness-in / proof-out verifier (no search)."`
+- `PARTIAL_RELEVANT_TO_PROOF` or `card.relevant_unsupported()` → `UNSUPPORTED_SEMANTICS` (never `VERIFIED`)
+- `PARTIAL_IRRELEVANT_TO_PROOF` may still `VERIFIED` if abilities are otherwise supported
+- Non-empty `functional_external_requirements` → `EXTERNAL_FUNCTIONAL_PIECE_REQUIRED`
+- Nondeterministic witnesses rejected
+- `verify` package must not import `search` (`tests/unit/test_search_boundary.py`)
+- **Does not** enforce `strict_two_card` / unused participant IDs today (open defect; stamped labels only)
+
+## Main entry points
+
+- `verifier.py`: `Verifier`, `Verifier.verify`, `check_recurrence`, `check_outputs`, `proof_hash`
+
+## Data contracts
+
+Consumes `proofs.models.LoopWitness`; emits `LoopProof` with `VerificationStatus` / `ProofKind`. Proof hash covers witness identity + status + loop + outputs.
+
+## Failure behavior
+
+Always returns a `LoopProof` for ordinary verification attempts — typed rejection statuses rather than exceptions for loop/physics failures.
+
+## Testing
+
+- `tests/gold_core/` — positives `VERIFIED`
+- `tests/hard_negatives/` — expected typed rejection
+- `tests/semantic/test_compile_verify.py` — compile → verify
+- `tests/unit/test_search_boundary.py` — layering
+- `tests/golden_proofs/` — proof artifact contracts
+
+## Extension guide
+
+Add acceptance gates here when they are truth conditions (physics, coverage, externals). Do not pull exploration into this package. If adding participant enforcement, decide explicitly whether it belongs in search pre-filter, verifier gate, or both — document the choice.
+
+## Bigger-picture relationship
+
+Verification may not speculate. Architecture: [`docs/ARCHITECTURE.md`](../../../docs/ARCHITECTURE.md).

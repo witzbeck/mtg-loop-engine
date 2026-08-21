@@ -20,6 +20,7 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
 ]
 eval = [
     "streamlit>=1.40",
@@ -28,3 +29,40 @@ eval = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+# Mechanical preferences + coverage floor. Policy for *what* to test
+# (critical path, ban useless tests) lives in CONTRIBUTING.md,
+# tests/README.md, and .cursor/rules/test-quality.mdc.
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=mtg_loop_engine",
+    "--cov-report=term-missing",
+    "--cov-fail-under=90",
+]
+xfail_strict = true
+filterwarnings = [
+    "error",
+]
+markers = [
+    "slow: heavier optional checks; default CI runs the full suite without needing this mark today",
+]
+
+[tool.coverage.run]
+branch = false
+source = ["mtg_loop_engine"]
+# Intentionally out of the %-gate: thin CLI entrypoint, Streamlit UI, and
+# network snapshot download helpers. Core verify/search/semantics/eval logic
+# stays measured. Do not omit engine packages to manufacture 90%.
+omit = [
+    "*/mtg_loop_engine/cli.py",
+    "*/mtg_loop_engine/eval/workbench.py",
+    "*/mtg_loop_engine/cards/ingest.py",
+    "*/mtg_loop_engine/benchmark/spellbook.py",
+    "*/mtg_loop_engine/eval/oracle_lookup.py",
+]
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+skip_empty = true

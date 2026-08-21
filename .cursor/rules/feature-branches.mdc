@@ -1,0 +1,6 @@
+# Feature branches
+
+- Non-trivial work uses a `feature/<slug>` branch — do not land it directly on `main`.
+- Keep CI green before merging to `main`.
+
+**Authority:** [`CONTRIBUTING.md`](../../CONTRIBUTING.md) (feature-branch policy, testing, PR expectations). This file is a Cursor adapter only. Squash defaults: `merge-strategy.mdc`. Merge when CI covers critical path: `ci-merge-gate.mdc`. After merge: `land-and-return.mdc`.
