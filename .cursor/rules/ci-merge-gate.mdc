@@ -34,7 +34,7 @@ If critical behavior is **not** covered, do **not** merge on green alone: add te
 - Merge with red or pending required checks
 - Assume “tests exist somewhere” if they are not run in CI
 - Weaken or skip tests to manufacture a green badge
-- Prefer contract tests over coverage padding — see `test-quality.mdc`
+- Count coverage-padding or vacuous tests as satisfying this gate (see `test-quality.mdc`)
 
 ## Authority
 
