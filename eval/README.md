@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Committed M4 evaluation metadata: Spellbook-shaped fixtures, gold-pool extra adjudications, and frozen baseline summaries.
+Committed M4 **evaluation knowledge**: fixtures, observed adjudications, taxonomy calibration, frozen baselines, and exceptional promoted review evidence — not ordinary LAR execution output.
 
 Working DuckDB files stay gitignored under `data/eval/`. Library code lives in `src/mtg_loop_engine/eval/`.
 
@@ -14,9 +14,11 @@ Package `mtg_loop_engine.eval` writers/readers → **THIS (artifacts)** → CI t
 graph TB;
   pkgEval[mtg_loop_engine.eval] --> fixtures[fixtures];
   pkgEval --> adjudications[adjudications];
+  pkgEval --> calibration[calibration];
   pkgEval --> baseline[baseline];
   fixtures --> tests[tests/eval];
   adjudications --> precision[adjudicatedPrecision];
+  calibration --> lar[LAR calibration tier];
   baseline --> status[docs/STATUS.md];
 ```
 
@@ -29,13 +31,17 @@ graph TB;
 | Path | Role |
 | --- | --- |
 | `fixtures/` | Tiny conventional Spellbook JSONL for CI |
-| `adjudications/` | Persisted extras + human labels |
-| `baseline/` | Frozen M4 metric snapshots |
+| `adjudications/` | Observed extras + human labels (what engine produced) |
+| `calibration/` | Curated taxonomy boundary cases (what classes mean) |
+| `baseline/` | Certified M4 metric snapshots |
+| `reviews/promoted/` | Exceptional LAR evidence packages only |
 
 ## Responsibilities
 
 - Keep committed evaluation artifacts reviewable and CI-stable.
 - Separate **reference recovery** baselines from **human-adjudicated precision** baselines.
+- Separate **observed adjudications** from **calibration** cases.
+- Keep ephemeral LAR runs under gitignored `data/eval/lar/runs/` — not here.
 
 ### Measurement split (do not conflate)
 

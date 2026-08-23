@@ -1,0 +1,31 @@
+{
+  "schema_version": "2",
+  "run_id": "2026-08-21_5b8c45d",
+  "started_at": "2026-08-21T00:00:00Z",
+  "engine": {
+    "git_sha": "5b8c45d",
+    "dirty": false
+  },
+  "review_protocol": {
+    "name": "loop-adjudication-review",
+    "version": "1",
+    "skill_sha": null,
+    "blinded_pair_review": false,
+    "adversarial_challenge": false
+  },
+  "evaluator": {
+    "model_identifier": "cursor-agent-session"
+  },
+  "taxonomy": {
+    "source": "docs/ADJUDICATION.md",
+    "sha256": null
+  },
+  "datasets": {
+    "adjudications_sha256": null,
+    "calibration_sha256": null,
+    "gold_core_sha256": null,
+    "oracle_snapshot_id": null
+  },
+  "pytest_passed": true,
+  "notes": "First full LAR (v1 protocol). Promoted as compact evidence package 0001-m4-lar-v1; full execution tree retained locally under data/eval/lar/runs/2026-08-21_5b8c45d/."
+}

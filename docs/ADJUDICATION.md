@@ -41,7 +41,9 @@ graph TB;
 
 **Rule:** The loop needs a third object (e.g. "any creature to sacrifice"), but that object's identity is irrelevant—any legal substitute works.
 
-**Example:** Phyrexian Altar + Gravecrawler (needs any Zombie on board as generic fodder in some framings).
+**Example:** Token Breeder + Intruder Alarm (seeded creature token fodder; any token works). See calibration case `CC-005` in [`eval/calibration/adjudication_cases.jsonl`](../eval/calibration/adjudication_cases.jsonl).
+
+**Boundary vs `unjustified_initial_state`:** Generic prerequisite assumes fodder the loop can reasonably obtain or that is explicitly modeled as intrinsic/generic setup. Unjustified initial state means the engine assumed board state the pair cannot establish under stated assumptions (e.g. five tokens when the loop only creates one per iteration).
 
 **Counts toward precision:** yes (valid).
 
@@ -49,7 +51,9 @@ graph TB;
 
 **Rule:** A specific third card *type* or ability is required that is not "any creature/artifact"—it must have a particular functional ability. Not strict two-card.
 
-**Example:** Deadeye Navigator + Peregrine Drake framed as needing a land that taps for 5+.
+**Example:** Deadeye Navigator + Peregrine Drake framed as needing a land that taps for 5+ (specific functional ability, not generic fodder).
+
+**Boundary vs `valid_generic_prerequisite`:** If any legal substitute of the same broad category works, prefer generic prerequisite. If a particular ability or card type is essential, use functional external requirement.
 
 **Counts toward precision:** no (invalid for strict/valid precision).
 
@@ -91,7 +95,15 @@ graph TB;
 
 **Example:** Edge cases involving obscure replacement interactions.
 
+**Boundary vs `rules_or_semantics_false_positive`:** False positive means the modeled rules/semantics path is confidently wrong under current engine understanding. Needs rules research means insufficient evidence to choose — not a disguised rejection.
+
 **Counts toward precision:** no (treat as not yet resolved for precision claims).
+
+---
+
+## Calibration cases
+
+Executable taxonomy examples live in [`eval/calibration/`](../eval/calibration/). Calibration is curated; adjudications are observational. LAR Tier A measures class/boundary coverage against calibration inventory.
 
 ---
 

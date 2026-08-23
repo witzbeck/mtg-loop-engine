@@ -1,0 +1,332 @@
+{
+  "run_id": "2026-08-21_5b8c45d",
+  "synthesized_at": "2026-08-21T17:00:00Z",
+  "unverified_legs": [],
+  "phase_a_summary": [
+    {
+      "class": "valid_strict_two_card",
+      "sample_n": 3,
+      "doc_clear": true,
+      "engine_aligned": true,
+      "top_failure_stage": null,
+      "verdict": "healthy",
+      "sample_pairs": [
+        "oracle:ashnods-altar__oracle:phoenix",
+        "oracle:phoenix__oracle:phyrexian-altar",
+        "oracle:phyrexian-altar__oracle:reassembling-skeleton"
+      ]
+    },
+    {
+      "class": "valid_generic_prerequisite",
+      "sample_n": 0,
+      "doc_clear": true,
+      "engine_aligned": false,
+      "top_failure_stage": "prerequisite_classification_mismatch",
+      "verdict": "process_debt",
+      "notes": "Class defined; zero frozen extras; core_breed_alarm lives in gold_core only; engine strict_two_card conflates with valid_strict"
+    },
+    {
+      "class": "functional_external_requirement",
+      "sample_n": 0,
+      "doc_clear": true,
+      "engine_aligned": false,
+      "top_failure_stage": "prerequisite_classification_mismatch",
+      "verdict": "process_debt",
+      "notes": "Verifier enforces stamped metadata (neg_functional_external); classify never populates functional_external_requirements"
+    },
+    {
+      "class": "unjustified_initial_state",
+      "sample_n": 0,
+      "doc_clear": false,
+      "engine_aligned": false,
+      "top_failure_stage": "prerequisite_classification_mismatch",
+      "verdict": "process_debt",
+      "related_fixture_pairs": [
+        "oracle:basalt-monolith__oracle:token-breeder",
+        "oracle:suicidal-phoenix__oracle:token-breeder",
+        "oracle:self-untap-tapper__oracle:token-breeder"
+      ]
+    },
+    {
+      "class": "rules_or_semantics_false_positive",
+      "sample_n": 0,
+      "doc_clear": true,
+      "engine_aligned": true,
+      "top_failure_stage": "verifier_rejection",
+      "verdict": "aligned_no_samples",
+      "notes": "Hard negatives cover five rules-fp semantics at verifier layer; no gold-pool exemplars"
+    },
+    {
+      "class": "duplicate_or_equivalent_interaction",
+      "sample_n": 5,
+      "doc_clear": true,
+      "engine_aligned": true,
+      "top_failure_stage": null,
+      "verdict": "healthy_post_gate",
+      "sample_pairs": [
+        "oracle:ashnods-altar__oracle:basalt-monolith",
+        "oracle:basalt-monolith__oracle:gravecrawler",
+        "oracle:basalt-monolith__oracle:intruder-alarm",
+        "oracle:basalt-monolith__oracle:phyrexian-altar",
+        "oracle:basalt-monolith__oracle:reassembling-skeleton"
+      ]
+    },
+    {
+      "class": "invalid_candidate_data",
+      "sample_n": 16,
+      "doc_clear": true,
+      "engine_aligned": true,
+      "top_failure_stage": null,
+      "verdict": "healthy",
+      "notes": "Fixture detection eval-side; 7/16 still live-accepted at search; precision exclusion works"
+    },
+    {
+      "class": "needs_rules_research",
+      "sample_n": 0,
+      "doc_clear": true,
+      "engine_aligned": true,
+      "top_failure_stage": null,
+      "verdict": "aligned_no_samples",
+      "notes": "Human epistemic bucket; orthogonal to verifier UNSUPPORTED_SEMANTICS fail-closed path"
+    }
+  ],
+  "pair_agreement": {
+    "agree": 24,
+    "disagree": 0,
+    "partial": 0,
+    "needs_rules_research": 0,
+    "not_applicable": 0,
+    "disagree_pairs": []
+  },
+  "phase_c_summary": [
+    {
+      "family": "mana_tap_untap",
+      "verify": true,
+      "rediscover": true,
+      "classify_honest": true,
+      "engine_aligned": true,
+      "related_B_disagreements": 0,
+      "witness_ids": ["core_basalt_training"],
+      "related_phase_b_pairs": 8
+    },
+    {
+      "family": "token_etb_untap",
+      "verify": true,
+      "rediscover": true,
+      "classify_honest": true,
+      "engine_aligned": true,
+      "related_B_disagreements": 0,
+      "witness_ids": ["core_alarm_tapper", "core_warden_tapper", "core_breed_alarm"],
+      "related_phase_b_pairs": 10
+    },
+    {
+      "family": "zone_recursion_sacrifice",
+      "verify": true,
+      "rediscover": true,
+      "classify_honest": true,
+      "engine_aligned": true,
+      "related_B_disagreements": 0,
+      "witness_ids": ["core_altar_gravecrawler", "core_ashnod_skeleton", "core_phoenix_seer"],
+      "related_phase_b_valid_strict": 3
+    },
+    {
+      "family": "counters_damage",
+      "verify": true,
+      "rediscover": true,
+      "classify_honest": true,
+      "engine_aligned": true,
+      "related_B_disagreements": 0,
+      "witness_ids": ["core_gun_scales"],
+      "related_phase_b_pairs": 0
+    },
+    {
+      "family": "etb_damage_death",
+      "verify": true,
+      "rediscover": true,
+      "classify_honest": true,
+      "engine_aligned": false,
+      "related_B_disagreements": 0,
+      "witness_ids": ["core_tremor_perpetual", "core_artist_phoenix"],
+      "failure_stage": "compiler_unsupported",
+      "related_phase_b_pairs": 7
+    }
+  ],
+  "cross_tier_signals": [
+    {
+      "signal_id": "duplicate_class_healthy_frozen_pre_gate_inventory",
+      "description": "Tier A duplicate class and Tier B all five Basalt-bystander pairs agree; live explore_pair rejects all five post participant-gate. Frozen JSONL retains pre-gate inventory until baseline re-freeze (ROADMAP M4 item 5).",
+      "evidence": [
+        "phase-a/duplicate_or_equivalent_interaction.json",
+        "phase-b pairs: oracle:basalt-monolith__oracle:gravecrawler, oracle:basalt-monolith__oracle:intruder-alarm, oracle:basalt-monolith__oracle:phyrexian-altar, oracle:basalt-monolith__oracle:reassembling-skeleton, oracle:ashnods-altar__oracle:basalt-monolith",
+        "phase-c/mana_tap_untap.json",
+        "tests/eval/test_classify_store.py::test_bystander_pairs_are_not_accepted"
+      ],
+      "severity": "low"
+    },
+    {
+      "signal_id": "b_ok_c_compiler_gap_etb_damage",
+      "description": "Tier B agrees all seven etb_damage_death-adjacent fixture pairs are invalid_candidate_data; Tier C reports family healthy on gold_core fixtures but engine_aligned=false because no real Oracle compiler path covers ETB ping or self-untap token loops.",
+      "evidence": [
+        "phase-c/etb_damage_death.json",
+        "phase-b pairs: oracle:etb-ping__oracle:suicidal-phoenix, oracle:soul-warden__oracle:suicidal-phoenix, oracle:intruder-alarm__oracle:suicidal-phoenix",
+        "phase-a/invalid_candidate_data.json"
+      ],
+      "severity": "medium"
+    },
+    {
+      "signal_id": "valid_generic_prerequisite_zero_inventory",
+      "description": "Tier A flags valid_generic_prerequisite as doc-clear but engine-misaligned with zero frozen exemplars; Tier C core_breed_alarm demonstrates generic token fodder in gold_core excluded from extras pool; Tier B fixture token-breeder rows are invalid_candidate_data not valid_generic.",
+      "evidence": [
+        "phase-a/valid_generic_prerequisite.json",
+        "phase-c/token_etb_untap.json (core_breed_alarm)",
+        "phase-b pairs: oracle:basalt-monolith__oracle:token-breeder, oracle:suicidal-phoenix__oracle:token-breeder"
+      ],
+      "severity": "medium"
+    },
+    {
+      "signal_id": "fixture_eval_exclusion_search_acceptance",
+      "description": "Tier A invalid_candidate_data and Tier B agree on all 16 fixture labels; seven fixture pairs still live-accepted post gate (strict_two_card verified). Exclusion is eval/metrics policy, not search filtering—intentional but creates frozen-vs-live count drift (16 frozen vs 10 live extras).",
+      "evidence": [
+        "phase-a/invalid_candidate_data.json",
+        "phase-b pairs: oracle:intruder-alarm__oracle:self-untap-tapper, oracle:phyrexian-altar__oracle:suicidal-phoenix, oracle:soul-warden__oracle:suicidal-phoenix",
+        "phase-c/token_etb_untap.json"
+      ],
+      "severity": "medium"
+    },
+    {
+      "signal_id": "zone_recursion_a_b_c_aligned",
+      "description": "All three tiers align on zone_recursion_sacrifice: Tier A valid_strict_two_card (3 samples), Tier B 3/3 strict extras agree, Tier C family end-to-end healthy with witness-to-extra cross-map.",
+      "evidence": [
+        "phase-a/valid_strict_two_card.json",
+        "phase-b pairs: oracle:ashnods-altar__oracle:phoenix, oracle:phoenix__oracle:phyrexian-altar, oracle:phyrexian-altar__oracle:reassembling-skeleton",
+        "phase-c/zone_recursion_sacrifice.json"
+      ],
+      "severity": "info"
+    },
+    {
+      "signal_id": "unpopulated_adjudication_classes",
+      "description": "Four Tier A classes have zero frozen gold-pool exemplars (valid_generic_prerequisite, functional_external_requirement, unjustified_initial_state, needs_rules_research). Tier B cannot calibrate pair-level disagreement for these buckets; process debt for reviewer training and baseline coverage.",
+      "evidence": [
+        "phase-a/valid_generic_prerequisite.json",
+        "phase-a/functional_external_requirement.json",
+        "phase-a/unjustified_initial_state.json",
+        "phase-a/needs_rules_research.json",
+        "manifest.json frozen_label_counts"
+      ],
+      "severity": "medium"
+    },
+    {
+      "signal_id": "frozen_witness_participation_drift",
+      "description": "Tier B agrees invalid_candidate_data for oracle:basalt-monolith__oracle:self-untap-tapper but notes frozen witness marked Basalt unused while live explore_pair now finds strict two-card Basalt+Perpetual loop—witness staleness, not label error. Re-freeze should refresh participation metadata.",
+      "evidence": [
+        "phase-b pair oracle:basalt-monolith__oracle:self-untap-tapper",
+        "phase-a/invalid_candidate_data.json"
+      ],
+      "severity": "low"
+    }
+  ],
+  "architecture_debt": [
+    {
+      "layer": "search",
+      "finding": "Participant gate closes Basalt bystander duplicates (5/5 rejected live); search does not filter fixtures—7/16 fixture pairs still verify post gate.",
+      "evidence_paths": [
+        "src/mtg_loop_engine/search/explorer.py",
+        "tests/eval/test_classify_store.py::test_bystander_pairs_are_not_accepted",
+        "data/eval/lar/runs/2026-08-21_5b8c45d/phase-a/duplicate_or_equivalent_interaction.json",
+        "data/eval/lar/runs/2026-08-21_5b8c45d/phase-a/invalid_candidate_data.json"
+      ],
+      "suggested_action": "Re-freeze gold_pool_extras.jsonl post gate (ROADMAP M4 item 5); document intentional fixture discovery vs precision exclusion"
+    },
+    {
+      "layer": "classify",
+      "finding": "analyze_prerequisites detects bystanders and generic seeds but never populates functional_external_requirements or AssumptionKind.UNJUSTIFIED; strict_two_card conflates valid_strict with valid_generic_prerequisite shapes.",
+      "evidence_paths": [
+        "src/mtg_loop_engine/eval/classify.py",
+        "data/eval/lar/runs/2026-08-21_5b8c45d/phase-a/valid_generic_prerequisite.json",
+        "data/eval/lar/runs/2026-08-21_5b8c45d/phase-a/functional_external_requirement.json",
+        "data/eval/lar/runs/2026-08-21_5b8c45d/phase-a/unjustified_initial_state.json"
+      ],
+      "suggested_action": "ADR or classify extension for functional-external detection; define justified-vs-unjustified seeding policy"
+    },
+    {
+      "layer": "verify",
+      "finding": "Verifier enforces functional_external when stamped (neg_functional_external) but does not gate on strict_two_card/participation—physics-only acceptance allows hand-authored bystander witnesses outside discovery.",
+      "evidence_paths": [
+        "src/mtg_loop_engine/verify/verifier.py",
+        "tests/hard_negatives/test_negatives.py",
+        "data/eval/lar/runs/2026-08-21_5b8c45d/phase-a/duplicate_or_equivalent_interaction.json"
+      ],
+      "suggested_action": "Keep discovery gate as primary enforcement; optional verifier participation check for hand-authored paths only if product requires"
+    },
+    {
+      "layer": "compiler",
+      "finding": "etb_damage_death family lacks real Oracle compiler coverage (Impact Tremors analog, self-untap token maker); counters_damage has no dedicated semantic compile-verify test.",
+      "evidence_paths": [
+        "data/eval/lar/runs/2026-08-21_5b8c45d/phase-c/etb_damage_death.json",
+        "data/eval/lar/runs/2026-08-21_5b8c45d/phase-c/counters_damage.json",
+        "src/mtg_loop_engine/corpus/gold_core/cases.py"
+      ],
+      "suggested_action": "Track compiler curriculum for ETB ping and Perpetual Apprentice analogs in ROADMAP deferred scope"
+    },
+    {
+      "layer": "eval/adjudication",
+      "finding": "Frozen JSONL retains 24 pre-gate rows vs 10 live GOLD_EXTRA_ADJUDICATIONS entries; four adjudication classes have zero exemplars; no VerificationStatus-to-AdjudicationClass bridge for rules_or_semantics_false_positive.",
+      "evidence_paths": [
+        "eval/adjudications/gold_pool_extras.jsonl",
+        "src/mtg_loop_engine/eval/gold_extras.py",
+        "eval/baseline/m4_gold_pool_summary.json",
+        "data/eval/lar/runs/2026-08-21_5b8c45d/phase-a/rules_or_semantics_false_positive.json"
+      ],
+      "suggested_action": "Baseline re-freeze; add curated exemplars or explicit empty-class rationale in ADJUDICATION.md"
+    },
+    {
+      "layer": "docs",
+      "finding": "valid_generic_prerequisite vs unjustified_initial_state boundary underspecified; ADJUDICATION Gravecrawler example implies generic fodder but engine models Gravecrawler as essential participant.",
+      "evidence_paths": [
+        "docs/ADJUDICATION.md",
+        "docs/TERMINOLOGY.md",
+        "data/eval/lar/runs/2026-08-21_5b8c45d/phase-a/valid_generic_prerequisite.json",
+        "data/eval/lar/runs/2026-08-21_5b8c45d/phase-a/unjustified_initial_state.json"
+      ],
+      "suggested_action": "Revise ADJUDICATION examples to match engine modeling or document intentional simplification"
+    }
+  ],
+  "recommended_followups": [
+    {
+      "priority": "high",
+      "action": "Re-freeze eval/adjudications/gold_pool_extras.jsonl and m4_gold_pool_summary.json post participant-gate (ROADMAP M4 item 5)",
+      "rationale": "16 frozen vs 10 live extras; five duplicate rows and stale participation on basalt+self-untap-tapper",
+      "evidence": ["manifest.json", "phase-a/duplicate_or_equivalent_interaction.json", "phase-b oracle:basalt-monolith__oracle:self-untap-tapper"]
+    },
+    {
+      "priority": "medium",
+      "action": "Resolve valid_generic_prerequisite inventory gap: add real-card gold-pool exemplar or document gold_core-only policy with ADJUDICATION example fix",
+      "rationale": "Precision-eligible class with zero frozen samples; core_breed_alarm excluded from extras",
+      "evidence": ["phase-a/valid_generic_prerequisite.json", "phase-c/token_etb_untap.json"]
+    },
+    {
+      "priority": "medium",
+      "action": "Sharpen unjustified_initial_state vs generic_prerequisite boundary in docs/ADJUDICATION.md and docs/TERMINOLOGY.md",
+      "rationale": "Tier A marks unjustified doc_clear=false; classify tags all seeds as GENERIC_PREREQUISITE",
+      "evidence": ["phase-a/unjustified_initial_state.json"]
+    },
+    {
+      "priority": "medium",
+      "action": "Plan compiler curriculum for etb_damage_death real Oracle cards (Impact Tremors, token self-untap makers)",
+      "rationale": "Family passes gold_core/fixture pipeline but engine_aligned=false for Spellbook-eligible recovery",
+      "evidence": ["phase-c/etb_damage_death.json"]
+    },
+    {
+      "priority": "low",
+      "action": "Add functional_external_requirement gold-pool exemplar or document hard-negative-only enforcement policy",
+      "rationale": "Class defined and verifier-tested but zero frozen pair samples",
+      "evidence": ["phase-a/functional_external_requirement.json", "tests/hard_negatives/test_negatives.py"]
+    },
+    {
+      "priority": "low",
+      "action": "Add tests/semantic compile-verify case for counters_damage family",
+      "rationale": "mana_tap_untap has dedicated test; counters_damage relies on explore_pair only",
+      "evidence": ["phase-c/counters_damage.json"]
+    }
+  ]
+}

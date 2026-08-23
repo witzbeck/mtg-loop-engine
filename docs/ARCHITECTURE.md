@@ -85,7 +85,7 @@ Solid arrows are intended production dependencies. The dashed `search → eval` 
 | `corpus` | Curated epistemic fixtures + shared builders. |
 | `benchmark` | Spellbook reference extract/filter. |
 | `eval` (package) | Recovery metrics + human-adjudicated precision. |
-| `eval/` (repo root) | Committed fixtures, adjudications, frozen baselines. |
+| `eval/` (repo root) | Committed fixtures, adjudications, calibration, frozen baselines, promoted review evidence. |
 
 ## Participant gate (search acceptance)
 
@@ -116,6 +116,31 @@ Fail-closed also fires when any card’s `relevant_unsupported()` is true. Disco
 | Human-adjudicated precision | Of accepted real-card discoveries, how many are valid? | `ABSENT_FROM_REFERENCE`, **not** a false positive |
 
 Frozen numbers: `eval/baseline/*.json` (prefer over prose). See [`EVALUATION.md`](EVALUATION.md).
+
+## Evaluation data lifecycle (LAR v2)
+
+```mermaid
+graph TB;
+  subgraph EXEC[Execution plane gitignored]
+    RUN[data/eval/lar/runs]
+  end
+  subgraph KNOW[Knowledge plane committed]
+    ADJ[eval/adjudications]
+    CAL[eval/calibration]
+    FIX[eval/fixtures]
+    BASE[eval/baseline]
+    TEST[tests]
+    DOC[docs]
+    EVID[eval/reviews/promoted]
+  end
+  RUN -->|promotion PR| ADJ
+  RUN -->|promotion PR| CAL
+  RUN -->|promotion PR| TEST
+  ADJ --> RUN
+  CAL --> RUN
+```
+
+**Invariant:** evaluation execution is ephemeral; accepted knowledge is durable. A run is temporary; a finding earns permanence through review.
 
 ## Testing as epistemic contracts
 
