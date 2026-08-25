@@ -55,6 +55,7 @@ REQUIRED_FILES = [
     ROOT / "docs" / "ADJUDICATION.md",
     ROOT / "docs" / "CLI.md",
     ROOT / "docs" / "runbooks" / "M4_FOLLOW_THROUGH.md",
+    ROOT / "docs" / "runbooks" / "M5_NOVEL_CANDIDATES.md",
     ROOT / ".github" / "pull_request_template.md",
 ]
 

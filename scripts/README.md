@@ -36,6 +36,7 @@ graph TB;
 | `render_status.py --check` | same with `--check` | Exit non-zero if STATUS drifts from baselines |
 | `check_docs.py` | `uv run python scripts/check_docs.py` | Required files, README presence, important links; optional STATUS freshness |
 | `spellbook_compiler_priority.py` | `uv run python scripts/spellbook_compiler_priority.py` | Live diagnostic: rank Spellbook compiler gaps from local snapshot + Scryfall bulk |
+| `spellbook_absent_discovery.py` | `uv run python scripts/spellbook_absent_discovery.py` | M5: blind-discover among COMPLETE Spellbook cards; label `ABSENT_FROM_REFERENCE` |
 
 CI currently runs `check_docs.py` (includes STATUS freshness unless `--skip-status`) and then `render_status.py --check` again as a named step after pytest. Prefer `--skip-status` on the docs step if STATUS should be checked only once.
 
@@ -55,6 +56,7 @@ CI currently runs `check_docs.py` (includes STATUS freshness unless `--skip-stat
 - `scripts/render_status.py`
 - `scripts/check_docs.py`
 - `scripts/spellbook_compiler_priority.py`
+- `scripts/spellbook_absent_discovery.py`
 
 ## Data contracts
 
