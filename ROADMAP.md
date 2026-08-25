@@ -115,7 +115,7 @@ Playbook: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDID
 
 ### First local probe (not a baseline)
 
-Post–slice 6: **31** COMPLETE (false-COMPLETE auras corrected); **8** verified; **5** in-reference; **`absent_from_reference=3`**. Continue path **a**; path **b** stays deferred.
+Post–slice 6 + host-recurrence fix: **31** COMPLETE; **5** verified; **5** in-reference; **`absent_from_reference=0`**. Gond + Tremors / Warleader / Basalt no longer verify (host tap in `LoopRelevantState`); Guard/Alarm + Gond remain in-reference. Continue path **a**; path **b** stays deferred.
 
 ---
 

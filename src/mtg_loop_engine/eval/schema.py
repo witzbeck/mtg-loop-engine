@@ -17,8 +17,19 @@ class AdjudicationClass(StrEnum):
     UNJUSTIFIED_INITIAL_STATE = "unjustified_initial_state"
     RULES_OR_SEMANTICS_FALSE_POSITIVE = "rules_or_semantics_false_positive"
     DUPLICATE_OR_EQUIVALENT_INTERACTION = "duplicate_or_equivalent_interaction"
+    # Cards interact productively but cannot recur (finite combo mislabeled as loop).
+    FINITE_INTERACTION_MISCLASSIFIED_AS_LOOP = "finite_interaction_misclassified_as_loop"
     INVALID_CANDIDATE_DATA = "invalid_candidate_data"
     NEEDS_RULES_RESEARCH = "needs_rules_research"
+
+
+class AdjudicationFailureReason(StrEnum):
+    """Optional diagnostic codes under an adjudication class (v1: finite / recurrence)."""
+
+    RECURRENCE_FAILURE = "recurrence_failure"
+    RESOURCE_NOT_RESTORED = "resource_not_restored"
+    PARTICIPANT_FAILURE = "participant_failure"
+    ILLEGAL_EXECUTION = "illegal_execution"
 
 
 class ReferenceStatus(StrEnum):
@@ -89,6 +100,7 @@ class AdjudicationRecord(BaseModel):
     candidate_id: str
     adjudication: AdjudicationClass
     notes: str = ""
+    failure_reasons: list[AdjudicationFailureReason] = Field(default_factory=list)
     reviewed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     proof_hash: str
     engine_version: str

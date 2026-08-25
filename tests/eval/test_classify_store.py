@@ -59,7 +59,7 @@ def test_basalt_grounds_is_strict_via_cost_reduction():
 
 def test_store_roundtrip(tmp_path: Path):
     from mtg_loop_engine.eval.explain import record_from_hit
-    from mtg_loop_engine.eval.schema import ReferenceStatus
+    from mtg_loop_engine.eval.schema import AdjudicationFailureReason, ReferenceStatus
 
     found = explore_pair(BASALT, TRAINING_GROUNDS)
     assert found is not None
@@ -75,8 +75,12 @@ def test_store_roundtrip(tmp_path: Path):
     store.save_adjudication(
         AdjudicationRecord(
             candidate_id=record.candidate_id,
-            adjudication=AdjudicationClass.VALID_STRICT_TWO_CARD,
-            notes="gold pair",
+            adjudication=AdjudicationClass.FINITE_INTERACTION_MISCLASSIFIED_AS_LOOP,
+            notes="example finite",
+            failure_reasons=[
+                AdjudicationFailureReason.RECURRENCE_FAILURE,
+                AdjudicationFailureReason.RESOURCE_NOT_RESTORED,
+            ],
             proof_hash=record.proof.proof_hash,
             engine_version=record.engine_version,
         )
@@ -93,5 +97,40 @@ def test_store_roundtrip(tmp_path: Path):
     assert loaded.left_name == "Basalt Monolith"
     adj = other.get_adjudication(record.candidate_id)
     assert adj is not None
-    assert adj.adjudication == AdjudicationClass.VALID_STRICT_TWO_CARD
+    assert adj.adjudication == AdjudicationClass.FINITE_INTERACTION_MISCLASSIFIED_AS_LOOP
+    assert adj.failure_reasons == [
+        AdjudicationFailureReason.RECURRENCE_FAILURE,
+        AdjudicationFailureReason.RESOURCE_NOT_RESTORED,
+    ]
     other.close()
+
+
+def test_queue_treats_skipped_as_reviewed(tmp_path: Path):
+    from mtg_loop_engine.eval.explain import record_from_hit
+    from mtg_loop_engine.eval.schema import ReferenceStatus
+
+    found = explore_pair(BASALT, TRAINING_GROUNDS)
+    assert found is not None
+    record = record_from_hit(
+        witness=found.witness,
+        proof=found.proof,
+        reasons=["cost_reduce"],
+        corpus="test",
+        reference_status=ReferenceStatus.ABSENT_FROM_REFERENCE,
+    )
+    store = AdjudicationStore(tmp_path / "adj.duckdb")
+    store.upsert_candidate(record)
+    assert len(store.queue(reviewed=False)) == 1
+    store.save_adjudication(
+        AdjudicationRecord(
+            candidate_id=record.candidate_id,
+            adjudication=AdjudicationClass.NEEDS_RULES_RESEARCH,
+            notes="",
+            proof_hash=record.proof.proof_hash,
+            engine_version=record.engine_version,
+            skipped=True,
+        )
+    )
+    assert store.queue(reviewed=False) == []
+    assert len(store.queue(reviewed=True)) == 1
+    store.close()

@@ -21,3 +21,4 @@ Blind discovery will surface pairs absent from Spellbook. Automatically calling 
 - M5 (novel candidate adjudication) is meaningless until M4 correctness follow-through keeps precision trustworthy.
 - Agents and CI must not auto-promote `NOVEL` from heuristics or LLM judgment.
 - Eval reporting must keep absence, duplicate, valid, and novel buckets distinct.
+- Adjudication class vocabulary may grow deliberately (schema + `docs/ADJUDICATION.md` + workbench guide) when reviewers need a sharper bucket—e.g. `finite_interaction_misclassified_as_loop` vs bystander duplicate—without changing the `NOVEL` ownership rule above.
