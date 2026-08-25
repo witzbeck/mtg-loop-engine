@@ -95,15 +95,22 @@ def pat_tap_add_mana(text: str, name: str) -> Ability | None:
         text,
         re.IGNORECASE,
     )
-    if not m:
-        # {T}: Add one mana of any color.
-        m_any = re.match(
-            r"^\{T\}: Add one mana of any color(?: to your mana pool)?\.?$",
-            text,
-            re.IGNORECASE,
+    if m:
+        amount = _parse_mana_braces(m.group(1))
+        return ActivatedAbility(
+            ability_id=_ability_id("tap-mana", text),
+            costs=[TapCost()],
+            effects=[AddManaEffect(amount=amount)],
+            is_mana_ability=True,
+            uses_stack=False,
         )
-        if not m_any:
-            return None
+    # {T}: Add one mana of any color.
+    m_any = re.match(
+        r"^\{T\}: Add one mana of any color(?: to your mana pool)?\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if m_any:
         return ActivatedAbility(
             ability_id=_ability_id("tap-mana-any", text),
             costs=[TapCost()],
@@ -111,14 +118,42 @@ def pat_tap_add_mana(text: str, name: str) -> Ability | None:
             is_mana_ability=True,
             uses_stack=False,
         )
-    amount = _parse_mana_braces(m.group(1))
-    return ActivatedAbility(
-        ability_id=_ability_id("tap-mana", text),
-        costs=[TapCost()],
-        effects=[AddManaEffect(amount=amount)],
-        is_mana_ability=True,
-        uses_stack=False,
+    # {T}: Add an amount of {G} equal to this creature's power. (Viridian Joiner)
+    m_pow = re.match(
+        r"^\{T\}: Add an amount of \{([GC])\} equal to "
+        r"(?:this creature's|its|~'s|"
+        + re.escape(name)
+        + r"'s) power\.?$",
+        text,
+        re.IGNORECASE,
     )
+    if m_pow:
+        color = "green" if m_pow.group(1).upper() == "G" else "colorless"
+        return ActivatedAbility(
+            ability_id=_ability_id("tap-mana-power", text),
+            costs=[TapCost()],
+            effects=[AddManaEffect(equal_to_source_power=color)],  # type: ignore[arg-type]
+            is_mana_ability=True,
+            uses_stack=False,
+        )
+    # {T}: Add X mana of any one color, where X is this creature's power.
+    m_x = re.match(
+        r"^\{T\}: Add X mana of any one color, where X is "
+        r"(?:this creature's|its|~'s|"
+        + re.escape(name)
+        + r"'s) power\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if m_x:
+        return ActivatedAbility(
+            ability_id=_ability_id("tap-mana-power-any", text),
+            costs=[TapCost()],
+            effects=[AddManaEffect(equal_to_source_power="any_color")],
+            is_mana_ability=True,
+            uses_stack=False,
+        )
+    return None
 
 
 def pat_mana_untap_self(text: str, name: str) -> Ability | None:
@@ -288,13 +323,29 @@ def pat_etb_untap_target(text: str, name: str) -> Ability | None:
         text,
         re.IGNORECASE,
     )
-    if not m_all:
+    if m_all:
+        return TriggeredAbility(
+            ability_id=_ability_id("etb-untap-all", text),
+            event=TriggerEvent.ENTER_BATTLEFIELD,
+            filter="creature",
+            effects=[UntapEffect(target="all_creatures")],
+        )
+    # Midnight Guard: Whenever another creature enters, untap this creature.
+    m_self = re.match(
+        r"^Whenever another creature enters(?: the battlefield)?, "
+        r"untap (?:this creature|~|"
+        + re.escape(name)
+        + r")\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m_self:
         return None
     return TriggeredAbility(
-        ability_id=_ability_id("etb-untap-all", text),
+        ability_id=_ability_id("etb-untap-self", text),
         event=TriggerEvent.ENTER_BATTLEFIELD,
         filter="creature",
-        effects=[UntapEffect(target="all_creatures")],
+        effects=[UntapEffect(target="self")],
     )
 
 
@@ -521,23 +572,30 @@ def pat_opponent_lose_life_you_gain_that_much(text: str, name: str) -> Ability |
 
 
 def pat_etb_damage(text: str, name: str) -> Ability | None:
-    m = re.match(
-        r"^Whenever a creature enters(?: the battlefield)?(?: under your control)?, "
+    """Creature ETB → fixed damage to opponent (Impact Tremors / Purphoros class)."""
+    # Optional ability word ("Alliance — ") and trailing reminder text.
+    cleaned = re.sub(r"^[A-Za-z][A-Za-z' ]*—\s*", "", text.strip())
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", cleaned).strip().rstrip(".")
+    name_alts = [re.escape(name)]
+    short = name.split(",")[0].strip()
+    if short and short.casefold() != name.casefold():
+        name_alts.append(re.escape(short))
+    front = name.split("//")[0].strip()
+    if front and front.casefold() not in {name.casefold(), short.casefold()}:
+        name_alts.append(re.escape(front))
+    source = (
         r"(?:~|"
-        + re.escape(name)
-        + r"|it) deals (\d+) damage to (?:each|target) opponent\.?$",
-        text,
+        + "|".join(name_alts)
+        + r"|it|this (?:creature|enchantment|permanent))"
+    )
+    m = re.match(
+        r"^Whenever (?:a|another) creature(?: you control)? "
+        r"enters(?: the battlefield)?(?: under your control)?, "
+        + source
+        + r" deals (\d+) damage to (?:each|target) opponent$",
+        cleaned,
         re.IGNORECASE,
     )
-    if not m:
-        m = re.match(
-            r"^Whenever a creature (?:you control )?enters(?: the battlefield)?, "
-            r"(?:~|"
-            + re.escape(name)
-            + r") deals (\d+) damage to each opponent\.?$",
-            text,
-            re.IGNORECASE,
-        )
     if not m:
         return None
     return TriggeredAbility(
@@ -550,7 +608,8 @@ def pat_etb_damage(text: str, name: str) -> Ability | None:
 
 def pat_etb_gain_life(text: str, name: str) -> Ability | None:
     m = re.match(
-        r"^Whenever (?:a|another) creature enters(?: the battlefield)?, you gain (\d+) life\.?$",
+        r"^Whenever (?:a|another) creature(?: you control)? "
+        r"enters(?: the battlefield)?, you gain (\d+) life\.?$",
         text,
         re.IGNORECASE,
     )
@@ -724,6 +783,11 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
     if words and all(word in _KEYWORD_ABILITIES for word in words):
         return _proof_irrelevant(clause)
 
+    # Keyword + reminder text (e.g. Lifelink (...)).
+    kw_alt = "|".join(re.escape(k) for k in sorted(_KEYWORD_ABILITIES, key=len, reverse=True))
+    if re.match(rf"^(?:{kw_alt})(?: \([^)]+\))?$", clause, re.IGNORECASE):
+        return _proof_irrelevant(clause)
+
     if re.match(r"^Ward \{[^}]+\}(?: \([^)]+\))?$", clause, re.IGNORECASE):
         return _proof_irrelevant(clause)
 
@@ -770,6 +834,38 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
 
     if re.match(
         r"^(?:\{[^}]+\})+: Creatures you control gain .+ until end of turn\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^(?:\{[^}]+\})+: Creatures you control get [+-]\d+/[+-]\d+ "
+        r"until end of turn\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    # Static anthem (Warleader's Call): not modeled loop physics.
+    if re.match(
+        r"^Creatures you control get [+-]\d+/[+-]\d+\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    # Theros god devotion (joined with Indestructible on one Scryfall line).
+    if re.match(
+        r"^Indestructible(?:\s+As long as your devotion to \w+ is less than \w+, "
+        r".+ isn't a creature)?\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^As long as your devotion to \w+ is less than \w+, .+ isn't a creature\.?$",
         clause,
         re.IGNORECASE,
     ):

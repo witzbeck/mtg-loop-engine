@@ -155,6 +155,17 @@ class Executor:
         trigger_amount: int | None = None,
     ) -> ExecError | None:
         if isinstance(effect, AddManaEffect):
+            if effect.equal_to_source_power:
+                qty = max(int(source.power or 0), 0)
+                if qty > 0:
+                    color = effect.equal_to_source_power
+                    setattr(
+                        state.mana,
+                        color,
+                        getattr(state.mana, color) + qty,
+                    )
+                    state.bump("mana", qty)
+                return None
             for color in (
                 "white",
                 "blue",

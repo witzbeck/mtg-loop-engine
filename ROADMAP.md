@@ -91,10 +91,13 @@ Blind discovery among real **COMPLETE**-compiled Oracle cards from Spellbook nam
 ### Remaining
 
 1. **Absent-discovery path** ✓ — `eval/reference_absent.py` + `scripts/spellbook_absent_discovery.py`.
-2. **Grow COMPLETE pool** — curriculum order in [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDIDATES.md).
+2. **Grow COMPLETE pool** — prefer **self-starting** two-card physics (path **a**): patterns that can close without an external seeded event. Curriculum order: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDIDATES.md).
    - **Slice 1 (aura channel)** ✓ — Freed / Pemmin’s; COMPLETE **17→19**.
    - **Slices 2–3 (activated artifacts + Intruder Alarm)** ✓ — Staff of Domination suite, live Basalt/Alarm; COMPLETE **19→24**.
    - **Slice 4 (life-drain + statics)** ✓ — Vito/Bond/Exquisite patterns; GAIN_LIFE / OPPONENT_LOSE_LIFE triggers; Flash/Devoid/Evolve/land-tapped statics.
+   - **Path a (active):** unlock more COMPLETE cards whose abilities can initiate and close a two-card loop from the default board (tap-for-mana engines, ETB untap/damage/life, etc.).
+     - **Slice 5 (self-starters)** ✓ — power-tap mana (Viridian Joiner); ETB damage (Impact Tremors / Purphoros / Alliance); ETB untap-self (Midnight Guard); anthem/devotion/lifelink-reminder as proof-irrelevant.
+   - **Path b (deferred, deliberate):** generic **life-gain seed** in `default_initial_state` when a searched card has `GAIN_LIFE` triggers (ADR 0002 fodder-style). Would let Vito/Bond + Exquisite-class pairs rediscover without a third piece. **Do not implement until path a plateaus or a human widens scope** — document only.
    - **Rules-evidence rails (supporting; land before widening modeled physics):** cheap epistemic adapters so coverage growth stays deliberate (ADR 0003). Not an M5 exit gate; not CR ingest or executor expansion.
 
    | Piece | Why |
@@ -111,7 +114,7 @@ Playbook: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDID
 
 ### First local probe (not a baseline)
 
-Post–slices 1–4: **~31** COMPLETE cards on the 50-page sample; still **3** verified in-reference pairs and `absent=0` (two-card life-drain needs an external life event to start). Continue fragment curriculum.
+Post–slice 5 self-starters: **39** COMPLETE cards; still **3** verified in-reference; `absent=0`. Continue path **a**; path **b** (life-gain seed) stays deferred above.
 
 ---
 
