@@ -46,6 +46,8 @@ graph TB;
 
 Accepted discoveries missing from Spellbook are `ABSENT_FROM_REFERENCE` (or similar reference status). `NOVEL` requires human adjudication (M5). See [`docs/EVALUATION.md`](../../../docs/EVALUATION.md).
 
+Workbench bridge: `candidate_records_from_discovery` + `persist_spellbook_absent_candidates` (corpus `spellbook_absent`) write DuckDB + `data/eval/spellbook_absent.jsonl`. Operator: `uv run python scripts/spellbook_absent_discovery.py --persist-workbench`, then filter corpus → `spellbook_absent` in the workbench.
+
 ### Detection vs enforcement
 
 `analyze_prerequisites` detects unused searched cards and sets `strict_two_card`. **Search enforces** that flag in `explore_pair` (accept only `VERIFIED` + `strict_two_card`). This package owns detection and measurement; the acceptance gate lives in search.
@@ -76,13 +78,13 @@ LAR v2 contracts (`lar_contracts.py`, `lar_calibration.py`) support ephemeral ru
 | `schema.py` | Adjudication classes / records |
 | `metrics.py` | Recovery + precision reports |
 | `spellbook_eval.py` | Reference subset evaluation |
-| `reference_absent.py` | Label verified discoveries vs reference pairs (M5) |
+| `reference_absent.py` | Label verified discoveries vs reference pairs; persist absent candidates for workbench (M5) |
 | `gold_extras.py` | Gold-pool extras snapshot / summary |
 | `store.py` | DuckDB + JSONL |
 | `workbench.py` | Streamlit UI |
 | `oracle_lookup.py` | Optional real Oracle text lookup |
 
-CLI: `eval-gold-extras`, `eval-spellbook`, `adjudicate-workbench`.
+CLI: `eval-gold-extras`, `eval-spellbook`, `adjudicate-workbench`. Absent workbench seed: `scripts/spellbook_absent_discovery.py --persist-workbench`.
 
 ## Data contracts
 

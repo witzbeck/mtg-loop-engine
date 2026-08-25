@@ -30,11 +30,16 @@ graph TB;
 - Persist the labeled extras set that justifies baseline precision.
 - Distinguish fixture pairs (`INVALID_CANDIDATE_DATA`) from real-card judgments.
 
-## Non-responsibilities
+## Boundaries
 
-- Frozen aggregate summaries (`../baseline/`)
-- Live DuckDB scratch DB (`data/eval/`)
-- Changing search joins to erase duplicates
+| Concern | Owner |
+| --- | --- |
+| Frozen aggregate summaries | `../baseline/` |
+| Live DuckDB scratch DB | `data/eval/` |
+| Live Spellbook-absent workbench seed | `data/eval/spellbook_absent.jsonl` via `scripts/spellbook_absent_discovery.py --persist-workbench` |
+| Changing search joins to erase duplicates | Out of scope |
+
+Spellbook absences are **not** stored in `gold_pool_extras.jsonl`. They use corpus `spellbook_absent` in the shared DuckDB / companion JSONL under `data/eval/`.
 
 ## Core invariants
 

@@ -149,7 +149,7 @@ def persist_gold_pool_extras(
                     skipped=False,
                 )
             )
-    store.export_jsonl(jsonl_path)
+    store.export_jsonl(jsonl_path, corpus="gold_pool_extras")
     adjs = {
         record.candidate_id: store.get_adjudication(record.candidate_id)
         for record in extras

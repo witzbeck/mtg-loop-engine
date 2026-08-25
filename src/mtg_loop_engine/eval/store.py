@@ -154,10 +154,10 @@ class AdjudicationStore:
             items.append((candidate, adj))
         return items
 
-    def export_jsonl(self, path: Path) -> None:
+    def export_jsonl(self, path: Path, *, corpus: str | None = None) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
         rows = []
-        for candidate in self.list_candidates():
+        for candidate in self.list_candidates(corpus=corpus):
             adj = self.get_adjudication(candidate.candidate_id)
             rows.append(
                 {

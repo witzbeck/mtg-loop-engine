@@ -79,7 +79,10 @@ Before a curriculum slice needs **new modeled physics** (executor primitives, no
 
 ### 3. Adjudicate absences
 
-Use the workbench / adjudication JSONL. Upgrade `ABSENT_FROM_REFERENCE` → `NOVEL` only with a human record. Keep `NOVEL` out of the precision denominator.
+1. `uv run python scripts/spellbook_absent_discovery.py --persist-workbench`
+2. `uv run --group eval mtg-loop-engine adjudicate-workbench`
+3. Sidebar corpus → `spellbook_absent`, review state → `unreviewed`.
+4. Apply [`docs/ADJUDICATION.md`](../ADJUDICATION.md). Upgrade `ABSENT_FROM_REFERENCE` → `NOVEL` only with a human record. Keep `NOVEL` out of the precision denominator.
 
 ### 4. Optional metric freeze
 
@@ -90,6 +93,7 @@ Only when intentionally certifying absent-discovery counts: write a baseline und
 | Step | Command |
 | ---- | ------- |
 | Absent discovery (local bulk) | `uv run python scripts/spellbook_absent_discovery.py` |
+| Seed absences into workbench | `uv run python scripts/spellbook_absent_discovery.py --persist-workbench` |
 | Compiler priority | `uv run python scripts/spellbook_compiler_priority.py` |
 | Adjudication UI | `uv run --group eval mtg-loop-engine adjudicate-workbench` |
 | Status check | `uv run python scripts/render_status.py --check` |
