@@ -1,0 +1,12 @@
+{
+  "oracle_id": "oracle:viscera-seer",
+  "name": "Viscera Seer",
+  "oracle_text": "Sacrifice a creature: Scry 1.",
+  "types": ["Creature"],
+  "type_line": "Creature — Vampire Wizard",
+  "audit": {
+    "audited_at": "2026-08-25",
+    "source": "manual_oracle_audit",
+    "notes": "types list is engine-derived; type_line is the audited Scryfall line."
+  }
+}

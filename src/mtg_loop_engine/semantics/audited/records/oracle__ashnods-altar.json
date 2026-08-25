@@ -1,0 +1,12 @@
+{
+  "oracle_id": "oracle:ashnods-altar",
+  "name": "Ashnod's Altar",
+  "oracle_text": "Sacrifice a creature: Add {C}{C}.",
+  "types": ["Artifact"],
+  "type_line": "Artifact",
+  "audit": {
+    "audited_at": "2026-08-25",
+    "source": "manual_oracle_audit",
+    "notes": "Rules-relevant fields consumed by the engine today."
+  }
+}

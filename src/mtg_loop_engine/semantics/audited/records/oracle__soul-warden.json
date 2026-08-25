@@ -1,0 +1,12 @@
+{
+  "oracle_id": "oracle:soul-warden",
+  "name": "Soul Warden",
+  "oracle_text": "Whenever another creature enters the battlefield, you gain 1 life.",
+  "types": ["Creature"],
+  "type_line": "Creature — Human Cleric",
+  "audit": {
+    "audited_at": "2026-08-25",
+    "source": "manual_oracle_audit",
+    "notes": "types list is engine-derived; type_line is the audited Scryfall line."
+  }
+}

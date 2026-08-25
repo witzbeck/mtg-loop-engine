@@ -11,7 +11,7 @@ from mtg_loop_engine.corpus.gold_core.cases import (
     INTRUDER_ALARM,
     PHYREXIAN_ALTAR,
     SKELETON,
-    TRAINING_GROUNDS,
+    SYNTHETIC_COST_REDUCER,
 )
 from mtg_loop_engine.eval.classify import analyze_prerequisites
 from mtg_loop_engine.eval.schema import AdjudicationClass, AdjudicationRecord
@@ -46,14 +46,14 @@ def test_bystander_pairs_are_not_accepted(left: CardSemantics, right: CardSemant
 
 
 def test_basalt_grounds_is_strict_via_cost_reduction():
-    found = explore_pair(BASALT, TRAINING_GROUNDS)
+    found = explore_pair(BASALT, SYNTHETIC_COST_REDUCER)
     assert found is not None
     analysis = analyze_prerequisites(found.witness)
     assert analysis.strict_two_card is True
     assert found.witness.classification.strict_two_card is True
     assert set(analysis.used_oracle_ids) == {
         BASALT.oracle_id,
-        TRAINING_GROUNDS.oracle_id,
+        SYNTHETIC_COST_REDUCER.oracle_id,
     }
 
 
@@ -61,7 +61,7 @@ def test_store_roundtrip(tmp_path: Path):
     from mtg_loop_engine.eval.explain import record_from_hit
     from mtg_loop_engine.eval.schema import AdjudicationFailureReason, ReferenceStatus
 
-    found = explore_pair(BASALT, TRAINING_GROUNDS)
+    found = explore_pair(BASALT, SYNTHETIC_COST_REDUCER)
     assert found is not None
     record = record_from_hit(
         witness=found.witness,
@@ -109,7 +109,7 @@ def test_queue_treats_skipped_as_reviewed(tmp_path: Path):
     from mtg_loop_engine.eval.explain import record_from_hit
     from mtg_loop_engine.eval.schema import ReferenceStatus
 
-    found = explore_pair(BASALT, TRAINING_GROUNDS)
+    found = explore_pair(BASALT, SYNTHETIC_COST_REDUCER)
     assert found is not None
     record = record_from_hit(
         witness=found.witness,

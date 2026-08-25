@@ -113,10 +113,10 @@ def test_spellbook_shaped_recovery_on_activated_return_curriculum():
 
 def test_explore_pair_rediscovers_fixture_phoenix_plus_real_altar():
     phoenix = compile_card(
-        GOLD_ORACLE_FIXTURES["oracle:phoenix"].oracle_id,
-        GOLD_ORACLE_FIXTURES["oracle:phoenix"].name,
-        GOLD_ORACLE_FIXTURES["oracle:phoenix"].oracle_text,
-        GOLD_ORACLE_FIXTURES["oracle:phoenix"].types,
+        GOLD_ORACLE_FIXTURES["synthetic:persistent-phoenix"].oracle_id,
+        GOLD_ORACLE_FIXTURES["synthetic:persistent-phoenix"].name,
+        GOLD_ORACLE_FIXTURES["synthetic:persistent-phoenix"].oracle_text,
+        GOLD_ORACLE_FIXTURES["synthetic:persistent-phoenix"].types,
     )
     altar = _compile("Phyrexian Altar")
     hit = explore_pair(altar, phoenix) or explore_pair(phoenix, altar)

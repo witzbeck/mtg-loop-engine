@@ -1,12 +1,10 @@
 {
-  "extras_total": 10,
-  "extras_real_card_pairs": 3,
-  "extras_fixture_pairs": 7,
-  "adjudicated": 3,
-  "valid": 3,
-  "precision": 1.0,
-  "by_class": {
-    "valid_strict_two_card": 3
-  },
-  "notes": "Precision computed over real-card pairs only; fixture pairs (is_fixture=True) are INVALID_CANDIDATE_DATA and excluded. Joins were not tightened to chase this distribution."
+  "extras_total": 11,
+  "extras_real_card_pairs": 0,
+  "extras_fixture_pairs": 11,
+  "adjudicated": 0,
+  "valid": 0,
+  "precision": null,
+  "by_class": {},
+  "notes": "ADR 0007: precision denominator is ORACLE_EXACT\u00d7ORACLE_EXACT only (is_precision_eligible_ids). Pre-migration gold-pool precision 1.0 is historical and not comparable. Zero eligible pairs \u2192 precision null."
 }

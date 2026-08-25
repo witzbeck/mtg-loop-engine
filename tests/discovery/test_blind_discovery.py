@@ -20,7 +20,7 @@ def test_index_joins_cover_gold_pairs():
 def test_basalt_and_grounds_are_complementary():
     pool = {c.oracle_id: c for c in gold_core_card_pool()}
     basalt = extract_capabilities(pool["oracle:basalt-monolith"])
-    grounds = extract_capabilities(pool["oracle:training-grounds"])
+    grounds = extract_capabilities(pool["synthetic:generic-activated-cost-reducer"])
     reasons = join_reasons(basalt, grounds) + join_reasons(grounds, basalt)
     assert "cost_reduce" in reasons
 

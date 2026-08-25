@@ -126,9 +126,10 @@ def cmd_discover_gold(_: argparse.Namespace) -> int:
 
 
 def cmd_eval_gold_extras(_: argparse.Namespace) -> int:
-    from mtg_loop_engine.eval.gold_extras import FIXTURE_ORACLE_IDS, persist_gold_pool_extras
+    from mtg_loop_engine.eval.gold_extras import persist_gold_pool_extras
     from mtg_loop_engine.eval.metrics import precision_from_records
     from mtg_loop_engine.eval.store import DEFAULT_JSONL, AdjudicationStore
+    from mtg_loop_engine.semantics.provenance import is_precision_eligible_ids
 
     store = AdjudicationStore()
     extras = persist_gold_pool_extras(store)
@@ -136,17 +137,18 @@ def cmd_eval_gold_extras(_: argparse.Namespace) -> int:
         record.candidate_id: store.get_adjudication(record.candidate_id)
         for record in extras
     }
-    real_extras = [
-        r for r in extras
-        if not {r.left_id, r.right_id} & FIXTURE_ORACLE_IDS
+    precision_extras = [
+        r for r in extras if is_precision_eligible_ids(r.left_id, r.right_id)
     ]
-    report = precision_from_records(real_extras, {k: v for k, v in adjs.items() if v})
+    report = precision_from_records(
+        precision_extras, {k: v for k, v in adjs.items() if v}
+    )
     print(
         json.dumps(
             {
                 "extras_total": len(extras),
-                "extras_real_card_pairs": len(real_extras),
-                "extras_fixture_pairs": len(extras) - len(real_extras),
+                "extras_real_card_pairs": len(precision_extras),
+                "extras_fixture_pairs": len(extras) - len(precision_extras),
                 "adjudicated": report.adjudicated,
                 "valid": report.valid,
                 "precision": report.precision,

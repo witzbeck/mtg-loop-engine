@@ -1,4 +1,4 @@
-"""Narration + real-Oracle curriculum honesty; Basalt gold_core uses Training Grounds."""
+"""Narration + real-Oracle curriculum honesty; Basalt gold_core uses Synthetic Cost Reducer."""
 
 from mtg_loop_engine.eval.narrate import (
     _ability_hint,
@@ -72,14 +72,14 @@ def test_ability_hint_short_id():
 
 
 def test_narrate_loop_gold_basalt_training():
-    """Basalt Monolith + Training Grounds is the gold_core mana_tap_untap witness."""
+    """Basalt Monolith + Synthetic Cost Reducer is the gold_core mana_tap_untap witness."""
     from mtg_loop_engine.corpus import all_gold_core
 
     witnesses = {
         " + ".join(sorted(c.name for c in w.essential_cards)): w for w in all_gold_core()
     }
     key = next(
-        (k for k in witnesses if "Basalt" in k and "Training Grounds" in k),
+        (k for k in witnesses if "Basalt" in k and "Synthetic Cost Reducer" in k),
         None,
     )
     assert key is not None, "expected core_basalt_training in gold_core"

@@ -4,7 +4,7 @@ from mtg_loop_engine.corpus.gold_core.cases import (
     BASALT,
     INTRUDER_ALARM,
     TOKEN_TAPPER,
-    TRAINING_GROUNDS,
+    SYNTHETIC_COST_REDUCER,
 )
 from mtg_loop_engine.proofs.models import LoopProof
 from mtg_loop_engine.rules.executor import Executor
@@ -109,7 +109,7 @@ def test_legal_steps_resolve_pending_triggers_before_activations():
 
 
 def test_reusable_fingerprint_ignores_event_counters_not_board():
-    spec = default_initial_state(BASALT, TRAINING_GROUNDS)
+    spec = default_initial_state(BASALT, SYNTHETIC_COST_REDUCER)
     a = GameState.from_spec(spec)
     b = a.copy()
     b.event_counters["mana"] = 99
@@ -135,7 +135,7 @@ def test_reusable_fingerprint_ignores_event_counters_not_board():
 
 
 def test_reusable_fingerprint_distinguishes_summoning_sickness():
-    spec = default_initial_state(BASALT, TRAINING_GROUNDS)
+    spec = default_initial_state(BASALT, SYNTHETIC_COST_REDUCER)
     a = GameState.from_spec(spec)
     # Seed a creature so sickness is modeled on a non-token permanent.
     a.permanents["crit"] = Permanent(
@@ -151,7 +151,7 @@ def test_reusable_fingerprint_distinguishes_summoning_sickness():
 
 
 def test_reusable_fingerprint_distinguishes_trigger_subject_and_amount():
-    spec = default_initial_state(BASALT, TRAINING_GROUNDS)
+    spec = default_initial_state(BASALT, SYNTHETIC_COST_REDUCER)
     a = GameState.from_spec(spec)
     a.pending_triggers = [
         {
@@ -184,17 +184,17 @@ def test_reusable_fingerprint_distinguishes_trigger_subject_and_amount():
 
 
 def test_injected_verifier_is_the_acceptance_oracle():
-    report = discover_loops([BASALT, TRAINING_GROUNDS], verifier=_RejectAll())
+    report = discover_loops([BASALT, SYNTHETIC_COST_REDUCER], verifier=_RejectAll())
     assert report.candidate_pairs >= 1
     assert report.searched_pairs >= 1
     assert report.verified == []
-    found = explore_pair(BASALT, TRAINING_GROUNDS, verifier=_RejectAll())
+    found = explore_pair(BASALT, SYNTHETIC_COST_REDUCER, verifier=_RejectAll())
     assert found is None
 
 
 def test_discover_does_not_verify_an_accepted_witness_twice():
     spy = _SpyVerifier()
-    report = discover_loops([BASALT, TRAINING_GROUNDS], verifier=spy)
+    report = discover_loops([BASALT, SYNTHETIC_COST_REDUCER], verifier=spy)
     assert len(report.verified) == 1
     winning = report.verified[0].witness
     assert isinstance(report.verified[0].proof, LoopProof)

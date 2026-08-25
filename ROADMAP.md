@@ -91,9 +91,10 @@ Blind discovery among real **COMPLETE**-compiled Oracle cards from Spellbook nam
 ### Remaining
 
 0. **Corpus / evaluation integrity (campaign; ahead of 95% and broad M5 recall)** ◐ —
-   ADR [0007](docs/decisions/0007-corpus-provenance-physics-vs-oracle.md) (Proposed):
-   separate `SYNTHETIC` physics fixtures from `ORACLE_EXACT` product truth; stop treating
-   pattern-tuned texts as precision-eligible “real cards.” Inventory:
+   ADR [0007](docs/decisions/0007-corpus-provenance-physics-vs-oracle.md) (**Accepted**):
+   `Provenance` taxonomy; Synthetic Cost Reducer; audited `ORACLE_EXACT` subset;
+   frozen divergent quarantine; `is_precision_eligible_ids` / physics vs Oracle pools.
+   Inventory:
    [`docs/decisions/reviews/corpus-provenance-inventory.md`](docs/decisions/reviews/corpus-provenance-inventory.md).
    Follow-ons (separate slices): verifier-owned mandatory recurrence dimensions; stronger
    claim/`proof_hash` binding. **Keep line coverage floor at 92%** until this campaign

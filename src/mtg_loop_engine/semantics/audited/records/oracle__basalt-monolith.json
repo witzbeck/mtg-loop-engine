@@ -1,0 +1,12 @@
+{
+  "oracle_id": "oracle:basalt-monolith",
+  "name": "Basalt Monolith",
+  "oracle_text": "{T}: Add {C}{C}{C}.\n{3}: Untap Basalt Monolith.",
+  "types": ["Artifact"],
+  "type_line": "Artifact",
+  "audit": {
+    "audited_at": "2026-08-25",
+    "source": "manual_oracle_audit",
+    "notes": "Rules-relevant fields consumed by the engine today."
+  }
+}

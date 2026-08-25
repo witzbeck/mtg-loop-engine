@@ -1,8 +1,6 @@
-"""Tests for fixture detection and its effect on precision metrics."""
+"""Tests for corpus provenance (ADR 0007) and precision eligibility."""
 
 from __future__ import annotations
-
-import pytest
 
 from mtg_loop_engine.eval.gold_extras import (
     FIXTURE_ORACLE_IDS,
@@ -10,158 +8,154 @@ from mtg_loop_engine.eval.gold_extras import (
     _pair_has_fixture,
 )
 from mtg_loop_engine.eval.schema import AdjudicationClass
+from mtg_loop_engine.semantics.enums import Provenance
 from mtg_loop_engine.semantics.oracle_fixtures import GOLD_ORACLE_FIXTURES
+from mtg_loop_engine.semantics.provenance import (
+    FROZEN_ORACLE_DIVERGENT_IDS,
+    assert_exact_fixture_matches_audit,
+    current_divergent_ids,
+    current_exact_ids,
+    is_precision_eligible_ids,
+)
 
 
-# ---------------------------------------------------------------------------
-# OracleFixture.is_fixture flag
-# ---------------------------------------------------------------------------
-
-
-KNOWN_FIXTURES = {
-    "oracle:suicidal-phoenix",
-    "oracle:etb-ping",
-    "oracle:self-untap-tapper",
-    "oracle:token-tapper",
-    "oracle:token-breeder",
+KNOWN_SYNTHETIC = {
+    "synthetic:generic-activated-cost-reducer",
+    "synthetic:token-tapper",
+    "synthetic:etb-ping",
+    "synthetic:self-untap-tapper",
+    "synthetic:suicidal-phoenix",
+    "synthetic:token-breeder",
+    "synthetic:persistent-phoenix",
+    "synthetic:scaled-gun",
+    "synthetic:put-counter-activated",
 }
 
-KNOWN_REAL = {
+KNOWN_EXACT = {
     "oracle:basalt-monolith",
-    "oracle:phyrexian-altar",
-    "oracle:gravecrawler",
-    "oracle:phoenix",
-    "oracle:reassembling-skeleton",
     "oracle:ashnods-altar",
     "oracle:viscera-seer",
     "oracle:soul-warden",
+}
+
+KNOWN_DIVERGENT = {
+    "oracle:phyrexian-altar",
+    "oracle:gravecrawler",
     "oracle:intruder-alarm",
+    "oracle:blood-artist",
+    "oracle:reassembling-skeleton",
+    "oracle:rest-in-peace",
 }
 
 
-def test_known_fixture_ids_are_flagged():
-    for oid in KNOWN_FIXTURES:
-        fixture = GOLD_ORACLE_FIXTURES.get(oid)
-        assert fixture is not None, f"{oid} not in GOLD_ORACLE_FIXTURES"
-        assert fixture.is_fixture, f"{oid} should have is_fixture=True"
+def test_synthetic_provenance_and_ids():
+    for oid in KNOWN_SYNTHETIC:
+        fixture = GOLD_ORACLE_FIXTURES[oid]
+        assert fixture.provenance is Provenance.SYNTHETIC
+        assert fixture.is_fixture
+        assert oid.startswith("synthetic:")
 
 
-def test_known_real_ids_are_not_flagged():
-    for oid in KNOWN_REAL:
-        fixture = GOLD_ORACLE_FIXTURES.get(oid)
-        assert fixture is not None, f"{oid} not in GOLD_ORACLE_FIXTURES"
-        assert not fixture.is_fixture, f"{oid} should have is_fixture=False"
+def test_exact_provenance():
+    for oid in KNOWN_EXACT:
+        fixture = GOLD_ORACLE_FIXTURES[oid]
+        assert fixture.provenance is Provenance.ORACLE_EXACT
+        assert not fixture.is_fixture
 
 
-def test_fixture_oracle_ids_set_matches_known():
-    assert KNOWN_FIXTURES == FIXTURE_ORACLE_IDS
+def test_divergent_provenance():
+    for oid in KNOWN_DIVERGENT:
+        fixture = GOLD_ORACLE_FIXTURES[oid]
+        assert fixture.provenance is Provenance.ORACLE_DIVERGENT
 
 
-# ---------------------------------------------------------------------------
-# _pair_has_fixture helper
-# ---------------------------------------------------------------------------
+def test_fixture_oracle_ids_match_synthetic():
+    assert KNOWN_SYNTHETIC == FIXTURE_ORACLE_IDS
+    assert FIXTURE_ORACLE_IDS == {
+        oid
+        for oid, fx in GOLD_ORACLE_FIXTURES.items()
+        if fx.provenance is Provenance.SYNTHETIC
+    }
 
 
-def test_pair_has_fixture_when_one_is_fake():
-    assert _pair_has_fixture("oracle:suicidal-phoenix", "oracle:phyrexian-altar")
+def test_cost_reducer_is_not_training_grounds():
+    assert "oracle:training-grounds" not in GOLD_ORACLE_FIXTURES
+    reducer = GOLD_ORACLE_FIXTURES["synthetic:generic-activated-cost-reducer"]
+    assert reducer.name == "Synthetic Cost Reducer"
 
 
-def test_pair_has_fixture_when_both_are_fake():
-    assert _pair_has_fixture("oracle:suicidal-phoenix", "oracle:etb-ping")
+def test_pair_has_fixture_when_one_is_synthetic():
+    assert _pair_has_fixture("synthetic:suicidal-phoenix", "oracle:phyrexian-altar")
 
 
-def test_pair_has_no_fixture_when_both_real():
+def test_pair_has_no_fixture_when_both_non_synthetic():
     assert not _pair_has_fixture("oracle:phyrexian-altar", "oracle:gravecrawler")
 
 
-# ---------------------------------------------------------------------------
-# GOLD_EXTRA_ADJUDICATIONS: fixture pairs labeled correctly
-# ---------------------------------------------------------------------------
+def test_precision_requires_both_exact():
+    assert is_precision_eligible_ids("oracle:basalt-monolith", "oracle:ashnods-altar")
+    assert not is_precision_eligible_ids(
+        "oracle:ashnods-altar", "synthetic:persistent-phoenix"
+    )
+    assert not is_precision_eligible_ids(
+        "oracle:phyrexian-altar", "oracle:reassembling-skeleton"
+    )
 
 
-def test_all_fixture_pairs_labelled_invalid():
-    for pair, (cls, notes) in GOLD_EXTRA_ADJUDICATIONS.items():
-        ids = list(pair)
-        if _pair_has_fixture(ids[0], ids[1]):
-            assert cls == AdjudicationClass.INVALID_CANDIDATE_DATA, (
-                f"Fixture pair {pair} has class {cls!r} instead of INVALID_CANDIDATE_DATA"
-            )
-
-
-def test_no_real_pair_labelled_invalid():
+def test_synthetic_extra_pairs_labelled_invalid():
     for pair, (cls, _) in GOLD_EXTRA_ADJUDICATIONS.items():
         ids = list(pair)
-        if not _pair_has_fixture(ids[0], ids[1]):
-            assert cls != AdjudicationClass.INVALID_CANDIDATE_DATA, (
-                f"Real pair {pair} should not be INVALID_CANDIDATE_DATA"
-            )
+        if _pair_has_fixture(ids[0], ids[1]):
+            assert cls == AdjudicationClass.INVALID_CANDIDATE_DATA, pair
 
 
-# ---------------------------------------------------------------------------
-# Precision report excludes fixture pairs
-# ---------------------------------------------------------------------------
+def test_divergent_skeleton_altar_still_valid_physics():
+    key = frozenset({"oracle:phyrexian-altar", "oracle:reassembling-skeleton"})
+    cls, _ = GOLD_EXTRA_ADJUDICATIONS[key]
+    assert cls == AdjudicationClass.VALID_STRICT_TWO_CARD
+    assert not is_precision_eligible_ids(*key)
 
 
-def test_precision_report_excludes_fixture_pairs():
-    """precision_from_records should never count INVALID_CANDIDATE_DATA in denominator."""
-    from datetime import datetime, timezone
-
-    from mtg_loop_engine.eval.metrics import precision_from_records
-    from mtg_loop_engine.eval.schema import (
-        AdjudicationRecord,
-        CandidateRecord,
-        ReferenceStatus,
+def test_frozen_divergent_inventory_does_not_grow():
+    current = current_divergent_ids()
+    assert current <= FROZEN_ORACLE_DIVERGENT_IDS, (
+        f"new ORACLE_DIVERGENT ids not in freeze: {current - FROZEN_ORACLE_DIVERGENT_IDS}"
     )
-    from mtg_loop_engine.corpus import all_gold_core
-    from mtg_loop_engine.verify.verifier import Verifier
 
-    # Build two minimal CandidateRecord stubs from gold_core witnesses
-    verifier = Verifier()
-    witnesses = all_gold_core()
-    w = witnesses[0]
-    proof = verifier.verify(w)
-    left, right = sorted(w.essential_cards, key=lambda c: c.oracle_id)
-    cid = f"{left.oracle_id}__{right.oracle_id}::testhash"
 
-    from mtg_loop_engine.eval.schema import PrerequisiteAnalysis
-    real_candidate = CandidateRecord(
-        candidate_id=cid,
-        corpus="test",
-        left_id=left.oracle_id,
-        right_id=right.oracle_id,
-        left_name=left.name,
-        right_name=right.name,
-        reference_status=ReferenceStatus.IN_REFERENCE,
-        witness=w,
-        proof=proof,
+def test_every_exact_fixture_matches_audited_record():
+    for oid in current_exact_ids():
+        assert_exact_fixture_matches_audit(GOLD_ORACLE_FIXTURES[oid])
+
+
+def test_physics_and_oracle_pool_selectors():
+    from mtg_loop_engine.corpus import (
+        gold_core_card_pool,
+        oracle_gold_card_pool,
+        oracle_gold_compiled_card_pool,
+        physics_gold_card_pool,
+        physics_gold_compiled_card_pool,
     )
-    invalid_candidate = real_candidate.model_copy(update={
-        "candidate_id": "invalid__id::hash",
-        "left_id": "oracle:suicidal-phoenix",
-    })
 
-    now = datetime.now(timezone.utc)
-    adjs = {
-        cid: AdjudicationRecord(
-            candidate_id=cid,
-            adjudication=AdjudicationClass.VALID_STRICT_TWO_CARD,
-            proof_hash="testhash",
-            engine_version="0.1.0",
-            reviewed_at=now,
-        ),
-        "invalid__id::hash": AdjudicationRecord(
-            candidate_id="invalid__id::hash",
-            adjudication=AdjudicationClass.INVALID_CANDIDATE_DATA,
-            proof_hash="hash",
-            engine_version="0.1.0",
-            reviewed_at=now,
-        ),
-    }
+    mixed = {c.oracle_id for c in gold_core_card_pool()}
+    physics = {c.oracle_id for c in physics_gold_card_pool()}
+    exact = {c.oracle_id for c in oracle_gold_card_pool()}
+    assert physics == mixed
+    assert exact == KNOWN_EXACT & mixed
+    assert all(oid in mixed for oid in exact)
+    assert any(oid.startswith("synthetic:") for oid in physics)
+    assert not any(oid.startswith("synthetic:") for oid in exact)
+    assert {c.oracle_id for c in physics_gold_compiled_card_pool()} == physics
+    assert {c.oracle_id for c in oracle_gold_compiled_card_pool()} == exact
 
-    report = precision_from_records([real_candidate, invalid_candidate], adjs)
-    # Only the real candidate counts toward adjudicated
-    assert report.adjudicated == 1
-    assert report.valid == 1
-    assert report.precision == 1.0
-    # INVALID_CANDIDATE_DATA still appears in by_class for visibility
-    assert report.by_class.get("invalid_candidate_data", 0) == 1
+
+def test_canonicalize_and_is_precision_eligible_pair_alias():
+    from mtg_loop_engine.semantics.provenance import (
+        canonicalize_text,
+        is_precision_eligible_pair,
+    )
+
+    assert canonicalize_text("a\r\nb") == "a\nb"
+    assert is_precision_eligible_pair(
+        "oracle:basalt-monolith", "oracle:ashnods-altar"
+    )

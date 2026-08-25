@@ -38,7 +38,7 @@ graph TB;
 | Concern | Module | Meaning |
 | --- | --- | --- |
 | Reference recovery | `spellbook_eval.py`, `metrics.py` | Among **eligible/supported** reference rows, how many rediscover? Stages: compile → join → search → optional prerequisite mismatch → recovered. |
-| Human-adjudicated precision | `metrics.precision_from_records` | Among adjudicated **real-card** accepted discoveries, how many are valid classes? |
+| Human-adjudicated precision | `metrics.precision_from_records` + `provenance.is_precision_eligible_ids` | Among adjudicated **ORACLE_EXACT×ORACLE_EXACT** discoveries, how many are valid classes? (ADR 0007) |
 | Prerequisite analysis | `classify.py` | Participation / assumptions / `strict_two_card` **detection** |
 | Persistence / UX | `store.py`, `workbench.py`, `narrate.py`, `glossary.py`, `explain.py` | Reviewer workflow; `AdjudicationClass` + optional `AdjudicationFailureReason` |
 

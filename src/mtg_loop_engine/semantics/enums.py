@@ -107,3 +107,17 @@ class TriggerEvent(StrEnum):
 class ChoiceController(StrEnum):
     COMBO_PLAYER = "combo_player"
     OPPONENT = "opponent"
+
+
+class Provenance(StrEnum):
+    """Corpus source trust boundary (ADR 0007).
+
+    SYNTHETIC — engine-physics evidence; invented or deliberately simplified.
+    ORACLE_EXACT — rules-relevant source record matches audited Oracle snapshot.
+    ORACLE_DIVERGENT — quarantine for real-card identity with non-exact semantics;
+    not a normal authoring destination after inventory freeze.
+    """
+
+    SYNTHETIC = "synthetic"
+    ORACLE_EXACT = "oracle_exact"
+    ORACLE_DIVERGENT = "oracle_divergent"
