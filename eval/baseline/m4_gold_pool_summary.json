@@ -1,12 +1,11 @@
 {
-  "extras_total": 24,
-  "extras_real_card_pairs": 8,
-  "extras_fixture_pairs": 16,
-  "adjudicated": 8,
+  "extras_total": 10,
+  "extras_real_card_pairs": 3,
+  "extras_fixture_pairs": 7,
+  "adjudicated": 3,
   "valid": 3,
-  "precision": 0.375,
+  "precision": 1.0,
   "by_class": {
-    "duplicate_or_equivalent_interaction": 5,
     "valid_strict_two_card": 3
   },
   "notes": "Precision computed over real-card pairs only; fixture pairs (is_fixture=True) are INVALID_CANDIDATE_DATA and excluded. Joins were not tightened to chase this distribution."
