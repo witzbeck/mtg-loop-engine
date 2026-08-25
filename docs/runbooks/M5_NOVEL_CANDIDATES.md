@@ -73,9 +73,9 @@ uv run python scripts/spellbook_absent_discovery.py
 
 Each slice: real-Oracle curriculum fixtures → RED/GREEN tests → remeasure → ship. Expand patterns deliberately with tests/docs (`AGENTS.md`).
 
-#### Rules-evidence rails
+#### Rules-evidence rails ✓
 
-Before a curriculum slice needs **new modeled physics** (executor primitives, not just patterns), land the supporting rails listed under ROADMAP M5 remaining #2: `AGENTS.md` principle, thin Cursor rule + skill, and `docs/RULES_EVIDENCE.md`. Memory may hypothesize; Oracle / CR / rulings decide; Spellbook stays discovery-only.
+Authority and citation format: [`docs/RULES_EVIDENCE.md`](../RULES_EVIDENCE.md). Skill: [`.agents/skills/rules-evidence/`](../../.agents/skills/rules-evidence/). Use before curriculum slices that need **new modeled physics** (executor primitives, not just patterns).
 
 ### 3. Adjudicate absences
 

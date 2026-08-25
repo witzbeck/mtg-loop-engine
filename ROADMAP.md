@@ -125,14 +125,7 @@ Blind discovery among real **COMPLETE**-compiled Oracle cards from Spellbook nam
      searched card has `GAIN_LIFE` triggers (ADR 0002 fodder-style). Documented on the
      witness; not a silent invented trigger. Required for Sanguine Bond + Exquisite Blood
      gold promotion.
-   - **Rules-evidence rails (supporting; land before widening modeled physics):** cheap epistemic adapters so coverage growth stays deliberate (ADR 0003). Not an M5 exit gate; not CR ingest or executor expansion.
-
-   | Piece | Why |
-   | ----- | --- |
-   | Principle in [`AGENTS.md`](AGENTS.md): memory proposes; sources decide | Blocks “I remember → patch Executor”; same epistemology as search/verify |
-   | Thin Cursor rule (~20–40 lines) scoped to `rules` / `semantics` / `verify` / `tests` / `eval` | Adapter that routes agents to the skill; not a rulebook corpus |
-   | Thin agent skill: how to investigate a rules question | Workflow + citation format (LAR-skill pattern); progressive load only when needed |
-   | `docs/RULES_EVIDENCE.md` (to add) | Authority roles: Oracle vs Comprehensive Rules vs rulings vs Spellbook — codifies ADJUDICATION / PHILOSOPHY |
+   - **Rules-evidence rails** ✓ — [`docs/RULES_EVIDENCE.md`](docs/RULES_EVIDENCE.md), [`AGENTS.md`](AGENTS.md) principle, [`.cursor/rules/rules-evidence.mdc`](.cursor/rules/rules-evidence.mdc), [`.agents/skills/rules-evidence/`](.agents/skills/rules-evidence/). Land before widening modeled physics (Wave 3+). Not CR ingest.
 
 3. **Workbench adjudication** — review absences; promote `NOVEL` only with human records.
 4. **Optional baseline** — freeze an absent-discovery summary only when intentionally certified.

@@ -9,6 +9,7 @@ Ordered engineering playbooks for milestone follow-through. Narratives and gates
 - Milestone follow-through sequences (M4 historical; **M5** active — novel / absent candidates)
 - Operator checklists that point at CLI commands and baseline refresh steps
 - Loop adjudication review protocol: [`LOOP_ADJUDICATION_REVIEW.md`](LOOP_ADJUDICATION_REVIEW.md)
+- M5 novel / absent candidates: [`M5_NOVEL_CANDIDATES.md`](M5_NOVEL_CANDIDATES.md) (rules-evidence rails → [`../RULES_EVIDENCE.md`](../RULES_EVIDENCE.md))
 
 ## What does not belong here
 
