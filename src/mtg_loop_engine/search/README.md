@@ -40,7 +40,8 @@ graph TB;
 ## Responsibilities
 
 - Bounded legal-action BFS (`explorer.explore_pair`)
-- Seed generic creature / Zombie tokens when abilities need sac fodder or cast-from-GY Zombie gates (`default_initial_state`)
+- Seed lifelink / undying grants when partners need them (`seed_grant_lifelink`, `seed_grant_undying`)
+- For remove-counter `any_target` damage, emit activate steps with `target="opponent"` first (Heliod path); self (`actor`) is also legal for undying self-ping
 - Seed a generic creature **aura host** (non-token setup permanent) when an activated ability uses `TapCost(source_self=False)` and neither essential is a creature (Presence of Gond + Intruder Alarm class); otherwise tap the partner creature. Host tap is tracked in `LoopRelevantState` so recurrence fails closed when the host stays tapped.
 - When loop actions activate a `once_per_turn` ability, `derive_relevant_state`
   adds `permanents.<id>.once_per_turn_used.<ability_id>` as `EXACT` (helpers live in

@@ -330,6 +330,7 @@ def _wave2_hard_negatives() -> list[LoopWitness]:
                         for a in ballista.abilities
                         if "counter-ping" in a.ability_id
                     ),
+                    target="opponent",
                 ),
             ],
             relevant_state=LoopRelevantState(

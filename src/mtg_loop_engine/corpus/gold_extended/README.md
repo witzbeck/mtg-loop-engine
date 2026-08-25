@@ -21,7 +21,9 @@ graph TB;
 - Package re-export of `gold_extended_catalog` (**15** stubs; body still authored under
   `physics_fixtures/synthetic_cases.py` for historical continuity)
 - Real pairs awaiting remaining Wave 3 primitives (`oracle_gap_catalog`:
-  `core_saffi_champion`, `core_mikaeus_triskelion`)
+  `core_saffi_champion`, `core_mikaeus_triskelion`). Mikaeus notes: SBA/undying/
+  self-ping physics landed; promotion still needs audited Oracle + grant/anthem
+  compile + gold witness. Saffi still needs delayed triggers.
 
 ## What does not belong here
 

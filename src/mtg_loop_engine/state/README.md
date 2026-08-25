@@ -29,10 +29,12 @@ graph TB;
 ## Responsibilities
 
 - Represent permanents, mana pools, life, pending triggers, and event counters needed by the modeled rules surface.
+- Track `damage_marked`, `lifelink`, and `undying` on `Permanent` for SBA / keyword physics (rules executor).
 - Provide `from_spec`, `copy`, and `get_path` for recurrence.
 - Path vocabulary used by `LoopRelevantState`: mana colors, life, events, permanent zone/tapped/counters/summoning_sick/`once_per_turn_used.<ability_id>`, `pending_triggers.count`, and battlefield counts (creature_tokens / creatures / artifacts).
 - Path `permanents.<id>.once_per_turn_used.<ability_id>` → boolean (whether that ability id is marked used this turn).
 - Path `pending_triggers.count` → length of the pending trigger queue (ADR 0008 mandatory).
+- `Permanent.effective_toughness()` → toughness + p1p1 − m1m1 (None if no printed toughness).
 
 ## Non-responsibilities
 

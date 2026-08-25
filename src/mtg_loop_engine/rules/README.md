@@ -36,12 +36,16 @@ graph TB;
 - Exact pending-trigger match when `actor` / `ability_id` are supplied (no silent idx-0 fallback).
 - Exile-on-death replacements suppress death events and `DIES` triggers (CR 700.4); sacrifice events still fire.
 - Summoning sickness blocks `{T}` / `TapCost` even on mana abilities (CR 302.6); haste not modeled.
+- State-based actions after each successful `run_step`: creatures you control die on toughness ≤ 0 or lethal `damage_marked` (CR 704.5f/g); cascades bounded.
+- Undying seed (`seed_grant_undying`) and synthetic `__undying_return__` trigger: return with +1/+1 iff zero p1p1 at death (CR 702.92a/c); no card-ability lookup.
+- `DealDamageEffect` `any_target`: opponent life when `step.target` is `None`/`opponent`; mark damage on a BF creature id (self-ping legal when `target == actor`).
 
 ## Non-responsibilities
 
 - Pair discovery or BFS (`search/`)
 - Full CR implementation
 - Accepting or rejecting loops as proofs (`verify/` owns that)
+- Saffi-class delayed triggers; Mikaeus grant/anthem compile from audited Oracle (still `oracle_gaps`)
 
 ## Core invariants
 
@@ -52,7 +56,7 @@ graph TB;
 
 ## Main entry points
 
-- `executor.py`: `Executor`, `ExecError`, `run_step` / `run_sequence`
+- `executor.py`: `Executor`, `ExecError`, `run_step` / `run_sequence`, `apply_state_based_actions`
 
 ## Data contracts
 
@@ -65,7 +69,7 @@ Return `ExecError` rather than mutating into an illegal board. Verifier maps the
 ## Testing
 
 Indirect via gold_core, hard_negatives, explorer unit tests, and compile→verify seam tests.
-Soundness unit contracts: `tests/unit/test_executor_soundness.py`, `tests/unit/test_once_per_turn_recurrence.py`.
+Soundness unit contracts: `tests/unit/test_executor_soundness.py`, `tests/unit/test_once_per_turn_recurrence.py`, `tests/unit/test_undying_sba.py`.
 
 ## Extension guide
 
@@ -74,3 +78,4 @@ To add a **rule primitive** (new modeled cost, effect, trigger, or replacement t
 ## Bigger-picture relationship
 
 Rules are the physics under the acceptance boundary. Architecture: [`docs/ARCHITECTURE.md`](../../../docs/ARCHITECTURE.md).
+Rules evidence: [`docs/RULES_EVIDENCE.md`](../../../docs/RULES_EVIDENCE.md).
