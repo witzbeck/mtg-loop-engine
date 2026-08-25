@@ -42,6 +42,10 @@ class CardCapabilities(BaseModel):
     def removes_p1p1(self) -> bool:
         return "remove_counter" in self.requires
 
+    def needs_p1p1_mana_seed(self) -> bool:
+        """Tap-for-mana scales with +1/+1 counters (Gyre Sage class)."""
+        return "mana_from_p1p1" in self.produces
+
 
 def extract_capabilities(card: CardSemantics) -> CardCapabilities:
     caps = CardCapabilities(oracle_id=card.oracle_id, name=card.name)
@@ -94,6 +98,8 @@ def _effects(effects: list, caps: CardCapabilities) -> None:
     for effect in effects:
         if isinstance(effect, AddManaEffect):
             caps.produces.add("mana")
+            if effect.equal_to_source_p1p1_counters:
+                caps.produces.add("mana_from_p1p1")
         elif isinstance(effect, UntapEffect):
             caps.produces.add("untap")
         elif isinstance(effect, CreateTokenEffect):

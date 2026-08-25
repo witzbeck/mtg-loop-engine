@@ -155,6 +155,24 @@ def pat_tap_add_mana(text: str, name: str) -> Ability | None:
             is_mana_ability=True,
             uses_stack=False,
         )
+    # Gyre Sage: {T}: Add {G} for each +1/+1 counter on this creature.
+    m_ctr = re.match(
+        r"^\{T\}: Add \{([GC])\} for each \+1/\+1 counter on "
+        r"(?:this creature|~|"
+        + re.escape(name)
+        + r")\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if m_ctr:
+        color = "green" if m_ctr.group(1).upper() == "G" else "colorless"
+        return ActivatedAbility(
+            ability_id=_ability_id("tap-mana-p1p1", text),
+            costs=[TapCost()],
+            effects=[AddManaEffect(equal_to_source_p1p1_counters=color)],  # type: ignore[arg-type]
+            is_mana_ability=True,
+            uses_stack=False,
+        )
     return None
 
 
@@ -420,6 +438,39 @@ def pat_etb_untap_target(text: str, name: str) -> Ability | None:
             event=TriggerEvent.ENTER_BATTLEFIELD,
             filter="creature",
             effects=[UntapEffect(target="all_creatures")],
+        )
+    # Village Bell-Ringer: When this creature enters, untap all creatures you control.
+    m_self_all = re.match(
+        r"^When (?:this creature|~|"
+        + re.escape(name)
+        + r") enters(?: the battlefield)?, "
+        r"untap all creatures(?: you control)?\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if m_self_all:
+        return TriggeredAbility(
+            ability_id=_ability_id("etb-self-untap-all", text),
+            event=TriggerEvent.ENTER_BATTLEFIELD,
+            filter="self",
+            effects=[UntapEffect(target="all_creatures")],
+        )
+    # Pestermite: When this creature enters, you may tap or untap target permanent.
+    # Combo-player favorable: model as untap (frozen choice ownership).
+    m_may = re.match(
+        r"^When (?:this creature|~|"
+        + re.escape(name)
+        + r") enters(?: the battlefield)?, "
+        r"you may tap or untap target permanent\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if m_may:
+        return TriggeredAbility(
+            ability_id=_ability_id("etb-may-untap-target", text),
+            event=TriggerEvent.ENTER_BATTLEFIELD,
+            filter="self",
+            effects=[UntapEffect(target="target_permanent")],
         )
     # Midnight Guard: Whenever another creature enters, untap this creature.
     m_self = re.match(
@@ -764,6 +815,25 @@ def pat_gain_life_put_p1p1_target(text: str, name: str) -> Ability | None:
                 target="target_permanent",
             )
         ],
+    )
+
+
+def pat_gain_life_untap_self(text: str, name: str) -> Ability | None:
+    """Famished Paladin: Whenever you gain life, untap this creature."""
+    m = re.match(
+        r"^Whenever you gain life, untap (?:this creature|~|"
+        + re.escape(name)
+        + r")\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("gain-life-untap-self", text),
+        event=TriggerEvent.GAIN_LIFE,
+        filter="any",
+        effects=[UntapEffect(target="self")],
     )
 
 
@@ -1296,6 +1366,7 @@ PATTERNS: list[Pattern] = [
     Pattern("etb_damage", pat_etb_damage),
     Pattern("etb_gain_life", pat_etb_gain_life),
     Pattern("gain_life_put_p1p1_target", pat_gain_life_put_p1p1_target),
+    Pattern("gain_life_untap_self", pat_gain_life_untap_self),
     Pattern("mana_put_p1p1_self", pat_mana_put_p1p1_self),
     Pattern("etb_with_counters_irrelevant", pat_etb_with_counters_irrelevant),
     Pattern("grant_lifelink_activated", pat_grant_lifelink_activated),

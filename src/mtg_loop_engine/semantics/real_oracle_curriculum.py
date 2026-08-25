@@ -206,4 +206,44 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         ),
         notes="Tap-untap target + Morph proof-irrelevant.",
     ),
+    # Path a — slice 7: life-untap / self-ETB untap-all / counter-mana / ETB may-untap.
+    "Famished Paladin": RealOracleCurriculum(
+        name="Famished Paladin",
+        types=["Creature", "Vampire", "Knight"],
+        oracle_text=(
+            "This creature doesn't untap during your untap step.\n"
+            "Whenever you gain life, untap this creature."
+        ),
+        notes="Life-gain untap; doesn't-untap static is proof-irrelevant.",
+    ),
+    "Village Bell-Ringer": RealOracleCurriculum(
+        name="Village Bell-Ringer",
+        types=["Creature", "Human", "Scout"],
+        oracle_text=(
+            "Flash (You may cast this spell any time you could cast an instant.)\n"
+            "When this creature enters, untap all creatures you control."
+        ),
+        notes="Self-ETB untap-all; Flash reminder is proof-irrelevant.",
+    ),
+    "Gyre Sage": RealOracleCurriculum(
+        name="Gyre Sage",
+        types=["Creature", "Elf", "Druid"],
+        oracle_text=(
+            "Evolve (Whenever a creature you control enters, if that creature has "
+            "greater power or toughness than this creature, put a +1/+1 counter "
+            "on this creature.)\n"
+            "{T}: Add {G} for each +1/+1 counter on this creature."
+        ),
+        notes="Counter-scaled tap mana; Evolve reminder is proof-irrelevant.",
+    ),
+    "Pestermite": RealOracleCurriculum(
+        name="Pestermite",
+        types=["Creature", "Faerie", "Rogue"],
+        oracle_text=(
+            "Flash\n"
+            "Flying\n"
+            "When this creature enters, you may tap or untap target permanent."
+        ),
+        notes="Combo-favorable: ETB may tap-or-untap modeled as untap target.",
+    ),
 }
