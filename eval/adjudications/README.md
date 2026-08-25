@@ -19,7 +19,7 @@ graph TB;
 ## Inputs
 
 - Accepted discoveries outside gold pair keys (extras)
-- Human `AdjudicationClass` values (`VALID_STRICT_TWO_CARD`, `DUPLICATE_OR_EQUIVALENT_INTERACTION`, `INVALID_CANDIDATE_DATA`, …)
+- Human `AdjudicationClass` values (`VALID_STRICT_TWO_CARD`, `DUPLICATE_OR_EQUIVALENT_INTERACTION`, `FINITE_INTERACTION_MISCLASSIFIED_AS_LOOP`, `INVALID_CANDIDATE_DATA`, …) plus optional `failure_reasons`
 
 ## Outputs
 

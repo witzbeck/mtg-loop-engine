@@ -4,7 +4,7 @@
 
 Human review of engine-accepted discoveries. The Streamlit workbench is a research instrument; this document is the durable class guide (also summarized in the workbench sidebar).
 
-Canonical enums live in `mtg_loop_engine.eval.schema` (`AdjudicationClass`, `ReferenceStatus`).
+Canonical enums live in `mtg_loop_engine.eval.schema` (`AdjudicationClass`, `AdjudicationFailureReason`, `ReferenceStatus`).
 
 ## Decision flow (accepted candidate)
 
@@ -17,7 +17,9 @@ graph TB;
   part -->|yes| legal{Legal under modeled rules?};
   legal -->|no| fp[RULES_OR_SEMANTICS_FALSE_POSITIVE];
   legal -->|unsure| needs[NEEDS_RULES_RESEARCH];
-  legal -->|yes| setup{Initial state justified?};
+  legal -->|yes| recur{Board can recur?};
+  recur -->|no finite interaction| finite[FINITE_INTERACTION_MISCLASSIFIED_AS_LOOP];
+  recur -->|yes| setup{Initial state justified?};
   setup -->|no| unjust[UNJUSTIFIED_INITIAL_STATE];
   setup -->|yes| third{Third functional piece?};
   third -->|specific ability required| ext[FUNCTIONAL_EXTERNAL_REQUIREMENT];
@@ -79,7 +81,19 @@ graph TB;
 
 **Example:** Basalt Monolith loops by itself; the second searched card just watches.
 
+**Boundary vs `finite_interaction_misclassified_as_loop`:** Bystander / redundant means one searched card never acts. Finite interaction means both act (or would), but the sequence cannot repeat.
+
 **Counts toward precision:** no. Discovery now rejects these via the search participant gate; remaining historical labels are regression fixtures only until the next baseline freeze.
+
+### `finite_interaction_misclassified_as_loop`
+
+**Rule:** The cards interact productively under modeled rules, but the board cannot return to a repeatable `LoopRelevantState`—a finite combo was accepted (or would have been labeled) as a loop. Prefer this over `rules_or_semantics_false_positive` when execution is legal and the failure is recurrence / resource restoration.
+
+**Example:** Impact Tremors + Presence of Gond (host taps once; no untapper; damage once). Same shape: Warleader's Call + Presence of Gond.
+
+**Optional diagnostics:** set `AdjudicationRecord.failure_reasons` to `recurrence_failure` and/or `resource_not_restored` (see below).
+
+**Counts toward precision:** no.
 
 ### `invalid_candidate_data`
 
@@ -98,6 +112,21 @@ graph TB;
 **Boundary vs `rules_or_semantics_false_positive`:** False positive means the modeled rules/semantics path is confidently wrong under current engine understanding. Needs rules research means insufficient evidence to choose.
 
 **Counts toward precision:** no (treat as not yet resolved for precision claims).
+
+---
+
+## `AdjudicationFailureReason` (optional diagnostics)
+
+Typed codes on `AdjudicationRecord.failure_reasons`. They refine a class; they do not replace it.
+
+| Code | Typical parent class | Meaning |
+| --- | --- | --- |
+| `recurrence_failure` | `finite_interaction_misclassified_as_loop` | Relevant state does not restore after the sequence |
+| `resource_not_restored` | `finite_interaction_misclassified_as_loop` | A spent resource (tap, counter, fodder) is not returned |
+| `participant_failure` | `duplicate_or_equivalent_interaction` | A searched essential never acts |
+| `illegal_execution` | `rules_or_semantics_false_positive` | Modeled path is not legal under CR intent |
+
+Leave the list empty when the class alone is enough.
 
 ---
 

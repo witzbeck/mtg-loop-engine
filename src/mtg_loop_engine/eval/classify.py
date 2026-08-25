@@ -10,6 +10,9 @@ from mtg_loop_engine.eval.schema import (
 from mtg_loop_engine.proofs.models import LoopWitness
 from mtg_loop_engine.semantics.ir import ContinuousCostReduction, ManaCost
 
+# Must match `AURA_HOST_OBJECT_ID` in search.explorer (avoid import cycle).
+_AURA_HOST_OBJECT_ID = "aura-host"
+
 
 def _loop_pays_mana(witness: LoopWitness) -> bool:
     by_oracle = {card.oracle_id: card for card in witness.card_semantics}
@@ -54,6 +57,20 @@ def analyze_prerequisites(witness: LoopWitness) -> PrerequisiteAnalysis:
             )
         if perm.is_token:
             text = f"seeded generic creature token {perm.name!r} ({perm.object_id})"
+            assumptions.append(
+                StateAssumption(
+                    kind=AssumptionKind.GENERIC_PREREQUISITE,
+                    description=text,
+                    object_id=perm.object_id,
+                    oracle_id=perm.oracle_id,
+                )
+            )
+            generic.append(text)
+        elif perm.object_id == _AURA_HOST_OBJECT_ID:
+            text = (
+                f"seeded generic aura host creature {perm.name!r} "
+                f"({perm.object_id})"
+            )
             assumptions.append(
                 StateAssumption(
                     kind=AssumptionKind.GENERIC_PREREQUISITE,

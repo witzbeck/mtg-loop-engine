@@ -10,6 +10,7 @@ import duckdb
 
 from mtg_loop_engine.eval.schema import (
     AdjudicationClass,
+    AdjudicationFailureReason,
     AdjudicationRecord,
     CandidateRecord,
 )
@@ -39,7 +40,8 @@ CREATE TABLE IF NOT EXISTS adjudications (
     proof_hash VARCHAR,
     engine_version VARCHAR,
     oracle_snapshot_hash VARCHAR,
-    skipped BOOLEAN
+    skipped BOOLEAN,
+    failure_reasons VARCHAR
 );
 """
 
@@ -50,6 +52,17 @@ class AdjudicationStore:
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.con = duckdb.connect(str(self.db_path))
         self.con.execute(_SCHEMA)
+        self._migrate()
+
+    def _migrate(self) -> None:
+        cols = {
+            row[1]
+            for row in self.con.execute("PRAGMA table_info('adjudications')").fetchall()
+        }
+        if "failure_reasons" not in cols:
+            self.con.execute(
+                "ALTER TABLE adjudications ADD COLUMN failure_reasons VARCHAR"
+            )
 
     def close(self) -> None:
         self.con.close()
@@ -101,8 +114,8 @@ class AdjudicationStore:
             """
             INSERT OR REPLACE INTO adjudications
             (candidate_id, adjudication, notes, reviewed_at, proof_hash,
-             engine_version, oracle_snapshot_hash, skipped)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+             engine_version, oracle_snapshot_hash, skipped, failure_reasons)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             [
                 record.candidate_id,
@@ -113,6 +126,7 @@ class AdjudicationStore:
                 record.engine_version,
                 record.oracle_snapshot_hash,
                 record.skipped,
+                json.dumps([r.value for r in record.failure_reasons]),
             ],
         )
 
@@ -120,13 +134,18 @@ class AdjudicationStore:
         row = self.con.execute(
             """
             SELECT candidate_id, adjudication, notes, reviewed_at, proof_hash,
-                   engine_version, oracle_snapshot_hash, skipped
+                   engine_version, oracle_snapshot_hash, skipped, failure_reasons
             FROM adjudications WHERE candidate_id = ?
             """,
             [candidate_id],
         ).fetchone()
         if row is None:
             return None
+        raw_reasons = row[8]
+        reasons: list[AdjudicationFailureReason] = []
+        if raw_reasons:
+            parsed = json.loads(raw_reasons) if isinstance(raw_reasons, str) else raw_reasons
+            reasons = [AdjudicationFailureReason(r) for r in parsed]
         return AdjudicationRecord(
             candidate_id=row[0],
             adjudication=AdjudicationClass(row[1]),
@@ -136,6 +155,7 @@ class AdjudicationStore:
             engine_version=row[5],
             oracle_snapshot_hash=row[6],
             skipped=bool(row[7]),
+            failure_reasons=reasons,
         )
 
     def queue(
@@ -149,7 +169,8 @@ class AdjudicationStore:
             adj = self.get_adjudication(candidate.candidate_id)
             if reviewed is True and adj is None:
                 continue
-            if reviewed is False and adj is not None and not adj.skipped:
+            # Unreviewed = no adjudication yet (skipped counts as reviewed).
+            if reviewed is False and adj is not None:
                 continue
             items.append((candidate, adj))
         return items

@@ -5,8 +5,12 @@ from __future__ import annotations
 from pathlib import Path
 
 from mtg_loop_engine.eval.glossary import GLOSSARY
-from mtg_loop_engine.eval.narrate import card_image_url, full_narrative, narrate_loop
-from mtg_loop_engine.eval.schema import AdjudicationClass, AdjudicationRecord
+from mtg_loop_engine.eval.narrate import card_image_url, full_narrative
+from mtg_loop_engine.eval.schema import (
+    AdjudicationClass,
+    AdjudicationFailureReason,
+    AdjudicationRecord,
+)
 from mtg_loop_engine.eval.store import (
     DEFAULT_DB,
     DEFAULT_JSONL,
@@ -15,6 +19,7 @@ from mtg_loop_engine.eval.store import (
 from mtg_loop_engine.eval.reference_absent import DEFAULT_ABSENT_JSONL
 
 CLASSES = list(AdjudicationClass)
+FAILURE_REASONS = list(AdjudicationFailureReason)
 
 # ---------------------------------------------------------------------------
 # Adjudication class guide: one sentence + example pair for each class
@@ -58,11 +63,17 @@ _CLASS_GUIDE: list[tuple[str, str, str]] = [
         "Basalt Monolith loops by itself; the second card just watches.",
     ),
     (
+        AdjudicationClass.FINITE_INTERACTION_MISCLASSIFIED_AS_LOOP.value,
+        "The cards interact for real, but the board cannot return to a repeatable state "
+        "(finite combo). Optional failure_reasons: recurrence_failure, resource_not_restored.",
+        "Impact Tremors + Presence of Gond (host stays tapped after one token).",
+    ),
+    (
         AdjudicationClass.INVALID_CANDIDATE_DATA.value,
         "One or both cards don't exist as real Magic cards — e.g. a test fixture "
         "stand-in, a missing oracle text, or a lookup failure. "
         "Excluded from precision calculations entirely.",
-        "\"Impact Tremors Lite\" is a gold-core fixture, not a real card.",
+        '"Impact Tremors Lite" is a gold-core fixture, not a real card.',
     ),
     (
         AdjudicationClass.NEEDS_RULES_RESEARCH.value,
@@ -82,6 +93,16 @@ def _ensure_loaded(store: AdjudicationStore, jsonl: Path) -> None:
         store.import_jsonl(jsonl)
     if DEFAULT_ABSENT_JSONL.exists():
         store.import_jsonl(DEFAULT_ABSENT_JSONL)
+
+
+def _advance_idx(queue_len: int) -> None:
+    """Move to the next queue slot; clamp after shrink (unreviewed save/skip)."""
+    import streamlit as st
+
+    if queue_len <= 0:
+        st.session_state.idx = 0
+        return
+    st.session_state.idx = min(st.session_state.idx + 1, queue_len - 1)
 
 
 def _render_card_header(st, name: str, oracle_text: str) -> None:
@@ -156,6 +177,15 @@ def _render_adjudication_controls(st, store, candidate, existing, queue, review_
         [c.value for c in CLASSES],
         index=[c.value for c in CLASSES].index(default_class),
     )
+    default_reasons = (
+        [r.value for r in existing.failure_reasons] if existing else []
+    )
+    reason_vals = st.multiselect(
+        "Failure reasons (optional diagnostics)",
+        [r.value for r in FAILURE_REASONS],
+        default=default_reasons,
+        help="Use with finite_interaction_misclassified_as_loop or rules false positives.",
+    )
     notes = st.text_area("Reviewer notes", value=existing.notes if existing else "")
 
     with st.container(horizontal=True):
@@ -170,6 +200,7 @@ def _render_adjudication_controls(st, store, candidate, existing, queue, review_
                 candidate_id=candidate.candidate_id,
                 adjudication=AdjudicationClass(choice),
                 notes=notes,
+                failure_reasons=[AdjudicationFailureReason(r) for r in reason_vals],
                 proof_hash=candidate.proof.proof_hash,
                 engine_version=candidate.engine_version,
                 oracle_snapshot_hash=candidate.oracle_snapshot_hash,
@@ -180,13 +211,20 @@ def _render_adjudication_controls(st, store, candidate, existing, queue, review_
 
     if save or stay:
         _save(skipped=False)
-        if save and review_filter != "unreviewed":
-            st.session_state.idx = min(st.session_state.idx + 1, max(len(queue) - 1, 0))
+        if save:
+            # Unreviewed queue shrinks after save; keep idx to land on the next item.
+            if review_filter == "unreviewed":
+                st.session_state.idx = min(st.session_state.idx, max(len(queue) - 2, 0))
+            else:
+                _advance_idx(len(queue))
         st.rerun()
     if skip:
         _save(skipped=True)
-        if review_filter != "unreviewed":
-            st.session_state.idx = min(st.session_state.idx + 1, max(len(queue) - 1, 0))
+        # Skipped leaves unreviewed; always advance so Skip is not a no-op.
+        if review_filter == "unreviewed":
+            st.session_state.idx = min(st.session_state.idx, max(len(queue) - 2, 0))
+        else:
+            _advance_idx(len(queue))
         st.rerun()
     if back:
         st.session_state.idx = max(st.session_state.idx - 1, 0)
@@ -246,7 +284,24 @@ def _render_study_tab(st) -> None:
     if "study_idx" not in st.session_state:
         st.session_state.study_idx = 0
 
-    chosen = st.selectbox("Select a gold-core loop", names, index=st.session_state.study_idx)
+    with st.container(horizontal=True):
+        if st.button(":material/arrow_back: Previous", key="study_prev"):
+            st.session_state.study_idx = max(st.session_state.study_idx - 1, 0)
+            st.session_state.pop("study_select", None)
+            st.rerun()
+        if st.button(":material/arrow_forward: Next", key="study_next"):
+            st.session_state.study_idx = min(
+                st.session_state.study_idx + 1, len(witnesses) - 1
+            )
+            st.session_state.pop("study_select", None)
+            st.rerun()
+
+    chosen = st.selectbox(
+        "Select a gold-core loop",
+        names,
+        index=st.session_state.study_idx,
+        key="study_select",
+    )
     st.session_state.study_idx = names.index(chosen)
     w = witnesses[st.session_state.study_idx]
 
@@ -279,14 +334,6 @@ def _render_study_tab(st) -> None:
         st.markdown("**Outputs:**")
         for out in proof.output_deltas:
             st.write(f"- {out.type.value}: +{out.delta_per_iteration} ({out.consequence.value})")
-
-    with st.container(horizontal=True):
-        if st.button(":material/arrow_back: Previous", key="study_prev"):
-            st.session_state.study_idx = max(st.session_state.study_idx - 1, 0)
-            st.rerun()
-        if st.button(":material/arrow_forward: Next", key="study_next"):
-            st.session_state.study_idx = min(st.session_state.study_idx + 1, len(witnesses) - 1)
-            st.rerun()
 
 
 # ---------------------------------------------------------------------------
