@@ -1,0 +1,219 @@
+{
+  "artifact_schema_version": 1,
+  "assumptions": [
+    "intrinsic: Rosie Cotton of South Lane begins on the battlefield",
+    "intrinsic: Scurry Oak begins on the battlefield",
+    "oracle_exact_gold",
+    "compiled_from_audited_fixture"
+  ],
+  "classification": {
+    "essential_card_count": 2,
+    "functional_external_requirements": [],
+    "generic_prerequisites": [
+      {
+        "description": "generic token-create seed to start CREATE_TOKEN triggers (Food identity irrelevant)",
+        "details": {},
+        "kind": "board"
+      }
+    ],
+    "loop_type": "arbitrary_repeatable",
+    "strict_two_card": true
+  },
+  "deterministic": true,
+  "essential_cards": [
+    {
+      "name": "Rosie Cotton of South Lane",
+      "oracle_id": "oracle:rosie-cotton-of-south-lane",
+      "role": null
+    },
+    {
+      "name": "Scurry Oak",
+      "oracle_id": "oracle:scurry-oak",
+      "role": null
+    }
+  ],
+  "expected_claim_consequence": "accumulates",
+  "expected_net_state": {
+    "creature_tokens": 1,
+    "life_opponent": 0,
+    "life_you": 0,
+    "mana": {
+      "any_color": 0,
+      "black": 0,
+      "blue": 0,
+      "colorless": 0,
+      "generic": 0,
+      "green": 0,
+      "red": 0,
+      "white": 0
+    },
+    "plus_one_counters": 1
+  },
+  "expected_outputs": [
+    {
+      "consequence": "accumulates",
+      "delta_per_iteration": 1,
+      "repeatable": true,
+      "type": "token"
+    },
+    {
+      "consequence": "accumulates",
+      "delta_per_iteration": 1,
+      "repeatable": true,
+      "type": "etb"
+    }
+  ],
+  "id": "core_rosie_scurry",
+  "initial_state": {
+    "event_counters": {},
+    "life_opponent": 40,
+    "life_you": 40,
+    "mana": {
+      "any_color": 0,
+      "black": 0,
+      "blue": 0,
+      "colorless": 0,
+      "generic": 0,
+      "green": 0,
+      "red": 0,
+      "white": 0
+    },
+    "permanents": [
+      {
+        "controller": "you",
+        "counters": {},
+        "damage_marked": 0,
+        "is_artifact": false,
+        "is_creature": true,
+        "is_token": false,
+        "name": "Rosie Cotton of South Lane",
+        "object_id": "c0",
+        "oracle_id": "oracle:rosie-cotton-of-south-lane",
+        "power": 1,
+        "summoning_sick": false,
+        "tapped": false,
+        "toughness": 1,
+        "undying": false,
+        "zone": "battlefield"
+      },
+      {
+        "controller": "you",
+        "counters": {},
+        "damage_marked": 0,
+        "is_artifact": false,
+        "is_creature": true,
+        "is_token": false,
+        "name": "Scurry Oak",
+        "object_id": "c1",
+        "oracle_id": "oracle:scurry-oak",
+        "power": 1,
+        "summoning_sick": false,
+        "tapped": false,
+        "toughness": 1,
+        "undying": false,
+        "zone": "battlefield"
+      }
+    ]
+  },
+  "loop_actions": [
+    {
+      "ability_id": "create-token-p1p1-whenever-you-create-a-token-put-a-1-1-co",
+      "actor": "c0",
+      "choose_may": null,
+      "note": null,
+      "op": "resolve_trigger",
+      "target": "c1"
+    },
+    {
+      "ability_id": "counters-create-token-whenever-one-or-more-1-1-counters-are-pu",
+      "actor": "c1",
+      "choose_may": null,
+      "note": null,
+      "op": "resolve_trigger",
+      "target": null
+    }
+  ],
+  "prerequisites": [
+    {
+      "description": "generic token-create seed to start CREATE_TOKEN triggers (Food identity irrelevant)",
+      "details": {},
+      "kind": "board"
+    }
+  ],
+  "relevant_state": {
+    "dimensions": [
+      {
+        "op": "exact",
+        "path": "permanents.c0.zone",
+        "value": "battlefield"
+      },
+      {
+        "op": "exact",
+        "path": "permanents.c0.tapped",
+        "value": false
+      },
+      {
+        "op": "exact",
+        "path": "permanents.c1.zone",
+        "value": "battlefield"
+      },
+      {
+        "op": "exact",
+        "path": "permanents.c1.tapped",
+        "value": false
+      },
+      {
+        "op": "exact",
+        "path": "pending_triggers.count",
+        "value": 1
+      },
+      {
+        "op": "minimum",
+        "path": "mana.white",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.blue",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.black",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.red",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.green",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.colorless",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.any_color",
+        "value": 0
+      }
+    ]
+  },
+  "semantic_coverage": "complete",
+  "setup_actions": [
+    {
+      "ability_id": null,
+      "actor": "c0",
+      "choose_may": null,
+      "note": "generic token-create seed (Rosie class)",
+      "op": "seed_create_token",
+      "target": null
+    }
+  ],
+  "tier": "gold_core"
+}

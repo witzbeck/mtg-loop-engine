@@ -25,13 +25,15 @@ graph TB;
 
 ## Outputs
 
-- Asserts on join coverage and physics rediscovery (`discover-physics`); Oracle gold may be empty (Wave 0)
+- Asserts on join coverage and physics rediscovery (`discover-physics`)
+- Asserts on Oracle gold pair-key rediscovery (**7** frozen positives; Heliod in gaps)
 
 ## Responsibilities
 
 - Prove search does not need pair labels for gold_core.
 - Prove compiler → discovery → verifier seam (M3.5).
 - Prove real-Oracle curriculum pairs can rediscover when join + mana model align (`test_real_oracle_altar_gravecrawler.py`).
+- Keep rediscovery **separate** from frozen gold artifact loading.
 
 ## Non-responsibilities
 

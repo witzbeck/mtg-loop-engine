@@ -1,0 +1,245 @@
+{
+  "artifact_schema_version": 1,
+  "assumptions": [
+    "intrinsic: Gravecrawler begins on the battlefield",
+    "intrinsic: Phyrexian Altar begins on the battlefield",
+    "generic_prerequisite: seeded generic creature token 'Zombie' (seed)",
+    "oracle_exact_gold",
+    "compiled_from_audited_fixture"
+  ],
+  "classification": {
+    "essential_card_count": 2,
+    "functional_external_requirements": [],
+    "generic_prerequisites": [
+      {
+        "description": "seeded generic creature token 'Zombie' (seed)",
+        "details": {},
+        "kind": "board"
+      }
+    ],
+    "loop_type": "arbitrary_repeatable",
+    "strict_two_card": true
+  },
+  "deterministic": true,
+  "essential_cards": [
+    {
+      "name": "Phyrexian Altar",
+      "oracle_id": "oracle:phyrexian-altar",
+      "role": null
+    },
+    {
+      "name": "Gravecrawler",
+      "oracle_id": "oracle:gravecrawler",
+      "role": null
+    }
+  ],
+  "expected_claim_consequence": "repeatable_event",
+  "expected_net_state": {
+    "creature_tokens": 0,
+    "life_opponent": 0,
+    "life_you": 0,
+    "mana": {
+      "any_color": 0,
+      "black": 0,
+      "blue": 0,
+      "colorless": 0,
+      "generic": 0,
+      "green": 0,
+      "red": 0,
+      "white": 0
+    },
+    "plus_one_counters": 0
+  },
+  "expected_outputs": [
+    {
+      "consequence": "accumulates",
+      "delta_per_iteration": 1,
+      "repeatable": true,
+      "type": "mana"
+    },
+    {
+      "consequence": "accumulates",
+      "delta_per_iteration": 1,
+      "repeatable": true,
+      "type": "etb"
+    },
+    {
+      "consequence": "accumulates",
+      "delta_per_iteration": 1,
+      "repeatable": true,
+      "type": "death"
+    },
+    {
+      "consequence": "accumulates",
+      "delta_per_iteration": 1,
+      "repeatable": true,
+      "type": "sacrifice"
+    }
+  ],
+  "id": "core_altar_gravecrawler_live",
+  "initial_state": {
+    "event_counters": {},
+    "life_opponent": 40,
+    "life_you": 40,
+    "mana": {
+      "any_color": 0,
+      "black": 0,
+      "blue": 0,
+      "colorless": 0,
+      "generic": 0,
+      "green": 0,
+      "red": 0,
+      "white": 0
+    },
+    "permanents": [
+      {
+        "controller": "you",
+        "counters": {},
+        "damage_marked": 0,
+        "is_artifact": false,
+        "is_creature": true,
+        "is_token": false,
+        "name": "Gravecrawler",
+        "object_id": "c0",
+        "oracle_id": "oracle:gravecrawler",
+        "power": 1,
+        "summoning_sick": false,
+        "tapped": false,
+        "toughness": 1,
+        "undying": false,
+        "zone": "battlefield"
+      },
+      {
+        "controller": "you",
+        "counters": {},
+        "damage_marked": 0,
+        "is_artifact": true,
+        "is_creature": false,
+        "is_token": false,
+        "name": "Phyrexian Altar",
+        "object_id": "c1",
+        "oracle_id": "oracle:phyrexian-altar",
+        "power": null,
+        "summoning_sick": false,
+        "tapped": false,
+        "toughness": null,
+        "undying": false,
+        "zone": "battlefield"
+      },
+      {
+        "controller": "you",
+        "counters": {},
+        "damage_marked": 0,
+        "is_artifact": false,
+        "is_creature": true,
+        "is_token": true,
+        "name": "Zombie",
+        "object_id": "seed",
+        "oracle_id": "token:zombie-seed",
+        "power": 1,
+        "summoning_sick": false,
+        "tapped": false,
+        "toughness": 1,
+        "undying": false,
+        "zone": "battlefield"
+      }
+    ]
+  },
+  "loop_actions": [
+    {
+      "ability_id": "sac-mana-any-sacrifice-a-creature-add-one-mana-of-any",
+      "actor": "c1",
+      "choose_may": null,
+      "note": null,
+      "op": "activate",
+      "target": "c0"
+    },
+    {
+      "ability_id": "cast-gy-zombie-you-may-cast-this-card-from-your-graveya",
+      "actor": "c0",
+      "choose_may": null,
+      "note": null,
+      "op": "activate",
+      "target": null
+    }
+  ],
+  "prerequisites": [
+    {
+      "description": "seeded generic creature token 'Zombie' (seed)",
+      "details": {},
+      "kind": "board"
+    }
+  ],
+  "relevant_state": {
+    "dimensions": [
+      {
+        "op": "exact",
+        "path": "permanents.c0.zone",
+        "value": "battlefield"
+      },
+      {
+        "op": "exact",
+        "path": "permanents.c0.tapped",
+        "value": false
+      },
+      {
+        "op": "exact",
+        "path": "permanents.c1.zone",
+        "value": "battlefield"
+      },
+      {
+        "op": "exact",
+        "path": "permanents.c1.tapped",
+        "value": false
+      },
+      {
+        "op": "exact",
+        "path": "pending_triggers.count",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "count.battlefield.creature_tokens",
+        "value": 1
+      },
+      {
+        "op": "minimum",
+        "path": "mana.white",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.blue",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.black",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.red",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.green",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.colorless",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.any_color",
+        "value": 0
+      }
+    ]
+  },
+  "semantic_coverage": "complete",
+  "setup_actions": [],
+  "tier": "gold_core"
+}

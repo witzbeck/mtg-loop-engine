@@ -2,50 +2,56 @@
 
 ## Purpose
 
-**Positive** epistemic contracts for Oracle-exact `gold_core`: every curated
+**Positive** epistemic contracts for Oracle-exact `gold_core`: every frozen
 Oracle witness must verify. These tests are executable product truth, not smoke
 coverage. Physics positives are covered under CLI `verify-physics` / discovery
 physics suites, not this folder’s product claim.
 
 ## Role in pipeline
 
-`corpus.gold_core` Oracle positives → **THIS** → `Verifier` → assert `VERIFIED`.
+Frozen `corpus.gold_core` artifacts → **THIS** → `Verifier` → assert `VERIFIED`.
 
 ```mermaid
 graph TB;
   corpus[all_gold_core] --> suite[test_positives];
   suite --> verifier[Verifier];
   verifier --> assert[assert VERIFIED];
+  frozen[test_frozen_artifacts] --> loadGate[no explore_pair];
 ```
 
 ## Inputs
 
-- `all_gold_core()` witnesses from `mtg_loop_engine.corpus` (Oracle-only)
+- `all_gold_core()` witnesses from `mtg_loop_engine.corpus` (Oracle-only, frozen JSON)
 
 ## Outputs
 
 - Parametrized pytest pass/fail (currently **7** Oracle positives)
+- Load-path contract: gold loader must not call search
 
 ## Responsibilities
 
 - Lock Oracle gold positives as a permanent regression anchor.
 - Fail loudly on any status other than `VERIFIED`.
+- Prove gold fixtures load without rediscovery.
 
 ## Non-responsibilities
 
 - Hard-negative typing (`../hard_negatives/`)
 - Blind discovery recall (`../discovery/`) — positives here prove verify, not rediscovery
 - Physics fixture regression (`verify-physics` / `physics_all_positives`)
-- Authoring witnesses (lives in `corpus/`)
+- Authoring / re-freezing witnesses (`scripts/freeze_gold_witnesses.py` + `corpus/.../witnesses/`)
 
 ## Core invariants
 
 - Status must be `VERIFIED` for each positive — no partial credit.
 - Witness identities stay aligned with corpus / golden proofs.
+- `all_gold_core` source and runtime must not invoke `explore_pair`.
 
 ## Main entry points
 
 - `test_positives.py`
+- `test_frozen_artifacts.py`
+- `test_heliod_demotion.py`
 
 ## Data contracts
 
@@ -62,7 +68,8 @@ This suite.
 ## Extension guide
 
 Add parametrized cases only when corpus gains a deliberate new Oracle positive
-(and update discovery recall in the same change).
+(and update discovery recall in the same change). Re-freeze JSON via the script;
+do not restore promote-at-import.
 
 ## Bigger-picture relationship
 

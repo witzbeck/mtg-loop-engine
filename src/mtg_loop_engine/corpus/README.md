@@ -64,7 +64,7 @@ graph TB;
 ## Main entry points
 
 - `builders.py`: `witness`, `two_card`, `bf`, `out`, …
-- `gold_core/oracle_cases.py`, `gold_core/hard_negatives.py`
+- `gold_core/oracle_cases.py` + `gold_core/witnesses/`, `gold_core/hard_negatives.py`
 - `physics_fixtures/synthetic_cases.py` (physics positives/HN + `gold_extended_catalog`)
 - `gold_extended/oracle_gaps.py`
 - Package helpers: `gold_core_card_pool` / `oracle_gold_card_pool`,
