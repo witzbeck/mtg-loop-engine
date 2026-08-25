@@ -41,8 +41,8 @@ def _pair_has_fixture(left_id: str, right_id: str) -> bool:
 #
 # Pre-gate bystander duplicates (Basalt self-untap + spectator) are no longer
 # discovered; they are regression-locked in tests/eval/test_classify_store.py.
-# Frozen baselines under eval/baseline/ remain the historical M4 snapshot until
-# the planned post-eligibility re-freeze (ROADMAP M4 item 5).
+# Frozen baselines under eval/baseline/ match this post-gate adjudication set
+# (ROADMAP M4 items 5–6).
 GOLD_EXTRA_ADJUDICATIONS: dict[frozenset[str], tuple[AdjudicationClass, str]] = {
     # ---- Real-card pairs (precision-eligible) --------------------------------
     frozenset({"oracle:ashnods-altar", "oracle:phoenix"}): (

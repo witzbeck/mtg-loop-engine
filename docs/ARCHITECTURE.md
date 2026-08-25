@@ -94,7 +94,7 @@ Solid arrows are intended production dependencies. The dashed `search → eval` 
 - **Detection:** `mtg_loop_engine.eval.classify.analyze_prerequisites` computes `used_oracle_ids` / `unused_oracle_ids` / `strict_two_card` from which searched cards act in loop steps (including continuous cost-reduction participation). Explorer stamps `Classification.strict_two_card` onto the witness. `unused_oracle_ids` remain on `PrerequisiteAnalysis` only.
 - **Enforcement (search-only):** `explore_pair` accepts only when `Verifier.verify` returns `VERIFIED` **and** `strict_two_card`. Bystander-verified sequences are skipped; BFS continues. The verifier does not read participation flags (hand-authored bystander witnesses can still verify).
 - **Evidence:** `tests/eval/test_classify_store.py` — five real Basalt bystander pairs → no hit; Basalt + Training Grounds still accepted.
-- **Baselines:** committed `eval/baseline/` numbers remain the pre-gate M4 freeze until roadmap item 5 (post-eligibility re-freeze).
+- **Baselines:** committed `eval/baseline/` numbers are the post-eligibility M4 freeze (gold extras post-gate; Spellbook eligible≥1). Regenerate only when metrics intentionally change.
 
 ## Fail-closed coverage
 

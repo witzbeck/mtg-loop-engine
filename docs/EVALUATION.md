@@ -105,7 +105,7 @@ Treat C1 success as regression evidence for known families.
 
 ### Live diagnostic vs certified baseline
 
-During development, live metrics under `data/eval/` may reflect post-fix behavior while `eval/baseline/` remains the last **certified** snapshot until roadmap re-freeze. Cite which plane you mean.
+During development, live metrics under `data/eval/` may lead committed `eval/baseline/` until a deliberate re-freeze. After ROADMAP M4 items 5–6, baselines match the post-eligibility freeze; cite which plane you mean when numbers disagree mid-change.
 
 ### Separate LAR signals
 

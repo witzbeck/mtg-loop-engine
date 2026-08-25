@@ -40,24 +40,22 @@ Five real-card Basalt bystander pairs are regression-locked in `tests/eval/test_
 
 Gold-fixture wording is not enough. Extend deterministic patterns using unsupported Spellbook/Oracle fragments (e.g. zone-restricted returns, extra clauses on Altar/Gravecrawler-class text). Prefer the most common `compiler_unsupported` family first.
 
-### 4. Spellbook eligibility
+### 4. Spellbook eligibility ✓
 
-Target **≥1 eligible** pair from the conventional two-card sample (`eval-spellbook`, optionally `--fetch-oracle`). Recall remains undefined until `eligible > 0`.
+**Shipped:** ≥1 eligible pair on the conventional local sample — Gravecrawler + Phyrexian Altar rediscovered (`eval/baseline/m4_spellbook_recovery_summary.json`).
 
-### 5. Re-freeze baseline
+### 5. Re-freeze baseline ✓
 
-Re-run gold extras + Spellbook recovery; update `eval/baseline/m4_*.json`; run:
+Gold extras + Spellbook recovery re-run; `eval/baseline/m4_*.json` updated; STATUS refreshed via:
 
 ```bash
 uv run python scripts/render_status.py
 uv run python scripts/render_status.py --check
 ```
 
-Commit baselines and `docs/STATUS.md` together.
-
 ### 6. M4 exit → M5
 
-Review adjudicated precision and eligibility against roadmap exit criteria. Only then begin M5 reference-absent / novel candidate work.
+Review adjudicated precision and eligibility against roadmap exit criteria. Only then begin M5 reference-absent / novel candidate work. Compiler curriculum (step 3) continues as coverage work inside or after that review.
 
 ## Commands that matter here
 
