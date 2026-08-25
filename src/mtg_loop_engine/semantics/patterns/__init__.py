@@ -229,7 +229,7 @@ def pat_mana_tap_gain_life(text: str, name: str) -> Ability | None:
 
 def pat_mana_tap_untap_target(text: str, name: str) -> Ability | None:
     m = re.match(
-        r"^((?:\{[^}]+\}(?:,\s*)?)+): Untap target creature\.?$",
+        r"^((?:\{[^}]+\}(?:,\s*)?)+): Untap target (?:artifact or )?creature\.?$",
         text,
         re.IGNORECASE,
     )
@@ -366,6 +366,35 @@ def pat_tap_create_token(text: str, name: str) -> Ability | None:
         effects=[
             CreateTokenEffect(
                 name=token_name, power=power, toughness=toughness, quantity=1
+            )
+        ],
+    )
+
+
+def pat_enchanted_tap_create_token(text: str, name: str) -> Ability | None:
+    """Presence of Gond class: enchanted creature has {T}: create token.
+
+    Land hosts (Squirrel Nest) stay unsupported until land seeds exist.
+    """
+    m = re.match(
+        r'^Enchanted creature has '
+        r'"\{T\}: Create (?:a|one)(?: (\d+)/(\d+))? (.+?) creature token\."\.?$',
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    power = int(m.group(1) or 1)
+    toughness = int(m.group(2) or 1)
+    return ActivatedAbility(
+        ability_id=_ability_id("enchanted-tap-token", text),
+        costs=[TapCost(source_self=False)],
+        effects=[
+            CreateTokenEffect(
+                name=m.group(3).strip(),
+                power=power,
+                toughness=toughness,
+                quantity=1,
             )
         ],
     )
@@ -791,10 +820,25 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
     if re.match(r"^Ward \{[^}]+\}(?: \([^)]+\))?$", clause, re.IGNORECASE):
         return _proof_irrelevant(clause)
 
-    if re.match(r"^Enchant (?:target )?.+$", clause, re.IGNORECASE):
+    # Enchant line alone — not joined granted abilities ("Enchanted … has …").
+    if re.match(r"^Enchant (?:target )?[A-Za-z][A-Za-z\s]*\.?$", clause, re.IGNORECASE):
         return _proof_irrelevant(clause)
 
     if re.match(r"^Equip (?:\{[^}]+\})+(?: \([^)]+\))?$", clause, re.IGNORECASE):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^Morph (?:\{[^}]+\})+(?: \([^)]+\))?\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^Umbra armor(?: \([^)]+\))?\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
         return _proof_irrelevant(clause)
 
     if re.match(
@@ -941,6 +985,7 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
 PATTERNS: list[Pattern] = [
     Pattern("tap_create_token_untap", pat_tap_create_token_untap),
     Pattern("tap_sac_token_make_two", pat_tap_sac_token_make_two),
+    Pattern("enchanted_tap_create_token", pat_enchanted_tap_create_token),
     Pattern("tap_create_token", pat_tap_create_token),
     Pattern("tap_add_mana", pat_tap_add_mana),
     Pattern("mana_untap_enchanted", pat_mana_untap_enchanted),

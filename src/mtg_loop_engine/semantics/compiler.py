@@ -32,13 +32,15 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
     ability_start = re.compile(
         r"^(\{|"
         r"Whenever |When |At the beginning |If |You may cast |"
-        r"Enchant |Equip |Flashback |Kicker |"
+        r"Enchanted |Enchant |Equip |Flashback |Kicker |"
         r"Sacrifice |Remove a |"
         r"Activated abilities |"
         r"Put a |"
+        r"Morph |"
         r"Cascade |Convoke |Delve |"
         r"Flying |Flash |Haste |Vigilance |Trample |Lifelink |Deathtouch |Reach |"
-        r"Defender |Menace |Hexproof |Shroud |First strike |Double strike )"
+        r"Defender |Menace |Hexproof |Shroud |First strike |Double strike |"
+        r"Umbra armor )"
     )
     for line in raw_lines:
         if not line:

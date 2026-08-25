@@ -97,6 +97,7 @@ Blind discovery among real **COMPLETE**-compiled Oracle cards from Spellbook nam
    - **Slice 4 (life-drain + statics)** ✓ — Vito/Bond/Exquisite patterns; GAIN_LIFE / OPPONENT_LOSE_LIFE triggers; Flash/Devoid/Evolve/land-tapped statics.
    - **Path a (active):** unlock more COMPLETE cards whose abilities can initiate and close a two-card loop from the default board (tap-for-mana engines, ETB untap/damage/life, etc.).
      - **Slice 5 (self-starters)** ✓ — power-tap mana (Viridian Joiner); ETB damage (Impact Tremors / Purphoros / Alliance); ETB untap-self (Midnight Guard); anthem/devotion/lifelink-reminder as proof-irrelevant.
+     - **Slice 6 (token auras + false-COMPLETE fix)** ✓ — Presence of Gond host-tap tokens; narrow Enchant irrelevant so Splinter Twin/Bear Umbra fail closed; Aphetto/Morph.
    - **Path b (deferred, deliberate):** generic **life-gain seed** in `default_initial_state` when a searched card has `GAIN_LIFE` triggers (ADR 0002 fodder-style). Would let Vito/Bond + Exquisite-class pairs rediscover without a third piece. **Do not implement until path a plateaus or a human widens scope** — document only.
    - **Rules-evidence rails (supporting; land before widening modeled physics):** cheap epistemic adapters so coverage growth stays deliberate (ADR 0003). Not an M5 exit gate; not CR ingest or executor expansion.
 
@@ -114,7 +115,7 @@ Playbook: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDID
 
 ### First local probe (not a baseline)
 
-Post–slice 5 self-starters: **39** COMPLETE cards; still **3** verified in-reference; `absent=0`. Continue path **a**; path **b** (life-gain seed) stays deferred above.
+Post–slice 6: **31** COMPLETE (false-COMPLETE auras corrected); **8** verified; **5** in-reference; **`absent_from_reference=3`**. Continue path **a**; path **b** stays deferred.
 
 ---
 

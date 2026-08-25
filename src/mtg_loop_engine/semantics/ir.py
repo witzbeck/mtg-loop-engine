@@ -35,6 +35,7 @@ class ManaAmount(BaseModel):
 
 class TapCost(BaseModel):
     kind: Literal["tap"] = "tap"
+    # When False, tap `step.target` (enchanted host) instead of the activating permanent.
     source_self: bool = True
 
 

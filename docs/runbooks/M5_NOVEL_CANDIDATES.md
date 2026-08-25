@@ -60,8 +60,9 @@ uv run python scripts/spellbook_absent_discovery.py
 3. **Global ETB untap** ✓ — Intruder Alarm live wording (`untap all creatures`).
 4. **Life-drain family** ✓ — Vito / Bond / Exquisite (+ Conqueror); `GAIN_LIFE` / `OPPONENT_LOSE_LIFE` triggers.
 5. **Path a / slice 5 (self-starters)** ✓ — power-tap mana; ETB damage (Impact / Purphoros / Alliance); ETB untap-self; anthem/devotion/lifelink-reminder irrelevant.
-6. **Path a (continue):** further self-starting COMPLETE unlocks until `absent_from_reference > 0` is routine.
-7. **Path b (deferred):** generic life-gain seed for `GAIN_LIFE` trigger cards — see ROADMAP M5; do not implement without an explicit widen.
+6. **Path a / slice 6 (token auras)** ✓ — Presence of Gond host-tap; Enchant false-COMPLETE fix; Aphetto/Morph. First `absent_from_reference > 0` on live probe.
+7. **Path a (continue):** further self-starting COMPLETE unlocks; adjudicate absences.
+8. **Path b (deferred):** generic life-gain seed for `GAIN_LIFE` trigger cards — see ROADMAP M5; do not implement without an explicit widen.
 
 #### Life-drain bootstrap (policy)
 

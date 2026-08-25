@@ -177,4 +177,23 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         ),
         notes="Devotion/anthem riders proof-irrelevant; ETB damage is the loop engine.",
     ),
+    "Presence of Gond": RealOracleCurriculum(
+        name="Presence of Gond",
+        types=["Enchantment", "Aura"],
+        oracle_text=(
+            'Enchant creature\n'
+            'Enchanted creature has "{T}: Create a 1/1 green Elf Warrior creature token."'
+        ),
+        notes="Host-tap token grant; pairs with Midnight Guard / Intruder Alarm.",
+    ),
+    "Aphetto Alchemist": RealOracleCurriculum(
+        name="Aphetto Alchemist",
+        types=["Creature", "Human", "Wizard"],
+        oracle_text=(
+            "{T}: Untap target artifact or creature.\n"
+            "Morph {U} (You may cast this card face down as a 2/2 creature for {3}. "
+            "Turn it face up any time for its morph cost.)"
+        ),
+        notes="Tap-untap target + Morph proof-irrelevant.",
+    ),
 }
