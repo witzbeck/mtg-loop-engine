@@ -56,9 +56,12 @@ Engine: <pattern / executor / verifier touch + test path>
 Example:
 
 ```text
-Claim: Sacrificing a noncreature does not increment DEATH event counters.
-Oracle: (N/A — counter semantics are CR/event modeling)
-CR: 700.4 — a permanent dies if moved from battlefield to graveyard and it is a creature
+Claim: Engine events.death / OutputType.DEATH count creature deaths only;
+       noncreature BF→GY still "dies" under CR but does not bump that counter.
+Oracle: (N/A — counter semantics are engine output modeling)
+CR: 700.4 — "dies" means moves from the battlefield to the graveyard (any permanent).
+    Creature-dies triggers (e.g. Blood Artist) filter separately; engine DIES
+    triggers still queue and apply filter="creature" where modeled.
 Engine: rules/executor.py die(); tests/unit/test_executor_soundness.py
 ```
 

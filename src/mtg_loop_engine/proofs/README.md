@@ -32,6 +32,7 @@ graph TB;
 - Define the epistemic wire format between discovery, verification, and evaluation.
 - Provide `normalize_proof` for stable golden comparison.
 - Provide claim-bound `proof_hash` construction (`claim.py`, ADR 0009).
+- Fail-closed `StateDimension.path` grammar (must match `state.paths` / `GameState.get_path`).
 
 ## Non-responsibilities
 
@@ -44,6 +45,7 @@ graph TB;
 - Witness carries `semantic_coverage` and `classification` for verifier gates.
 - `strict_two_card` on classification is a **label** used by search acceptance; the verifier does not reject on it alone (search-only participant gate).
 - Normalization must be deterministic for golden proofs.
+- Invalid recurrence paths never construct a soft-success witness.
 
 ## Main entry points
 

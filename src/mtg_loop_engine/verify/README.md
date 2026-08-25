@@ -30,6 +30,7 @@ graph TB;
 
 - Fail-closed semantic coverage gates
 - Functional-external and essential-count gates
+- Fail-closed `LoopRelevantState` path grammar (`STATE_NOT_RECURRENT` on invalid paths)
 - Execute setup + loop via `rules.Executor`
 - Check proof-specific recurrence (`LoopRelevantState`) plus **mandatory**
   dimensions (ADR 0008: once-per-turn usage, pending trigger count)
@@ -74,6 +75,7 @@ Always returns a `LoopProof` for ordinary verification attempts — typed reject
 - `tests/hard_negatives/` — expected typed rejection
 - `tests/semantic/test_compile_verify.py` — compile → verify
 - `tests/unit/test_search_boundary.py` — layering
+- `tests/unit/test_state_path_grammar.py` — path grammar fail-closed
 - `tests/golden_proofs/` — proof artifact contracts
 
 ## Extension guide

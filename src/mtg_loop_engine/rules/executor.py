@@ -436,7 +436,10 @@ class Executor:
                 state.pending_triggers.append(entry)
 
     def die(self, state: GameState, permanent: Permanent) -> None:
-        # CR 700.4: "dies" means moves from the battlefield to the graveyard.
+        # CR 700.4: "dies" means BF→GY for any permanent.
+        # Engine ``events.death`` / OutputType.DEATH count *creature* deaths only
+        # (Blood Artist-class outputs); DIES triggers still queue for all and
+        # filter by ``filter="creature"`` where needed.
         # Exile replacements (e.g. Rest in Peace) suppress death events and DIES triggers.
         # Sacrifice events still fire before this replacement is applied.
         # CR 702.92a/c: undying returns iff the creature had no +1/+1 counters when it died.
@@ -447,7 +450,8 @@ class Executor:
             permanent.zone = Zone.EXILE
             permanent.tapped = False
             return
-        state.bump("death")
+        if permanent.is_creature:
+            state.bump("death")
         self._queue_triggers(state, TriggerEvent.DIES, permanent)
         permanent.zone = Zone.GRAVEYARD
         permanent.tapped = False
