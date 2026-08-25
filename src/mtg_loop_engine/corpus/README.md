@@ -53,12 +53,12 @@ graph TB;
 
 ## Core invariants
 
-- `gold_core` positives are `ORACLE_EXACT`×`ORACLE_EXACT` only (currently **7**)
+- `gold_core` positives are `ORACLE_EXACT`×`ORACLE_EXACT` only (currently **8**)
 - Oracle hard negatives accompany promotions (currently **8**)
 - Physics suite retains historical synthetic/divergent regressions (**10** positives, **10** hard negatives)
 - `gold_extended_catalog` curriculum stubs (**15**) are authored in `physics_fixtures` and re-exported
-- Wave 3 remainders (`core_saffi_champion`, `core_mikaeus_triskelion`) and demoted
-  `core_heliod_ballista` stay in `oracle_gaps` until primitives / product-legal activation land
+- Wave 3 remainders (`core_saffi_champion`, `core_mikaeus_triskelion`) stay in `oracle_gaps`
+  until primitives land; Heliod/Ballista re-promoted to `gold_core`
 - `gold_core_pair_keys` must not be imported by `search/`
 
 ## Main entry points

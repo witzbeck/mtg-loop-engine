@@ -1,0 +1,227 @@
+{
+  "artifact_schema_version": 1,
+  "assumptions": [
+    "intrinsic: Heliod, Sun-Crowned begins on the battlefield",
+    "intrinsic: Walking Ballista begins on the battlefield",
+    "generic_prerequisite: seeded counters {'p1p1': 2} on Walking Ballista (c1)",
+    "oracle_exact_gold",
+    "compiled_from_audited_fixture"
+  ],
+  "classification": {
+    "essential_card_count": 2,
+    "functional_external_requirements": [],
+    "generic_prerequisites": [
+      {
+        "description": "seeded counters {'p1p1': 2} on Walking Ballista (c1)",
+        "details": {},
+        "kind": "board"
+      }
+    ],
+    "loop_type": "arbitrary_repeatable",
+    "strict_two_card": true
+  },
+  "deterministic": true,
+  "essential_cards": [
+    {
+      "name": "Heliod, Sun-Crowned",
+      "oracle_id": "oracle:heliod-sun-crowned",
+      "role": null
+    },
+    {
+      "name": "Walking Ballista",
+      "oracle_id": "oracle:walking-ballista",
+      "role": null
+    }
+  ],
+  "expected_claim_consequence": "lethal",
+  "expected_net_state": {
+    "creature_tokens": 0,
+    "life_opponent": -1,
+    "life_you": 1,
+    "mana": {
+      "any_color": 0,
+      "black": 0,
+      "blue": 0,
+      "colorless": 0,
+      "generic": 0,
+      "green": 0,
+      "red": 0,
+      "white": 0
+    },
+    "plus_one_counters": 0
+  },
+  "expected_outputs": [
+    {
+      "consequence": "accumulates",
+      "delta_per_iteration": 1,
+      "repeatable": true,
+      "type": "damage"
+    },
+    {
+      "consequence": "accumulates",
+      "delta_per_iteration": 1,
+      "repeatable": true,
+      "type": "life_gain"
+    }
+  ],
+  "id": "core_heliod_ballista",
+  "initial_state": {
+    "event_counters": {},
+    "life_opponent": 40,
+    "life_you": 40,
+    "mana": {
+      "any_color": 0,
+      "black": 0,
+      "blue": 0,
+      "colorless": 1,
+      "generic": 0,
+      "green": 0,
+      "red": 0,
+      "white": 1
+    },
+    "permanents": [
+      {
+        "controller": "you",
+        "counters": {},
+        "damage_marked": 0,
+        "is_artifact": false,
+        "is_creature": true,
+        "is_token": false,
+        "name": "Heliod, Sun-Crowned",
+        "object_id": "c0",
+        "oracle_id": "oracle:heliod-sun-crowned",
+        "power": 1,
+        "summoning_sick": false,
+        "tapped": false,
+        "toughness": 1,
+        "undying": false,
+        "zone": "battlefield"
+      },
+      {
+        "controller": "you",
+        "counters": {
+          "p1p1": 2
+        },
+        "damage_marked": 0,
+        "is_artifact": true,
+        "is_creature": true,
+        "is_token": false,
+        "name": "Walking Ballista",
+        "object_id": "c1",
+        "oracle_id": "oracle:walking-ballista",
+        "power": 0,
+        "summoning_sick": false,
+        "tapped": false,
+        "toughness": 0,
+        "undying": false,
+        "zone": "battlefield"
+      }
+    ]
+  },
+  "loop_actions": [
+    {
+      "ability_id": "counter-ping-remove-a-1-1-counter-from-this-creature-",
+      "actor": "c1",
+      "choose_may": null,
+      "note": null,
+      "op": "activate",
+      "target": "opponent"
+    },
+    {
+      "ability_id": "gain-life-p1p1-whenever-you-gain-life-put-a-1-1-counter",
+      "actor": "c0",
+      "choose_may": null,
+      "note": null,
+      "op": "resolve_trigger",
+      "target": "c1"
+    }
+  ],
+  "prerequisites": [
+    {
+      "description": "seeded counters {'p1p1': 2} on Walking Ballista (c1)",
+      "details": {},
+      "kind": "board"
+    }
+  ],
+  "relevant_state": {
+    "dimensions": [
+      {
+        "op": "exact",
+        "path": "permanents.c0.zone",
+        "value": "battlefield"
+      },
+      {
+        "op": "exact",
+        "path": "permanents.c0.tapped",
+        "value": false
+      },
+      {
+        "op": "exact",
+        "path": "permanents.c1.zone",
+        "value": "battlefield"
+      },
+      {
+        "op": "exact",
+        "path": "permanents.c1.tapped",
+        "value": false
+      },
+      {
+        "op": "minimum",
+        "path": "permanents.c1.counters.p1p1",
+        "value": 2
+      },
+      {
+        "op": "exact",
+        "path": "pending_triggers.count",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.white",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.blue",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.black",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.red",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.green",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.colorless",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.any_color",
+        "value": 0
+      }
+    ]
+  },
+  "semantic_coverage": "complete",
+  "setup_actions": [
+    {
+      "ability_id": "grant-lifelink-1-w-another-target-creature-gains-lifeli",
+      "actor": "c0",
+      "choose_may": null,
+      "note": "paid lifelink grant setup (Path b mana prerequisite)",
+      "op": "activate",
+      "target": "c1"
+    }
+  ],
+  "tier": "gold_core"
+}

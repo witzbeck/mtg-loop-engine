@@ -17,7 +17,7 @@ from mtg_loop_engine.semantics.oracle_fixtures import GOLD_ORACLE_FIXTURES
 
 _WITNESSES_DIR = Path(__file__).resolve().parent / "witnesses"
 
-# Stable load order (Wave 1–2 product gold; Heliod demoted — see oracle_gaps).
+# Stable load order (Wave 1–2 product gold + Heliod/Ballista re-promotion).
 _GOLD_IDS: tuple[str, ...] = (
     "core_guard_gond",
     "core_altar_gravecrawler_live",
@@ -26,6 +26,7 @@ _GOLD_IDS: tuple[str, ...] = (
     "core_basalt_zirda",
     "core_druid_vizier",
     "core_rosie_scurry",
+    "core_heliod_ballista",
 )
 
 _REQUIRED_ASSUMPTIONS = frozenset(
@@ -76,7 +77,7 @@ def _load_artifact(gold_id: str) -> LoopWitness:
 
 
 def all_gold_core() -> list[LoopWitness]:
-    """Return frozen Oracle-exact gold positives (Waves 1–2)."""
+    """Return frozen Oracle-exact gold positives (eight product pairs)."""
     return [_load_artifact(gold_id) for gold_id in _GOLD_IDS]
 
 

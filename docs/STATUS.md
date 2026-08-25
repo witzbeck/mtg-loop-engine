@@ -39,7 +39,7 @@ Validated from `eval/baseline/*.json`. Regenerate this section with `scripts/ren
 | precision | 1.0 |
 | by_class.valid_strict_two_card | 1 |
 
-Notes from baseline: ADR 0007 Waves 1–2: Oracle gold_core has seven EXACT positives (Heliod/Ballista demoted to oracle_gaps; seed_grant_lifelink quarantined from product VERIFIED). Gold-pool extra = Alarm+Gond (valid). Wave 3 SBA closed Basalt/Gond+Druid finite false positives. Precision uses eligible VALID denominator only.
+Notes from baseline: ADR 0007 Waves 1–2 + Heliod re-promotion: Oracle gold_core has eight EXACT positives (paid Heliod grant + 0/0 Ballista; seed_grant_lifelink still quarantined from product VERIFIED). Gold-pool extra = Alarm+Gond (valid). Wave 3 SBA closed Basalt/Gond+Druid finite false positives. Precision uses eligible VALID denominator only.
 
 ### Spellbook recovery (`m4_spellbook_recovery_summary.json`)
 

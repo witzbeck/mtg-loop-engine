@@ -30,7 +30,7 @@ graph TB;
 - Live `explore_pair` / promote-at-import
 - `discovered_without_pair_labels` (discovery-only)
 - Embedded `card_semantics` as source of truth (recompiled on load)
-- Heliod / Ballista (staged in `gold_extended/oracle_gaps`)
+- Heliod / Ballista (`core_heliod_ballista.json` — paid grant setup, no seed)
 
 ## Notes
 

@@ -152,6 +152,16 @@ class MoveToZoneEffect(BaseModel):
     target: Literal["self"] = "self"
 
 
+class GrantLifelinkEffect(BaseModel):
+    """Grant lifelink to another creature (Heliod-class paid activation).
+
+    Closed-loop model: no EOT cleanup — lifelink persists for the witness.
+    """
+
+    kind: Literal["grant_lifelink"] = "grant_lifelink"
+    target: Literal["target_other_creature"] = "target_other_creature"
+
+
 Effect = Annotated[
     AddManaEffect
     | UntapEffect
@@ -164,7 +174,8 @@ Effect = Annotated[
     | GainLifeEffect
     | DrawEffect
     | LoseLifeEffect
-    | MoveToZoneEffect,
+    | MoveToZoneEffect
+    | GrantLifelinkEffect,
     Field(discriminator="kind"),
 ]
 

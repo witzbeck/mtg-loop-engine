@@ -26,7 +26,7 @@ graph TB;
 
 ## Outputs
 
-- `all_gold_core()` — currently **7** Oracle positives (Waves 1–2; Heliod demoted)
+- `all_gold_core()` — currently **8** Oracle positives (Heliod/Ballista re-promoted)
 - `hard_negatives()` — currently **8** Oracle counterfactuals
 
 ## Core invariants
@@ -49,7 +49,7 @@ graph TB;
 
 Capture a new pair with the freeze script after verify + rediscover + hard negative +
 LAR + net/events. Do not call explore from `all_gold_core`. Park incomplete real pairs
-in `gold_extended/oracle_gaps.py` — Heliod remains gaps until product-legal activation.
+in `gold_extended/oracle_gaps.py` (Saffi / Mikaeus remain).
 
 ## Bigger-picture relationship
 

@@ -40,10 +40,14 @@ from mtg_loop_engine.semantics.ir import (
     AddCounterEffect,
     CardSemantics,
     DealDamageEffect,
+    GrantLifelinkEffect,
+    ManaAmount,
+    ManaCost,
     SacrificeCost,
     TapCost,
     TriggeredAbility,
 )
+from mtg_loop_engine.semantics.oracle_fixtures import GOLD_ORACLE_FIXTURES
 from mtg_loop_engine.state.game import GameState
 from mtg_loop_engine.verify.verifier import Verifier
 
@@ -94,6 +98,39 @@ def _needs_tap_host(card: CardSemantics) -> bool:
     )
 
 
+def _grant_lifelink_ability(card: CardSemantics) -> ActivatedAbility | None:
+    for ab in card.abilities:
+        if isinstance(ab, ActivatedAbility) and any(
+            isinstance(e, GrantLifelinkEffect) for e in ab.effects
+        ):
+            return ab
+    return None
+
+
+def _mana_for_grant_lifelink(card: CardSemantics) -> ManaAmount | None:
+    """Seed pool for one paid grant-lifelink activate ({1}{W} class).
+
+    Generic cost is seeded as colorless so ``pay_mana`` can spend it (Path b
+    style mana prerequisite — not a free grant op).
+    """
+    ab = _grant_lifelink_ability(card)
+    if ab is None:
+        return None
+    for cost in ab.costs:
+        if isinstance(cost, ManaCost):
+            need = cost.amount
+            return ManaAmount(
+                white=need.white,
+                blue=need.blue,
+                black=need.black,
+                red=need.red,
+                green=need.green,
+                colorless=need.colorless + need.generic,
+                any_color=need.any_color,
+            )
+    return None
+
+
 def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpec:
     """Place both cards on the battlefield with generic fodder/counters as needed."""
     ordered = sorted([a, b], key=lambda c: c.oracle_id)
@@ -101,15 +138,27 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
     for i, card in enumerate(ordered):
         types = {t.lower() for t in card.types}
         caps = extract_capabilities(card)
+        is_creature = "creature" in types
+        fix = GOLD_ORACLE_FIXTURES.get(card.oracle_id)
+        if (
+            is_creature
+            and fix is not None
+            and fix.power is not None
+            and fix.toughness is not None
+        ):
+            power, toughness = fix.power, fix.toughness
+        else:
+            power = 1 if is_creature else None
+            toughness = 1 if is_creature else None
         # Counter-mana engines need enough p1p1 to pay Staff-class untap:
         # {3} untap creature + {1} untap Staff in the same cycle.
         if caps.needs_p1p1_mana_seed():
             counters = {"p1p1": 4}
         elif caps.removes_p1p1():
-            counters = {"p1p1": 1}
+            # 0/0 counter-removers need ≥2 so one ping leaves a legal creature (SBA).
+            counters = {"p1p1": 2 if toughness == 0 else 1}
         else:
             counters = {}
-        is_creature = "creature" in types
         permanents.append(
             bf(
                 f"c{i}",
@@ -118,8 +167,8 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
                 is_creature=is_creature,
                 is_artifact="artifact" in types,
                 counters=counters,
-                power=1 if is_creature else None,
-                toughness=1 if is_creature else None,
+                power=power,
+                toughness=toughness,
             )
         )
     need_token = any(extract_capabilities(c).needs_token_fodder() for c in ordered)
@@ -165,7 +214,21 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
                 toughness=1,
             )
         )
-    return InitialStateSpec(permanents=permanents)
+    mana = ManaAmount()
+    for card in ordered:
+        seed = _mana_for_grant_lifelink(card)
+        if seed is None:
+            continue
+        mana = ManaAmount(
+            white=mana.white + seed.white,
+            blue=mana.blue + seed.blue,
+            black=mana.black + seed.black,
+            red=mana.red + seed.red,
+            green=mana.green + seed.green,
+            colorless=mana.colorless + seed.colorless,
+            any_color=mana.any_color + seed.any_color,
+        )
+    return InitialStateSpec(permanents=permanents, mana=mana)
 
 
 def _try_apply(executor: Executor, state: GameState, step: ActionStep) -> GameState | None:
@@ -297,10 +360,20 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
                 # Opponent first (Heliod/Ballista); self legal for undying self-ping.
                 targets = ["opponent", perm.object_id]
             elif need_effect_target:
+                exclude_source = any(
+                    getattr(e, "target", None) == "target_other_creature"
+                    for e in ab.effects
+                )
                 targets = [
                     p.object_id
                     for p in state.permanents.values()
-                    if p.zone == Zone.BATTLEFIELD and p.controller == "you"
+                    if p.zone == Zone.BATTLEFIELD
+                    and p.controller == "you"
+                    and (not exclude_source or p.object_id != perm.object_id)
+                    and (
+                        not exclude_source
+                        or p.is_creature
+                    )
                 ]
             else:
                 targets = [None]
@@ -494,6 +567,23 @@ def build_witness(
                 ),
             )
         )
+    grant_ability_ids = {
+        ab.ability_id
+        for card in (a, b)
+        if (ab := _grant_lifelink_ability(card)) is not None
+    }
+    if any(
+        s.op == "activate" and s.ability_id in grant_ability_ids for s in setup
+    ):
+        generic.append(
+            Prerequisite(
+                kind="board",
+                description=(
+                    "generic mana for one paid grant-lifelink activation "
+                    "(Path b; identity of mana source irrelevant)"
+                ),
+            )
+        )
     refs = [
         EssentialCardRef(oracle_id=a.oracle_id, name=a.name),
         EssentialCardRef(oracle_id=b.oracle_id, name=b.name),
@@ -611,6 +701,8 @@ def explore_pair(
     if (
         not both_oracle_exact
         and (_needs_lifelink_grant_seed(a) or _needs_lifelink_grant_seed(b))
+        and _grant_lifelink_ability(a) is None
+        and _grant_lifelink_ability(b) is None
     ):
         # Grant lifelink to a partner that can remove counters for damage.
         grantor = None
@@ -634,6 +726,39 @@ def explore_pair(
             err = executor.run_step(start, seed)
             if err is None:
                 setup_actions = [*setup_actions, seed]
+    # Paid Heliod-class grant: activate once in setup targeting the counter-pinger.
+    grant_card = a if _grant_lifelink_ability(a) is not None else (
+        b if _grant_lifelink_ability(b) is not None else None
+    )
+    if grant_card is not None:
+        grant_ab = _grant_lifelink_ability(grant_card)
+        grantor = None
+        pinger = None
+        for perm in sorted(start.permanents.values(), key=lambda p: p.object_id):
+            card = semantics.get(perm.oracle_id)
+            if card is None:
+                continue
+            if card.oracle_id == grant_card.oracle_id:
+                grantor = perm.object_id
+            caps = extract_capabilities(card)
+            if caps.removes_p1p1() and perm.is_creature:
+                pinger = perm.object_id
+        if (
+            grant_ab is not None
+            and grantor is not None
+            and pinger is not None
+            and grantor != pinger
+        ):
+            step = ActionStep(
+                op="activate",
+                actor=grantor,
+                ability_id=grant_ab.ability_id,
+                target=pinger,
+                note="paid lifelink grant setup (Path b mana prerequisite)",
+            )
+            err = executor.run_step(start, step)
+            if err is None:
+                setup_actions = [*setup_actions, step]
     queue: deque[tuple[GameState, list[ActionStep]]] = deque([(start, [])])
     expanded: set[tuple] = set()
     visited = 0

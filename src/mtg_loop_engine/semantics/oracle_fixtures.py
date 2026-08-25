@@ -21,6 +21,10 @@ class OracleFixture:
     provenance: Provenance
     type_line: str = ""
     """Optional audited type line; defaults to ``" ".join(types)`` when empty."""
+    power: int | None = None
+    """Printed power when state construction consumes it (ADR 0010)."""
+    toughness: int | None = None
+    """Printed toughness when state construction consumes it (ADR 0010)."""
 
     @property
     def is_fixture(self) -> bool:
@@ -340,6 +344,8 @@ GOLD_ORACLE_FIXTURES: dict[str, OracleFixture] = {
             "Remove a +1/+1 counter from this creature: It deals 1 damage to any target."
         ),
         provenance=Provenance.ORACLE_EXACT,
+        power=0,
+        toughness=0,
     ),
 }
 

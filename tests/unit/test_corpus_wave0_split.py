@@ -12,7 +12,6 @@ def test_oracle_gap_catalog_lists_wave3_blockers():
     assert ids == {
         "core_saffi_champion",
         "core_mikaeus_triskelion",
-        "core_heliod_ballista",
     }
     for g in gaps:
         assert g.blockers

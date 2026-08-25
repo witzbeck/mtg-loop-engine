@@ -26,7 +26,7 @@ graph TB;
 ## Outputs
 
 - Asserts on join coverage and physics rediscovery (`discover-physics`)
-- Asserts on Oracle gold pair-key rediscovery (**7** frozen positives; Heliod in gaps)
+- Asserts on Oracle gold pair-key rediscovery (**8** frozen positives including Heliod/Ballista)
 
 ## Responsibilities
 

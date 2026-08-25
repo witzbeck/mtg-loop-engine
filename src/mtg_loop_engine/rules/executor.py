@@ -17,6 +17,7 @@ from mtg_loop_engine.semantics.ir import (
     DealDamageEffect,
     DrawEffect,
     GainLifeEffect,
+    GrantLifelinkEffect,
     LoseLifeEffect,
     ManaAmount,
     ManaCost,
@@ -287,6 +288,22 @@ class Executor:
                 self._queue_triggers(
                     state, TriggerEvent.COUNTER_ADDED, p, amount=qty
                 )
+            return None
+
+        if isinstance(effect, GrantLifelinkEffect):
+            tid = target_id
+            if not tid or tid not in state.permanents:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "grant lifelink needs target creature",
+                )
+            p = state.permanents[tid]
+            if tid == source.object_id or not p.is_creature:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "grant lifelink target must be another creature",
+                )
+            p.lifelink = True
             return None
 
         if isinstance(effect, RemoveCounterEffect):

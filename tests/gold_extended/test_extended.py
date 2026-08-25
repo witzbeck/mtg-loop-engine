@@ -23,6 +23,6 @@ def test_oracle_gaps_document_wave3_blockers():
     ids = {g.proposed_gold_id for g in gaps}
     assert "core_saffi_champion" in ids
     assert "core_mikaeus_triskelion" in ids
-    assert "core_heliod_ballista" in ids
+    assert "core_heliod_ballista" not in ids
     for g in gaps:
         assert g.blockers

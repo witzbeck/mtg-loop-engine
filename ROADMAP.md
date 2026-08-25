@@ -109,13 +109,12 @@ Blind discovery among real **COMPLETE**-compiled Oracle cards from Spellbook nam
    **Claim consequence derivation:** ✓ verifier derives `ACCUMULATES` /
    `REPEATABLE_EVENT` / `LETHAL` from net state + gross outputs under recurrence;
    mismatches with `expected_claim_consequence` → `NOT_A_LOOP`.
-   **Waves 1–2:** ✓ seven Oracle gold positives
-   (`core_guard_gond` … `core_rosie_scurry`) as **frozen witness artifacts**
-   (independent of search; `all_gold_core` loads JSON only). `core_heliod_ballista`
-   demoted to `corpus.gold_extended.oracle_gaps` (seed_grant_lifelink quarantined
-   from Oracle product VERIFIED; re-promote only with two-counter 0/0 + paid Heliod
-   activation).
-   Wave 3 remainders (`core_saffi_champion`, `core_mikaeus_triskelion`) also staged in
+   **Waves 1–2:** ✓ eight Oracle gold positives
+   (`core_guard_gond` … `core_rosie_scurry`, `core_heliod_ballista`) as **frozen witness artifacts**
+   (independent of search; `all_gold_core` loads JSON only). Heliod/Ballista re-promoted with
+   printed 0/0 Ballista (≥2 p1p1), paid `{1}{W}` grant-lifelink setup, and
+   `seed_grant_lifelink` still quarantined from Oracle product VERIFIED.
+   Wave 3 remainders (`core_saffi_champion`, `core_mikaeus_triskelion`) stay staged in
    `oracle_gaps` until delayed triggers / undying+SBA grant compile land.
    Keep **line coverage floor at 92%** until percentages measure faithful
    claims. Path-grammar fail-closed + creature-scoped ``events.death`` ✓.
