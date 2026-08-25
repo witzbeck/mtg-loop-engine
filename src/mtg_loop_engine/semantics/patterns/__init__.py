@@ -204,7 +204,7 @@ def pat_sac_creature_add_mana(text: str, name: str) -> Ability | None:
         return ActivatedAbility(
             ability_id=_ability_id("sac-mana-any", text),
             costs=[SacrificeCost(selector="creature_controlled")],
-            effects=[AddManaEffect(amount=ManaAmount(generic=1))],
+            effects=[AddManaEffect(amount=ManaAmount(any_color=1))],
             is_mana_ability=True,
             uses_stack=False,
         )

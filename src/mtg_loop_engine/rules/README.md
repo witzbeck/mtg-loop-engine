@@ -42,6 +42,7 @@ graph TB;
 
 - Execution errors become typed verification failures upstream — no silent illegal success.
 - Cost reduction and trigger resolution must match what patterns claim to support.
+- `ManaAmount.any_color` models "mana of any color": it may pay W/U/B/R/G (or generic), but generic mana still cannot pay colored costs.
 
 ## Main entry points
 

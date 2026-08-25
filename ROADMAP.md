@@ -82,7 +82,7 @@ M4 is **not** complete because evaluation infrastructure exists. Exit requires p
 ### Remaining before M5
 
 3. **Deterministic real-Oracle compiler expansion** — curriculum from unsupported Spellbook/Oracle fragments, not only gold-fixture wording.
-4. **≥1 eligible Spellbook pair** on the conventional sample (today: selected ≫ 0, eligible = 0 — details in STATUS).
+4. **≥1 eligible Spellbook pair** on the conventional sample. Curriculum seam: real-Oracle **Gravecrawler + Phyrexian Altar** compiles and rediscovers via `explore_pair` (`tests/discovery/test_real_oracle_altar_gravecrawler.py`). Frozen STATUS/Spellbook baseline still reports historical eligible=0 until item 5 re-freeze.
 5. **Re-run and freeze** truthful post-fix baselines; refresh STATUS via `scripts/render_status.py`. (Frozen baselines still reflect the pre-gate snapshot until this step.)
 6. **Reconcile docs/status** with the new freeze.
 

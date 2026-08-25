@@ -237,7 +237,15 @@ def derive_relevant_state(
                 value=before.get_path("count.battlefield.creature_tokens"),
             )
         )
-    for color in ("white", "blue", "black", "red", "green", "colorless"):
+    for color in (
+        "white",
+        "blue",
+        "black",
+        "red",
+        "green",
+        "colorless",
+        "any_color",
+    ):
         start = getattr(before.mana, color)
         dims.append(
             StateDimension(

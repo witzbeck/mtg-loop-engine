@@ -31,6 +31,7 @@ graph TB;
 
 - Prove search does not need pair labels for gold_core.
 - Prove compiler → discovery → verifier seam (M3.5).
+- Prove real-Oracle curriculum pairs can rediscover when join + mana model align (`test_real_oracle_altar_gravecrawler.py`).
 
 ## Non-responsibilities
 
