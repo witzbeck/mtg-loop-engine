@@ -176,11 +176,21 @@ class ReplacementExileInsteadOfGraveyard(BaseModel):
     supported: bool = True
 
 
+class ProofIrrelevantStatic(BaseModel):
+    """Oracle text intentionally modeled as supported but non-participating in loop proofs."""
+
+    kind: Literal["proof_irrelevant_static"] = "proof_irrelevant_static"
+    ability_id: str
+    clause: str
+    supported: bool = True
+
+
 Ability = Annotated[
     ActivatedAbility
     | TriggeredAbility
     | ContinuousCostReduction
-    | ReplacementExileInsteadOfGraveyard,
+    | ReplacementExileInsteadOfGraveyard
+    | ProofIrrelevantStatic,
     Field(discriminator="kind"),
 ]
 

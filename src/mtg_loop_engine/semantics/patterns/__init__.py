@@ -21,6 +21,7 @@ from mtg_loop_engine.semantics.ir import (
     ManaCost,
     RemoveCounterEffect,
     ReplacementExileInsteadOfGraveyard,
+    ProofIrrelevantStatic,
     ReturnToBattlefieldEffect,
     SacrificeCost,
     TapCost,
@@ -195,6 +196,19 @@ def pat_tap_create_token_untap(text: str, name: str) -> Ability | None:
 
 def pat_sac_creature_add_mana(text: str, name: str) -> Ability | None:
     m = re.match(
+        r"^Sacrifice a creature: Add one mana of any color(?: to your mana pool)?\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if m:
+        return ActivatedAbility(
+            ability_id=_ability_id("sac-mana-any", text),
+            costs=[SacrificeCost(selector="creature_controlled")],
+            effects=[AddManaEffect(amount=ManaAmount(generic=1))],
+            is_mana_ability=True,
+            uses_stack=False,
+        )
+    m = re.match(
         r"^Sacrifice a creature: Add ((?:\{[^}]+\})+)\.?$",
         text,
         re.IGNORECASE,
@@ -249,7 +263,11 @@ def pat_return_from_gy(text: str, name: str) -> Ability | None:
     m = re.match(
         r"^((?:\{[^}]+\})+): Return (~|this (?:card|permanent|creature)|"
         + re.escape(name)
-        + r") from your graveyard to the battlefield\.?$",
+        + r") from your graveyard to the battlefield(?: tapped)?"
+        r"(?:\. You may cast "
+        + re.escape(name)
+        + r" only from your graveyard)?"
+        r"(?:\. Activate only as a sorcery)?\.?$",
         text,
         re.IGNORECASE,
     )
@@ -435,7 +453,88 @@ def pat_tap_sac_token_make_two(text: str, name: str) -> Ability | None:
     )
 
 
-# Order matters: more specific patterns first.
+_KEYWORD_ABILITIES = frozenset(
+    {
+        "flying",
+        "flash",
+        "haste",
+        "vigilance",
+        "trample",
+        "lifelink",
+        "deathtouch",
+        "reach",
+        "defender",
+        "menace",
+        "hexproof",
+        "shroud",
+        "first strike",
+        "double strike",
+        "indestructible",
+        "ward",
+    }
+)
+
+
+def _proof_irrelevant(text: str) -> ProofIrrelevantStatic:
+    return ProofIrrelevantStatic(
+        ability_id=_ability_id("proof-irrelevant", text),
+        clause=text,
+    )
+
+
+def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
+    """Match Oracle clauses that do not participate in modeled loop proofs."""
+    clause = text.strip().rstrip(".")
+    if not clause:
+        return None
+
+    lowered = clause.lower()
+    if lowered in _KEYWORD_ABILITIES:
+        return _proof_irrelevant(clause)
+
+    words = [part.strip().lower() for part in clause.split() if part.strip()]
+    if words and all(word in _KEYWORD_ABILITIES for word in words):
+        return _proof_irrelevant(clause)
+
+    if re.match(r"^Ward \{[^}]+\}(?: \([^)]+\))?$", clause, re.IGNORECASE):
+        return _proof_irrelevant(clause)
+
+    if re.match(r"^Enchant (?:target )?.+$", clause, re.IGNORECASE):
+        return _proof_irrelevant(clause)
+
+    if re.match(r"^Equip (?:\{[^}]+\})+(?: \([^)]+\))?$", clause, re.IGNORECASE):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^Creatures with power \d+ or less can't block "
+        + re.escape(name)
+        + r"(?:\.)?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^You may cast " + re.escape(name) + r" only from your graveyard\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^This creature can't be blocked by creatures with power \d+ or less\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(r"^Activate only as a sorcery\.?$", clause, re.IGNORECASE):
+        return _proof_irrelevant(clause)
+
+    return None
+
+
+# Order matters: more specific patterns first; proof-irrelevant static last.
 PATTERNS: list[Pattern] = [
     Pattern("tap_create_token_untap", pat_tap_create_token_untap),
     Pattern("tap_sac_token_make_two", pat_tap_sac_token_make_two),
@@ -455,6 +554,7 @@ PATTERNS: list[Pattern] = [
     Pattern("remove_counter_damage", pat_remove_counter_damage),
     Pattern("put_p1p1_counter", pat_put_p1p1_counter),
     Pattern("exile_instead_of_gy", pat_exile_instead_of_gy),
+    Pattern("proof_irrelevant_static", pat_proof_irrelevant_static),
 ]
 
 

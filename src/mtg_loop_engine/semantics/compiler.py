@@ -23,13 +23,22 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
     raw_lines = [ln.strip() for ln in text.split("\n")]
     clauses: list[str] = []
     buf = ""
+    keyword_line = re.compile(
+        r"^(Flying|Flash|Haste|Vigilance|Trample|Lifelink|Deathtouch|Reach|Defender|"
+        r"Menace|Hexproof|Shroud|Indestructible|First strike|Double strike|Ward"
+        r"(?: \([^)]+\))?)$",
+        re.IGNORECASE,
+    )
     ability_start = re.compile(
         r"^(\{|"
-        r"Whenever |When |At the beginning |If |"
+        r"Whenever |When |At the beginning |If |You may cast |"
         r"Enchant |Equip |Flashback |Kicker |"
         r"Sacrifice |Remove a |"
         r"Activated abilities |"
-        r"Put a )"
+        r"Put a |"
+        r"Cascade |Convoke |Delve |"
+        r"Flying |Flash |Haste |Vigilance |Trample |Lifelink |Deathtouch |Reach |"
+        r"Defender |Menace |Hexproof |Shroud |First strike |Double strike )"
     )
     for line in raw_lines:
         if not line:
@@ -37,7 +46,7 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
                 clauses.append(buf.strip())
                 buf = ""
             continue
-        if buf and ability_start.match(line):
+        if buf and (ability_start.match(line) or keyword_line.match(line)):
             clauses.append(buf.strip())
             buf = line
         elif not buf:
