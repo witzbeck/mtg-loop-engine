@@ -21,11 +21,10 @@ graph TB;
 - Package re-export of `gold_extended_catalog` (**15** stubs; body still authored under
   `physics_fixtures/synthetic_cases.py` for historical continuity)
 - Real pairs awaiting remaining Wave 3 / product-legal primitives (`oracle_gap_catalog`:
-  `core_saffi_champion`, `core_mikaeus_triskelion`, `core_heliod_ballista`). Mikaeus notes:
-  SBA/undying/self-ping physics landed; promotion still needs audited Oracle + grant/anthem
-  compile + gold witness. Saffi still needs delayed triggers. Heliod demoted: fixtures
-  retained; do not re-promote until two-counter 0/0 start + paid lifelink activation
-  (no `seed_grant_lifelink` on product witnesses).
+  `core_saffi_champion`, `core_mikaeus_triskelion`). Mikaeus notes: SBA/undying/self-ping
+  physics landed; promotion still needs audited Oracle + grant/anthem compile + gold
+  witness. Saffi still needs delayed triggers. Heliod/Ballista re-promoted to
+  `gold_core` via paid `{1}{W}` grant + printed 0/0 Ballista (≥2 p1p1).
 
 ## What does not belong here
 

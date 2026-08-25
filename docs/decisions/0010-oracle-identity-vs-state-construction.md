@@ -52,7 +52,7 @@ those purposes — not before, and not as a demand to snapshot every Scryfall fi
 ## Non-decisions
 
 - Full card modeling before any ability use — rejected.
-- Heliod re-promotion physics — follow-on implementation under this boundary.
+- Heliod re-promotion physics — landed under this boundary (paid grant + audited 0/0).
 - Mana cost / P/T on every historical audited record in one PR — migrate when a
   claim consumes them.
 

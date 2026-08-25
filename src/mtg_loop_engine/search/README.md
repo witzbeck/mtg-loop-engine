@@ -42,8 +42,13 @@ graph TB;
 - Bounded legal-action BFS (`explorer.explore_pair`)
 - Seed undying grants when partners need them (`seed_grant_undying`)
 - `seed_grant_lifelink` is a **physics stand-in only** — explorer does **not** emit it when
-  both searched cards are `ORACLE_EXACT` (product Heliod requires a paid activation; verifier
-  also rejects Oracle-product witnesses that include the seed)
+  both searched cards are `ORACLE_EXACT`, or when a real `GrantLifelinkEffect` activation
+  exists (product Heliod: paid `{1}{W}` activate once in setup; verifier also rejects
+  Oracle-product witnesses that include the seed)
+- When a searched card has a grant-lifelink activate, seed `InitialStateSpec.mana` for one
+  paid activation (Path b mana prerequisite — not a free grant)
+- When audited printed P/T is present on the fixture, `default_initial_state` uses it;
+  `removes_p1p1` + toughness 0 → start with **2** p1p1 counters (SBA-safe)
 - Seed **four** `p1p1` counters on cards whose mana ability scales with +1/+1 counters (Gyre Sage class), so counter-mana engines can pay Staff-class untap cycles (`{3}` untap creature + `{1}` untap Staff)
 - For remove-counter `any_target` damage, emit activate steps with `target="opponent"` first (Heliod path); self (`actor`) is also legal for undying self-ping
 - Seed a generic creature **aura host** (non-token setup permanent) when an activated ability uses `TapCost(source_self=False)` and neither essential is a creature (Presence of Gond + Intruder Alarm class); otherwise tap the partner creature. Host tap is tracked in `LoopRelevantState` so recurrence fails closed when the host stays tapped.

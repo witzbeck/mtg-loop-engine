@@ -18,6 +18,7 @@ from mtg_loop_engine.semantics.ir import (
     DealDamageEffect,
     DrawEffect,
     GainLifeEffect,
+    GrantLifelinkEffect,
     LoseLifeEffect,
     ManaAmount,
     ManaCost,
@@ -873,19 +874,22 @@ def pat_etb_with_counters_irrelevant(text: str, name: str) -> Ability | None:
 def pat_grant_lifelink_activated(text: str, name: str) -> Ability | None:
     """Heliod: {cost}: Another target creature gains lifelink until end of turn.
 
-    Modeled as proof-irrelevant activation text. ``seed_grant_lifelink`` is a
-    physics stand-in only — quarantined from ORACLE_EXACT product VERIFIED
-    (paid Heliod activation required for product witnesses).
+    Product path uses this paid activation (setup once). ``seed_grant_lifelink``
+    remains a physics stand-in only — quarantined from ORACLE_EXACT VERIFIED.
     """
     m = re.match(
-        r"^(?:\{[^}]+\})+: Another target creature gains lifelink "
+        r"^((?:\{[^}]+\})+): Another target creature gains lifelink "
         r"until end of turn\.?$",
         text,
         re.IGNORECASE,
     )
     if not m:
         return None
-    return _proof_irrelevant(text.strip().rstrip("."))
+    return ActivatedAbility(
+        ability_id=_ability_id("grant-lifelink", text),
+        costs=[ManaCost(amount=_parse_mana_braces(m.group(1)))],
+        effects=[GrantLifelinkEffect(target="target_other_creature")],
+    )
 
 
 def pat_remove_counter_damage(text: str, name: str) -> Ability | None:

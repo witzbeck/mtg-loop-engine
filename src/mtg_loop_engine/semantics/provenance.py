@@ -25,6 +25,8 @@ RULES_RELEVANT_FIELDS: tuple[str, ...] = (
     "oracle_text",
     "types",
     "type_line",
+    "power",
+    "toughness",
 )
 
 # Frozen allowlist: CI rejects any ORACLE_DIVERGENT id not in this set.
@@ -63,13 +65,19 @@ def canonicalize_source_record(record: dict[str, Any]) -> dict[str, Any]:
 
 def fixture_as_source_record(fixture: OracleFixture) -> dict[str, Any]:
     type_line = fixture.type_line or " ".join(fixture.types)
-    return {
+    record: dict[str, Any] = {
         "oracle_id": fixture.oracle_id,
         "name": fixture.name,
         "oracle_text": fixture.oracle_text,
         "types": list(fixture.types),
         "type_line": type_line,
     }
+    # Exactness covers printed P/T only when present (ADR 0010 growth rule).
+    if fixture.power is not None:
+        record["power"] = fixture.power
+    if fixture.toughness is not None:
+        record["toughness"] = fixture.toughness
+    return record
 
 
 def load_audited_record(oracle_id: str) -> dict[str, Any]:

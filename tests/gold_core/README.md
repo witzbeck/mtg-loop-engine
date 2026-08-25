@@ -25,8 +25,9 @@ graph TB;
 
 ## Outputs
 
-- Parametrized pytest pass/fail (currently **7** Oracle positives)
+- Parametrized pytest pass/fail (currently **8** Oracle positives)
 - Load-path contract: gold loader must not call search
+- Heliod/Ballista promotion + seed quarantine (`test_heliod_promotion.py`)
 
 ## Responsibilities
 
@@ -51,7 +52,7 @@ graph TB;
 
 - `test_positives.py`
 - `test_frozen_artifacts.py`
-- `test_heliod_demotion.py`
+- `test_heliod_promotion.py`
 
 ## Data contracts
 
