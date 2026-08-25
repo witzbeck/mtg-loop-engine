@@ -50,9 +50,11 @@ GOLD_ORACLE_FIXTURES: dict[str, OracleFixture] = {
         name="Intruder Alarm",
         types=["Enchantment"],
         type_line="Enchantment",
-        # Real Oracle also has the don't-untap static; simplified → quarantine.
-        oracle_text="Whenever a creature enters the battlefield, untap target permanent.",
-        provenance=Provenance.ORACLE_DIVERGENT,
+        oracle_text=(
+            "Creatures don't untap during their controllers' untap steps.\n"
+            "Whenever a creature enters, untap all creatures."
+        ),
+        provenance=Provenance.ORACLE_EXACT,
     ),
     "synthetic:token-tapper": OracleFixture(
         oracle_id="synthetic:token-tapper",
@@ -67,18 +69,66 @@ GOLD_ORACLE_FIXTURES: dict[str, OracleFixture] = {
         name="Phyrexian Altar",
         types=["Artifact"],
         type_line="Artifact",
-        # Real Oracle: any color. Tuned black → quarantine.
-        oracle_text="Sacrifice a creature: Add {B}.",
-        provenance=Provenance.ORACLE_DIVERGENT,
+        oracle_text="Sacrifice a creature: Add one mana of any color.",
+        provenance=Provenance.ORACLE_EXACT,
     ),
     "oracle:gravecrawler": OracleFixture(
         oracle_id="oracle:gravecrawler",
         name="Gravecrawler",
-        types=["Creature"],
+        types=["Creature", "Zombie"],
         type_line="Creature — Zombie",
-        # Activated return ≠ cast-from-GY + Zombie restriction → quarantine.
-        oracle_text="{B}: Return Gravecrawler from your graveyard to the battlefield.",
-        provenance=Provenance.ORACLE_DIVERGENT,
+        oracle_text=(
+            "This creature can't block.\n"
+            "You may cast this card from your graveyard as long as you control a Zombie."
+        ),
+        provenance=Provenance.ORACLE_EXACT,
+    ),
+    "oracle:midnight-guard": OracleFixture(
+        oracle_id="oracle:midnight-guard",
+        name="Midnight Guard",
+        types=["Creature", "Human", "Soldier"],
+        type_line="Creature — Human Soldier",
+        oracle_text="Whenever another creature enters, untap this creature.",
+        provenance=Provenance.ORACLE_EXACT,
+    ),
+    "oracle:presence-of-gond": OracleFixture(
+        oracle_id="oracle:presence-of-gond",
+        name="Presence of Gond",
+        types=["Enchantment", "Aura"],
+        type_line="Enchantment — Aura",
+        oracle_text=(
+            "Enchant creature\n"
+            'Enchanted creature has "{T}: Create a 1/1 green Elf Warrior creature token."'
+        ),
+        provenance=Provenance.ORACLE_EXACT,
+    ),
+    "oracle:thraben-doomsayer": OracleFixture(
+        oracle_id="oracle:thraben-doomsayer",
+        name="Thraben Doomsayer",
+        types=["Creature", "Human", "Cleric"],
+        type_line="Creature — Human Cleric",
+        oracle_text=(
+            "{T}: Create a 1/1 white Human creature token.\n"
+            "Fateful hour — As long as you have 5 or less life, "
+            "other creatures you control get +2/+2."
+        ),
+        provenance=Provenance.ORACLE_EXACT,
+    ),
+    "oracle:sanguine-bond": OracleFixture(
+        oracle_id="oracle:sanguine-bond",
+        name="Sanguine Bond",
+        types=["Enchantment"],
+        type_line="Enchantment",
+        oracle_text="Whenever you gain life, target opponent loses that much life.",
+        provenance=Provenance.ORACLE_EXACT,
+    ),
+    "oracle:exquisite-blood": OracleFixture(
+        oracle_id="oracle:exquisite-blood",
+        name="Exquisite Blood",
+        types=["Enchantment"],
+        type_line="Enchantment",
+        oracle_text="Whenever an opponent loses life, you gain that much life.",
+        provenance=Provenance.ORACLE_EXACT,
     ),
     "synthetic:persistent-phoenix": OracleFixture(
         oracle_id="synthetic:persistent-phoenix",

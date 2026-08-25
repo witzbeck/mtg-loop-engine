@@ -74,6 +74,15 @@ class InteractionIndex:
             out |= self.by_requires["mana"]
         if "mana" in cap.produces:
             out |= self.by_requires["mana"]
+        # Life-drain feedback (Bond/Blood, Vito/…).
+        if "life_gain" in cap.produces:
+            out |= self.by_triggers["gain_life"]
+        if "gain_life" in cap.triggers_on:
+            out |= self.by_produces["life_gain"]
+        if "life_loss" in cap.produces:
+            out |= self.by_triggers["opponent_lose_life"]
+        if "opponent_lose_life" in cap.triggers_on:
+            out |= self.by_produces["life_loss"]
         out.discard(oid)
         return out
 

@@ -899,6 +899,16 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
     ):
         return _proof_irrelevant(clause)
 
+    # Fateful hour / conditional life anthem (Thraben Doomsayer).
+    if re.match(
+        r"^(?:[A-Z][a-z]+(?: [a-z]+)? — )?"
+        r"As long as you have \d+ or less life, "
+        r"other creatures you control get [+-]\d+/[+-]\d+\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
     # Theros god devotion (joined with Indestructible on one Scryfall line).
     if re.match(
         r"^Indestructible(?:\s+As long as your devotion to \w+ is less than \w+, "

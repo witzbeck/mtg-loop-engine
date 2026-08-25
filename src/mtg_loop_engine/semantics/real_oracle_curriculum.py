@@ -107,6 +107,16 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         ),
         notes="Live Scryfall: untap-all on ETB; static is proof-irrelevant.",
     ),
+    "Thraben Doomsayer": RealOracleCurriculum(
+        name="Thraben Doomsayer",
+        types=["Creature", "Human", "Cleric"],
+        oracle_text=(
+            "{T}: Create a 1/1 white Human creature token.\n"
+            "Fateful hour — As long as you have 5 or less life, "
+            "other creatures you control get +2/+2."
+        ),
+        notes="Tap-token; Fateful hour anthem is proof-irrelevant.",
+    ),
     "Sanguine Bond": RealOracleCurriculum(
         name="Sanguine Bond",
         types=["Enchantment"],

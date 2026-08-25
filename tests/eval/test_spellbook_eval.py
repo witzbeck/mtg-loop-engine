@@ -104,11 +104,11 @@ def test_gold_extra_adjudications_cover_discovered_extras():
         collect_physics_pool_extras,
     )
 
-    # Wave 0: Oracle gold empty → no product gold-pool extras.
+    # Wave 1: Oracle gold has four pairs; extras may include other EXACT discoveries.
     extras = collect_gold_pool_extras()
     keys = {frozenset({r.left_id, r.right_id}) for r in extras}
     assert keys == set(GOLD_EXTRA_ADJUDICATIONS)
-    assert len(extras) == 0
+    assert len(extras) == len(GOLD_EXTRA_ADJUDICATIONS)
 
     physics_extras = collect_physics_pool_extras()
     physics_keys = {frozenset({r.left_id, r.right_id}) for r in physics_extras}

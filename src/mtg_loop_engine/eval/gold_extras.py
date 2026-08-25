@@ -42,9 +42,14 @@ def _pair_has_fixture(left_id: str, right_id: str) -> bool:
     return bool({left_id, right_id} & FIXTURE_ORACLE_IDS)
 
 
-# Wave 0: Oracle gold_core is empty → no Oracle gold-pool extras yet.
-# Product precision stays null until ORACLE_EXACT×ORACLE_EXACT discoveries exist.
-GOLD_EXTRA_ADJUDICATIONS: dict[frozenset[str], tuple[AdjudicationClass, str]] = {}
+# Wave 1: Oracle gold_core has four pairs; extras are other Oracle discoveries
+# beyond labeled gold (still precision-eligible only if EXACT×EXACT + adjudicated).
+GOLD_EXTRA_ADJUDICATIONS: dict[frozenset[str], tuple[AdjudicationClass, str]] = {
+    frozenset({"oracle:intruder-alarm", "oracle:presence-of-gond"}): (
+        AdjudicationClass.VALID_STRICT_TWO_CARD,
+        "Alarm+Gond rediscovers with aura-host seed; valid Oracle loop not yet promoted to gold_core.",
+    ),
+}
 
 # Physics-suite extras (discoveries beyond labeled physics positives). Not
 # product-precision. Historical Wave-0-migration adjudication set.

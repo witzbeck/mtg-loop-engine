@@ -37,12 +37,17 @@ KNOWN_EXACT = {
     "oracle:ashnods-altar",
     "oracle:viscera-seer",
     "oracle:soul-warden",
-}
-
-KNOWN_DIVERGENT = {
     "oracle:phyrexian-altar",
     "oracle:gravecrawler",
     "oracle:intruder-alarm",
+    "oracle:midnight-guard",
+    "oracle:presence-of-gond",
+    "oracle:thraben-doomsayer",
+    "oracle:sanguine-bond",
+    "oracle:exquisite-blood",
+}
+
+KNOWN_DIVERGENT = {
     "oracle:blood-artist",
     "oracle:reassembling-skeleton",
     "oracle:rest-in-peace",
@@ -104,11 +109,14 @@ def test_precision_requires_both_exact():
 
 
 def test_synthetic_extra_pairs_labelled_invalid():
-    assert GOLD_EXTRA_ADJUDICATIONS == {}
     for pair, (cls, _) in PHYSICS_EXTRA_ADJUDICATIONS.items():
         ids = list(pair)
         if _pair_has_fixture(ids[0], ids[1]):
             assert cls == AdjudicationClass.INVALID_CANDIDATE_DATA, pair
+    # Oracle gold extras (Wave 1) are EXACT×EXACT and may be VALID.
+    for pair, (cls, _) in GOLD_EXTRA_ADJUDICATIONS.items():
+        assert not _pair_has_fixture(*pair)
+        assert cls == AdjudicationClass.VALID_STRICT_TWO_CARD
 
 
 def test_divergent_skeleton_altar_still_valid_physics():

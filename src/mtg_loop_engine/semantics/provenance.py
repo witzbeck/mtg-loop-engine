@@ -30,9 +30,6 @@ RULES_RELEVANT_FIELDS: tuple[str, ...] = (
 # Shrink entries when migrating to SYNTHETIC or ORACLE_EXACT; never grow casually.
 FROZEN_ORACLE_DIVERGENT_IDS: frozenset[str] = frozenset(
     {
-        "oracle:phyrexian-altar",
-        "oracle:gravecrawler",
-        "oracle:intruder-alarm",
         "oracle:blood-artist",
         "oracle:reassembling-skeleton",
         "oracle:rest-in-peace",

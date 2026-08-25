@@ -631,6 +631,19 @@ class Executor:
             return None
         if op == "noop":
             return None
+        if op == "seed_gain_life":
+            # Explicit Path-b generic life-gain seed (ADR 0002 fodder-style).
+            qty = 1
+            state.life_you += qty
+            state.bump("life_gain", qty)
+            source = state.permanents.get(step.actor) if step.actor else None
+            if source is None:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_ACTION,
+                    "seed_gain_life needs actor with GAIN_LIFE triggers",
+                )
+            self._queue_triggers(state, TriggerEvent.GAIN_LIFE, source, amount=qty)
+            return None
         if op == "opponent_must_cooperate":
             return ExecError(
                 VerificationStatus.OPPONENT_COOPERATION_REQUIRED,

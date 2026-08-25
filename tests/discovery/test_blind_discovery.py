@@ -45,11 +45,13 @@ def test_blind_discovery_rediscovers_physics_core():
         assert "discovered_without_pair_labels" in hit.witness.assumptions
 
 
-def test_oracle_gold_discovery_vacuous_when_empty():
-    """Wave 0: empty Oracle gold rediscovers vacuously."""
+def test_oracle_gold_discovery_rediscovers_promoted_pairs():
+    """Wave 1+: Oracle gold_core pairs rediscover without pair labels."""
     pool = gold_core_card_pool()
     gold = gold_core_pair_keys()
-    report = discover_loops(pool, max_depth=6)
-    assert gold <= report.verified_pairs
-    assert len(gold) == 0
-    assert report.cards == 0
+    report = discover_loops(pool, max_depth=8)
+    missing = gold - report.verified_pairs
+    assert gold
+    assert not missing, (
+        f"failed to rediscover {len(missing)}/{len(gold)} Oracle gold pairs: {missing}"
+    )

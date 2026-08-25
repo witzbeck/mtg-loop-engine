@@ -1,10 +1,12 @@
 {
-  "extras_total": 0,
-  "extras_real_card_pairs": 0,
+  "extras_total": 1,
+  "extras_real_card_pairs": 1,
   "extras_fixture_pairs": 0,
-  "adjudicated": 0,
-  "valid": 0,
-  "precision": null,
-  "by_class": {},
-  "notes": "ADR 0007 Wave 0: Oracle gold_core empty; gold-pool extras from Oracle pool are 0. Precision denominator remains ORACLE_EXACT\u00d7ORACLE_EXACT only (is_precision_eligible_ids). Pre-migration gold-pool precision 1.0 and the former 11 physics extras are historical / moved to physics_pool_extras — not comparable."
+  "adjudicated": 1,
+  "valid": 1,
+  "precision": 1.0,
+  "by_class": {
+    "valid_strict_two_card": 1
+  },
+  "notes": "ADR 0007 Wave 1: first ORACLE_EXACT\u00d7ORACLE_EXACT gold-pool extra (Alarm+Gond). Precision 1.0 on eligible denominator. Pre-migration gold-pool precision 1.0 on divergent pairs is historical and not comparable. Physics extras live under PHYSICS_EXTRA_ADJUDICATIONS."
 }
