@@ -105,6 +105,32 @@ def test_store_roundtrip(tmp_path: Path):
     other.close()
 
 
+def test_store_close_is_idempotent(tmp_path: Path):
+    store = AdjudicationStore(tmp_path / "adj.duckdb")
+    store.close()
+    store.close()
+
+
+def test_store_context_manager_closes(tmp_path: Path):
+    path = tmp_path / "adj.duckdb"
+    with AdjudicationStore(path) as store:
+        assert store.list_candidates() == []
+    # Re-open after context exit proves the file lock was released.
+    again = AdjudicationStore(path)
+    again.close()
+
+
+def test_lock_holder_pid_parses_duckdb_message():
+    from mtg_loop_engine.eval.store import lock_holder_pid
+
+    msg = (
+        'Could not set lock on file "/tmp/x.duckdb": Conflicting lock is held in '
+        "/usr/bin/python3.13 (PID 992165) by user fr333y3d3a"
+    )
+    assert lock_holder_pid(msg) == 992165
+    assert lock_holder_pid("unrelated") is None
+
+
 def test_second_open_while_locked_raises_duckdb_lock_error(tmp_path: Path):
     """Cross-process lock (same-process DuckDB allows multiple connections)."""
     import subprocess
@@ -141,7 +167,7 @@ def test_second_open_while_locked_raises_duckdb_lock_error(tmp_path: Path):
             if time.time() > deadline:
                 raise AssertionError("timed out waiting for holder lock")
             time.sleep(0.05)
-        with pytest.raises(DuckDBLockError, match="DuckDB lock"):
+        with pytest.raises(DuckDBLockError, match="Lock holder PID"):
             AdjudicationStore(path)
     finally:
         holder.terminate()

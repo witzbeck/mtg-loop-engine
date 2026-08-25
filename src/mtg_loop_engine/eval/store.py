@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import atexit
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Self
 
 import duckdb
 
@@ -18,6 +21,8 @@ from mtg_loop_engine.eval.schema import (
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_DB = REPO_ROOT / "data" / "eval" / "adjudications.duckdb"
 DEFAULT_JSONL = REPO_ROOT / "eval" / "adjudications" / "gold_pool_extras.jsonl"
+
+_LOCK_PID_RE = re.compile(r"\(PID (\d+)\)")
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS candidates (
@@ -50,17 +55,32 @@ class DuckDBLockError(RuntimeError):
     """Raised when another process already holds the adjudications DuckDB file lock."""
 
 
+def lock_holder_pid(message: str) -> int | None:
+    """Parse the holding PID from a DuckDB conflicting-lock message, if present."""
+    match = _LOCK_PID_RE.search(message)
+    return int(match.group(1)) if match else None
+
+
+def _format_lock_error(db_path: Path, duckdb_msg: str) -> str:
+    lines = [
+        f"Could not open {db_path}: another process holds the DuckDB lock.",
+        "Stop other `adjudicate-workbench` / Streamlit instances, then retry.",
+        "Ctrl+C the terminal that launched the workbench (closing the browser tab is not enough).",
+    ]
+    pid = lock_holder_pid(duckdb_msg)
+    if pid is not None:
+        lines.append(f"Lock holder PID: {pid} — try: kill {pid}")
+    lines.append(f"({duckdb_msg})")
+    return "\n".join(lines)
+
+
 def _connect(db_path: Path) -> duckdb.DuckDBPyConnection:
     try:
         return duckdb.connect(str(db_path))
     except duckdb.IOException as exc:
         msg = str(exc)
         if "Conflicting lock" in msg or "Could not set lock" in msg:
-            raise DuckDBLockError(
-                f"Could not open {db_path}: another process holds the DuckDB lock.\n"
-                f"Stop other `adjudicate-workbench` / Streamlit instances, then retry.\n"
-                f"({msg})"
-            ) from exc
+            raise DuckDBLockError(_format_lock_error(db_path, msg)) from exc
         raise
 
 
@@ -77,8 +97,11 @@ class AdjudicationStore:
         self.db_path = Path(db_path or DEFAULT_DB)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.con = _connect(self.db_path)
+        self._closed = False
         self.con.execute(_SCHEMA)
         self._migrate()
+        # Process exit (incl. Streamlit SIGINT) should release the file lock.
+        atexit.register(self.close)
 
     def _migrate(self) -> None:
         cols = {
@@ -91,7 +114,16 @@ class AdjudicationStore:
             )
 
     def close(self) -> None:
+        if self._closed:
+            return
+        self._closed = True
         self.con.close()
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(self, *_exc: object) -> None:
+        self.close()
 
     def upsert_candidate(self, record: CandidateRecord) -> None:
         payload = record.model_dump(mode="json")

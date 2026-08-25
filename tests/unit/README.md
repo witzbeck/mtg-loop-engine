@@ -35,7 +35,7 @@ Individual modules → **THIS** → fast regression signals.
 
 ## Main entry points
 
-- `test_interactions.py`, `test_explorer.py`, `test_search_boundary.py`, `test_scryfall_ingest.py`, `test_recurrence.py`, `test_executor_soundness.py`, `test_once_per_turn_recurrence.py`, `test_output_gross_vs_net.py`, `test_verifier_outputs.py`, `test_spellbook_filter.py`, …
+- `test_interactions.py`, `test_explorer.py`, `test_search_boundary.py`, `test_scryfall_ingest.py`, `test_recurrence.py`, `test_executor_soundness.py`, `test_once_per_turn_recurrence.py`, `test_output_gross_vs_net.py`, `test_verifier_outputs.py`, `test_spellbook_filter.py`, `test_managed_subprocess.py`, …
 
 ## Data contracts
 

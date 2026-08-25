@@ -72,7 +72,9 @@ LAR v2 contracts (`lar_contracts.py`, `lar_calibration.py`) support ephemeral ru
 - Gold-extra persistence expects adjudications to cover **currently discovered** extras
   (count locked in `tests/eval/test_spellbook_eval.py`). Frozen baseline JSON matches.
 - Workbench: **one** `adjudicate-workbench` process at a time — DuckDB file lock; Streamlit
-  keeps a single cached connection per process.
+  keeps a single cached connection per process. Stop via Ctrl+C in the launch terminal
+  (CLI forwards signals to the Streamlit process group and closes the store); closing the
+  browser tab alone leaves the lock held.
 ## Main entry points
 
 | Module | Role |
