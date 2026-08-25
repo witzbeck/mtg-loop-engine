@@ -348,7 +348,7 @@ def _get_store(db_path: str) -> AdjudicationStore:
     """One DuckDB connection per Streamlit process (reruns must not reopen the file)."""
     import streamlit as st
 
-    @st.cache_resource
+    @st.cache_resource(on_release=lambda store: store.close())
     def _cached(path: str) -> AdjudicationStore:
         return AdjudicationStore(Path(path))
 
@@ -368,7 +368,10 @@ def render(
         layout="wide",
     )
     st.title(":material/loop: MTG Loop Engine — adjudication workbench")
-    st.caption("M4 research instrument. Not the M7 explorer. One workbench process at a time.")
+    st.caption(
+        "M4 research instrument. Not the M7 explorer. One workbench process at a time. "
+        "Stop with Ctrl+C in the launch terminal (closing this tab does not release DuckDB)."
+    )
 
     path = db_path or DEFAULT_DB
     try:
