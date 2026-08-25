@@ -16,8 +16,9 @@ from mtg_loop_engine.semantics.oracle_fixtures import GOLD_ORACLE_FIXTURES, Orac
 
 AUDITED_DIR = Path(__file__).resolve().parent / "audited" / "records"
 
-# Rules-relevant fields consumed by compilation / verification today.
-# Expand when the compiler begins consuming mana cost, colors, keywords, faces, etc.
+# Rules-relevant fields consumed by compilation / verification / product
+# state construction today (ADR 0007 + ADR 0010). Expand deliberately when
+# a claim consumes a new field — exactness is not “model the whole card.”
 RULES_RELEVANT_FIELDS: tuple[str, ...] = (
     "oracle_id",
     "name",

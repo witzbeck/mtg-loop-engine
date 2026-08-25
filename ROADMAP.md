@@ -190,6 +190,7 @@ Post–slice 7: remeasure with `spellbook_absent_discovery.py` / `spellbook_comp
 | Verifier contract | Witness-in / proof-out; search never inside verifier |
 | Mandatory recurrence | Verifier merges once-per-turn + pending-trigger dims (ADR 0008); witnesses cannot omit them to soft-pass |
 | Claim-bound proof_hash | `proof_hash` binds full claim payload; proof schema 0.2.0 (ADR 0009) |
+| Identity vs state construction | Exactness ≠ full-card model; printed P/T/costs enter when consumed (ADR 0010) |
 | Fail-closed coverage | `PARTIAL_RELEVANT_TO_PROOF` → never `VERIFIED` |
 | Determinism | V1 deterministic-only; nondeterministic → typed rejection |
 | LLM ban | No LLM on the `VERIFIED` path, indefinitely |

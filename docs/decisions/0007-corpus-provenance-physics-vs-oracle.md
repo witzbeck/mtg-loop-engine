@@ -86,6 +86,7 @@ verification must mean something; precision must not be optimized against a soft
 
 - Verifier-owned mandatory recurrence dimensions — landed as ADR 0008.
 - Stronger claim/`proof_hash` binding — landed as ADR 0009.
+- Oracle identity vs state-construction completeness — landed as ADR 0010.
 - Full Scryfall bulk in CI — out of scope; audited subset only.
 
 ## Consequences
