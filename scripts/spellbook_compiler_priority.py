@@ -1,17 +1,27 @@
 #!/usr/bin/env python3
-"""Rank Spellbook compiler gaps from a variant JSONL + local Scryfall snapshot."""
+"""Rank Spellbook compiler gaps and emit an M5.1 compiler-frontier report.
+
+Live diagnostic under ``data/eval/`` (gitignored). Pair unlock counts are
+counterfactual both-COMPLETE eligibility — not rediscovery.
+"""
 
 from __future__ import annotations
 
 import argparse
 import json
-import re
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
 from mtg_loop_engine.benchmark.spellbook import is_conventional_two_card
 from mtg_loop_engine.cards.ingest import load_oracle_cards, read_manifest
+from mtg_loop_engine.corpus.gold_extended.oracle_gaps import oracle_gap_catalog
+from mtg_loop_engine.eval.compiler_frontier import (
+    build_frontier,
+    frontier_to_jsonable,
+    normalize_fragment,
+    render_frontier_markdown,
+)
 from mtg_loop_engine.eval.metrics import RecoveryReport
 from mtg_loop_engine.eval.oracle_lookup import oracle_text_from_card, types_from_line
 from mtg_loop_engine.eval.spellbook_eval import (
@@ -45,11 +55,6 @@ MECHANIC_NEEDLES: dict[str, tuple[str, ...]] = {
     "counters_damage": ("counter", "damage", "ping", "-X/-X"),
     "cost_reduction": ("cost", "less to activate", "training grounds"),
 }
-
-
-def _normalize_fragment(text: str) -> str:
-    collapsed = re.sub(r"\s+", " ", text.strip().lower())
-    return collapsed[:120]
 
 
 def _lookup_keys(name: str) -> list[str]:
@@ -101,34 +106,12 @@ def tag_mechanic(*texts: str) -> list[str]:
     return hits or ["other"]
 
 
-def run_analysis(
-    variants_path: Path,
-    scryfall_dir: Path,
-    *,
-    write_recovery: Path | None = None,
+def _legacy_recovery_section(
+    recovery: RecoveryReport,
+    cards_by_fold: dict[str, CardSemantics],
 ) -> dict[str, Any]:
-    variants = load_variant_jsonl(variants_path)
-    selected = [v for v in variants if is_conventional_two_card(v)]
-    all_names: set[str] = set()
-    for variant in selected:
-        all_names.update(variant_card_names(variant))
-
-    scryfall_manifest = read_manifest(scryfall_dir)
-    name_index, unresolved_names = build_name_index(scryfall_dir, all_names)
-
-    cards_by_name: dict[str, CardSemantics] = {}
-    for name in all_names:
-        sem = lookup_semantics(name, name_index)
-        if sem is not None:
-            cards_by_name[name.casefold()] = sem
-
-    recovery = evaluate_reference_subset(selected, cards_by_name=cards_by_name)
-    if write_recovery is not None:
-        write_recovery.parent.mkdir(parents=True, exist_ok=True)
-        write_recovery.write_text(recovery.model_dump_json(indent=2) + "\n", encoding="utf-8")
-
+    """Preserve historical mechanic/fragment frequency diagnostics."""
     fragment_pair_counts: Counter[str] = Counter()
-    fragment_card_counts: Counter[str] = Counter()
     card_pair_counts: Counter[str] = Counter()
     mechanic_pair_counts: Counter[str] = Counter()
     detail_breakdown: Counter[str] = Counter()
@@ -150,44 +133,26 @@ def run_analysis(
 
         for name in row.names:
             card_pair_counts[name] += 1
-            sem = cards_by_name.get(name.casefold())
+            sem = cards_by_fold.get(name.casefold())
             if sem is None:
                 continue
             for frag in sem.unsupported_fragments:
-                norm = _normalize_fragment(frag)
+                norm = normalize_fragment(frag)
                 fragment_pair_counts[norm] += 1
-                fragment_card_counts[f"{name}::{norm}"] += 1
-
-    unresolved_dfc = [n for n in unresolved_names if "//" in n]
-    unresolved_other = [n for n in unresolved_names if "//" not in n]
 
     return {
-        "inputs": {
-            "variants_path": str(variants_path),
-            "variant_count": len(selected),
-            "unique_card_names": len(all_names),
-            "scryfall_snapshot_hash": scryfall_manifest.get("oracle_snapshot_hash"),
-            "spellbook_pages_note": "Use data/spellbook/latest manifest for Spellbook hash",
-        },
-        "recovery_counts": recovery.counts.model_dump(),
         "detail_breakdown": dict(detail_breakdown.most_common()),
         "top_cards_in_failed_pairs": card_pair_counts.most_common(25),
         "top_unsupported_fragments": fragment_pair_counts.most_common(30),
         "mechanic_family_pressure": mechanic_pair_counts.most_common(),
         "mechanic_examples": {k: v[:3] for k, v in example_pairs.items()},
-        "unresolved_names": {
-            "dfc_count": len(unresolved_dfc),
-            "other_count": len(unresolved_other),
-            "dfc_top": Counter(unresolved_dfc).most_common(15),
-            "other_top": Counter(unresolved_other).most_common(10),
-        },
-        "curriculum_recommendations": _recommendations(
+        "legacy_curriculum_recommendations": _legacy_recommendations(
             fragment_pair_counts, mechanic_pair_counts, recovery.counts.eligible
         ),
     }
 
 
-def _recommendations(
+def _legacy_recommendations(
     fragments: Counter[str],
     mechanics: Counter[str],
     eligible: int,
@@ -196,7 +161,7 @@ def _recommendations(
     if eligible == 0:
         recs.append(
             {
-                "priority": "P0",
+                "priority": "legacy-P0",
                 "action": "Expand deterministic patterns until eligible >= 1 (M4 gate)",
                 "rationale": "Recall undefined while eligible=0",
             }
@@ -204,73 +169,196 @@ def _recommendations(
     for rank, (family, count) in enumerate(mechanics.most_common(5), start=1):
         recs.append(
             {
-                "priority": f"P{rank}",
+                "priority": f"legacy-mechanic-{rank}",
                 "action": f"Compiler curriculum: {family} ({count} failed pairs tagged)",
-                "rationale": "Highest Spellbook conventional-two-card pressure in live diagnostic",
+                "rationale": "Heuristic mechanic pressure (prefer frontier tiers)",
             }
         )
     for rank, (frag, count) in enumerate(fragments.most_common(5), start=1):
         recs.append(
             {
-                "priority": f"fragment-{rank}",
+                "priority": f"legacy-fragment-{rank}",
                 "action": f"Pattern for: {frag[:100]}",
-                "rationale": f"Appears in {count} pair compilations",
+                "rationale": f"Appears in {count} pair compilations (frequency, not unlock)",
             }
         )
     return recs
 
 
-def render_markdown(report: dict[str, Any]) -> str:
-    counts = report["recovery_counts"]
-    lines = [
-        "# Spellbook compiler priority report (live diagnostic)",
-        "",
-        "## Recovery summary",
-        "",
-        f"- Selected pairs: **{counts['selected']}**",
-        f"- Compiled: **{counts['compiled']}**",
-        f"- Supported / eligible / rediscovered: **{counts['supported']}** / "
-        f"**{counts['eligible']}** / **{counts['rediscovered']}**",
-        f"- Compiler unsupported: **{counts['compiler_unsupported']}**",
-        "",
-        "## Detail breakdown",
-        "",
-    ]
-    for detail, n in report["detail_breakdown"].items():
-        lines.append(f"- `{detail}`: {n}")
-    lines.extend(["", "## Mechanic family pressure (heuristic tags)", ""])
-    for family, n in report["mechanic_family_pressure"]:
-        lines.append(f"- **{family}**: {n} pairs")
-        for ex in report["mechanic_examples"].get(family, []):
-            lines.append(f"  - e.g. {' + '.join(ex['names'])}")
-    lines.extend(["", "## Top unsupported Oracle fragments", ""])
-    for frag, n in report["top_unsupported_fragments"][:15]:
-        lines.append(f"- ({n}) `{frag}`")
-    lines.extend(["", "## Top cards appearing in failed pairs", ""])
-    for name, n in report["top_cards_in_failed_pairs"][:15]:
-        if " + " not in name:
-            lines.append(f"- {name}: {n}")
-    unresolved = report["unresolved_names"]
-    lines.extend(
-        [
-            "",
-            "## Unresolved card names",
-            "",
-            f"- DFC / split names: {unresolved['dfc_count']}",
-            f"- Other unresolved: {unresolved['other_count']}",
-            "",
-            "## Curriculum recommendations",
-            "",
-        ]
+def run_analysis(
+    variants_path: Path,
+    scryfall_dir: Path,
+    *,
+    write_recovery: Path | None = None,
+    skip_recovery: bool = False,
+    simulate_unlocks: bool = False,
+) -> dict[str, Any]:
+    if simulate_unlocks:
+        raise SystemExit(
+            "--simulate-unlocks is reserved for faithful rediscovery simulation; "
+            "not implemented in M5.1 (pair_unlock remains both-COMPLETE only)."
+        )
+
+    variants = load_variant_jsonl(variants_path)
+    selected = [v for v in variants if is_conventional_two_card(v)]
+    all_names: set[str] = set()
+    for variant in selected:
+        all_names.update(variant_card_names(variant))
+
+    # Staged oracle_gaps compete with the frontier — include even if rare in Spellbook.
+    gap_catalog = oracle_gap_catalog()
+    for gap in gap_catalog:
+        all_names.add(gap.left_name)
+        all_names.add(gap.right_name)
+
+    scryfall_manifest = read_manifest(scryfall_dir)
+    name_index, unresolved_names = build_name_index(scryfall_dir, all_names)
+
+    cards_by_fold: dict[str, CardSemantics] = {}
+    cards_by_display: dict[str, CardSemantics] = {}
+    for name in all_names:
+        sem = lookup_semantics(name, name_index)
+        if sem is not None:
+            cards_by_fold[name.casefold()] = sem
+            cards_by_display[sem.name] = sem
+
+    recovery: RecoveryReport | None = None
+    if not skip_recovery:
+        recovery = evaluate_reference_subset(selected, cards_by_name=cards_by_fold)
+        if write_recovery is not None:
+            write_recovery.parent.mkdir(parents=True, exist_ok=True)
+            write_recovery.write_text(
+                recovery.model_dump_json(indent=2) + "\n", encoding="utf-8"
+            )
+
+    conventional_pairs: list[tuple[str, str]] = []
+    for variant in selected:
+        names = variant_card_names(variant)
+        if len(names) == 2:
+            conventional_pairs.append((names[0], names[1]))
+
+    frontier = build_frontier(
+        cards_by_display,
+        conventional_pairs,
+        unresolved_names=unresolved_names,
+        oracle_gaps=gap_catalog,
     )
+
+    unresolved_dfc = [n for n in unresolved_names if "//" in n]
+    unresolved_other = [n for n in unresolved_names if "//" not in n]
+    if recovery is not None:
+        legacy = _legacy_recovery_section(recovery, cards_by_fold)
+        recovery_counts = recovery.counts.model_dump()
+    else:
+        legacy = {
+            "detail_breakdown": {},
+            "top_cards_in_failed_pairs": [],
+            "top_unsupported_fragments": [],
+            "mechanic_family_pressure": [],
+            "mechanic_examples": {},
+            "legacy_curriculum_recommendations": [],
+        }
+        recovery_counts = {
+            "selected": len(selected),
+            "compiled": 0,
+            "supported": 0,
+            "eligible": 0,
+            "rediscovered": 0,
+            "compiler_unsupported": 0,
+            "join_miss": 0,
+            "search_miss": 0,
+            "verifier_rejection": 0,
+            "classification_mismatch": 0,
+            "skipped": True,
+        }
+
+    curriculum_recommendations: list[dict[str, str]] = []
+    for tier_key in ("P0", "P1"):
+        tier_rows = frontier.tiers.get(tier_key) or []
+        for row in tier_rows[:8]:
+            curriculum_recommendations.append(
+                {
+                    "priority": str(row.tier),
+                    "action": (
+                        f"Close fragment ({row.gap_kind}): {row.fragment[:100]}"
+                    ),
+                    "rationale": (
+                        f"cards_unlocked={row.cards_unlocked}, "
+                        f"pairs_both_COMPLETE={row.pairs_unlocked_both_complete}, "
+                        f"sole_gap={row.sole_gap_cards}"
+                    ),
+                }
+            )
+
+    return {
+        "inputs": {
+            "variants_path": str(variants_path),
+            "variant_count": len(selected),
+            "unique_card_names": len(all_names),
+            "scryfall_snapshot_hash": scryfall_manifest.get("oracle_snapshot_hash"),
+            "spellbook_pages_note": "Use data/spellbook/latest manifest for Spellbook hash",
+            "oracle_gaps_included": [g.proposed_gold_id for g in gap_catalog],
+            "recovery_skipped": skip_recovery,
+        },
+        "recovery_counts": recovery_counts,
+        "frontier": frontier_to_jsonable(frontier),
+        "unresolved_names": {
+            "dfc_count": len(unresolved_dfc),
+            "other_count": len(unresolved_other),
+            "dfc_top": Counter(unresolved_dfc).most_common(15),
+            "other_top": Counter(unresolved_other).most_common(10),
+        },
+        **legacy,
+        "curriculum_recommendations": curriculum_recommendations,
+    }
+
+
+def render_markdown(report: dict[str, Any]) -> str:
+    from mtg_loop_engine.eval.compiler_frontier import CompilerFrontierReport
+
+    frontier = CompilerFrontierReport.model_validate(report["frontier"])
+    parts = [render_frontier_markdown(frontier).rstrip(), ""]
+
+    counts = report["recovery_counts"]
+    if counts.get("skipped"):
+        parts.extend(
+            [
+                "# Recovery appendix",
+                "",
+                "_Skipped (`--frontier-only`). Re-run without that flag for eligible/rediscovered._",
+                "",
+            ]
+        )
+    else:
+        parts.extend(
+            [
+                "# Recovery appendix (legacy frequency diagnostic)",
+                "",
+                "## Recovery summary",
+                "",
+                f"- Selected pairs: **{counts['selected']}**",
+                f"- Compiled: **{counts['compiled']}**",
+                f"- Supported / eligible / rediscovered: **{counts['supported']}** / "
+                f"**{counts['eligible']}** / **{counts['rediscovered']}**",
+                f"- Compiler unsupported: **{counts['compiler_unsupported']}**",
+                "",
+                "## Mechanic family pressure (heuristic tags)",
+                "",
+            ]
+        )
+        for family, n in report["mechanic_family_pressure"]:
+            parts.append(f"- **{family}**: {n} pairs")
+            for ex in report["mechanic_examples"].get(family, []):
+                parts.append(f"  - e.g. {' + '.join(ex['names'])}")
+    parts.extend(["", "## Curriculum recommendations (from frontier P0/P1)", ""])
     for rec in report["curriculum_recommendations"]:
-        lines.append(f"- **{rec['priority']}** — {rec['action']} ({rec['rationale']})")
-    lines.append("")
-    lines.append(
+        parts.append(f"- **{rec['priority']}** — {rec['action']} ({rec['rationale']})")
+    parts.append("")
+    parts.append(
         "_Live diagnostic only — not a certified baseline. "
         "See `docs/EVALUATION.md` for denominator rules._"
     )
-    return "\n".join(lines) + "\n"
+    return "\n".join(parts) + "\n"
 
 
 def main() -> int:
@@ -280,7 +368,21 @@ def main() -> int:
     parser.add_argument("--out-json", type=Path, default=DEFAULT_OUT_JSON)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
     parser.add_argument("--recovery-out", type=Path, default=DEFAULT_RECOVERY)
-    parser.add_argument("--no-recovery", action="store_true")
+    parser.add_argument(
+        "--no-recovery",
+        action="store_true",
+        help="Do not write the recovery JSON artifact (still runs recovery unless --frontier-only)",
+    )
+    parser.add_argument(
+        "--frontier-only",
+        action="store_true",
+        help="Skip reference recovery explore; emit frontier + pool stats only (faster)",
+    )
+    parser.add_argument(
+        "--simulate-unlocks",
+        action="store_true",
+        help="Reserved: rediscovery simulation (not implemented in M5.1)",
+    )
     args = parser.parse_args()
 
     if not args.variants.exists():
@@ -291,12 +393,31 @@ def main() -> int:
     report = run_analysis(
         args.variants,
         args.scryfall_dir,
-        write_recovery=None if args.no_recovery else args.recovery_out,
+        write_recovery=None if (args.no_recovery or args.frontier_only) else args.recovery_out,
+        skip_recovery=args.frontier_only,
+        simulate_unlocks=args.simulate_unlocks,
     )
     args.out_json.parent.mkdir(parents=True, exist_ok=True)
     args.out_json.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     args.out_md.write_text(render_markdown(report), encoding="utf-8")
-    print(json.dumps({"out_json": str(args.out_json), "counts": report["recovery_counts"]}, indent=2))
+    frontier = report["frontier"]
+    print(
+        json.dumps(
+            {
+                "out_json": str(args.out_json),
+                "counts": report["recovery_counts"],
+                "frontier_pool": {
+                    "complete": frontier["complete_cards"],
+                    "partial": frontier["partial_cards"],
+                    "unresolved": frontier["unresolved_cards"],
+                },
+                "tier_counts": {
+                    k: len(v) for k, v in frontier.get("tiers", {}).items()
+                },
+            },
+            indent=2,
+        )
+    )
     return 0
 
 

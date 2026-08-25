@@ -33,7 +33,7 @@ Tests for evaluation instrumentation: prerequisite **detection**, search partici
 
 ## Main entry points
 
-- `test_classify_store.py`, `test_spellbook_eval.py`, `test_fixture_detection.py`, `test_narrate.py`, …
+- `test_classify_store.py`, `test_spellbook_eval.py`, `test_compiler_frontier.py`, `test_fixture_detection.py`, `test_narrate.py`, …
 
 ## Data contracts
 

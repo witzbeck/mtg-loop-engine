@@ -10,14 +10,15 @@ Gates: [`../../ROADMAP.md`](../../ROADMAP.md). Denominators: [`../EVALUATION.md`
 
 ```mermaid
 graph TB;
-  m4exit[M4 exit] --> pool[COMPLETE cards from Spellbook names];
-  pool --> discover[Blind discover_loops];
+  frontier[M5.1 frontier report] --> slice[M5.2 curriculum slice];
+  slice --> discover[Blind discover_loops];
   discover --> label[classify vs Spellbook pairs];
   label --> inRef[IN_REFERENCE];
   label --> absent[ABSENT_FROM_REFERENCE];
   absent --> human[Human adjudication];
   human --> novel[NOVEL];
-  pool --> curriculum[Compiler curriculum grows COMPLETE pool];
+  human --> contracts[Regressions / taxonomy];
+  contracts --> frontier;
 ```
 
 ### 1. Absent-discovery labeling ✓ (path shipped)
@@ -27,7 +28,33 @@ graph TB;
 - Tests: `tests/eval/test_reference_absent.py`
 - **Never** auto-set `NOVEL` from this path.
 
-### 2. Grow COMPLETE coverage
+### 1b. Compiler frontier (M5.1) ✓ tool / ritual
+
+Choose Slice 8+ from evidence, not intuition.
+
+```bash
+uv run python scripts/spellbook_compiler_priority.py
+```
+
+Live outputs (gitignored): `data/eval/compiler_priority_report.{json,md}`.
+
+Library: `mtg_loop_engine.eval.compiler_frontier`. Ranking inputs:
+
+| Field | Meaning |
+| --- | --- |
+| `distance_to_complete` | Unsupported proof-relevant fragment count |
+| `gap_kind` | `pattern_existing_physics` / `reusable_new_primitive` / `substantial_rules` |
+| `cards_unlocked` | Cards that become COMPLETE if that fragment closes |
+| `pairs_unlocked_both_complete` | Conventional pairs that become **both-COMPLETE** (counterfactual eligibility — **not** rediscovery) |
+| Tiers P0 / P1 / P2 | Coarse human decision aid; no weighted scalar score |
+
+Staged `oracle_gaps` (Mikaeus / Saffi) appear in the report and **compete** with other gaps — no privileged sequencing.
+
+**Curriculum PR evidence (durable trail):** paste the relevant P0/P1 rows, pair-unlock estimates, and why that gap beat nearby alternatives. Do **not** maintain a perpetually updated `frontier_latest.md`.
+
+`--simulate-unlocks` is reserved for faithful rediscovery simulation (not implemented in M5.1).
+
+### 2. Grow COMPLETE coverage (M5.2)
 
 **Goal:** enlarge the pool of Spellbook-named cards that compile `COMPLETE`, so blind discovery can surface `ABSENT_FROM_REFERENCE` candidates. Do **not** optimize for Spellbook pair recall as the primary M5 metric.
 
@@ -36,6 +63,7 @@ graph TB;
 1. `# COMPLETE` among Spellbook names (`spellbook_absent_discovery.py` / priority script)
 2. `absent_from_reference` count from absent discovery
 3. Pair `eligible` / `rediscovered` from `spellbook_compiler_priority.py` (secondary)
+4. Frontier P0/P1 citation for the chosen gap
 
 ```bash
 uv run python scripts/spellbook_compiler_priority.py
@@ -49,9 +77,9 @@ uv run python scripts/spellbook_absent_discovery.py
 | Proof-irrelevant statics / riders | Clause does not drive modeled loop physics | Unlocks `COMPLETE` without new executor rules |
 | Parameterized activated patterns | Same shape, many mana/effect variants | One pattern → many cards |
 
-**Do not chase** the heuristic `other` family (majority of tags). Prefer concrete fragment counts.
+**Do not chase** the heuristic `other` family (majority of tags). Prefer frontier pair-unlock over raw fragment frequency.
 
-**Defer early:** copy-on-ETB, extra combat, blink/exile-return, soulbond, imprint/copy — high rules cost, low reuse.
+**Defer early:** copy-on-ETB, extra combat, blink/exile-return, soulbond, imprint/copy — high rules cost, low reuse (usually frontier **P2**).
 
 #### Curriculum order
 
@@ -60,34 +88,49 @@ uv run python scripts/spellbook_absent_discovery.py
 3. **Global ETB untap** ✓ — Intruder Alarm live wording (`untap all creatures`).
 4. **Life-drain family** ✓ — Vito / Bond / Exquisite (+ Conqueror); `GAIN_LIFE` / `OPPONENT_LOSE_LIFE` triggers.
 5. **Path a / slice 5 (self-starters)** ✓ — power-tap mana; ETB damage (Impact / Purphoros / Alliance); ETB untap-self; anthem/devotion/lifelink-reminder irrelevant.
-6. **Path a / slice 6 (token auras)** ✓ — Presence of Gond host-tap; Enchant false-COMPLETE fix; Aphetto/Morph. First `absent_from_reference > 0` on live probe (later cleared by host-recurrence fix: aura host is a non-token setup permanent so tap enters `D`).
-7. **Path a / slice 7 (life-untap / counter-mana)** ✓ — Famished Paladin; Village Bell-Ringer; Gyre Sage; Pestermite. Remeasure COMPLETE / absent on each PR.
-8. **Path a (continue):** further self-starting COMPLETE unlocks; adjudicate absences. Taxonomy: `finite_interaction_misclassified_as_loop` + optional `failure_reasons` for finite vs bystander labels.
-9. **Path b (Wave 1):** generic life-gain seed for `GAIN_LIFE` trigger cards — required for Bond/Blood gold; disclose on witness.
+6. **Path a / slice 6 (token auras)** ✓ — Presence of Gond host-tap; Enchant false-COMPLETE fix; Aphetto/Morph.
+7. **Path a / slice 7 (life-untap / counter-mana)** ✓ — Famished Paladin; Village Bell-Ringer; Gyre Sage; Pestermite.
+8. **Frontier-driven slices (M5.2):** pick from live P0/P1; ritual below. Path **a** preference remains.
+9. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+
+#### Per-slice ritual
+
+1. Cite frontier P0/P1 rows + pair-unlock estimate + rejected alternatives.
+2. Real Oracle text → RED curriculum fixture → narrow deterministic pattern.
+3. Executor primitive **only** if required (rules-evidence first).
+4. Positive verify + adversarial hard negative.
+5. Discovery/seam regression when search behavior changes.
+6. Remeasure frontier + absent discovery; seed workbench when absences appear.
 
 #### Life-drain bootstrap (policy)
 
 | Path | Meaning | Status |
 | ---- | ------- | ------ |
 | **a** | Prefer cards/patterns that start their own loop from default BF setup | **Active** |
-| **b** | Seed generic life-gain when a searched essential has `GAIN_LIFE` triggers | **Widened for Wave 1 Bond/Blood** — explicit seed, disclosed on witness |
+| **b** | Seed generic life-gain when a searched essential has `GAIN_LIFE` triggers | **Widened for Bond/Blood** — explicit seed, disclosed on witness |
 
-Each slice: real-Oracle curriculum fixtures → RED/GREEN tests → remeasure → ship. Expand patterns deliberately with tests/docs (`AGENTS.md`).
+Expand patterns deliberately with tests/docs (`AGENTS.md`).
 
 #### Rules-evidence rails ✓
 
 Authority and citation format: [`docs/RULES_EVIDENCE.md`](../RULES_EVIDENCE.md). Skill: [`.agents/skills/rules-evidence/`](../../.agents/skills/rules-evidence/). Use before curriculum slices that need **new modeled physics** (executor primitives, not just patterns).
 
-### 3. Adjudicate absences
+### 3. Adjudicate absences (M5.3 — continuous)
+
+Trigger after every meaningful curriculum/physics PR (COMPLETE growth, new verified discoveries, or proof-relevant executor/compiler changes):
 
 1. `uv run python scripts/spellbook_absent_discovery.py --persist-workbench`
 2. `uv run --group eval mtg-loop-engine adjudicate-workbench`
 3. Sidebar corpus → `spellbook_absent`, review state → `unreviewed`.
 4. Apply [`docs/ADJUDICATION.md`](../ADJUDICATION.md). Upgrade `ABSENT_FROM_REFERENCE` → `NOVEL` only with a human record. Keep `NOVEL` out of the precision denominator.
 
-### 4. Optional metric freeze
+Absences are curriculum: finite / bystander / illegal activation failures feed the next frontier pass and should become regressions at the lowest useful layer.
+
+### 4. Optional metric freeze / M5.4 exit
 
 Only when intentionally certifying absent-discovery counts: write a baseline under `eval/baseline/`, refresh STATUS, document the sample in the baseline README.
+
+M5 exit also requires the checklist in [`ROADMAP.md`](../../ROADMAP.md) (reproducible pipeline, absences disposed, no known high-priority false `VERIFIED`). Novel combo is **not** required. Coverage floor stays **92%** until a classified miss inventory + contract tests support raising it.
 
 ## Commands
 

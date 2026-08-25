@@ -32,7 +32,7 @@ Entry point: `uv run mtg-loop-engine` (`mtg_loop_engine.cli`).
 | `uv run python scripts/render_status.py` | Refresh generated section of [`STATUS.md`](STATUS.md) from frozen baselines |
 | `uv run python scripts/render_status.py --check` | Exit non-zero if `STATUS.md` is out of sync |
 | `uv run python scripts/check_docs.py` | README / link / governance file checks |
-| `uv run python scripts/spellbook_compiler_priority.py` | Live diagnostic: rank Spellbook compiler gaps from local snapshot + Scryfall bulk |
+| `uv run python scripts/spellbook_compiler_priority.py` | Live M5.1 frontier + recovery diagnostic: rank compiler gaps by COMPLETE / both-COMPLETE pair unlock (local Spellbook + Scryfall) |
 
 See [`runbooks/M4_FOLLOW_THROUGH.md`](runbooks/M4_FOLLOW_THROUGH.md) for the post-docs engineering sequence these commands support. Details: [`scripts/README.md`](../scripts/README.md).
 
