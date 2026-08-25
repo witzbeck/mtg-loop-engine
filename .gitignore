@@ -17,3 +17,7 @@ data/**
 !data/README.md
 !data/.gitkeep
 *.duckdb
+
+# Repo-local agent voice / question-shape (not shared via git)
+.cursor/rules/high-signal-communication.mdc
+.cursor/rules/design-decision-questions.mdc

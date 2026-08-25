@@ -41,7 +41,7 @@ The distinguishing choice is **Q5=split PR**: behavioral code + locking tests la
 - Milestone checklist item **5 — Docs**: update package READMEs / ADR / `ROADMAP.md` when contracts or milestones change.
 - PR expectations: prefer **small, reviewable PRs** scoped to one milestone concern — but does **not** carve out an exception for deferring contract docs.
 
-[`.cursor/rules/feature-branches.mdc`](../../../.cursor/rules/feature-branches.mdc) is a Cursor adapter only; it defers to `CONTRIBUTING.md` and does not authorize doc lag.
+[`CONTRIBUTING.md`](../../../CONTRIBUTING.md) owns feature-branch and docs-with-code policy; IDE adapters must not authorize doc lag.
 
 ### What changes when the gate ships
 

@@ -1,5 +1,10 @@
+---
+description: Prefer squash merge; state reason in the PR if not squashing.
+alwaysApply: true
+---
+
 # Default merge strategy
 
-- Prefer **squash merge** for pull requests by default to keep main-branch history concise and easy to scan.
-- Keep separate commits only when preserving commit-by-commit history provides clear review, rollback, or auditing value.
-- If using a non-squash strategy, state the reason in the PR description before merging.
+Prefer **squash merge** unless preserving commit-by-commit history has clear review, rollback, or auditing value. If not squashing, state the reason in the PR description before merging.
+
+**Authority:** [`CONTRIBUTING.md`](../../CONTRIBUTING.md) (feature-branch policy).

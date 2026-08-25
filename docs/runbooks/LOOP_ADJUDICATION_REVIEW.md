@@ -8,7 +8,7 @@ Run tiered human-style reviews of loop claims (taxonomy, pairs, mechanic familie
 
 ## Not this process
 
-- Engineering option review → [`docs/decisions/reviews/`](../decisions/reviews/) and `design-decision-review` skill
+- Engineering option review → [`docs/decisions/reviews/PROCESS.md`](../decisions/reviews/PROCESS.md)
 - Routine committed run trees under `eval/reviews/<timestamp>/` (deprecated)
 
 ## Two planes
@@ -17,8 +17,6 @@ Run tiered human-style reviews of loop claims (taxonomy, pairs, mechanic familie
 |-------|----------|---------|
 | Execution | `data/eval/lar/runs/<run_id>/` | gitignored, disposable |
 | Knowledge | `eval/adjudications/`, `eval/calibration/`, `tests/`, `docs/`, `eval/baseline/`, `eval/reviews/promoted/` | committed via PR |
-
-Skill: [`.cursor/skills/loop-adjudication-review/SKILL.md`](../../.cursor/skills/loop-adjudication-review/SKILL.md)
 
 ```mermaid
 graph TB;
@@ -250,3 +248,42 @@ After promotion PRs (or explicit discard), delete `data/eval/lar/runs/<run_id>/`
 > P1/P2 agents may **propose** promotions but may **not** mutate committed adjudications, calibration cases, engine code, or baselines during the review itself.
 
 Use evidence discipline: `observed` | `inferred` | `suspected` | `confirmed`.
+
+## Agent task stubs
+
+Copy and fill paths. These labels are repo protocol for parallel LAR legs.
+
+### Tier overview (parallelism)
+
+| Tier | Phase | Units | Parallelism |
+|------|-------|-------|-------------|
+| 0 | Preflight + manifest v2 | 1 | sequential |
+| A | Taxonomy calibration coverage | 8 classes | 8 `[LAR-P1-A-*]` |
+| B1 | Blind pair adjudication | batches | 4 `[LAR-P1-B1-*]` |
+| B2 | Reveal + compare | merge | sequential after B1 |
+| B3 | Adversarial challenge | sampled + disagreements | `[LAR-P1-B3-*]` |
+| C1 | Known-family regression | 5 families | 5 `[LAR-P1-C1-*]` |
+| C2 | Held-out generalization | small set | optional `[LAR-P1-C2-*]` |
+| D | Cross-tier synthesis | 1 | `[LAR-P2-SYNTH]` |
+
+Run B2 after B1 freezes blind outputs. Run D after A, B3, C legs terminal.
+
+### Blind pair batch
+
+```
+[LAR-P1-B1-batch2] LAR v2 run data/eval/lar/runs/<run_id>/.
+Blind adjudicate 6 pairs — NO frozen labels before proposed_class.
+Write phase-b/blind.jsonl entries only. No durable artifact edits.
+```
+
+### Synthesis
+
+```
+[LAR-P2-SYNTH] Merge LAR v2 tiers for data/eval/lar/runs/<run_id>/.
+Output synthesis.md, comparison.json, promotion_candidates.json.
+Include knowledge_changes and coverage sections.
+```
+
+### Partial failure
+
+Missing P1 leg: synth marks `unverified_legs` and proceeds with partial merge.

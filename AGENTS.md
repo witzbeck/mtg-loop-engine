@@ -1,14 +1,12 @@
 # Agent contract (human / AI)
 
-Authoritative operating rules for contributors and coding agents. In-repository docs are canonical. Home-directory plan files under `~/.cursor/plans/` are ephemeral session notes; required reading is `ROADMAP.md`, ADRs, and package READMEs.
+Authoritative operating rules for contributors and coding agents. In-repository docs are canonical. Required reading is `ROADMAP.md`, ADRs, and package READMEs.
 
-Cursor adapters under `.cursor/rules/` summarize workflow preferences; **this file and `CONTRIBUTING.md` win** on conflict.
+**This file and `CONTRIBUTING.md` win** on conflict with other workflow summaries.
 
 ## Prose
 
 Say what is true. Explain what changes. Question what matters. Cut the rest.
-
-Chat and committed docs follow [`.cursor/rules/high-signal-communication.mdc`](.cursor/rules/high-signal-communication.mdc).
 
 ## Mandatory preflight
 
@@ -63,7 +61,7 @@ Contract changes should be readable from the PR, not only from reverse-engineeri
 
 ## Tests
 
-Treat tests as epistemic contracts. Map critical behavior to the owning suite under `tests/`. See [`tests/README.md`](tests/README.md) and [`.cursor/rules/test-quality.mdc`](.cursor/rules/test-quality.mdc).
+Treat tests as epistemic contracts. Map critical behavior to the owning suite under `tests/`. See [`tests/README.md`](tests/README.md).
 
 ## Scope
 
@@ -76,7 +74,7 @@ For any package under `src/mtg_loop_engine/`, the package `README.md` is the ope
 
 ## Land and return
 
-When feature work is complete and the user has asked to open a PR or finish the branch: land once CI is green **and** the CI merge gate is satisfied, then switch back to up-to-date `main` and delete the local feature branch. See [`CONTRIBUTING.md`](CONTRIBUTING.md), [`.cursor/rules/land-and-return.mdc`](.cursor/rules/land-and-return.mdc), and [`.cursor/rules/ci-merge-gate.mdc`](.cursor/rules/ci-merge-gate.mdc).
+When feature work is complete and the user has asked to open a PR or finish the branch: land once CI is green **and** the CI merge gate is satisfied, then switch back to up-to-date `main` and delete the local feature branch. See [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Related
 

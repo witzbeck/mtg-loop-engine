@@ -60,18 +60,46 @@ graph TB;
 
 ## Contract tests
 
-**Critical path → suite:** verifier → `gold_core` / `hard_negatives`; compiler → `semantic`; discovery/seams → `discovery`; eval → `eval`; proof artifacts → `golden_proofs`; layer boundaries → `unit`.
+This project treats tests as **executable epistemic contracts**. Pytest mechanics live in `pyproject.toml` `[tool.pytest.ini_options]`. Contributor merge coupling: [`CONTRIBUTING.md`](../CONTRIBUTING.md) (CI merge gate).
 
-Assert outcomes (`VerificationStatus`, typed reasons, rediscovery, coverage, hashes, join reasons). Pair positives with hard negatives for new acceptance behavior. Regress real adjudications when fixing precision bugs.
+### Critical functionality (must be CI-covered)
 
-**Avoid:**
-- `assert True` / “doesn’t throw” with no oracle
-- mock-call-only tests
-- duplicating gold cases without a new contract
-- weakening expectations to green CI
-- expanding patterns only to pass a test
+When behavior changes, add or update tests in the suite that owns that contract:
 
-**Coverage %:** CI requires **≥ 90%** line coverage on measured `mtg_loop_engine` modules (`pyproject.toml`). That floor is a backstop alongside contract suites. See [`.cursor/rules/test-quality.mdc`](../.cursor/rules/test-quality.mdc) and [`CONTRIBUTING.md`](../CONTRIBUTING.md).
+| Critical path | Suite |
+| --- | --- |
+| Verifier accepts / rejects | `tests/gold_core/`, `tests/hard_negatives/`, relevant `unit/` |
+| Compiler / patterns | `tests/semantic/` |
+| Blind discovery / seams | `tests/discovery/` (+ semantic compile→verify) |
+| Search ↛ verify boundary | `tests/unit/test_search_boundary.py` (and kin) |
+| Eval / adjudication / recovery | `tests/eval/` |
+| Proof shape / hash stability | `tests/golden_proofs/` |
+
+Green CI is merge-OK only if this table’s row for the PR is exercised — see **CI merge gate** in [`CONTRIBUTING.md`](../CONTRIBUTING.md).
+
+### Good tests
+
+- Assert **outcomes**: `VerificationStatus`, typed rejection reasons, rediscovery counts, coverage enums, proof hashes, join reasons.
+- Prefer **one clear contract** per test (or parametrize over corpus cases).
+- Pair positives with hard negatives when adding acceptance behavior.
+- Regress **adjudicated failures** with real witnesses when fixing precision bugs.
+
+### Useless tests (do not add)
+
+- Assertions that cannot fail meaningfully (`assert True`, empty bodies, “runs without exception” with no oracle).
+- Tests that only prove a mock was called, without a domain outcome.
+- Pure coverage padding for private helpers already exercised by gold/seam tests.
+- Duplicating an existing gold_core/discovery case under a new name with no new contract.
+- Weakening expected status/reason so a broken verifier still “passes.”
+- Broadening modeled rules/patterns solely to green a test (expand deliberately with docs).
+
+### Coverage % policy
+
+CI enforces a **90% line-coverage floor** on measured `mtg_loop_engine` code (`--cov-fail-under=90` in `pyproject.toml`).
+
+That floor is a **backstop**, not a substitute for the suites above. Raise coverage with real contract tests.
+
+Intentionally omitted from the %-gate (see `[tool.coverage.run] omit`): CLI entrypoint, Streamlit workbench, and network snapshot download helpers. Do not widen that omit list to green CI — raise coverage with real contract tests.
 
 Pytest mechanics (`--strict-markers`, `xfail_strict`, warnings-as-errors, coverage fail-under) are configured in `pyproject.toml`.
 

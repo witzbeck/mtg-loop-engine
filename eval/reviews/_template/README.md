@@ -37,4 +37,4 @@ cp eval/reviews/_template/manifest.example.json "data/eval/lar/runs/${RUN_ID}/ma
 
 Authoritative Pydantic models: `mtg_loop_engine.eval.lar_contracts`.
 
-Process: [`.cursor/skills/loop-adjudication-review/SKILL.md`](../../../.cursor/skills/loop-adjudication-review/SKILL.md)
+Process: [`docs/runbooks/LOOP_ADJUDICATION_REVIEW.md`](../../../docs/runbooks/LOOP_ADJUDICATION_REVIEW.md)

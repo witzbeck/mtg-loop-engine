@@ -2,7 +2,7 @@
 
 **Milestone:** M4 follow-through item 1 (and bundled item 2 regressions)  
 **Status:** Resolved (2026-08-21) — winner **B7**  
-**Skill:** `.cursor/skills/design-decision-review/SKILL.md`
+**Process:** [`PROCESS.md`](PROCESS.md) (historical Skill path was `.cursor/skills/…`; wrappers now live under `.agents/skills/design-decision-review/`)
 
 ## Problem
 

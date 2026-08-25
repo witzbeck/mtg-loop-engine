@@ -71,8 +71,7 @@ See [`promoted/README.md`](promoted/README.md) and [`promoted/0001-m4-lar-v1/`](
 
 ## Process
 
-Runbook: [`docs/runbooks/LOOP_ADJUDICATION_REVIEW.md`](../../docs/runbooks/LOOP_ADJUDICATION_REVIEW.md)  
-Skill: [`.cursor/skills/loop-adjudication-review/SKILL.md`](../../.cursor/skills/loop-adjudication-review/SKILL.md)
+Runbook: [`docs/runbooks/LOOP_ADJUDICATION_REVIEW.md`](../../docs/runbooks/LOOP_ADJUDICATION_REVIEW.md)
 
 ## Promotion discipline
 

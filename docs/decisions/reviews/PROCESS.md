@@ -1,15 +1,8 @@
----
-name: design-decision-review
-description: >-
-  Parallel subagent review of design-option combinations before implementation.
-  Use when a plan surfaces multiple dimensions (gate placement, bundling, UX,
-  rollout) and a human-style decision record is needed. Produces a review
-  matrix, per-bundle scores, and a coalesced recommendation or ADR draft.
----
+# Design decision review process
 
-# Design decision review
+Parallel, evidence-based review of **multi-dimensional design choices** before implementation. Produces a review matrix, per-bundle scores, and a coalesced recommendation or ADR draft.
 
-Use this skill when implementation is blocked on **multi-dimensional design choices** and the team wants evidence-based resolution — not a single agent guessing.
+Distinct from loop adjudication ([`docs/runbooks/LOOP_ADJUDICATION_REVIEW.md`](../../runbooks/LOOP_ADJUDICATION_REVIEW.md)).
 
 ## When to use
 
@@ -45,7 +38,7 @@ graph TB;
 
 ### Step 2 — Parallel bundle reviewers
 
-Launch **one Task subagent per bundle** in the same turn when possible.
+Launch **one reviewer task per bundle** in the same turn when possible.
 
 Task line **must** begin with `[DDR-P1-XX]` where `XX` is the bundle id (e.g. `B1`).
 
@@ -53,7 +46,7 @@ Each reviewer:
 
 1. Reads only repo evidence (ADRs, runbooks, code, tests) — no chat memory.
 2. **Advocates honestly** for its assigned bundle; also lists disqualifying risks.
-3. Answers: Does this bundle meet M4 runbook / frozen boundaries? What code paths change? What tests lock the contract?
+3. Answers: Does this bundle meet active runbook / frozen boundaries? What code paths change? What tests lock the contract?
 4. Scores the rubric and outputs **ACCEPT**, **ACCEPT_WITH_RISKS**, or **REJECT** for the bundle as a whole.
 5. Writes findings to the matrix file section `## Bundle Bx` (append-only during review).
 
@@ -69,7 +62,7 @@ The coalescer:
 
 1. Reconciles disagreements from repo evidence (re-read key files; do not invent).
 2. Picks **one winning bundle** or a **hybrid** only when two bundles differ on non-blocking scoping only.
-3. Records unresolved blockers requiring human `AskQuestion`.
+3. Records unresolved blockers requiring a human decision question.
 4. Updates the review matrix **Verdict** section and recommends next action (implement, ADR draft, escalate).
 
 ### Step 4 — Land the decision
@@ -81,30 +74,34 @@ Same change (or immediate follow-up PR) should include:
 - `ROADMAP.md` / runbook updates when milestone sequencing changes
 - Implementation follows the matrix success criteria
 
-## Bundle task stub
-
-```
-[DDR-P1-B1] Design decision review — participant enforcement bundle B1.
-Repo: /home/fr333y3d3a/repos/mtg-loop-engine
-Matrix: docs/decisions/reviews/<slug>-review.md
-Bundle: Q1=A search-only, Q2=bundle regressions, Q3=silent continue, Q4=no baseline, Q5=single PR
-Read ADRs 0001-0002, M4 runbook, search/explorer.py, eval/classify.py, tests/eval/test_classify_store.py.
-Score rubric; ACCEPT/ACCEPT_WITH_RISKS/REJECT; append ## Bundle B1 to matrix. No code changes.
-```
-
-## Coalescer task stub
-
-```
-[DDR-P2-COALESCE] Merge DDR-P1 bundle reviews for <slug>.
-Read all ## Bundle Bx sections plus repo evidence. One verdict, one recommended bundle, explicit merge notes. Update Verdict section in matrix. No code changes unless user asked to implement.
-```
-
 ## Partial failure
 
 - One P1 leg failed: coalesce from completed legs; mark **Unverified because leg Bx did not complete**.
-- All P1 failed: retry or AskQuestion — do not coalesce from nothing.
+- All P1 failed: retry or ask the human — do not coalesce from nothing.
 
 ## Relation to other processes
 
-- **README gate** (`readme-gate-orchestration`): runs after code edits; this skill runs **before** implementation when design forks exist.
-- **ADR policy** (`docs/decisions/README.md`): Accepted ADRs are not silently overridden; a winning bundle that conflicts requires ADR revision or human override.
+- Folder README ancestry checks run after code edits; this process runs **before** implementation when design forks exist.
+- ADR policy ([`docs/decisions/README.md`](../README.md)): Accepted ADRs are not silently overridden; a winning bundle that conflicts requires ADR revision or human override.
+
+## Agent task stubs
+
+Copy and fill paths. These labels are repo protocol for parallel review legs.
+
+### Bundle reviewer
+
+```
+[DDR-P1-B1] Design decision review — <decision> bundle B1.
+Repo: <repo-root>
+Matrix: docs/decisions/reviews/<slug>-review.md
+Bundle: <dimension assignments>
+Read relevant ADRs, runbooks, code, and tests for this bundle.
+Score rubric; ACCEPT/ACCEPT_WITH_RISKS/REJECT; append ## Bundle B1 to matrix. No code changes.
+```
+
+### Coalescer
+
+```
+[DDR-P2-COALESCE] Merge DDR-P1 bundle reviews for <slug>.
+Read all ## Bundle Bx sections plus repo evidence. One verdict, one recommended bundle, explicit merge notes. Update Verdict section in matrix. No code changes unless asked to implement.
+```
