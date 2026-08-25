@@ -301,40 +301,19 @@ def derive_relevant_state(
                     value=qty,
                 )
             )
-    # Once-per-turn abilities used in the loop must recur as unused (EXACT False).
+    # Once-per-turn + pending-trigger dims: shared with verifier (ADR 0008).
+    from mtg_loop_engine.verify.mandatory_recurrence import (
+        once_per_turn_dimensions,
+        pending_trigger_dimensions,
+    )
+
     if loop_actions and cards:
-        by_oracle = {c.oracle_id: c for c in cards}
-        seen_once: set[tuple[str, str]] = set()
-        for step in loop_actions:
-            if step.op != "activate" or not step.actor or not step.ability_id:
-                continue
-            key = (step.actor, step.ability_id)
-            if key in seen_once:
-                continue
-            live = before.permanents.get(step.actor)
-            if live is None:
-                continue
-            card = by_oracle.get(live.oracle_id)
-            if card is None:
-                continue
-            for ab in card.abilities:
-                if (
-                    isinstance(ab, ActivatedAbility)
-                    and ab.ability_id == step.ability_id
-                    and ab.once_per_turn
-                ):
-                    seen_once.add(key)
-                    dims.append(
-                        StateDimension(
-                            path=(
-                                f"permanents.{step.actor}"
-                                f".once_per_turn_used.{step.ability_id}"
-                            ),
-                            op=ComparisonOp.EXACT,
-                            value=step.ability_id in live.once_per_turn_used,
-                        )
-                    )
-                    break
+        dims.extend(
+            once_per_turn_dimensions(
+                loop_actions=loop_actions, cards=cards, before=before
+            )
+        )
+    dims.extend(pending_trigger_dimensions(before))
     if any(p.is_token for p in spec.permanents):
         dims.append(
             StateDimension(

@@ -96,9 +96,11 @@ Blind discovery among real **COMPLETE**-compiled Oracle cards from Spellbook nam
    divergent quarantine + `is_precision_eligible_ids` / physics vs Oracle pools.
    Inventory:
    [`docs/decisions/reviews/corpus-provenance-inventory.md`](docs/decisions/reviews/corpus-provenance-inventory.md).
-   **Next in this campaign:** verifier-owned mandatory recurrence dimensions; then
-   stronger claim/`proof_hash` binding. **Keep line coverage floor at 92%** until the
-   campaign lands enough that percentages measure faithful claims.
+   ADR [0008](docs/decisions/0008-verifier-owned-mandatory-recurrence.md) (**Accepted**):
+   verifier-owned once-per-turn + pending-trigger recurrence dims.
+   **Next in this campaign:** stronger claim/`proof_hash` binding.
+   **Keep line coverage floor at 92%** until the campaign lands enough that percentages
+   measure faithful claims.
 
 1. **Absent-discovery path** ✓ — `eval/reference_absent.py` + `scripts/spellbook_absent_discovery.py`.
 2. **Grow COMPLETE pool** — prefer **self-starting** two-card physics (path **a**): patterns that can close without an external seeded event. Curriculum order: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDIDATES.md).

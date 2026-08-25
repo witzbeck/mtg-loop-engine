@@ -31,7 +31,8 @@ graph TB;
 - Fail-closed semantic coverage gates
 - Functional-external and essential-count gates
 - Execute setup + loop via `rules.Executor`
-- Check proof-specific recurrence (`LoopRelevantState`) and expected outputs
+- Check proof-specific recurrence (`LoopRelevantState`) plus **mandatory**
+  dimensions (ADR 0008: once-per-turn usage, pending trigger count)
 - Hash proofs for stability tracking
 
 ## Boundaries
@@ -56,6 +57,7 @@ graph TB;
 ## Main entry points
 
 - `verifier.py`: `Verifier`, `Verifier.verify`, `check_recurrence`, `check_outputs`, `proof_hash`
+- `mandatory_recurrence.py`: `effective_relevant_state`, once-per-turn / pending helpers
 
 ## Data contracts
 

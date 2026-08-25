@@ -134,6 +134,10 @@ class GameState:
                 ability_id = parts[3]
                 return ability_id in perm.once_per_turn_used
             raise KeyError(path)
+        if head == "pending_triggers":
+            if len(parts) == 2 and parts[1] == "count":
+                return len(self.pending_triggers)
+            raise KeyError(path)
         if head == "count":
             # count.battlefield.creature_tokens
             zone = Zone(parts[1])

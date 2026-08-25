@@ -10,6 +10,7 @@ from typing import Any
 from mtg_loop_engine.config import EngineConfig
 from mtg_loop_engine.proofs.models import (
     LoopProof,
+    LoopRelevantState,
     LoopWitness,
     RecurrenceResult,
     VersionIdentity,
@@ -22,6 +23,7 @@ from mtg_loop_engine.semantics.enums import (
     VerificationStatus,
 )
 from mtg_loop_engine.state.game import GameState
+from mtg_loop_engine.verify.mandatory_recurrence import effective_relevant_state
 
 
 def _git_sha() -> str | None:
@@ -39,11 +41,20 @@ def _git_sha() -> str | None:
 
 
 def check_recurrence(
-    before: GameState, after: GameState, witness: LoopWitness
+    before: GameState,
+    after: GameState,
+    witness: LoopWitness,
+    *,
+    relevant_state: LoopRelevantState | None = None,
 ) -> RecurrenceResult:
     details: list[str] = []
     ok = True
-    for dim in witness.relevant_state.dimensions:
+    dims = (
+        relevant_state.dimensions
+        if relevant_state is not None
+        else witness.relevant_state.dimensions
+    )
+    for dim in dims:
         try:
             b = before.get_path(dim.path)
             a = after.get_path(dim.path)
@@ -195,7 +206,10 @@ class Verifier:
             return reject(err.status, err.message)
 
         after = state
-        recurrence = check_recurrence(before, after, witness)
+        relevant = effective_relevant_state(witness, before)
+        recurrence = check_recurrence(
+            before, after, witness, relevant_state=relevant
+        )
         if not recurrence.ok:
             return reject(
                 VerificationStatus.STATE_NOT_RECURRENT,
