@@ -65,5 +65,6 @@ Review adjudicated precision and eligibility against roadmap exit criteria. Only
 | ---- | ------- |
 | Gold extras / precision | `uv run mtg-loop-engine eval-gold-extras` |
 | Spellbook recovery | `uv run mtg-loop-engine eval-spellbook --variants … [--fetch-oracle]` |
+| Live compiler priority (local bulk) | `uv run python scripts/spellbook_compiler_priority.py` → `data/eval/compiler_priority_report.{md,json}` |
 | Adjudication UI | `uv run --group eval mtg-loop-engine adjudicate-workbench` |
 | Status sync | `uv run python scripts/render_status.py [--check]` |

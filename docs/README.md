@@ -46,7 +46,7 @@ graph TB;
 
 | Doc | What it answers |
 | --- | --------------- |
-| [`CLI.md`](CLI.md) | CLI commands by milestone |
+| [`CLI.md`](CLI.md) | CLI commands by milestone; framework / upgrade / scripts-promotion guidance |
 | [`runbooks/`](runbooks/) | Ordered engineering follow-through (e.g. M4) |
 | [`decisions/`](decisions/) | Lightweight ADRs (why constraints exist) |
 

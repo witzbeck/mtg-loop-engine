@@ -41,6 +41,7 @@ graph TB;
 
 - Deterministic: same clause → same match or miss.
 - Miss ⇒ unsupported fragment ⇒ fail-closed relevant coverage at compile time (default).
+- **Proof-irrelevant statics** (keywords, Enchant/Equip lines, cast-restriction riders) compile as supported no-ops so they do not block Spellbook eligibility when loop mechanics are modeled.
 - Patterns must not claim support the executor cannot run.
 
 ## Main entry points

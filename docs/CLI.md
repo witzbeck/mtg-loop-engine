@@ -30,5 +30,146 @@ Entry point: `uv run mtg-loop-engine` (`mtg_loop_engine.cli`).
 | `uv run python scripts/render_status.py` | Refresh generated section of [`STATUS.md`](STATUS.md) from frozen baselines |
 | `uv run python scripts/render_status.py --check` | Exit non-zero if `STATUS.md` is out of sync |
 | `uv run python scripts/check_docs.py` | README / link / governance file checks |
+| `uv run python scripts/spellbook_compiler_priority.py` | Live diagnostic: rank Spellbook compiler gaps from local snapshot + Scryfall bulk |
 
-See [`runbooks/M4_FOLLOW_THROUGH.md`](runbooks/M4_FOLLOW_THROUGH.md) for the post-docs engineering sequence these commands support.
+See [`runbooks/M4_FOLLOW_THROUGH.md`](runbooks/M4_FOLLOW_THROUGH.md) for the post-docs engineering sequence these commands support. Details: [`scripts/README.md`](../scripts/README.md).
+
+---
+
+## Architecture
+
+The product CLI is **thin wiring** over library APIs under `src/mtg_loop_engine/`. Handlers import packages, print structured output, and return exit codes. Business logic (verify, compile, discover, eval) stays in packages — see [`src/mtg_loop_engine/README.md`](../src/mtg_loop_engine/README.md).
+
+Today the surface is eight flat subcommands (stdlib `argparse` in `cli.py`), with only a handful of flags beyond `--version`. CI does **not** invoke `mtg-loop-engine`; it runs pytest plus [`scripts/`](../scripts/README.md) hygiene helpers. `cli.py` is intentionally omitted from the coverage gate.
+
+Click may appear in `uv.lock` via the **eval** optional group (Streamlit / Uvicorn). That is **not** a product dependency. Default install remains `duckdb`, `httpx`, and `pydantic` only.
+
+```mermaid
+graph TB;
+  op[Operator] --> prodCli[mtg-loop-engine argparse];
+  prodCli --> lib[Library packages];
+  scripts[scripts argparse] --> ci[CI hygiene];
+  scripts -.->|selective promotion later| prodCli;
+  evalExtra[eval group Streamlit] -.->|transitive Click| lock[uv.lock];
+  lock -.->|not default install| prodCli;
+```
+
+### Compatibility contracts
+
+Any future framework change must preserve the operator-facing surface:
+
+- Documented command names, flags, and defaults in this file and the root README
+- Gate exit codes: `verify-gold`, `compile-coverage`, `discover-gold` → `0` / `1`
+- `eval-spellbook` missing variants path → stderr guidance + exit `1`
+- Mixed human-line + JSON stdout shapes as documented above
+- No Spellbook pairing leakage into discovery; no LLM-authored semantics on any path that can emit `VERIFIED`
+
+---
+
+## Framework choice
+
+**Verdict:** keep stdlib `argparse` now. Click is **later-if-needed**, not now, and not never. Typer is disqualified for the default product CLI under the current dependency bar. This is stack / operator-surface guidance — not an ADR-class epistemic freeze (see [`decisions/`](decisions/)).
+
+| Option | Fit today | Cost | Notes |
+| ------ | --------- | ---- | ----- |
+| Keep argparse | Best | Zero | Matches eight flat leaves and wiring-only |
+| argparse `parents=` | When shared flags appear | Zero | Prefer before any new framework |
+| Click (no Rich) | When triggers fire | First-class dep + docs blast | Preferred future upgrade if needed |
+| Typer | Poor | Rich + shellingham + vendored Click | Disqualified under current default-dep bar |
+
+“Click is already in the lockfile” is **not** free for the product console script. Adopting it requires a first-class pin in `[project.dependencies]`, CI/runtime expansion, and updates across every doc that encodes command strings.
+
+### Viability triggers
+
+Re-open a framework upgrade when **two or more** of these are true, or **one** is an explicit human product requirement:
+
+1. ≥12 leaf commands in ≥3 named groups (nested `eval` / `fetch` / `scan`), not eight flat names
+2. The same option set copied onto ≥3 commands and argparse `parents=` is getting painful
+3. Documented shell completion for non-dev operators (README / runbook, not a contributor nicety)
+4. Product CLI becomes a CI merge-gate surface **and** the tree has grown past a thin dispatcher
+5. Parser + dispatch wiring (not domain handlers) exceeds ~400 lines with a real option graph
+
+**Not** triggers: lockfile presence of Click; prettier `--help`; fat handlers such as `compile-coverage` (extract library code instead); M6 / M7 merely existing on the roadmap.
+
+Until triggers fire: stay on argparse. If shared flags appear first, use **argparse parents in the same PR as those flags**, before considering Click. If Click later wins, prefer **Click without Rich**, not Typer.
+
+### Roadmap fit
+
+Advisory sequencing only — not an exit criterion for any milestone in [`ROADMAP.md`](../ROADMAP.md).
+
+| Milestone | CLI framework work? | Rationale |
+| --------- | ------------------- | --------- |
+| **M4** (active) | **No** | Competes with compiler curriculum, Spellbook eligibility, baseline freeze. ADR 0006 milestone discipline. |
+| **M5** Novel candidates | **No** (default) | Likely extends existing eval / discovery commands; still flat recipes. Prefer argparse (+ parents if shared flags appear). |
+| **M6** Incremental scans | **Best first window** | Snapshot-diff re-runs, newly eligible pairs, and proof-hash stability can introduce shared path / config flags and a small command cluster (`scan` / `diff` / `report`). Upgrade **only if viability triggers fire** while building that surface — not as speculative scaffolding before the commands exist. |
+| **M7** Explorer | **Not the Click milestone** | FastAPI (or equivalent) web UI. At most a thin `serve` leaf; do not buy a CLI framework to launch uvicorn. |
+
+**Recommended sequencing for a future upgrade PR:**
+
+1. Finish M4 exit gates.
+2. Grow operator commands for the real need (typically M6 orchestration) on argparse first, or with argparse parents if flags are shared.
+3. If triggers are met, open a **behavior-preserving** Click migration PR (separate from domain work), with wiring tests and full sync of this file plus README / runbook surfaces.
+4. Prefer **Click without Rich**; do not adopt Typer unless default-dep policy explicitly accepts Rich.
+
+### Migration constraints (if / when — Click)
+
+1. Pin Click in `[project.dependencies]`; do not hitchhike Streamlit’s transitive Click.
+2. Preserve command names, flags, exit codes, and stdout / stderr contracts above.
+3. Do **not** fold all of `scripts/` into the product CLI in the same PR as a Click migration; promote per the criteria below, separately if needed.
+4. Add wiring tests only (exit codes, JSON keys, stderr) — do not duplicate gold / discovery / eval domain tests; do not un-omit `cli.py` solely to manufacture coverage %.
+5. No drive-by rename / nest unless aliases preserve documented strings; no Rich / Typer / completion unless that *is* the requirement.
+6. Same-PR updates for every doc that encodes command strings.
+
+---
+
+## Scripts vs product CLI
+
+[`scripts/`](../scripts/README.md) holds optional helpers that are not library imports. The primary product CLI remains `mtg-loop-engine`. That split is intentional **for now**, not a forever ban on promotion.
+
+**Short answer:** promote *some* scripts later under criteria — not a wholesale merge into Click (or argparse).
+
+### Promotion criteria
+
+Promote a script into a thin product CLI leaf when **most** of these hold:
+
+1. Operators run it as part of the discovery / eval / scan workflow (not only CI)
+2. It shares paths / flags with existing product commands (`--variants`, snapshot dirs, `--out`)
+3. Logic can move (or already lives) behind a library function; CLI stays wiring-only
+4. Documented in runbooks next to other `mtg-loop-engine` commands
+
+Keep under `scripts/` when **any** of these dominate:
+
+1. CI / docs hygiene with no product identity
+2. Repo-layout checks that assume a checkout (not an installed package)
+3. One-off local diagnostics that must not expand default install or CI surface
+
+### Per-script recommendation
+
+| Script | Promote? | When / how | Notes |
+| ------ | -------- | ---------- | ----- |
+| `spellbook_compiler_priority.py` | **Strongest candidate** | After M4 eligibility work stabilizes, or early M5 / M6 when compiler-gap diagnostics are recurring; ideally as `compiler-priority` (or under a future `diag` / `eval` group) | Already overlaps `eval-spellbook` / compiler curriculum. Extract analysis to a library module first; CLI becomes thin. Do **not** wait for Click — an argparse leaf is fine. |
+| `render_status.py` | **Optional / weak** | Only if the product CLI becomes the single operator entry *and* CI is willing to call `mtg-loop-engine status --check` (or similar) | Pure docs / baseline hygiene. Fine forever as a script. Promotion is ergonomics, not architecture. |
+| `check_docs.py` | **Least appropriate** | Prefer stay in `scripts/` indefinitely | Checkout-layout / README / link hygiene; odd fit for an installable package console script. CI should keep invoking `python scripts/check_docs.py`. |
+
+### Roadmap coupling
+
+- Script promotion is **orthogonal** to a Click upgrade. Prefer promoting `spellbook_compiler_priority` as an argparse leaf (after library extract) whenever the operator need is real.
+- If Click lands at M6 because of nested `scan` / `eval` / `diag` groups, that is a natural moment to place a promoted diagnostic under a group — still only if the promotion criteria are met.
+- Do not promote scripts *in order to justify* Click.
+
+### If promoting (future constraints)
+
+1. Library extract first where logic is fat (especially compiler-priority).
+2. Preserve script invocation as a thin shim or document deprecation aliases so CI / runbooks do not break mid-cutover.
+3. Update `scripts/README.md`, this file, and the CI workflow in the same change.
+4. Keep network-free invariants for anything CI still calls.
+
+---
+
+## Explicit non-goals
+
+- Migrating to Click or Typer during M4
+- **Blanket** unification of all `scripts/` into the product CLI
+- Promoting `check_docs.py` solely for “one entrypoint” aesthetics
+- Treating M7 as a CLI-framework project
+- A numbered ADR whose only decision is “we chose argparse”
