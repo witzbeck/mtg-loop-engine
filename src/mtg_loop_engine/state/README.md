@@ -30,6 +30,7 @@ graph TB;
 
 - Represent permanents, mana pools, life, pending triggers, and event counters needed by the modeled rules surface.
 - Provide `from_spec`, `copy`, and `get_path` for recurrence.
+- Path `permanents.<id>.once_per_turn_used.<ability_id>` → boolean (whether that ability id is marked used this turn).
 
 ## Non-responsibilities
 

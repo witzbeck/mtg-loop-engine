@@ -32,6 +32,10 @@ graph TB;
 - Replay setup and loop actions faithfully within the modeled rules surface.
 - GY activations when abilities return to battlefield; optional `requires_zombie` gate for cast-from-GY shapes.
 - Combo-player favorable / opponent adversarial choice ownership (see executor docstring and frozen product decisions).
+- Explicit sacrifice / host-tap target revalidation (BF, controller, creature/token selectors); invalid explicit objects → `ILLEGAL_TARGET`.
+- Exact pending-trigger match when `actor` / `ability_id` are supplied (no silent idx-0 fallback).
+- Exile-on-death replacements suppress death events and `DIES` triggers (CR 700.4); sacrifice events still fire.
+- Summoning sickness blocks `{T}` / `TapCost` even on mana abilities (CR 302.6); haste not modeled.
 
 ## Non-responsibilities
 
@@ -44,6 +48,7 @@ graph TB;
 - Execution errors become typed verification failures upstream — no silent illegal success.
 - Cost reduction and trigger resolution must match what patterns claim to support.
 - `ManaAmount.any_color` models "mana of any color": it may pay W/U/B/R/G (or generic), but generic mana still cannot pay colored costs.
+- Adversarial witnesses (targets/triggers the explorer would never emit) must still fail closed.
 
 ## Main entry points
 
@@ -60,6 +65,7 @@ Return `ExecError` rather than mutating into an illegal board. Verifier maps the
 ## Testing
 
 Indirect via gold_core, hard_negatives, explorer unit tests, and compile→verify seam tests.
+Soundness unit contracts: `tests/unit/test_executor_soundness.py`, `tests/unit/test_once_per_turn_recurrence.py`.
 
 ## Extension guide
 
