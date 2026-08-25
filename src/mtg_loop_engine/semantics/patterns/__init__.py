@@ -521,6 +521,9 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
     ):
         return _proof_irrelevant(clause)
 
+    if re.match(r"^This creature can't block\.?$", clause, re.IGNORECASE):
+        return _proof_irrelevant(clause)
+
     if re.match(
         r"^This creature can't be blocked by creatures with power \d+ or less\.?$",
         clause,

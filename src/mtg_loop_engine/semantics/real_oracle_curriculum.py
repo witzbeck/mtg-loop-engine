@@ -10,11 +10,26 @@ class RealOracleCurriculum:
     name: str
     types: list[str]
     oracle_text: str
+    notes: str = ""
 
 
-# Wording aligned with Scryfall oracle_cards bulk (2026-08-24 snapshot).
+# Live wording from Scryfall oracle_cards bulk (local snapshot), except where noted.
 REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
     "Gravecrawler": RealOracleCurriculum(
+        name="Gravecrawler",
+        types=["Creature", "Zombie"],
+        oracle_text=(
+            "This creature can't block.\n"
+            "You may cast this card from your graveyard as long as you control a Zombie."
+        ),
+        notes=(
+            "Post-errata Scryfall text: no activated GY return. Spellbook Altar loops need "
+            "cast-from-GY + another Zombie (generic prerequisite) — not yet modeled."
+        ),
+    ),
+    # Pre-errata activated return — keeps zone-recursion pattern/rediscovery seam testable
+    # without claiming current Scryfall Gravecrawler rediscovers today.
+    "GravecrawlerActivatedReturn": RealOracleCurriculum(
         name="Gravecrawler",
         types=["Creature", "Zombie"],
         oracle_text=(
@@ -22,18 +37,20 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
             "{B}: Return Gravecrawler from your graveyard to the battlefield.\n"
             "You may cast Gravecrawler only from your graveyard."
         ),
+        notes="Curriculum stand-in for activated GY return (historical Oracle shape).",
     ),
     "Phyrexian Altar": RealOracleCurriculum(
         name="Phyrexian Altar",
         types=["Artifact"],
-        oracle_text="Sacrifice a creature: Add one mana of any color to your mana pool.",
+        oracle_text="Sacrifice a creature: Add one mana of any color.",
     ),
     "Reassembling Skeleton": RealOracleCurriculum(
         name="Reassembling Skeleton",
         types=["Creature", "Skeleton"],
         oracle_text=(
-            "{1}{B}: Return Reassembling Skeleton from your graveyard to the battlefield.\n"
+            "{1}{B}: Return this card from your graveyard to the battlefield tapped.\n"
             "Activate only as a sorcery."
         ),
+        notes="Mana sink {1}{B} does not close with a single any-color from Altar alone.",
     ),
 }
