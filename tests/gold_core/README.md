@@ -2,11 +2,14 @@
 
 ## Purpose
 
-**Positive** epistemic contracts: every curated gold_core witness must verify. These tests are executable product truth, not smoke coverage.
+**Positive** epistemic contracts for Oracle-exact `gold_core`: every curated
+Oracle witness must verify. These tests are executable product truth, not smoke
+coverage. Physics positives are covered under CLI `verify-physics` / discovery
+physics suites, not this folder’s product claim.
 
 ## Role in pipeline
 
-`corpus.gold_core` positives → **THIS** → `Verifier` → assert `VERIFIED`.
+`corpus.gold_core` Oracle positives → **THIS** → `Verifier` → assert `VERIFIED`.
 
 ```mermaid
 graph TB;
@@ -17,21 +20,22 @@ graph TB;
 
 ## Inputs
 
-- `all_gold_core()` witnesses from `mtg_loop_engine.corpus`
+- `all_gold_core()` witnesses from `mtg_loop_engine.corpus` (Oracle-only)
 
 ## Outputs
 
-- Parametrized pytest pass/fail
+- Parametrized pytest pass/fail (currently **8** Oracle positives)
 
 ## Responsibilities
 
-- Lock the M1 positive spine as a permanent regression anchor.
+- Lock Oracle gold positives as a permanent regression anchor.
 - Fail loudly on any status other than `VERIFIED`.
 
 ## Non-responsibilities
 
 - Hard-negative typing (`../hard_negatives/`)
 - Blind discovery recall (`../discovery/`) — positives here prove verify, not rediscovery
+- Physics fixture regression (`verify-physics` / `physics_all_positives`)
 - Authoring witnesses (lives in `corpus/`)
 
 ## Core invariants
@@ -57,7 +61,8 @@ This suite.
 
 ## Extension guide
 
-Add parametrized cases only when corpus gains a deliberate new positive (and update discovery recall in the same change).
+Add parametrized cases only when corpus gains a deliberate new Oracle positive
+(and update discovery recall in the same change).
 
 ## Bigger-picture relationship
 

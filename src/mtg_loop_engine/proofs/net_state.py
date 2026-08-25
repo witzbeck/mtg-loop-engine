@@ -38,7 +38,7 @@ def _plus_one_counter_total(state: GameState) -> int:
     for p in state.permanents.values():
         if p.zone != Zone.BATTLEFIELD:
             continue
-        total += p.counters.get("+1/+1", 0)
+        total += p.counters.get("p1p1", 0) + p.counters.get("+1/+1", 0)
     return total
 
 

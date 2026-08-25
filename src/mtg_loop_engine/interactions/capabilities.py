@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 from mtg_loop_engine.semantics.enums import TriggerEvent
 from mtg_loop_engine.semantics.ir import (
     ActivatedAbility,
+    AddCounterCost,
     AddCounterEffect,
     AddManaEffect,
     CardSemantics,
@@ -18,6 +19,7 @@ from mtg_loop_engine.semantics.ir import (
     LoseLifeEffect,
     ManaCost,
     RemoveCounterEffect,
+    ReplacementReduceM1M1Counters,
     ReturnToBattlefieldEffect,
     SacrificeCost,
     TapCost,
@@ -49,6 +51,9 @@ def extract_capabilities(card: CardSemantics) -> CardCapabilities:
         if isinstance(ab, ContinuousCostReduction):
             caps.modifies.add("reduce_activation_cost")
             continue
+        if isinstance(ab, ReplacementReduceM1M1Counters):
+            caps.modifies.add("m1m1_put")
+            continue
         if isinstance(ab, TriggeredAbility):
             caps.triggers_on.add(ab.event.value)
             _effects(ab.effects, caps)
@@ -71,6 +76,11 @@ def extract_capabilities(card: CardSemantics) -> CardCapabilities:
                         caps.requires.add("sac_token")
                     else:
                         caps.requires.add("sac_creature")
+                elif isinstance(cost, AddCounterCost) and cost.counter_type in {
+                    "m1m1",
+                    "-1/-1",
+                }:
+                    caps.requires.add("m1m1_put")
             for effect in ab.effects:
                 if isinstance(effect, RemoveCounterEffect):
                     caps.requires.add("remove_counter")
@@ -89,6 +99,7 @@ def _effects(effects: list, caps: CardCapabilities) -> None:
         elif isinstance(effect, CreateTokenEffect):
             caps.produces.add("token")
             caps.produces.add("etb")
+            caps.produces.add("create_token")
         elif isinstance(effect, AddCounterEffect):
             caps.produces.add("add_counter")
         elif isinstance(effect, DealDamageEffect):
@@ -117,8 +128,14 @@ def join_reasons(left: CardCapabilities, right: CardCapabilities) -> list[str]:
         reasons.append("sac_recursion")
     if "remove_counter" in left.requires and "add_counter" in right.produces:
         reasons.append("counter_reload")
+    if "create_token" in left.produces and "create_token" in right.triggers_on:
+        reasons.append("token_create_trigger")
+    if "add_counter" in left.produces and "counter_added" in right.triggers_on:
+        reasons.append("counter_added_trigger")
     if "mana" in left.requires and "reduce_activation_cost" in right.modifies:
         reasons.append("cost_reduce")
+    if "m1m1_put" in left.requires and "m1m1_put" in right.modifies:
+        reasons.append("m1m1_replacement")
     if "mana" in left.requires and "mana" in right.produces:
         reasons.append("mana_pay")
     if "dies" in right.triggers_on and left.requires & {"sac_creature", "sac_self"}:

@@ -49,6 +49,14 @@ GOLD_EXTRA_ADJUDICATIONS: dict[frozenset[str], tuple[AdjudicationClass, str]] = 
         AdjudicationClass.VALID_STRICT_TWO_CARD,
         "Alarm+Gond rediscovers with aura-host seed; valid Oracle loop not yet promoted to gold_core.",
     ),
+    frozenset({"oracle:basalt-monolith", "oracle:devoted-druid"}): (
+        AdjudicationClass.FINITE_INTERACTION_MISCLASSIFIED_AS_LOOP,
+        "Druid -1/-1 untap without Vizier is finite (lethal SBAs); Basalt is net-zero mana.",
+    ),
+    frozenset({"oracle:devoted-druid", "oracle:presence-of-gond"}): (
+        AdjudicationClass.FINITE_INTERACTION_MISCLASSIFIED_AS_LOOP,
+        "Gond+Druid token loop dies to accumulating -1/-1 counters without Vizier.",
+    ),
 }
 
 # Physics-suite extras (discoveries beyond labeled physics positives). Not

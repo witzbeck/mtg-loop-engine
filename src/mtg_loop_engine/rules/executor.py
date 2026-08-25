@@ -8,6 +8,7 @@ from mtg_loop_engine.proofs.models import ActionStep
 from mtg_loop_engine.semantics.enums import TriggerEvent, VerificationStatus, Zone
 from mtg_loop_engine.semantics.ir import (
     ActivatedAbility,
+    AddCounterCost,
     AddCounterEffect,
     AddManaEffect,
     CardSemantics,
@@ -22,6 +23,7 @@ from mtg_loop_engine.semantics.ir import (
     MoveToZoneEffect,
     RemoveCounterEffect,
     ReplacementExileInsteadOfGraveyard,
+    ReplacementReduceM1M1Counters,
     ReturnToBattlefieldEffect,
     SacrificeCost,
     TapCost,
@@ -44,8 +46,12 @@ class Executor:
     def __init__(self, semantics: dict[str, CardSemantics]):
         self.semantics = semantics  # keyed by oracle_id
 
-    def cost_reduction(self, state: GameState) -> int:
+    def cost_reduction(
+        self, state: GameState, *, ability: ActivatedAbility | None = None
+    ) -> tuple[int, int]:
+        """Return (generic_reduction, min_mana_remaining floor)."""
         reduction = 0
+        floor = 0
         for perm in state.permanents.values():
             if perm.zone != Zone.BATTLEFIELD or perm.controller != "you":
                 continue
@@ -53,9 +59,17 @@ class Executor:
             if not card:
                 continue
             for ab in card.abilities:
-                if isinstance(ab, ContinuousCostReduction):
-                    reduction += ab.reduce_generic
-        return reduction
+                if not isinstance(ab, ContinuousCostReduction):
+                    continue
+                if (
+                    ab.exclude_mana_abilities
+                    and ability is not None
+                    and ability.is_mana_ability
+                ):
+                    continue
+                reduction += ab.reduce_generic
+                floor = max(floor, ab.min_mana_remaining)
+        return reduction, floor
 
     def has_exile_on_death(self, state: GameState) -> bool:
         for perm in state.permanents.values():
@@ -68,6 +82,20 @@ class Executor:
                 if isinstance(ab, ReplacementExileInsteadOfGraveyard):
                     return True
         return False
+
+    def m1m1_put_quantity(self, state: GameState, quantity: int) -> int:
+        """Apply Vizier-style replacement to a would-be -1/-1 put."""
+        reduce_by = 0
+        for perm in state.permanents.values():
+            if perm.zone != Zone.BATTLEFIELD or perm.controller != "you":
+                continue
+            card = self.semantics.get(perm.oracle_id)
+            if not card:
+                continue
+            for ab in card.abilities:
+                if isinstance(ab, ReplacementReduceM1M1Counters):
+                    reduce_by = max(reduce_by, ab.reduce_by)
+        return max(0, quantity - reduce_by)
 
     def find_ability(
         self, oracle_id: str, ability_id: str
@@ -220,17 +248,34 @@ class Executor:
                 state.permanents[oid] = tok
                 state.bump("token")
                 self._on_etb(state, tok)
+                self._queue_triggers(state, TriggerEvent.CREATE_TOKEN, tok)
             return None
 
         if isinstance(effect, AddCounterEffect):
-            tid = source.object_id if effect.target == "self" else target_id
+            if effect.target == "self":
+                tid = source.object_id
+            else:
+                tid = target_id
             if not tid or tid not in state.permanents:
                 return ExecError(VerificationStatus.ILLEGAL_TARGET, "counter target")
             p = state.permanents[tid]
-            p.counters[effect.counter_type] = (
-                p.counters.get(effect.counter_type, 0) + effect.quantity
-            )
-            state.bump("counter_added", effect.quantity)
+            if effect.target == "target_other_creature":
+                if tid == source.object_id or not p.is_creature:
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_TARGET,
+                        "counter target must be another creature",
+                    )
+            qty = effect.quantity
+            if effect.counter_type in {"m1m1", "-1/-1"}:
+                qty = self.m1m1_put_quantity(state, qty)
+            if qty > 0:
+                p.counters[effect.counter_type] = (
+                    p.counters.get(effect.counter_type, 0) + qty
+                )
+                state.bump("counter_added", qty)
+                self._queue_triggers(
+                    state, TriggerEvent.COUNTER_ADDED, p, amount=qty
+                )
             return None
 
         if isinstance(effect, RemoveCounterEffect):
@@ -262,6 +307,12 @@ class Executor:
                     amount=effect.amount,
                 )
             state.bump("damage", effect.amount)
+            if source.lifelink and effect.amount > 0:
+                state.life_you += effect.amount
+                state.bump("life_gain", effect.amount)
+                self._queue_triggers(
+                    state, TriggerEvent.GAIN_LIFE, source, amount=effect.amount
+                )
             return None
 
         if isinstance(effect, GainLifeEffect):
@@ -485,7 +536,7 @@ class Executor:
             return ExecError(VerificationStatus.ONCE_PER_TURN_LIMIT, ab.ability_id)
 
         # Costs
-        reduction = self.cost_reduction(state)
+        reduction, mana_floor = self.cost_reduction(state, ability=ab)
         for cost in ab.costs:
             if isinstance(cost, TapCost):
                 tap_perm = perm
@@ -519,9 +570,21 @@ class Executor:
                 reduced = min(reduction, need.generic)
                 need.generic -= reduced
                 reduction -= reduced
+                if mana_floor > 0:
+                    current = need.total()
+                    if current < mana_floor:
+                        need.generic += mana_floor - current
                 err = self.pay_mana(state, need)
                 if err:
                     return err
+            elif isinstance(cost, AddCounterCost):
+                qty = cost.quantity
+                if cost.counter_type in {"m1m1", "-1/-1"}:
+                    qty = self.m1m1_put_quantity(state, qty)
+                if qty > 0:
+                    key = cost.counter_type
+                    perm.counters[key] = perm.counters.get(key, 0) + qty
+                    state.bump("counter", qty)
             elif isinstance(cost, SacrificeCost):
                 if cost.selector == "self":
                     if not self.matches_sacrifice_selector(perm, "self"):
@@ -643,6 +706,45 @@ class Executor:
                     "seed_gain_life needs actor with GAIN_LIFE triggers",
                 )
             self._queue_triggers(state, TriggerEvent.GAIN_LIFE, source, amount=qty)
+            return None
+        if op == "seed_create_token":
+            # Generic token-create seed for CREATE_TOKEN feedback loops (Rosie class).
+            source = state.permanents.get(step.actor) if step.actor else None
+            if source is None:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_ACTION,
+                    "seed_create_token needs actor with CREATE_TOKEN triggers",
+                )
+            err = self.apply_effects(
+                state,
+                source,
+                [
+                    CreateTokenEffect(
+                        name="Food",
+                        power=0,
+                        toughness=0,
+                        quantity=1,
+                        is_creature=False,
+                        is_artifact=True,
+                    )
+                ],
+                None,
+            )
+            return err
+        if op == "seed_grant_lifelink":
+            # Heliod-class: grant lifelink to a creature for the closed damage loop.
+            if not step.target or step.target not in state.permanents:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "seed_grant_lifelink needs target creature",
+                )
+            perm = state.permanents[step.target]
+            if not perm.is_creature:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "seed_grant_lifelink target must be a creature",
+                )
+            perm.lifelink = True
             return None
         if op == "opponent_must_cooperate":
             return ExecError(

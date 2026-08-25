@@ -17,6 +17,7 @@ from mtg_loop_engine.proofs.models import (
     LoopProof,
     LoopRelevantState,
     LoopWitness,
+    NetStateDelta,
     OutputDelta,
     Prerequisite,
     StateDimension,
@@ -25,6 +26,7 @@ from mtg_loop_engine.rules.executor import Executor
 from mtg_loop_engine.search.pruning import reusable_fingerprint
 from mtg_loop_engine.semantics.enums import (
     ComparisonOp,
+    Consequence,
     OutputType,
     SemanticCoverage,
     TriggerEvent,
@@ -33,6 +35,7 @@ from mtg_loop_engine.semantics.enums import (
 )
 from mtg_loop_engine.semantics.ir import (
     ActivatedAbility,
+    AddCounterEffect,
     CardSemantics,
     SacrificeCost,
     TapCost,
@@ -163,7 +166,10 @@ def _try_apply(executor: Executor, state: GameState, step: ActionStep) -> GameSt
 
 def _effect_needs_permanent_target(ability: ActivatedAbility) -> bool:
     for effect in ability.effects:
-        if getattr(effect, "target", None) == "target_permanent":
+        if getattr(effect, "target", None) in {
+            "target_permanent",
+            "target_other_creature",
+        }:
             return True
     return False
 
@@ -215,11 +221,28 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
                 trig["ability_id"],
             )
             needs_target = False
+            exclude_source = False
             if ab is not None:
                 for effect in getattr(ab, "effects", []):
-                    if getattr(effect, "target", None) == "target_permanent":
+                    tgt = getattr(effect, "target", None)
+                    if tgt in {"target_permanent", "target_other_creature"}:
                         needs_target = True
-            candidates = tapped_first if needs_target else [None]
+                    if tgt == "target_other_creature":
+                        exclude_source = True
+            if needs_target:
+                candidates = [
+                    oid
+                    for oid in tapped_first
+                    if not exclude_source or oid != trig["source_id"]
+                ]
+                if exclude_source:
+                    candidates = [
+                        oid
+                        for oid in candidates
+                        if state.permanents[oid].is_creature
+                    ]
+            else:
+                candidates = [None]
             for target in candidates:
                 step = base.model_copy(update={"target": target})
                 key = (step.actor, step.ability_id, step.target)
@@ -301,10 +324,17 @@ def derive_relevant_state(
             )
         )
         for ctype, qty in live.counters.items():
+            # Accumulating +1/+1 loops (Rosie/Scurry) need MINIMUM; reload loops
+            # that return to the same count still satisfy MINIMUM.
+            op = (
+                ComparisonOp.MINIMUM
+                if ctype in {"p1p1", "+1/+1"}
+                else ComparisonOp.EXACT
+            )
             dims.append(
                 StateDimension(
                     path=f"permanents.{perm.object_id}.counters.{ctype}",
-                    op=ComparisonOp.EXACT,
+                    op=op,
                     value=qty,
                 )
             )
@@ -359,8 +389,30 @@ def derive_outputs(before: GameState, after: GameState) -> list[OutputDelta]:
 
 
 def _needs_life_gain_seed(card: CardSemantics) -> bool:
+    """Path-b life-drain seed (Bond/Blood), not Heliod counter-on-gain."""
+    from mtg_loop_engine.semantics.ir import LoseLifeEffect
+
     return any(
-        isinstance(ab, TriggeredAbility) and ab.event == TriggerEvent.GAIN_LIFE
+        isinstance(ab, TriggeredAbility)
+        and ab.event == TriggerEvent.GAIN_LIFE
+        and any(isinstance(e, LoseLifeEffect) for e in ab.effects)
+        for ab in card.abilities
+    )
+
+
+def _needs_token_create_seed(card: CardSemantics) -> bool:
+    return any(
+        isinstance(ab, TriggeredAbility) and ab.event == TriggerEvent.CREATE_TOKEN
+        for ab in card.abilities
+    )
+
+
+def _needs_lifelink_grant_seed(card: CardSemantics) -> bool:
+    """Heliod-class: GAIN_LIFE → counter, partner removes counters for damage."""
+    return any(
+        isinstance(ab, TriggeredAbility)
+        and ab.event == TriggerEvent.GAIN_LIFE
+        and any(isinstance(e, AddCounterEffect) for e in ab.effects)
         for ab in card.abilities
     )
 
@@ -398,6 +450,26 @@ def build_witness(
                 description=(
                     "generic life-gain seed to start GAIN_LIFE triggers "
                     "(identity irrelevant)"
+                ),
+            )
+        )
+    if any(s.op == "seed_create_token" for s in setup):
+        generic.append(
+            Prerequisite(
+                kind="board",
+                description=(
+                    "generic token-create seed to start CREATE_TOKEN triggers "
+                    "(Food identity irrelevant)"
+                ),
+            )
+        )
+    if any(s.op == "seed_grant_lifelink" for s in setup):
+        generic.append(
+            Prerequisite(
+                kind="board",
+                description=(
+                    "generic lifelink grant seed (Heliod activated ability stand-in; "
+                    "identity of grant source irrelevant once lifelink is on the pinger)"
                 ),
             )
         )
@@ -450,12 +522,18 @@ def explore_pair(
     max_depth: int = 6,
     max_states: int = 4000,
     verifier: Verifier | None = None,
+    expected_net_state: NetStateDelta | None = None,
+    expected_claim_consequence: Consequence | None = None,
 ) -> ExploredWitness | None:
     """Search one unordered pair.
 
     Returns the first verifier-accepted loop where both searched essentials
     participate (`strict_two_card`). Bystander-verified sequences are skipped
     silently so BFS can continue; if none qualify, returns ``None``.
+
+    When ``expected_net_state`` / ``expected_claim_consequence`` are set, stamp
+    them on candidate witnesses before verify so shallow gross-only loops can
+    be skipped in favor of the claimed net benefit (gold promotion).
     """
     check = verifier or Verifier()
     spec = default_initial_state(a, b)
@@ -487,6 +565,45 @@ def explore_pair(
             err = executor.run_step(start, seed)
             if err is None:
                 setup_actions = [seed]
+    if _needs_token_create_seed(a) or _needs_token_create_seed(b):
+        seed_actor = None
+        for perm in sorted(start.permanents.values(), key=lambda p: p.object_id):
+            card = semantics.get(perm.oracle_id)
+            if card is not None and _needs_token_create_seed(card):
+                seed_actor = perm.object_id
+                break
+        if seed_actor is not None:
+            seed = ActionStep(
+                op="seed_create_token",
+                actor=seed_actor,
+                note="generic token-create seed (Rosie class)",
+            )
+            err = executor.run_step(start, seed)
+            if err is None:
+                setup_actions = [*setup_actions, seed]
+    if _needs_lifelink_grant_seed(a) or _needs_lifelink_grant_seed(b):
+        # Grant lifelink to a partner that can remove counters for damage.
+        grantor = None
+        pinger = None
+        for perm in sorted(start.permanents.values(), key=lambda p: p.object_id):
+            card = semantics.get(perm.oracle_id)
+            if card is None:
+                continue
+            if _needs_lifelink_grant_seed(card):
+                grantor = perm.object_id
+            caps = extract_capabilities(card)
+            if caps.removes_p1p1() and perm.is_creature:
+                pinger = perm.object_id
+        if grantor is not None and pinger is not None and grantor != pinger:
+            seed = ActionStep(
+                op="seed_grant_lifelink",
+                actor=grantor,
+                target=pinger,
+                note="generic lifelink grant seed (Heliod class)",
+            )
+            err = executor.run_step(start, seed)
+            if err is None:
+                setup_actions = [*setup_actions, seed]
     queue: deque[tuple[GameState, list[ActionStep]]] = deque([(start, [])])
     expanded: set[tuple] = set()
     visited = 0
@@ -527,6 +644,22 @@ def explore_pair(
                         state,
                         setup_actions=setup_actions,
                     )
+                    if (
+                        expected_net_state is not None
+                        or expected_claim_consequence is not None
+                    ):
+                        witness = witness.model_copy(
+                            update={
+                                k: v
+                                for k, v in {
+                                    "expected_net_state": expected_net_state,
+                                    "expected_claim_consequence": (
+                                        expected_claim_consequence
+                                    ),
+                                }.items()
+                                if v is not None
+                            }
+                        )
                     proof = check.verify(witness)
                     # Participant gate (search-only): physics may verify a one-card
                     # self-loop while the other searched card never acts. Detection

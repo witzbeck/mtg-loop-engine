@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Unsupported / partial-relevant stub witnesses plus staging for real Oracle pairs
+Unsupported / partial-relevant curriculum stubs plus staging for real Oracle pairs
 blocked by missing physics (`oracle_gaps.py`). Documents known gaps without
 claiming product gold.
 
@@ -10,25 +10,28 @@ claiming product gold.
 
 ```mermaid
 graph TB;
-  stubs[gold_extended_catalog] --> verifier[Verifier];
+  physicsHost[physics_fixtures.synthetic_cases] --> stubs[gold_extended_catalog];
+  stubs --> verifier[Verifier];
   gaps[oracle_gaps] --> staging[promotionStaging];
   verifier --> unsupported[UNSUPPORTED_SEMANTICS];
 ```
 
 ## What belongs here
 
-- Authored stubs with `PARTIAL_RELEVANT_TO_PROOF` / unsupported markers
-- Real pairs awaiting Wave 2/3 primitives (`oracle_gap_catalog`)
+- Package re-export of `gold_extended_catalog` (**15** stubs; body still authored under
+  `physics_fixtures/synthetic_cases.py` for historical continuity)
+- Real pairs awaiting remaining Wave 3 primitives (`oracle_gap_catalog`:
+  `core_saffi_champion`, `core_mikaeus_triskelion`)
 
 ## What does not belong here
 
 - Verified Oracle gold (`gold_core/`)
-- Synthetic physics regressions (`physics_fixtures/`)
+- Synthetic physics positives / hard negatives (`physics_fixtures/` suites)
 
 ## Main entry points
 
-- `gold_extended_catalog` (physics-adjacent stubs; still used by CLI smoke)
-- `oracle_gap_catalog`
+- `gold_extended_catalog` (re-export)
+- `oracle_gap_catalog` / `OracleGap` in `oracle_gaps.py`
 
 ## Testing
 
@@ -36,4 +39,5 @@ graph TB;
 
 ## Bigger-picture relationship
 
-Parent: [`../README.md`](../README.md).
+Parent: [`../README.md`](../README.md). Physics host of stubs:
+[`../physics_fixtures/README.md`](../physics_fixtures/README.md).

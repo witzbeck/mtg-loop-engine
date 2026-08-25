@@ -21,29 +21,30 @@ graph TB;
 ## Inputs
 
 - Audited `ORACLE_EXACT` records + compiled semantics
-- Handwritten witnesses with new IDs (never reuse physics `core_*` claim IDs)
+- Handwritten / rediscovered witnesses with **new** IDs (never reuse physics `core_*` claim IDs)
 
 ## Outputs
 
-- `all_gold_core()` — Oracle positives only (Wave 0: empty)
-- `hard_negatives()` — Oracle counterfactuals (Wave 0: empty)
+- `all_gold_core()` — currently **8** Oracle positives (Waves 1–3 Heliod)
+- `hard_negatives()` — currently **7** Oracle counterfactuals
 
 ## Core invariants
 
 - Every positive → `VerificationStatus.VERIFIED`
 - Both essentials `ORACLE_EXACT`; semantics compiled from audited records
+- Reported `events` and `net_state` match the claim (gross counters alone never justify `ACCUMULATES`)
 - Blind discovery rediscovers all positive pairs without pair labels
 
 ## Main entry points
 
 - `oracle_cases.py`, `hard_negatives.py`
-- Compatibility shim: `cases.py` (re-exports physics card IR for unit tests)
+- Compatibility shim: `cases.py` (re-exports Oracle APIs + physics card IR for unit tests)
 
 ## Extension guide
 
 Promote a pair only under the campaign acceptance contract (verify + rediscover +
-hard negative + LAR + net/events). Prefer `gold_extended/oracle_gaps.py` for
-blocked real pairs.
+hard negative + LAR + net/events). Park incomplete real pairs in
+`gold_extended/oracle_gaps.py` — do not simplify Oracle to force `COMPLETE`.
 
 ## Bigger-picture relationship
 

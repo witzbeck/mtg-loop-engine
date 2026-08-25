@@ -26,6 +26,7 @@ class Permanent:
     is_artifact: bool = False
     power: int | None = None
     toughness: int | None = None
+    lifelink: bool = False
     once_per_turn_used: set[str] = field(default_factory=set)
 
     def copy(self) -> Permanent:
@@ -43,6 +44,7 @@ class Permanent:
             is_artifact=self.is_artifact,
             power=self.power,
             toughness=self.toughness,
+            lifelink=self.lifelink,
             once_per_turn_used=set(self.once_per_turn_used),
         )
 

@@ -100,13 +100,16 @@ Blind discovery among real **COMPLETE**-compiled Oracle cards from Spellbook nam
    verifier-owned once-per-turn + pending-trigger recurrence dims.
    ADR [0009](docs/decisions/0009-claim-bound-proof-hash.md) (**Accepted**): claim-bound
    `proof_hash` / proof schema **0.2.0**.
-   **Wave 0 (claims boundary):** `gold_core` holds only Oracle-exact positives
-   (temporarily empty); historical synthetic/divergent witnesses live in
-   `corpus.physics_fixtures`; `verify-gold` / `discover-gold` are Oracle-only;
-   `verify-physics` / `discover-physics` cover the moved suite. Precision baseline
-   remains **null**.
-   **Next:** net-state vs gross events schema, then Wave 1–3 Oracle promotions
-   (Guard/Gond → … → Mikaeus/Triskelion).
+   **Wave 0 (claims boundary):** ✓ `gold_core` holds only Oracle-exact positives;
+   historical synthetic/divergent witnesses live in `corpus.physics_fixtures`;
+   `verify-gold` / `discover-gold` are Oracle-only; `verify-physics` /
+   `discover-physics` cover the moved suite.
+   **Net-state gate:** ✓ additive `events` / `net_state` / `claim_consequence`
+   (proof schema **0.3.0**); gross counters alone do not justify `ACCUMULATES`.
+   **Waves 1–2 + Heliod:** ✓ eight Oracle gold positives
+   (`core_guard_gond` … `core_heliod_ballista`). Wave 3 remainders
+   (`core_saffi_champion`, `core_mikaeus_triskelion`) staged in
+   `corpus.gold_extended.oracle_gaps` until delayed triggers / undying+SBA land.
    Keep **line coverage floor at 92%** until percentages measure faithful
    claims (optional next: path-grammar fail-closed, noncreature death cleanup).
 

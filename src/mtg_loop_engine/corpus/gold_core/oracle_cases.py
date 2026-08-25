@@ -1,4 +1,4 @@
-"""Oracle-exact gold_core positives (ADR 0007 Wave 1).
+"""Oracle-exact gold_core positives (ADR 0007 Wave 1+).
 
 Witnesses are captured from blind ``explore_pair`` on audited ``ORACLE_EXACT``
 fixtures, then stamped with stable gold IDs and net-state expectations.
@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from mtg_loop_engine.corpus.builders import witness as rebuild_witness
 from mtg_loop_engine.proofs.models import LoopWitness, NetStateDelta
-from mtg_loop_engine.search.explorer import explore_pair
 from mtg_loop_engine.semantics.compiler import compile_oracle_text
 from mtg_loop_engine.semantics.enums import Consequence
 from mtg_loop_engine.semantics.ir import ManaAmount
@@ -24,7 +23,10 @@ def _compile(oracle_id: str):
         oracle_text=fix.oracle_text,
         types=fix.types,
     )
-    assert report.coverage.value == "complete", (oracle_id, report.semantics.unsupported_fragments)
+    assert report.coverage.value == "complete", (
+        oracle_id,
+        report.semantics.unsupported_fragments,
+    )
     return report.semantics
 
 
@@ -37,10 +39,23 @@ def _promote(
     expected_claim_consequence: Consequence,
     max_depth: int = 8,
 ) -> LoopWitness:
+    # Lazy import avoids corpus ↔ search circular import at package load.
+    from mtg_loop_engine.search.explorer import explore_pair
+
     left = _compile(left_id)
     right = _compile(right_id)
-    hit = explore_pair(left, right, max_depth=max_depth) or explore_pair(
-        right, left, max_depth=max_depth
+    hit = explore_pair(
+        left,
+        right,
+        max_depth=max_depth,
+        expected_net_state=expected_net_state,
+        expected_claim_consequence=expected_claim_consequence,
+    ) or explore_pair(
+        right,
+        left,
+        max_depth=max_depth,
+        expected_net_state=expected_net_state,
+        expected_claim_consequence=expected_claim_consequence,
     )
     if hit is None:
         raise RuntimeError(f"failed to rediscover {gold_id} for gold promotion")
@@ -77,8 +92,8 @@ def _promote(
 
 
 def all_gold_core() -> list[LoopWitness]:
-    """Return Wave 1 Oracle-exact gold positives."""
-    return [
+    """Return Oracle-exact gold positives (Waves 1+)."""
+    cases = [
         _promote(
             gold_id="core_guard_gond",
             left_id="oracle:midnight-guard",
@@ -90,7 +105,7 @@ def all_gold_core() -> list[LoopWitness]:
             gold_id="core_altar_gravecrawler_live",
             left_id="oracle:phyrexian-altar",
             right_id="oracle:gravecrawler",
-            expected_net_state=NetStateDelta(),  # net mana 0; repeatable events
+            expected_net_state=NetStateDelta(),
             expected_claim_consequence=Consequence.REPEATABLE_EVENT,
         ),
         _promote(
@@ -107,7 +122,41 @@ def all_gold_core() -> list[LoopWitness]:
             expected_net_state=NetStateDelta(life_you=1, life_opponent=-1),
             expected_claim_consequence=Consequence.LETHAL,
         ),
+        _promote(
+            gold_id="core_basalt_zirda",
+            left_id="oracle:basalt-monolith",
+            right_id="oracle:zirda-the-dawnwaker",
+            expected_net_state=NetStateDelta(mana=ManaAmount(colorless=2)),
+            expected_claim_consequence=Consequence.ACCUMULATES,
+        ),
+        _promote(
+            gold_id="core_druid_vizier",
+            left_id="oracle:devoted-druid",
+            right_id="oracle:vizier-of-remedies",
+            expected_net_state=NetStateDelta(mana=ManaAmount(green=1)),
+            expected_claim_consequence=Consequence.ACCUMULATES,
+        ),
+        _promote(
+            gold_id="core_rosie_scurry",
+            left_id="oracle:rosie-cotton-of-south-lane",
+            right_id="oracle:scurry-oak",
+            expected_net_state=NetStateDelta(
+                creature_tokens=1,
+                plus_one_counters=1,
+            ),
+            expected_claim_consequence=Consequence.ACCUMULATES,
+            max_depth=10,
+        ),
+        _promote(
+            gold_id="core_heliod_ballista",
+            left_id="oracle:heliod-sun-crowned",
+            right_id="oracle:walking-ballista",
+            expected_net_state=NetStateDelta(life_you=1, life_opponent=-1),
+            expected_claim_consequence=Consequence.LETHAL,
+            max_depth=10,
+        ),
     ]
+    return cases
 
 
 __all__ = ["all_gold_core"]

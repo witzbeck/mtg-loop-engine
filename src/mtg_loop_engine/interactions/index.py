@@ -67,11 +67,21 @@ class InteractionIndex:
         if "remove_counter" in cap.requires:
             out |= self.by_produces["add_counter"]
         if "add_counter" in cap.produces:
-            out |= self.by_requires["remove_counter"]
+            out |= self.by_requires["remove_counter"] | self.by_triggers["counter_added"]
+        if "token" in cap.produces or "create_token" in cap.produces:
+            out |= self.by_triggers["create_token"]
+        if "create_token" in cap.triggers_on:
+            out |= self.by_produces["token"] | self.by_produces["create_token"]
+        if "counter_added" in cap.triggers_on:
+            out |= self.by_produces["add_counter"]
         if "mana" in cap.requires:
             out |= self.by_modifies["reduce_activation_cost"] | self.by_produces["mana"]
         if "reduce_activation_cost" in cap.modifies:
             out |= self.by_requires["mana"]
+        if "m1m1_put" in cap.requires:
+            out |= self.by_modifies["m1m1_put"]
+        if "m1m1_put" in cap.modifies:
+            out |= self.by_requires["m1m1_put"]
         if "mana" in cap.produces:
             out |= self.by_requires["mana"]
         # Life-drain feedback (Bond/Blood, Vito/…).
