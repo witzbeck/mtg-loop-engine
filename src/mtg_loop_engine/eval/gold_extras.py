@@ -7,7 +7,12 @@ from pathlib import Path
 import json
 
 from mtg_loop_engine.config import EngineConfig
-from mtg_loop_engine.corpus import gold_core_card_pool, gold_core_pair_keys
+from mtg_loop_engine.corpus import (
+    gold_core_card_pool,
+    gold_core_pair_keys,
+    physics_gold_card_pool,
+    physics_gold_pair_keys,
+)
 from mtg_loop_engine.eval.explain import record_from_hit
 from mtg_loop_engine.eval.metrics import precision_from_records
 from mtg_loop_engine.eval.schema import (
@@ -37,16 +42,13 @@ def _pair_has_fixture(left_id: str, right_id: str) -> bool:
     return bool({left_id, right_id} & FIXTURE_ORACLE_IDS)
 
 
-# Human adjudication of extras still accepted after the participant gate
-# (search requires strict_two_card). Keys are frozensets of oracle ids.
-# Notes explain the class; they are not search hints.
-#
-# Pre-gate bystander duplicates (Basalt self-untap + spectator) are no longer
-# discovered; they are regression-locked in tests/eval/test_classify_store.py.
-# Frozen baselines under eval/baseline/ match this post-gate adjudication set
-# (ROADMAP M4 items 5–6). Product precision uses is_precision_eligible_ids only
-# (ADR 0007): both essentials must be ORACLE_EXACT.
-GOLD_EXTRA_ADJUDICATIONS: dict[frozenset[str], tuple[AdjudicationClass, str]] = {
+# Wave 0: Oracle gold_core is empty → no Oracle gold-pool extras yet.
+# Product precision stays null until ORACLE_EXACT×ORACLE_EXACT discoveries exist.
+GOLD_EXTRA_ADJUDICATIONS: dict[frozenset[str], tuple[AdjudicationClass, str]] = {}
+
+# Physics-suite extras (discoveries beyond labeled physics positives). Not
+# product-precision. Historical Wave-0-migration adjudication set.
+PHYSICS_EXTRA_ADJUDICATIONS: dict[frozenset[str], tuple[AdjudicationClass, str]] = {
     # ---- SYNTHETIC physics extras (not product-precision) --------------------
     frozenset({"oracle:ashnods-altar", "synthetic:persistent-phoenix"}): (
         AdjudicationClass.INVALID_CANDIDATE_DATA,
@@ -98,7 +100,7 @@ GOLD_EXTRA_ADJUDICATIONS: dict[frozenset[str], tuple[AdjudicationClass, str]] = 
 
 
 def collect_gold_pool_extras(*, max_depth: int = 6) -> list[CandidateRecord]:
-    """Run unlabeled discovery on gold_core cards and keep non-gold accepted pairs."""
+    """Run unlabeled discovery on Oracle gold_core cards; keep non-gold accepted pairs."""
     gold = gold_core_pair_keys()
     report = discover_loops(gold_core_card_pool(), max_depth=max_depth)
     extras: list[CandidateRecord] = []
@@ -113,6 +115,30 @@ def collect_gold_pool_extras(*, max_depth: int = 6) -> list[CandidateRecord]:
                 proof=hit.proof,
                 reasons=hit.reasons,
                 corpus="gold_pool_extras",
+                reference_status=ReferenceStatus.ABSENT_FROM_REFERENCE,
+                engine_version=engine,
+            )
+        )
+    extras.sort(key=lambda r: (r.left_name, r.right_name))
+    return extras
+
+
+def collect_physics_pool_extras(*, max_depth: int = 6) -> list[CandidateRecord]:
+    """Discoveries beyond labeled physics positives (engine regression, not precision)."""
+    labeled = physics_gold_pair_keys()
+    report = discover_loops(physics_gold_card_pool(), max_depth=max_depth)
+    extras: list[CandidateRecord] = []
+    engine = EngineConfig().engine_version
+    for hit in report.verified:
+        key = frozenset(c.oracle_id for c in hit.witness.essential_cards)
+        if key in labeled:
+            continue
+        extras.append(
+            record_from_hit(
+                witness=hit.witness,
+                proof=hit.proof,
+                reasons=hit.reasons,
+                corpus="physics_pool_extras",
                 reference_status=ReferenceStatus.ABSENT_FROM_REFERENCE,
                 engine_version=engine,
             )

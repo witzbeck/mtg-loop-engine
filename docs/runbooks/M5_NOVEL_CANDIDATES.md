@@ -62,14 +62,14 @@ uv run python scripts/spellbook_absent_discovery.py
 5. **Path a / slice 5 (self-starters)** ✓ — power-tap mana; ETB damage (Impact / Purphoros / Alliance); ETB untap-self; anthem/devotion/lifelink-reminder irrelevant.
 6. **Path a / slice 6 (token auras)** ✓ — Presence of Gond host-tap; Enchant false-COMPLETE fix; Aphetto/Morph. First `absent_from_reference > 0` on live probe (later cleared by host-recurrence fix: aura host is a non-token setup permanent so tap enters `D`).
 7. **Path a (continue):** further self-starting COMPLETE unlocks; adjudicate absences. Taxonomy: `finite_interaction_misclassified_as_loop` + optional `failure_reasons` for finite vs bystander labels.
-8. **Path b (deferred):** generic life-gain seed for `GAIN_LIFE` trigger cards — see ROADMAP M5; do not implement without an explicit widen.
+8. **Path b (Wave 1):** generic life-gain seed for `GAIN_LIFE` trigger cards — required for Bond/Blood gold; disclose on witness.
 
 #### Life-drain bootstrap (policy)
 
 | Path | Meaning | Status |
 | ---- | ------- | ------ |
 | **a** | Prefer cards/patterns that start their own loop from default BF setup | **Active** |
-| **b** | Seed generic life-gain (or a one-shot life event) when a searched essential has `GAIN_LIFE` triggers | **Deferred on ROADMAP** — ADR 0002 fodder-shaped; widens discovery for Bond/Exquisite without a third card |
+| **b** | Seed generic life-gain when a searched essential has `GAIN_LIFE` triggers | **Widened for Wave 1 Bond/Blood** — explicit seed, disclosed on witness |
 
 Each slice: real-Oracle curriculum fixtures → RED/GREEN tests → remeasure → ship. Expand patterns deliberately with tests/docs (`AGENTS.md`).
 

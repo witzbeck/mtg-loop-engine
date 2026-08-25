@@ -2,7 +2,12 @@
 
 from pathlib import Path
 
-from mtg_loop_engine.corpus import all_gold_core, gold_core_card_pool
+from mtg_loop_engine.corpus import (
+    all_gold_core,
+    gold_core_card_pool,
+    physics_all_positives,
+    physics_gold_card_pool,
+)
 from mtg_loop_engine.corpus.builders import two_card
 from mtg_loop_engine.eval.reference_absent import (
     CORPUS_SPELLBOOK_ABSENT,
@@ -83,14 +88,14 @@ def test_name_pair_key_is_casefold_order_independent():
     assert name_pair_key("A", "b") == name_pair_key("B", "a")
 
 
-def test_gold_pool_extras_label_absent_relative_to_gold_core_pairs():
-    """Discoveries beyond gold_core labels are ABSENT_FROM_REFERENCE (not NOVEL)."""
-    gold_name_pairs = {
+def test_physics_pool_extras_label_absent_relative_to_physics_pairs():
+    """Discoveries beyond physics labels are ABSENT_FROM_REFERENCE (not NOVEL)."""
+    physics_name_pairs = {
         frozenset(c.name.casefold() for c in witness.essential_cards)
-        for witness in all_gold_core()
+        for witness in physics_all_positives()
     }
-    discovery = discover_loops(gold_core_card_pool())
-    classified = classify_discovery_vs_reference(discovery, gold_name_pairs)
+    discovery = discover_loops(physics_gold_card_pool())
+    classified = classify_discovery_vs_reference(discovery, physics_name_pairs)
     assert classified.in_reference >= 10
     assert classified.absent_from_reference >= 1
     assert all(h.reference_status != ReferenceStatus.NOVEL for h in classified.hits)
@@ -124,13 +129,13 @@ def test_candidate_records_from_discovery_only_absent_default():
 
 
 def test_persist_spellbook_absent_candidates_roundtrip(tmp_path: Path):
-    gold_name_pairs = {
+    physics_name_pairs = {
         frozenset(c.name.casefold() for c in witness.essential_cards)
-        for witness in all_gold_core()
+        for witness in physics_all_positives()
     }
-    discovery = discover_loops(gold_core_card_pool())
-    records = candidate_records_from_discovery(discovery, gold_name_pairs)
-    assert records, "expected at least one gold-pool absent for persist contract"
+    discovery = discover_loops(physics_gold_card_pool())
+    records = candidate_records_from_discovery(discovery, physics_name_pairs)
+    assert records, "expected at least one physics-pool absent for persist contract"
     sample = records[:1]
     db = tmp_path / "adj.duckdb"
     jsonl = tmp_path / "spellbook_absent.jsonl"

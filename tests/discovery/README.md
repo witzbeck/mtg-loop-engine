@@ -25,7 +25,7 @@ graph TB;
 
 ## Outputs
 
-- Asserts on join coverage and 10/10 rediscovery
+- Asserts on join coverage and physics rediscovery (`discover-physics`); Oracle gold may be empty (Wave 0)
 
 ## Responsibilities
 

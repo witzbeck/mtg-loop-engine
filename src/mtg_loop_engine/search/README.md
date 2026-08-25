@@ -101,7 +101,7 @@ Returns `None` / empty verified hits when bounds exhaust, the oracle rejects all
 
 ## Testing
 
-- `tests/discovery/` — blind recall 10/10; compiled seam
+- `tests/discovery/` — physics blind recall; Oracle gold discovery (may be empty)
 - `tests/unit/test_explorer.py` — oracle injection; no double-verify
 - `tests/unit/test_search_boundary.py` — verify ↛ search
 - `tests/eval/test_classify_store.py` — participant gate regressions

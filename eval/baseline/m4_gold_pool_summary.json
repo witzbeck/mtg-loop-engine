@@ -1,10 +1,10 @@
 {
-  "extras_total": 11,
+  "extras_total": 0,
   "extras_real_card_pairs": 0,
-  "extras_fixture_pairs": 11,
+  "extras_fixture_pairs": 0,
   "adjudicated": 0,
   "valid": 0,
   "precision": null,
   "by_class": {},
-  "notes": "ADR 0007: precision denominator is ORACLE_EXACT\u00d7ORACLE_EXACT only (is_precision_eligible_ids). Pre-migration gold-pool precision 1.0 is historical and not comparable. Zero eligible pairs \u2192 precision null."
+  "notes": "ADR 0007 Wave 0: Oracle gold_core empty; gold-pool extras from Oracle pool are 0. Precision denominator remains ORACLE_EXACT\u00d7ORACLE_EXACT only (is_precision_eligible_ids). Pre-migration gold-pool precision 1.0 and the former 11 physics extras are historical / moved to physics_pool_extras — not comparable."
 }

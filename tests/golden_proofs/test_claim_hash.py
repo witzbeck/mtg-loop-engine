@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from mtg_loop_engine.config import EngineConfig
-from mtg_loop_engine.corpus import all_gold_core
+from mtg_loop_engine.corpus import physics_all_positives
 from mtg_loop_engine.proofs.claim import claim_proof_hash
 from mtg_loop_engine.proofs.models import VersionIdentity
 from mtg_loop_engine.semantics.enums import VerificationStatus
@@ -25,7 +25,7 @@ def _versions() -> VersionIdentity:
 
 
 def test_verified_proof_uses_schema_0_2_and_stable_claim_hash():
-    witness = all_gold_core()[0]
+    witness = physics_all_positives()[0]
     proof = Verifier().verify(witness)
     assert proof.status == VerificationStatus.VERIFIED
     assert proof.versions.proof_schema_version == "0.2.0"
@@ -42,7 +42,7 @@ def test_verified_proof_uses_schema_0_2_and_stable_claim_hash():
 
 
 def test_git_sha_excluded_from_claim_hash():
-    witness = all_gold_core()[0]
+    witness = physics_all_positives()[0]
     v1 = _versions()
     v2 = v1.model_copy(update={"git_sha": "ffffffffffff"})
     h1 = claim_proof_hash(
@@ -55,7 +55,7 @@ def test_git_sha_excluded_from_claim_hash():
 
 
 def test_reordering_essential_cards_and_assumptions_preserves_hash():
-    witness = all_gold_core()[0]
+    witness = physics_all_positives()[0]
     versions = _versions()
     base = claim_proof_hash(
         witness, status=VerificationStatus.VERIFIED, versions=versions
@@ -78,7 +78,7 @@ def test_reordering_essential_cards_and_assumptions_preserves_hash():
 
 
 def test_changing_card_mana_cost_changes_hash():
-    witness = all_gold_core()[0]
+    witness = physics_all_positives()[0]
     versions = _versions()
     base = claim_proof_hash(
         witness, status=VerificationStatus.VERIFIED, versions=versions
@@ -108,7 +108,7 @@ def test_changing_card_mana_cost_changes_hash():
 
 
 def test_changing_initial_mana_changes_hash():
-    witness = all_gold_core()[0]
+    witness = physics_all_positives()[0]
     versions = _versions()
     base = claim_proof_hash(
         witness, status=VerificationStatus.VERIFIED, versions=versions
@@ -130,7 +130,7 @@ def test_changing_initial_mana_changes_hash():
 
 
 def test_changing_recurrence_dimension_changes_hash():
-    witness = all_gold_core()[0]
+    witness = physics_all_positives()[0]
     versions = _versions()
     base = claim_proof_hash(
         witness, status=VerificationStatus.VERIFIED, versions=versions

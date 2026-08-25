@@ -2,62 +2,38 @@
 
 ## Purpose
 
-Fifteen stub witnesses for unsupported / partial-relevant families. They document known gaps without expanding the verified gold_core spine. Still active through M4 as the fail-closed curriculum for pattern growth.
+Unsupported / partial-relevant stub witnesses plus staging for real Oracle pairs
+blocked by missing physics (`oracle_gaps.py`). Documents known gaps without
+claiming product gold.
 
 ## Role in pipeline
-
-Stub catalog → **THIS** → verifier expects unsupported-style rejection → curriculum signal for pattern work.
 
 ```mermaid
 graph TB;
   stubs[gold_extended_catalog] --> verifier[Verifier];
+  gaps[oracle_gaps] --> staging[promotionStaging];
   verifier --> unsupported[UNSUPPORTED_SEMANTICS];
-  stubs --> curriculum[patternCurriculum];
 ```
 
-## Inputs
+## What belongs here
 
-- Authored stub witnesses with `PARTIAL_RELEVANT_TO_PROOF` (or similar unsupported markers) in `gold_core/cases.py` catalog helpers / extended entries
+- Authored stubs with `PARTIAL_RELEVANT_TO_PROOF` / unsupported markers
+- Real pairs awaiting Wave 2/3 primitives (`oracle_gap_catalog`)
 
-## Outputs
+## What does not belong here
 
-- Catalog of stubs that must not claim `VERIFIED`
-
-## Responsibilities
-
-- Hold explicit “not yet supported” contracts so the suite stays honest about coverage gaps.
-- Avoid breaking gold_core positives when new unsupported families are recorded.
-
-## Non-responsibilities
-
-- Verified positives (gold_core)
-- Live Spellbook rows (benchmark/eval)
-
-## Core invariants
-
-- Stubs must not silently become `VERIFIED` without an intentional gold_core promotion.
-- Coverage remains fail-closed for proof-relevant gaps.
+- Verified Oracle gold (`gold_core/`)
+- Synthetic physics regressions (`physics_fixtures/`)
 
 ## Main entry points
 
-- Extended catalog accessors used by `tests/gold_extended/`
-
-## Data contracts
-
-Same `LoopWitness` schema as gold_core; expected statuses are unsupported / rejection typed.
-
-## Failure behavior
-
-If a stub suddenly verifies, tests should fail — that is a signal to either promote it deliberately or fix an over-eager pattern.
+- `gold_extended_catalog` (physics-adjacent stubs; still used by CLI smoke)
+- `oracle_gap_catalog`
 
 ## Testing
 
 `tests/gold_extended/`
 
-## Extension guide
-
-Add a stub when Spellbook/real Oracle shows a family the compiler cannot honor yet. Promote to gold_core only with a full verifying witness + discovery expectation.
-
 ## Bigger-picture relationship
 
-Parent: [`../README.md`](../README.md). Pattern growth path: [`../../semantics/patterns/README.md`](../../semantics/patterns/README.md).
+Parent: [`../README.md`](../README.md).
