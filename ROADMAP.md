@@ -113,6 +113,12 @@ Blind discovery among real **COMPLETE**-compiled Oracle cards from Spellbook nam
    Keep **line coverage floor at 92%** until percentages measure faithful
    claims (optional next: path-grammar fail-closed, noncreature death cleanup).
 
+   **Wave 3 physics slice (undying + SBA + self-ping):** ✓ executor primitives
+   landed (`damage_marked`, `apply_state_based_actions`, `seed_grant_undying`,
+   `DealDamage` `any_target`). Mikaeus remains in `oracle_gaps` until audited
+   Oracle + grant/anthem compile + gold witness — do not promote yet. Saffi
+   delayed triggers still out of scope.
+
 1. **Absent-discovery path** ✓ — `eval/reference_absent.py` + `scripts/spellbook_absent_discovery.py`.
 2. **Grow COMPLETE pool** — prefer **self-starting** two-card physics (path **a**): patterns that can close without an external seeded event. Curriculum order: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDIDATES.md).
    - **Slice 1 (aura channel)** ✓ — Freed / Pemmin’s; COMPLETE **17→19**.

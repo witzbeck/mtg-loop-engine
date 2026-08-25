@@ -42,20 +42,13 @@ def _pair_has_fixture(left_id: str, right_id: str) -> bool:
     return bool({left_id, right_id} & FIXTURE_ORACLE_IDS)
 
 
-# Wave 1: Oracle gold_core has four pairs; extras are other Oracle discoveries
-# beyond labeled gold (still precision-eligible only if EXACT×EXACT + adjudicated).
+# Wave 1+: Oracle gold_core labeled pairs; extras are other Oracle discoveries
+# beyond labeled gold. SBA (Wave 3 physics) closed Basalt/Gond+Druid finite
+# false positives that previously verified without toughness checks.
 GOLD_EXTRA_ADJUDICATIONS: dict[frozenset[str], tuple[AdjudicationClass, str]] = {
     frozenset({"oracle:intruder-alarm", "oracle:presence-of-gond"}): (
         AdjudicationClass.VALID_STRICT_TWO_CARD,
         "Alarm+Gond rediscovers with aura-host seed; valid Oracle loop not yet promoted to gold_core.",
-    ),
-    frozenset({"oracle:basalt-monolith", "oracle:devoted-druid"}): (
-        AdjudicationClass.FINITE_INTERACTION_MISCLASSIFIED_AS_LOOP,
-        "Druid -1/-1 untap without Vizier is finite (lethal SBAs); Basalt is net-zero mana.",
-    ),
-    frozenset({"oracle:devoted-druid", "oracle:presence-of-gond"}): (
-        AdjudicationClass.FINITE_INTERACTION_MISCLASSIFIED_AS_LOOP,
-        "Gond+Druid token loop dies to accumulating -1/-1 counters without Vizier.",
     ),
 }
 

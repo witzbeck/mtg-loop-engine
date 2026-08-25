@@ -84,6 +84,8 @@ class PermanentSpec(BaseModel):
     is_artifact: bool = False
     power: int | None = None
     toughness: int | None = None
+    undying: bool = False
+    damage_marked: int = 0
 
 
 class InitialStateSpec(BaseModel):

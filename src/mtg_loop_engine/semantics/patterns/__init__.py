@@ -841,7 +841,8 @@ def pat_remove_counter_damage(text: str, name: str) -> Ability | None:
         costs=[],
         effects=[
             RemoveCounterEffect(counter_type="p1p1", quantity=1),
-            DealDamageEffect(amount=1, target="opponent"),
+            # any_target: explorer defaults to opponent (Heliod); self-ping for undying.
+            DealDamageEffect(amount=1, target="any_target"),
         ],
     )
 

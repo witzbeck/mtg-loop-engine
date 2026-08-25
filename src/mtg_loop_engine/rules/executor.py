@@ -293,18 +293,41 @@ class Executor:
             source.zone = Zone.BATTLEFIELD
             source.tapped = False
             source.summoning_sick = True
+            source.damage_marked = 0
             state.bump("return_to_battlefield")
             self._on_etb(state, source)
             return None
 
         if isinstance(effect, DealDamageEffect):
-            if effect.target == "opponent":
+            to_opponent = effect.target == "opponent" or (
+                effect.target == "any_target"
+                and target_id in (None, "opponent")
+            )
+            if to_opponent:
                 state.life_opponent -= effect.amount
                 self._queue_triggers(
                     state,
                     TriggerEvent.OPPONENT_LOSE_LIFE,
                     source,
                     amount=effect.amount,
+                )
+            elif effect.target == "any_target" and target_id is not None:
+                # CR 702.92 / Triskelion-class: any-target may include the source.
+                victim = state.permanents.get(target_id)
+                if (
+                    victim is None
+                    or victim.zone != Zone.BATTLEFIELD
+                    or not victim.is_creature
+                ):
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_TARGET,
+                        "damage target must be a battlefield creature",
+                    )
+                victim.damage_marked += effect.amount
+            else:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "deal damage needs opponent or creature target",
                 )
             state.bump("damage", effect.amount)
             if source.lifelink and effect.amount > 0:
@@ -405,6 +428,10 @@ class Executor:
         # CR 700.4: "dies" means moves from the battlefield to the graveyard.
         # Exile replacements (e.g. Rest in Peace) suppress death events and DIES triggers.
         # Sacrifice events still fire before this replacement is applied.
+        # CR 702.92a/c: undying returns iff the creature had no +1/+1 counters when it died.
+        had_p1p1 = permanent.counters.get("p1p1", 0)
+        had_undying = permanent.undying
+        permanent.damage_marked = 0
         if self.has_exile_on_death(state) and permanent.is_creature:
             permanent.zone = Zone.EXILE
             permanent.tapped = False
@@ -413,6 +440,38 @@ class Executor:
         self._queue_triggers(state, TriggerEvent.DIES, permanent)
         permanent.zone = Zone.GRAVEYARD
         permanent.tapped = False
+        if had_undying and had_p1p1 == 0:
+            state.pending_triggers.append(
+                {
+                    "source_id": permanent.object_id,
+                    "ability_id": "__undying_return__",
+                    "subject_id": permanent.object_id,
+                }
+            )
+
+    def apply_state_based_actions(
+        self, state: GameState, *, max_iters: int = 16
+    ) -> None:
+        """CR 704.5f/g: creatures with toughness ≤ 0 or lethal damage die.
+
+        Iterates until stable or ``max_iters`` (undying / death cascades).
+        """
+        for _ in range(max_iters):
+            doomed: list[Permanent] = []
+            for perm in state.permanents.values():
+                if perm.zone != Zone.BATTLEFIELD or perm.controller != "you":
+                    continue
+                if not perm.is_creature:
+                    continue
+                et = perm.effective_toughness()
+                if et is None:
+                    continue
+                if et <= 0 or perm.damage_marked >= et:
+                    doomed.append(perm)
+            if not doomed:
+                return
+            for perm in doomed:
+                self.die(state, perm)
 
     def sacrifice(self, state: GameState, permanent: Permanent) -> None:
         state.bump("sacrifice")
@@ -654,6 +713,8 @@ class Executor:
         else:
             idx = 0
         tr = state.pending_triggers.pop(idx)
+        if tr["ability_id"] == "__undying_return__":
+            return self._resolve_undying_return(state, tr)
         source = state.permanents[tr["source_id"]]
         ab = self.find_ability(source.oracle_id, tr["ability_id"])
         if not isinstance(ab, TriggeredAbility):
@@ -666,7 +727,38 @@ class Executor:
             trigger_amount=tr.get("amount"),
         )
 
+    def _resolve_undying_return(
+        self, state: GameState, tr: dict
+    ) -> ExecError | None:
+        """CR 702.92a/c synthetic return — no card ability lookup."""
+        subject_id = tr.get("subject_id") or tr["source_id"]
+        perm = state.permanents.get(subject_id)
+        if perm is None:
+            return ExecError(
+                VerificationStatus.ILLEGAL_ACTION, "undying subject missing"
+            )
+        if perm.zone != Zone.GRAVEYARD:
+            return ExecError(
+                VerificationStatus.ILLEGAL_ACTION,
+                "undying return requires graveyard",
+            )
+        perm.zone = Zone.BATTLEFIELD
+        perm.tapped = False
+        perm.summoning_sick = True
+        perm.damage_marked = 0
+        perm.counters["p1p1"] = perm.counters.get("p1p1", 0) + 1
+        state.bump("return_to_battlefield")
+        self._on_etb(state, perm)
+        return None
+
     def run_step(self, state: GameState, step: ActionStep) -> ExecError | None:
+        err = self._run_step_body(state, step)
+        if err:
+            return err
+        self.apply_state_based_actions(state)
+        return None
+
+    def _run_step_body(self, state: GameState, step: ActionStep) -> ExecError | None:
         op = step.op
         if op == "activate":
             return self.activate(state, step)
@@ -745,6 +837,21 @@ class Executor:
                     "seed_grant_lifelink target must be a creature",
                 )
             perm.lifelink = True
+            return None
+        if op == "seed_grant_undying":
+            # Mikaeus-class: grant undying for counter-gated return (physics seed).
+            if not step.target or step.target not in state.permanents:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "seed_grant_undying needs target creature",
+                )
+            perm = state.permanents[step.target]
+            if not perm.is_creature:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "seed_grant_undying target must be a creature",
+                )
+            perm.undying = True
             return None
         if op == "opponent_must_cooperate":
             return ExecError(

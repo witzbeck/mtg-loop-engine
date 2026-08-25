@@ -38,14 +38,15 @@ def oracle_gap_catalog() -> list[OracleGap]:
             left_name="Mikaeus, the Unhallowed",
             right_name="Triskelion",
             blockers=(
-                "undying as a granted keyword with counter-gated return",
-                "static P/T anthem (+1/+1 to other non-Humans)",
-                "state-based actions for lethal damage / 0 toughness",
-                "damage to self as a legal 'any target' choice for undying loops",
+                "Mikaeus undying grant / non-Human anthem not compiled from audited Oracle",
+                "static P/T anthem continuous layers (+1/+1 to other non-Humans)",
+                "gold promotion blocked pending audited Oracle witness",
             ),
             notes=(
-                "Heliod/Ballista covers remove-counter damage + lifelink; "
-                "undying/SBA layer is the remaining gap."
+                "SBA / undying keyword / any_target self-ping physics landed "
+                "(Permanent.damage_marked, apply_state_based_actions, seed_grant_undying, "
+                "DealDamage any_target). Remaining for promotion: audited Oracle + "
+                "Mikaeus grant/anthem compile + gold witness."
             ),
         ),
     ]

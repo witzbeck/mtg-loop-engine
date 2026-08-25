@@ -31,16 +31,15 @@ Validated from `eval/baseline/*.json`. Regenerate this section with `scripts/ren
 
 | Metric | Value |
 | ------ | ----- |
-| extras_total | 3 |
-| extras_real_card_pairs | 3 |
+| extras_total | 1 |
+| extras_real_card_pairs | 1 |
 | extras_fixture_pairs | 0 |
-| adjudicated (precision denominator) | 3 |
+| adjudicated (precision denominator) | 1 |
 | valid | 1 |
-| precision | 0.3333333333333333 |
-| by_class.finite_interaction_misclassified_as_loop | 2 |
+| precision | 1.0 |
 | by_class.valid_strict_two_card | 1 |
 
-Notes from baseline: ADR 0007 Waves 1–3: Oracle gold_core has eight EXACT positives; gold-pool extras = Alarm+Gond (valid) plus two finite Druid mislabels. Precision uses eligible VALID denominator only.
+Notes from baseline: ADR 0007 Waves 1–3: Oracle gold_core has eight EXACT positives; gold-pool extra = Alarm+Gond (valid). Wave 3 SBA closed Basalt/Gond+Druid finite false positives. Precision uses eligible VALID denominator only.
 
 ### Spellbook recovery (`m4_spellbook_recovery_summary.json`)
 

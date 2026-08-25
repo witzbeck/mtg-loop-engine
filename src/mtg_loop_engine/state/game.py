@@ -27,7 +27,19 @@ class Permanent:
     power: int | None = None
     toughness: int | None = None
     lifelink: bool = False
+    undying: bool = False
+    damage_marked: int = 0
     once_per_turn_used: set[str] = field(default_factory=set)
+
+    def effective_toughness(self) -> int | None:
+        """Toughness after +1/+1 and -1/-1 counters. None if no printed toughness."""
+        if self.toughness is None:
+            return None
+        return (
+            self.toughness
+            + self.counters.get("p1p1", 0)
+            - self.counters.get("m1m1", 0)
+        )
 
     def copy(self) -> Permanent:
         return Permanent(
@@ -45,6 +57,8 @@ class Permanent:
             power=self.power,
             toughness=self.toughness,
             lifelink=self.lifelink,
+            undying=self.undying,
+            damage_marked=self.damage_marked,
             once_per_turn_used=set(self.once_per_turn_used),
         )
 
@@ -76,6 +90,8 @@ class GameState:
                 is_artifact=p.is_artifact,
                 power=p.power,
                 toughness=p.toughness,
+                undying=p.undying,
+                damage_marked=p.damage_marked,
             )
             for p in spec.permanents
         }
@@ -170,4 +186,6 @@ def permanent_from_spec(spec: PermanentSpec) -> Permanent:
         is_artifact=spec.is_artifact,
         power=spec.power,
         toughness=spec.toughness,
+        undying=spec.undying,
+        damage_marked=spec.damage_marked,
     )

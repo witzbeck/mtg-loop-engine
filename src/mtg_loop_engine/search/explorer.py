@@ -37,6 +37,7 @@ from mtg_loop_engine.semantics.ir import (
     ActivatedAbility,
     AddCounterEffect,
     CardSemantics,
+    DealDamageEffect,
     SacrificeCost,
     TapCost,
     TriggeredAbility,
@@ -174,6 +175,13 @@ def _effect_needs_permanent_target(ability: ActivatedAbility) -> bool:
     return False
 
 
+def _any_target_damage(ability: ActivatedAbility) -> bool:
+    return any(
+        isinstance(e, DealDamageEffect) and e.target == "any_target"
+        for e in ability.effects
+    )
+
+
 def _tap_cost_needs_host(ability: ActivatedAbility) -> bool:
     return any(isinstance(c, TapCost) and not c.source_self for c in ability.costs)
 
@@ -263,6 +271,7 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
             selector = _sac_selector(ab)
             need_effect_target = _effect_needs_permanent_target(ab)
             need_tap_host = _tap_cost_needs_host(ab)
+            any_target_dmg = _any_target_damage(ab)
             if selector:
                 targets = _fodder_ids(state, selector)
             elif need_tap_host:
@@ -275,6 +284,9 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
                     and not p.tapped
                     and p.object_id != perm.object_id
                 ]
+            elif any_target_dmg:
+                # Opponent first (Heliod/Ballista); self legal for undying self-ping.
+                targets = ["opponent", perm.object_id]
             elif need_effect_target:
                 targets = [
                     p.object_id
