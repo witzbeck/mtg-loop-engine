@@ -12,6 +12,7 @@ from mtg_loop_engine.eval.store import (
     DEFAULT_JSONL,
     AdjudicationStore,
 )
+from mtg_loop_engine.eval.reference_absent import DEFAULT_ABSENT_JSONL
 
 CLASSES = list(AdjudicationClass)
 
@@ -76,10 +77,11 @@ _CLASS_GUIDE: list[tuple[str, str, str]] = [
 # ---------------------------------------------------------------------------
 
 def _ensure_loaded(store: AdjudicationStore, jsonl: Path) -> None:
-    if store.list_candidates():
-        return
-    if jsonl.exists():
+    """Seed DuckDB from committed gold JSONL (if empty) and merge absent JSONL."""
+    if not store.list_candidates() and jsonl.exists():
         store.import_jsonl(jsonl)
+    if DEFAULT_ABSENT_JSONL.exists():
+        store.import_jsonl(DEFAULT_ABSENT_JSONL)
 
 
 def _render_card_header(st, name: str, oracle_text: str) -> None:
@@ -350,7 +352,9 @@ def render(
         else:
             st.info(
                 "No candidates in this filter. "
-                "Import a JSONL file or run `eval-gold-extras` to populate.",
+                "For gold extras: run `eval-gold-extras`. "
+                "For Spellbook absences: "
+                "`uv run python scripts/spellbook_absent_discovery.py --persist-workbench`.",
                 icon=":material/info:",
             )
             store.close()
