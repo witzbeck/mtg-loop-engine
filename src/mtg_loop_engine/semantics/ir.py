@@ -108,6 +108,8 @@ class DealDamageEffect(BaseModel):
 class GainLifeEffect(BaseModel):
     kind: Literal["gain_life"] = "gain_life"
     amount: int = 1
+    # When True, use the pending trigger's recorded amount (Exquisite Blood class).
+    amount_from_trigger: bool = False
 
 
 class DrawEffect(BaseModel):
@@ -119,6 +121,7 @@ class LoseLifeEffect(BaseModel):
     kind: Literal["lose_life"] = "lose_life"
     amount: int = 1
     who: Literal["opponent", "you"] = "opponent"
+    amount_from_trigger: bool = False
 
 
 class MoveToZoneEffect(BaseModel):

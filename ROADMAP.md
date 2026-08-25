@@ -94,6 +94,7 @@ Blind discovery among real **COMPLETE**-compiled Oracle cards from Spellbook nam
 2. **Grow COMPLETE pool** — curriculum order in [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDIDATES.md).
    - **Slice 1 (aura channel)** ✓ — Freed / Pemmin’s; COMPLETE **17→19**.
    - **Slices 2–3 (activated artifacts + Intruder Alarm)** ✓ — Staff of Domination suite, live Basalt/Alarm; COMPLETE **19→24**.
+   - **Slice 4 (life-drain + statics)** ✓ — Vito/Bond/Exquisite patterns; GAIN_LIFE / OPPONENT_LOSE_LIFE triggers; Flash/Devoid/Evolve/land-tapped statics.
    - **Rules-evidence rails (supporting; land before widening modeled physics):** cheap epistemic adapters so coverage growth stays deliberate (ADR 0003). Not an M5 exit gate; not CR ingest or executor expansion.
 
    | Piece | Why |
@@ -110,7 +111,7 @@ Playbook: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDID
 
 ### First local probe (not a baseline)
 
-Post–slices 1–3: **24** COMPLETE cards on the 50-page sample → **3** verified in-reference pairs; `absent=0`. Next pressure: life-drain / remaining high-frequency fragments.
+Post–slices 1–4: **~31** COMPLETE cards on the 50-page sample; still **3** verified in-reference pairs and `absent=0` (two-card life-drain needs an external life event to start). Continue fragment curriculum.
 
 ---
 

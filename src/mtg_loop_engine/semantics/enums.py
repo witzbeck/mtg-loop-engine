@@ -100,6 +100,8 @@ class TriggerEvent(StrEnum):
     TAP = "tap"
     UNTAP = "untap"
     COUNTER_ADDED = "counter_added"
+    GAIN_LIFE = "gain_life"
+    OPPONENT_LOSE_LIFE = "opponent_lose_life"
 
 
 class ChoiceController(StrEnum):

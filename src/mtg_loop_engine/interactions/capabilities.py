@@ -123,4 +123,8 @@ def join_reasons(left: CardCapabilities, right: CardCapabilities) -> list[str]:
         reasons.append("mana_pay")
     if "dies" in right.triggers_on and left.requires & {"sac_creature", "sac_self"}:
         reasons.append("dies_payoff")
+    if "life_gain" in left.produces and "gain_life" in right.triggers_on:
+        reasons.append("life_to_drain")
+    if "life_loss" in left.produces and "opponent_lose_life" in right.triggers_on:
+        reasons.append("loss_to_gain")
     return reasons

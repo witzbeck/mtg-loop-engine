@@ -134,15 +134,25 @@ class Executor:
         source: Permanent,
         effects: list,
         target_id: str | None,
+        *,
+        trigger_amount: int | None = None,
     ) -> ExecError | None:
         for effect in effects:
-            err = self._apply_one(state, source, effect, target_id)
+            err = self._apply_one(
+                state, source, effect, target_id, trigger_amount=trigger_amount
+            )
             if err:
                 return err
         return None
 
     def _apply_one(
-        self, state: GameState, source: Permanent, effect, target_id: str | None
+        self,
+        state: GameState,
+        source: Permanent,
+        effect,
+        target_id: str | None,
+        *,
+        trigger_amount: int | None = None,
     ) -> ExecError | None:
         if isinstance(effect, AddManaEffect):
             for color in (
@@ -241,12 +251,26 @@ class Executor:
         if isinstance(effect, DealDamageEffect):
             if effect.target == "opponent":
                 state.life_opponent -= effect.amount
+                self._queue_triggers(
+                    state,
+                    TriggerEvent.OPPONENT_LOSE_LIFE,
+                    source,
+                    amount=effect.amount,
+                )
             state.bump("damage", effect.amount)
             return None
 
         if isinstance(effect, GainLifeEffect):
-            state.life_you += effect.amount
-            state.bump("life_gain", effect.amount)
+            qty = (
+                trigger_amount
+                if effect.amount_from_trigger and trigger_amount is not None
+                else effect.amount
+            )
+            if qty is None or qty <= 0:
+                return ExecError(VerificationStatus.ILLEGAL_ACTION, "gain life amount")
+            state.life_you += qty
+            state.bump("life_gain", qty)
+            self._queue_triggers(state, TriggerEvent.GAIN_LIFE, source, amount=qty)
             return None
 
         if isinstance(effect, DrawEffect):
@@ -254,11 +278,24 @@ class Executor:
             return None
 
         if isinstance(effect, LoseLifeEffect):
+            qty = (
+                trigger_amount
+                if effect.amount_from_trigger and trigger_amount is not None
+                else effect.amount
+            )
+            if qty is None or qty <= 0:
+                return ExecError(VerificationStatus.ILLEGAL_ACTION, "lose life amount")
             if effect.who == "opponent":
-                state.life_opponent -= effect.amount
+                state.life_opponent -= qty
+                self._queue_triggers(
+                    state,
+                    TriggerEvent.OPPONENT_LOSE_LIFE,
+                    source,
+                    amount=qty,
+                )
             else:
-                state.life_you -= effect.amount
-            state.bump("life_loss", effect.amount)
+                state.life_you -= qty
+            state.bump("life_loss", qty)
             return None
 
         if isinstance(effect, MoveToZoneEffect):
@@ -274,7 +311,12 @@ class Executor:
         self._queue_triggers(state, TriggerEvent.ENTER_BATTLEFIELD, permanent)
 
     def _queue_triggers(
-        self, state: GameState, event: TriggerEvent, subject: Permanent
+        self,
+        state: GameState,
+        event: TriggerEvent,
+        subject: Permanent,
+        *,
+        amount: int | None = None,
     ) -> None:
         for perm in list(state.permanents.values()):
             if perm.zone != Zone.BATTLEFIELD or perm.controller != "you":
@@ -295,13 +337,14 @@ class Executor:
                     subject.is_token and subject.is_creature
                 ):
                     continue
-                state.pending_triggers.append(
-                    {
-                        "source_id": perm.object_id,
-                        "ability_id": ab.ability_id,
-                        "subject_id": subject.object_id,
-                    }
-                )
+                entry = {
+                    "source_id": perm.object_id,
+                    "ability_id": ab.ability_id,
+                    "subject_id": subject.object_id,
+                }
+                if amount is not None:
+                    entry["amount"] = amount
+                state.pending_triggers.append(entry)
 
     def die(self, state: GameState, permanent: Permanent) -> None:
         state.bump("death")
@@ -444,7 +487,13 @@ class Executor:
         ab = self.find_ability(source.oracle_id, tr["ability_id"])
         if not isinstance(ab, TriggeredAbility):
             return ExecError(VerificationStatus.ILLEGAL_ACTION, "bad trigger")
-        return self.apply_effects(state, source, ab.effects, step.target or tr.get("subject_id"))
+        return self.apply_effects(
+            state,
+            source,
+            ab.effects,
+            step.target or tr.get("subject_id"),
+            trigger_amount=tr.get("amount"),
+        )
 
     def run_step(self, state: GameState, step: ActionStep) -> ExecError | None:
         op = step.op

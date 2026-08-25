@@ -58,7 +58,8 @@ uv run python scripts/spellbook_absent_discovery.py
 1. **Aura channel** ✓ — `{C}: tap/untap enchanted creature` + irrelevant enchanted riders (Freed / Pemmin’s). Live delta: COMPLETE **17→19**.
 2. **Generic activated artifacts** ✓ — Staff of Domination suite, `this artifact` untap, doesn't-untap statics, draw effect.
 3. **Global ETB untap** ✓ — Intruder Alarm live wording (`untap all creatures`).
-4. **Life-drain family** — only after linked gain/drain semantics are deliberate
+4. **Life-drain family** ✓ — Vito / Bond / Exquisite (+ Conqueror); `GAIN_LIFE` / `OPPONENT_LOSE_LIFE` triggers.
+5. Continue fragment curriculum (priority report) until `absent_from_reference > 0` is routine.
 
 Each slice: real-Oracle curriculum fixtures → RED/GREEN tests → remeasure → ship. Expand patterns deliberately with tests/docs (`AGENTS.md`).
 

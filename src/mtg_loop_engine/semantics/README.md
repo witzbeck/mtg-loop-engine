@@ -76,7 +76,7 @@ CLI: `mtg-loop-engine compile-coverage`.
 
 Unmatched clauses become unsupported fragments → `PARTIAL_RELEVANT_TO_PROOF` (default). **Empty Oracle text** is also fail-closed (no silent `COMPLETE`). No exception for ordinary incomplete text; the failure mode is coverage, then verifier rejection.
 
-Real-Oracle curriculum under `real_oracle_curriculum.py` includes live Gravecrawler, activated-return stand-in, and M5 aura-channel cards (Freed from the Real / Pemmin's Aura).
+Real-Oracle curriculum under `real_oracle_curriculum.py` includes live Gravecrawler, aura-channel cards, Staff of Domination, and live Basalt / Intruder Alarm wording.
 
 ## Testing
 
