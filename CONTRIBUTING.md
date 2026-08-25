@@ -74,9 +74,12 @@ Green CI authorizes merge only when the change’s critical behavior is exercise
 
 See [`.github/workflows/ci.yml`](.github/workflows/ci.yml):
 
-- `uv run pytest` — executable contracts (gold, hard negatives, discovery, semantics, eval, …) **and** ≥90% line coverage on measured library code
+- `uv run pytest` — executable contracts (gold, hard negatives, discovery, semantics, eval, …) **and** ≥92% **line** coverage on measured library code
+- Branch coverage is reported in a second CI pytest pass (`--cov-branch`, no fail-under) so the line floor is not mixed with branch opportunities
 - `uv run python scripts/check_docs.py` — docs hygiene
 - `uv run python scripts/render_status.py --check` — STATUS ↔ baseline sync
+
+Treat **95%** as a later quality milestone: raise only after P0 verifier soundness stays green, recurrence/pruning contracts exist, and remaining misses are classified by product value — not by padding.
 
 ### Before treating green CI as merge OK
 
