@@ -8,7 +8,7 @@ Durable, in-repo record of frozen product and architecture decisions for the MTG
 
 ```mermaid
 graph TB;
-  roadmap[ROADMAP frozen table] --> adrSeed[ADR 0001-0008];
+  roadmap[ROADMAP frozen table] --> adrSeed[ADR 0001-0009];
   adrSeed --> agents[AGENTS.md];
   adrSeed --> contrib[CONTRIBUTING.md];
   adrSeed --> code[Packages and tests];
@@ -38,6 +38,7 @@ graph TB;
 | [0006](0006-milestone-and-deferred-scope-policy.md) | Milestone and deferred-scope policy | Accepted |
 | [0007](0007-corpus-provenance-physics-vs-oracle.md) | Corpus provenance: physics fixtures vs Oracle truth | Accepted |
 | [0008](0008-verifier-owned-mandatory-recurrence.md) | Verifier-owned mandatory recurrence dimensions | Accepted |
+| [0009](0009-claim-bound-proof-hash.md) | Claim-bound proof_hash | Accepted |
 
 ## Notes
 

@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-import hashlib
-import json
 import subprocess
-from typing import Any
 
 from mtg_loop_engine.config import EngineConfig
+from mtg_loop_engine.proofs.claim import claim_proof_hash
 from mtg_loop_engine.proofs.models import (
     LoopProof,
     LoopRelevantState,
@@ -108,11 +106,6 @@ def check_outputs(before: GameState, after: GameState, witness: LoopWitness) -> 
     return problems
 
 
-def proof_hash(payload: dict[str, Any]) -> str:
-    blob = json.dumps(payload, sort_keys=True, default=str)
-    return hashlib.sha256(blob.encode()).hexdigest()[:32]
-
-
 class Verifier:
     def __init__(self, config: EngineConfig | None = None):
         self.config = config or EngineConfig()
@@ -131,13 +124,9 @@ class Verifier:
             reason: str,
             recurrence: RecurrenceResult | None = None,
             coverage: SemanticCoverage | None = None,
+            relevant_state: LoopRelevantState | None = None,
         ) -> LoopProof:
             cov = coverage or witness.semantic_coverage
-            body = {
-                "witness_id": witness.id,
-                "status": status.value,
-                "reason": reason,
-            }
             return LoopProof(
                 kind=ProofKind.VALID,
                 witness_id=witness.id,
@@ -155,7 +144,13 @@ class Verifier:
                 status=status,
                 rejection_reason=reason,
                 semantic_coverage=cov,
-                proof_hash=proof_hash(body),
+                proof_hash=claim_proof_hash(
+                    witness,
+                    status=status,
+                    versions=versions,
+                    rejection_reason=reason,
+                    relevant_state=relevant_state,
+                ),
             )
 
         if not witness.deterministic:
@@ -215,6 +210,7 @@ class Verifier:
                 VerificationStatus.STATE_NOT_RECURRENT,
                 "recurrence failed",
                 recurrence=recurrence,
+                relevant_state=relevant,
             )
 
         out_problems = check_outputs(before, after, witness)
@@ -223,15 +219,10 @@ class Verifier:
                 VerificationStatus.NOT_A_LOOP,
                 "; ".join(out_problems),
                 recurrence=recurrence,
+                relevant_state=relevant,
             )
 
         consequences = [o.consequence for o in witness.expected_outputs]
-        body = {
-            "witness_id": witness.id,
-            "status": VerificationStatus.VERIFIED.value,
-            "loop": [a.model_dump() for a in witness.loop_actions],
-            "outputs": [o.model_dump() for o in witness.expected_outputs],
-        }
         return LoopProof(
             kind=ProofKind.VALID,
             witness_id=witness.id,
@@ -254,5 +245,10 @@ class Verifier:
             status=VerificationStatus.VERIFIED,
             rejection_reason=None,
             semantic_coverage=witness.semantic_coverage,
-            proof_hash=proof_hash(body),
+            proof_hash=claim_proof_hash(
+                witness,
+                status=VerificationStatus.VERIFIED,
+                versions=versions,
+                relevant_state=relevant,
+            ),
         )
