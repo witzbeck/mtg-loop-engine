@@ -299,10 +299,14 @@ def _wave2_hard_negatives() -> list[LoopWitness]:
 
     heliod = _compile("oracle:heliod-sun-crowned")
     ballista = _compile("oracle:walking-ballista")
-    # Ping without lifelink: no life gain → Heliod does not reload the counter.
+    ballista_ping = next(
+        a.ability_id for a in ballista.abilities if "counter-ping" in a.ability_id
+    )
+    # One counter on printed 0/0: ping removes the only counter → SBA dies (704.5f).
+    # Recurrence claim on counters fails when the permanent leaves the battlefield.
     negs.append(
         witness(
-            id="neg_ballista_no_lifelink",
+            id="neg_ballista_one_counter_sba",
             classification=two_card(essential=_refs(heliod, ballista)),
             essential_cards=_refs(heliod, ballista),
             card_semantics=[heliod, ballista],
@@ -325,11 +329,7 @@ def _wave2_hard_negatives() -> list[LoopWitness]:
                 ActionStep(
                     op="activate",
                     actor="p_ballista",
-                    ability_id=next(
-                        a.ability_id
-                        for a in ballista.abilities
-                        if "counter-ping" in a.ability_id
-                    ),
+                    ability_id=ballista_ping,
                     target="opponent",
                 ),
             ],
@@ -341,7 +341,48 @@ def _wave2_hard_negatives() -> list[LoopWitness]:
             expected_outputs=[out(OutputType.DAMAGE, 1)],
             expected_status=VerificationStatus.STATE_NOT_RECURRENT,
             tier="hard_negative",
-            assumptions=["no lifelink grant → counter not replaced"],
+            assumptions=["1 counter on 0/0 → SBA death after ping; no lifelink seed"],
+        )
+    )
+    # Two counters, no lifelink: ping spends one; Heliod never reloads → not recurrent.
+    negs.append(
+        witness(
+            id="neg_ballista_two_counter_no_lifelink",
+            classification=two_card(essential=_refs(heliod, ballista)),
+            essential_cards=_refs(heliod, ballista),
+            card_semantics=[heliod, ballista],
+            initial_state=InitialStateSpec(
+                permanents=[
+                    bf("p_heliod", heliod.oracle_id, heliod.name, is_creature=True),
+                    bf(
+                        "p_ballista",
+                        ballista.oracle_id,
+                        ballista.name,
+                        is_creature=True,
+                        is_artifact=True,
+                        power=0,
+                        toughness=0,
+                        counters={"p1p1": 2},
+                    ),
+                ]
+            ),
+            loop_actions=[
+                ActionStep(
+                    op="activate",
+                    actor="p_ballista",
+                    ability_id=ballista_ping,
+                    target="opponent",
+                ),
+            ],
+            relevant_state=LoopRelevantState(
+                dimensions=[
+                    dim("permanents.p_ballista.counters.p1p1", ComparisonOp.EXACT, 2),
+                ]
+            ),
+            expected_outputs=[out(OutputType.DAMAGE, 1)],
+            expected_status=VerificationStatus.STATE_NOT_RECURRENT,
+            tier="hard_negative",
+            assumptions=["no lifelink grant → counter not replaced after ping"],
         )
     )
 

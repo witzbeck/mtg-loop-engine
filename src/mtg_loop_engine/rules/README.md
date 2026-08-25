@@ -39,6 +39,8 @@ graph TB;
 - Summoning sickness blocks `{T}` / `TapCost` even on mana abilities (CR 302.6); haste not modeled.
 - State-based actions after each successful `run_step`: creatures you control die on toughness ≤ 0 or lethal `damage_marked` (CR 704.5f/g); cascades bounded.
 - Undying seed (`seed_grant_undying`) and synthetic `__undying_return__` trigger: return with +1/+1 iff zero p1p1 at death (CR 702.92a/c); no card-ability lookup.
+- Lifelink seed (`seed_grant_lifelink`) is a **physics stand-in** only — not product-legal for
+  `ORACLE_EXACT` witnesses (verifier quarantines; paid Heliod activation required for product).
 - `DealDamageEffect` `any_target`: opponent life when `step.target` is `None`/`opponent`; mark damage on a BF creature id (self-ping legal when `target == actor`).
 
 ## Non-responsibilities

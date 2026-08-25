@@ -18,9 +18,11 @@ from mtg_loop_engine.rules.executor import Executor
 from mtg_loop_engine.semantics.enums import (
     ComparisonOp,
     ProofKind,
+    Provenance,
     SemanticCoverage,
     VerificationStatus,
 )
+from mtg_loop_engine.semantics.provenance import provenance_of
 from mtg_loop_engine.state.game import GameState
 from mtg_loop_engine.state.paths import state_path_error
 from mtg_loop_engine.verify.mandatory_recurrence import effective_relevant_state
@@ -157,6 +159,19 @@ class Verifier:
 
         if not witness.deterministic:
             return reject(VerificationStatus.NONDETERMINISTIC, "witness not deterministic")
+
+        # Quarantine: seed_grant_lifelink is a physics stand-in, not product-legal
+        # for ORACLE_EXACT×ORACLE_EXACT witnesses (paid Heliod activation required).
+        seed_steps = list(witness.setup_actions) + list(witness.loop_actions)
+        if any(s.op == "seed_grant_lifelink" for s in seed_steps):
+            essentials = witness.essential_cards
+            if essentials and all(
+                provenance_of(c.oracle_id) is Provenance.ORACLE_EXACT for c in essentials
+            ):
+                return reject(
+                    VerificationStatus.UNSUPPORTED_RULE,
+                    "seed_grant_lifelink forbidden on Oracle product witness",
+                )
 
         # Fail-closed semantic coverage
         if witness.semantic_coverage == SemanticCoverage.PARTIAL_RELEVANT_TO_PROOF:

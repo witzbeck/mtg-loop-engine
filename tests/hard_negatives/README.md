@@ -18,7 +18,7 @@ graph TB;
 
 ## Inputs
 
-- Oracle HN from `corpus.gold_core.hard_negatives` (currently **7**)
+- Oracle HN from `corpus.gold_core.hard_negatives` (currently **8**)
 - Physics HN from `corpus.physics_fixtures` (currently **10**)
 
 ## Outputs

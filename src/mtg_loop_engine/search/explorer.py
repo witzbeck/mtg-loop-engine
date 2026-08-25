@@ -28,11 +28,13 @@ from mtg_loop_engine.semantics.enums import (
     ComparisonOp,
     Consequence,
     OutputType,
+    Provenance,
     SemanticCoverage,
     TriggerEvent,
     VerificationStatus,
     Zone,
 )
+from mtg_loop_engine.semantics.provenance import provenance_of
 from mtg_loop_engine.semantics.ir import (
     ActivatedAbility,
     AddCounterEffect,
@@ -487,7 +489,7 @@ def build_witness(
             Prerequisite(
                 kind="board",
                 description=(
-                    "generic lifelink grant seed (Heliod activated ability stand-in; "
+                    "physics lifelink grant seed (not product-legal for ORACLE_EXACT; "
                     "identity of grant source irrelevant once lifelink is on the pinger)"
                 ),
             )
@@ -600,7 +602,16 @@ def explore_pair(
             err = executor.run_step(start, seed)
             if err is None:
                 setup_actions = [*setup_actions, seed]
-    if _needs_lifelink_grant_seed(a) or _needs_lifelink_grant_seed(b):
+    # seed_grant_lifelink is a physics stand-in only. Never emit on ORACLE_EXACT
+    # product pairs (Heliod requires a paid {1}{W} activation for product VERIFIED).
+    both_oracle_exact = (
+        provenance_of(a.oracle_id) is Provenance.ORACLE_EXACT
+        and provenance_of(b.oracle_id) is Provenance.ORACLE_EXACT
+    )
+    if (
+        not both_oracle_exact
+        and (_needs_lifelink_grant_seed(a) or _needs_lifelink_grant_seed(b))
+    ):
         # Grant lifelink to a partner that can remove counters for damage.
         grantor = None
         pinger = None
@@ -618,7 +629,7 @@ def explore_pair(
                 op="seed_grant_lifelink",
                 actor=grantor,
                 target=pinger,
-                note="generic lifelink grant seed (Heliod class)",
+                note="physics lifelink grant seed (non-product path)",
             )
             err = executor.run_step(start, seed)
             if err is None:

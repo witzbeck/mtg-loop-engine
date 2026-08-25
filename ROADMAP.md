@@ -106,10 +106,12 @@ Blind discovery among real **COMPLETE**-compiled Oracle cards from Spellbook nam
    `discover-physics` cover the moved suite.
    **Net-state gate:** ✓ additive `events` / `net_state` / `claim_consequence`
    (proof schema **0.3.0**); gross counters alone do not justify `ACCUMULATES`.
-   **Waves 1–2 + Heliod:** ✓ eight Oracle gold positives
-   (`core_guard_gond` … `core_heliod_ballista`). Wave 3 remainders
-   (`core_saffi_champion`, `core_mikaeus_triskelion`) staged in
-   `corpus.gold_extended.oracle_gaps` until delayed triggers / undying+SBA land.
+   **Waves 1–2:** ✓ seven Oracle gold positives
+   (`core_guard_gond` … `core_rosie_scurry`). `core_heliod_ballista` demoted to
+   `corpus.gold_extended.oracle_gaps` (seed_grant_lifelink quarantined from Oracle
+   product VERIFIED; re-promote only with two-counter 0/0 + paid Heliod activation).
+   Wave 3 remainders (`core_saffi_champion`, `core_mikaeus_triskelion`) also staged in
+   `oracle_gaps` until delayed triggers / undying+SBA grant compile land.
    Keep **line coverage floor at 92%** until percentages measure faithful
    claims. Path-grammar fail-closed + creature-scoped ``events.death`` ✓.
 
