@@ -45,7 +45,7 @@ graph TB;
 - When loop actions activate a `once_per_turn` ability, `derive_relevant_state` adds `permanents.<id>.once_per_turn_used.<ability_id>` as `EXACT` so Alarm + once-per-turn tappers cannot verify as loops.
 - Orchestrate pool → pairs → explorer (`discover.discover_loops`)
 - Reuse `corpus.builders` (`bf`, `two_card`) so witness shape matches gold
-- Prune via `reusable_fingerprint` (`pruning.py`)
+- Prune via `reusable_fingerprint` (`pruning.py`). Equality asserts search-equivalence for currently modeled future legal behavior: fingerprints include `summoning_sick`, `once_per_turn_used`, and trigger `subject_id`/`amount` (not only source+ability). Monotonic event counters alone do not change the fingerprint.
 - Call verifier as the sole physics acceptance oracle on the discovery path
 - **Participant gate:** accept only when `proof.status == VERIFIED` **and** `witness.classification.strict_two_card`; silently continue BFS otherwise
 

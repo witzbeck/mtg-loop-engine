@@ -134,6 +134,55 @@ def test_reusable_fingerprint_ignores_event_counters_not_board():
     assert reusable_fingerprint(a) != reusable_fingerprint(tokened)
 
 
+def test_reusable_fingerprint_distinguishes_summoning_sickness():
+    spec = default_initial_state(BASALT, TRAINING_GROUNDS)
+    a = GameState.from_spec(spec)
+    # Seed a creature so sickness is modeled on a non-token permanent.
+    a.permanents["crit"] = Permanent(
+        object_id="crit",
+        oracle_id="oracle:crit",
+        name="Crit",
+        is_creature=True,
+        summoning_sick=False,
+    )
+    sick = a.copy()
+    sick.permanents["crit"].summoning_sick = True
+    assert reusable_fingerprint(a) != reusable_fingerprint(sick)
+
+
+def test_reusable_fingerprint_distinguishes_trigger_subject_and_amount():
+    spec = default_initial_state(BASALT, TRAINING_GROUNDS)
+    a = GameState.from_spec(spec)
+    a.pending_triggers = [
+        {
+            "source_id": "src",
+            "ability_id": "trig",
+            "subject_id": "sub-a",
+            "amount": 1,
+        }
+    ]
+    by_subject = a.copy()
+    by_subject.pending_triggers = [
+        {
+            "source_id": "src",
+            "ability_id": "trig",
+            "subject_id": "sub-b",
+            "amount": 1,
+        }
+    ]
+    by_amount = a.copy()
+    by_amount.pending_triggers = [
+        {
+            "source_id": "src",
+            "ability_id": "trig",
+            "subject_id": "sub-a",
+            "amount": 2,
+        }
+    ]
+    assert reusable_fingerprint(a) != reusable_fingerprint(by_subject)
+    assert reusable_fingerprint(a) != reusable_fingerprint(by_amount)
+
+
 def test_injected_verifier_is_the_acceptance_oracle():
     report = discover_loops([BASALT, TRAINING_GROUNDS], verifier=_RejectAll())
     assert report.candidate_pairs >= 1
