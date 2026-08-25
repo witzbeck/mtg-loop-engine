@@ -31,13 +31,12 @@ Validated from `eval/baseline/*.json`. Do not edit this section by hand; run `sc
 
 | Metric | Value |
 | ------ | ----- |
-| extras_total | 24 |
-| extras_real_card_pairs | 8 |
-| extras_fixture_pairs | 16 |
-| adjudicated (precision denominator) | 8 |
+| extras_total | 10 |
+| extras_real_card_pairs | 3 |
+| extras_fixture_pairs | 7 |
+| adjudicated (precision denominator) | 3 |
 | valid | 3 |
-| precision | 0.375 |
-| by_class.duplicate_or_equivalent_interaction | 5 |
+| precision | 1.0 |
 | by_class.valid_strict_two_card | 3 |
 
 Notes from baseline: Precision computed over real-card pairs only; fixture pairs (is_fixture=True) are INVALID_CANDIDATE_DATA and excluded. Joins were not tightened to chase this distribution.
