@@ -30,6 +30,8 @@ Search may speculate. The verifier may not.
 
 The verifier is witness-in / proof-out: it never searches, never invents missing abilities, and never emits `VERIFIED` when proof-relevant semantics are incomplete (`PARTIAL_RELEVANT_TO_PROOF`). Typed rejections (`RESOURCE_DEFICIT`, `STATE_NOT_RECURRENT`, `UNSUPPORTED_SEMANTICS`, …) are first-class outcomes.
 
+When expanding modeled physics, treat agent memory as a hypothesis only: cite Oracle / Comprehensive Rules / rulings per [`RULES_EVIDENCE.md`](RULES_EVIDENCE.md). Spellbook does not authorize `VERIFIED`.
+
 ## Precision over false confidence
 
 An honest `unsupported` or typed rejection is preferable to a wrong `VERIFIED`. Precision-first means missing eligible pairs while coverage is thin is better than teaching the corpus that spectator-card “loops” or unmodeled rules are proven.

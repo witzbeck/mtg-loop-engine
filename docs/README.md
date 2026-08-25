@@ -14,10 +14,12 @@ graph TB;
   readme --> terminology[TERMINOLOGY];
   readme --> architecture[ARCHITECTURE];
   philosophy --> adjudication[ADJUDICATION];
+  philosophy --> rulesEvidence[RULES_EVIDENCE];
   terminology --> evaluation[EVALUATION];
   architecture --> cli[CLI];
   evaluation --> status[STATUS];
   adjudication --> status;
+  rulesEvidence --> adjudication;
   status --> baselines[eval/baseline];
   roadmap[ROADMAP] --> decisions[decisions/];
   roadmap --> runbooks[runbooks/];
@@ -40,6 +42,7 @@ graph TB;
 | --- | --------------- |
 | [`EVALUATION.md`](EVALUATION.md) | Denominators (no aggregate “accuracy”); recovery vs precision |
 | [`ADJUDICATION.md`](ADJUDICATION.md) | Human label guide for accepted discoveries |
+| [`RULES_EVIDENCE.md`](RULES_EVIDENCE.md) | Oracle / CR / rulings / Spellbook roles; citation format before physics changes |
 | [`STATUS.md`](STATUS.md) | Quantitative snapshot from frozen baselines |
 
 ### Operators and decisions

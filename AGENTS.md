@@ -26,6 +26,7 @@ Finish this preflight before implementation.
 | Rule | Meaning |
 |------|---------|
 | Search proposes; verify decides | Search/joins may over-propose. The verifier never searches and never softens proof requirements to find a loop. |
+| Memory proposes; sources decide | Agent/human recall may hypothesize rules behavior. Oracle text, Comprehensive Rules, and official rulings decide modeled physics. Spellbook stays discovery/recovery only. See [`docs/RULES_EVIDENCE.md`](docs/RULES_EVIDENCE.md). |
 | Blind discovery | Discovery uses compiled capabilities and joins only. Spellbook pair labels stay on the eval / recovery path (ADR 0001). |
 | Deterministic `VERIFIED` path | `VERIFIED` requires deterministic compiler + modeled executor semantics (ADR 0003). |
 | Fail closed on incomplete coverage | Incomplete proof-relevant coverage (`PARTIAL_RELEVANT_TO_PROOF` or equivalent) yields a typed rejection. |
@@ -81,3 +82,4 @@ When feature work is complete and the user has asked to open a PR or finish the 
 - Contributor workflow: [`CONTRIBUTING.md`](CONTRIBUTING.md)
 - Frozen decisions: [`docs/decisions/`](docs/decisions/)
 - Gate document: [`ROADMAP.md`](ROADMAP.md)
+- Rules evidence: [`docs/RULES_EVIDENCE.md`](docs/RULES_EVIDENCE.md)

@@ -1,0 +1,32 @@
+---
+description: >-
+  Before changing modeled rules physics, cite Oracle/CR (not memory or Spellbook).
+  Routes to docs/RULES_EVIDENCE.md and the rules-evidence skill.
+globs:
+  - src/mtg_loop_engine/rules/**
+  - src/mtg_loop_engine/semantics/**
+  - src/mtg_loop_engine/verify/**
+  - tests/unit/test_executor*.py
+  - tests/unit/test_*recurrence*.py
+  - tests/semantic/**
+  - tests/gold_core/**
+  - tests/hard_negatives/**
+  - tests/eval/**
+  - docs/RULES_EVIDENCE.md
+  - docs/ADJUDICATION.md
+alwaysApply: false
+---
+
+# Rules evidence
+
+When editing modeled Magic semantics (patterns, executor, verifier gates) or
+tests/eval that encode those claims: **memory proposes; sources decide**.
+
+1. Read [`docs/RULES_EVIDENCE.md`](../../docs/RULES_EVIDENCE.md) for authority roles
+   and citation format.
+2. Load the project skill [`.agents/skills/rules-evidence/SKILL.md`](../../.agents/skills/rules-evidence/SKILL.md)
+   when the change adds executor primitives or changes what `VERIFIED` requires.
+3. Do **not** use Spellbook (or memory alone) to justify `VERIFIED` semantics
+   (ADR 0001 / 0003). Expand coverage deliberately with tests and docs.
+
+**Authority:** [`docs/RULES_EVIDENCE.md`](../../docs/RULES_EVIDENCE.md), [`AGENTS.md`](../../AGENTS.md).

@@ -109,7 +109,7 @@ graph TB;
 
 **Example:** Edge cases involving obscure replacement interactions.
 
-**Boundary vs `rules_or_semantics_false_positive`:** False positive means the modeled rules/semantics path is confidently wrong under current engine understanding. Needs rules research means insufficient evidence to choose.
+**Boundary vs `rules_or_semantics_false_positive`:** False positive means the modeled rules/semantics path is confidently wrong under current engine understanding. Needs rules research means insufficient evidence to choose. Investigation discipline: [`RULES_EVIDENCE.md`](RULES_EVIDENCE.md).
 
 **Counts toward precision:** no (treat as not yet resolved for precision claims).
 
