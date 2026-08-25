@@ -90,6 +90,15 @@ Blind discovery among real **COMPLETE**-compiled Oracle cards from Spellbook nam
 
 ### Remaining
 
+0. **Corpus / evaluation integrity (campaign; ahead of 95% and broad M5 recall)** ◐ —
+   ADR [0007](docs/decisions/0007-corpus-provenance-physics-vs-oracle.md) (Proposed):
+   separate `SYNTHETIC` physics fixtures from `ORACLE_EXACT` product truth; stop treating
+   pattern-tuned texts as precision-eligible “real cards.” Inventory:
+   [`docs/decisions/reviews/corpus-provenance-inventory.md`](docs/decisions/reviews/corpus-provenance-inventory.md).
+   Follow-ons (separate slices): verifier-owned mandatory recurrence dimensions; stronger
+   claim/`proof_hash` binding. **Keep line coverage floor at 92%** until this campaign
+   lands enough that percentages measure faithful claims.
+
 1. **Absent-discovery path** ✓ — `eval/reference_absent.py` + `scripts/spellbook_absent_discovery.py`.
 2. **Grow COMPLETE pool** — prefer **self-starting** two-card physics (path **a**): patterns that can close without an external seeded event. Curriculum order: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDIDATES.md).
    - **Slice 1 (aura channel)** ✓ — Freed / Pemmin’s; COMPLETE **17→19**.
