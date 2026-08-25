@@ -135,6 +135,7 @@ def _link_check_sources() -> list[Path]:
         ROOT / "docs" / "README.md",
         ROOT / "docs" / "runbooks" / "README.md",
         ROOT / "docs" / "runbooks" / "M4_FOLLOW_THROUGH.md",
+        ROOT / "docs" / "runbooks" / "M5_NOVEL_CANDIDATES.md",
         ROOT / "docs" / "decisions" / "README.md",
     ]
     return [p for p in sources if p.is_file()]
