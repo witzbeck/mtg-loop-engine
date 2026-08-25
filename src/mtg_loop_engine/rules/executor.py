@@ -358,18 +358,92 @@ class Executor:
                 state.pending_triggers.append(entry)
 
     def die(self, state: GameState, permanent: Permanent) -> None:
-        state.bump("death")
-        self._queue_triggers(state, TriggerEvent.DIES, permanent)
+        # CR 700.4: "dies" means moves from the battlefield to the graveyard.
+        # Exile replacements (e.g. Rest in Peace) suppress death events and DIES triggers.
+        # Sacrifice events still fire before this replacement is applied.
         if self.has_exile_on_death(state) and permanent.is_creature:
             permanent.zone = Zone.EXILE
-        else:
-            permanent.zone = Zone.GRAVEYARD
+            permanent.tapped = False
+            return
+        state.bump("death")
+        self._queue_triggers(state, TriggerEvent.DIES, permanent)
+        permanent.zone = Zone.GRAVEYARD
         permanent.tapped = False
 
     def sacrifice(self, state: GameState, permanent: Permanent) -> None:
         state.bump("sacrifice")
         self._queue_triggers(state, TriggerEvent.SACRIFICED, permanent)
         self.die(state, permanent)
+
+    @staticmethod
+    def matches_sacrifice_selector(permanent: Permanent, selector: str) -> bool:
+        """BF + combo-player control + type constraints for sacrifice selectors."""
+        if permanent.zone != Zone.BATTLEFIELD or permanent.controller != "you":
+            return False
+        if selector == "self":
+            return True
+        if selector == "creature_controlled":
+            return permanent.is_creature
+        if selector == "token_creature_controlled":
+            return permanent.is_token and permanent.is_creature
+        return False
+
+    def _validate_tap_host(self, tap_perm: Permanent | None) -> ExecError | None:
+        """Host for enchanted-creature {T}: exist, BF, controlled, creature, untapped, not sick."""
+        if tap_perm is None:
+            return ExecError(VerificationStatus.ILLEGAL_TARGET, "tap host missing")
+        if tap_perm.zone != Zone.BATTLEFIELD:
+            return ExecError(
+                VerificationStatus.ILLEGAL_TARGET, "tap host not on battlefield"
+            )
+        if tap_perm.controller != "you":
+            return ExecError(
+                VerificationStatus.ILLEGAL_TARGET, "tap host not controlled"
+            )
+        if not tap_perm.is_creature:
+            return ExecError(
+                VerificationStatus.ILLEGAL_TARGET, "tap host not a creature"
+            )
+        if tap_perm.tapped:
+            return ExecError(VerificationStatus.ILLEGAL_ACTION, "already tapped")
+        # CR 302.6: creatures with summoning sickness cannot {T} (including mana abilities).
+        if tap_perm.summoning_sick:
+            return ExecError(VerificationStatus.TIMING_VIOLATION, "summoning sick")
+        return None
+
+    def _validate_explicit_sacrifice(
+        self, state: GameState, fodder_id: str, selector: str
+    ) -> ExecError | None:
+        fodder = state.permanents.get(fodder_id)
+        if fodder is None:
+            return ExecError(
+                VerificationStatus.ILLEGAL_TARGET, "sacrifice target missing"
+            )
+        # Wrong controller / type: adversarial illegal target.
+        if fodder.controller != "you":
+            return ExecError(
+                VerificationStatus.ILLEGAL_TARGET,
+                f"sacrifice target illegal for {selector}",
+            )
+        if selector == "creature_controlled" and not fodder.is_creature:
+            return ExecError(
+                VerificationStatus.ILLEGAL_TARGET,
+                f"sacrifice target illegal for {selector}",
+            )
+        if selector == "token_creature_controlled" and not (
+            fodder.is_token and fodder.is_creature
+        ):
+            return ExecError(
+                VerificationStatus.ILLEGAL_TARGET,
+                f"sacrifice target illegal for {selector}",
+            )
+        # Consumed / off-battlefield: resource exhausted (finite fodder loops).
+        if fodder.zone != Zone.BATTLEFIELD:
+            return ExecError(
+                VerificationStatus.RESOURCE_DEFICIT,
+                "sacrifice target not on battlefield",
+            )
+        return None
 
     def _controls_zombie(self, state: GameState) -> bool:
         for perm in state.permanents.values():
@@ -392,6 +466,11 @@ class Executor:
         perm = state.permanents.get(step.actor)
         if not perm:
             return ExecError(VerificationStatus.ILLEGAL_ACTION, "actor missing")
+        if perm.controller != "you":
+            return ExecError(
+                VerificationStatus.ILLEGAL_ACTION,
+                "cannot activate opponent-controlled permanent",
+            )
         ab = self.find_ability(perm.oracle_id, step.ability_id)
         if not isinstance(ab, ActivatedAbility):
             return ExecError(VerificationStatus.ILLEGAL_ACTION, "ability not activated")
@@ -423,18 +502,20 @@ class Executor:
                             VerificationStatus.ILLEGAL_ACTION, "tap cost needs host"
                         )
                     tap_perm = state.permanents.get(step.target)
-                    if tap_perm is None:
+                    err = self._validate_tap_host(tap_perm)
+                    if err:
+                        return err
+                else:
+                    if tap_perm.tapped:
                         return ExecError(
-                            VerificationStatus.ILLEGAL_ACTION, "tap host missing"
+                            VerificationStatus.ILLEGAL_ACTION, "already tapped"
                         )
-                if tap_perm.tapped:
-                    return ExecError(VerificationStatus.ILLEGAL_ACTION, "already tapped")
-                if (
-                    tap_perm.is_creature
-                    and tap_perm.summoning_sick
-                    and not ab.is_mana_ability
-                ):
-                    return ExecError(VerificationStatus.TIMING_VIOLATION, "summoning sick")
+                    # CR 302.6: {T} on a sick creature is illegal even for mana abilities.
+                    if tap_perm.is_creature and tap_perm.summoning_sick:
+                        return ExecError(
+                            VerificationStatus.TIMING_VIOLATION, "summoning sick"
+                        )
+                assert tap_perm is not None
                 tap_perm.tapped = True
                 # Host-tap activations still apply effects from the aura actor;
                 # do not pass the host as an effect target unless the effect asks.
@@ -450,25 +531,28 @@ class Executor:
                     return err
             elif isinstance(cost, SacrificeCost):
                 if cost.selector == "self":
-                    if perm.zone != Zone.BATTLEFIELD:
+                    if not self.matches_sacrifice_selector(perm, "self"):
                         return ExecError(
-                            VerificationStatus.RESOURCE_DEFICIT, "self not on battlefield"
+                            VerificationStatus.RESOURCE_DEFICIT,
+                            "self not on battlefield",
                         )
                     self.sacrifice(state, perm)
                 else:
                     fodder_id = step.target
-                    if not fodder_id:
+                    if fodder_id:
+                        err = self._validate_explicit_sacrifice(
+                            state, fodder_id, cost.selector
+                        )
+                        if err:
+                            return err
+                    else:
                         fodder_id = self._pick_fodder(state, cost.selector)
-                    if not fodder_id:
-                        return ExecError(
-                            VerificationStatus.RESOURCE_DEFICIT, "no sacrifice fodder"
-                        )
+                        if not fodder_id:
+                            return ExecError(
+                                VerificationStatus.RESOURCE_DEFICIT,
+                                "no sacrifice fodder",
+                            )
                     fodder = state.permanents[fodder_id]
-                    if fodder.zone != Zone.BATTLEFIELD:
-                        return ExecError(
-                            VerificationStatus.RESOURCE_DEFICIT,
-                            "sacrifice target not on battlefield",
-                        )
                     self.sacrifice(state, fodder)
 
         err = self.apply_effects(state, perm, ab.effects, step.target)
@@ -479,30 +563,25 @@ class Executor:
         return None
 
     def _pick_fodder(self, state: GameState, selector: str) -> str | None:
-        for p in state.permanents.values():
-            if p.zone != Zone.BATTLEFIELD or p.controller != "you":
-                continue
-            if selector == "token_creature_controlled" and p.is_token and p.is_creature:
-                return p.object_id
-            if selector == "creature_controlled" and p.is_creature:
-                # Prefer tokens / non-essential: tokens first
-                if p.is_token:
+        # Prefer tokens for creature_controlled (generic fodder over essentials).
+        if selector == "creature_controlled":
+            for p in state.permanents.values():
+                if (
+                    self.matches_sacrifice_selector(p, selector)
+                    and p.is_token
+                ):
                     return p.object_id
         for p in state.permanents.values():
-            if (
-                p.zone == Zone.BATTLEFIELD
-                and p.controller == "you"
-                and p.is_creature
-                and selector == "creature_controlled"
-            ):
+            if self.matches_sacrifice_selector(p, selector):
                 return p.object_id
         return None
 
     def resolve_trigger(self, state: GameState, step: ActionStep) -> ExecError | None:
         if not state.pending_triggers:
             return ExecError(VerificationStatus.ILLEGAL_ACTION, "no pending triggers")
-        # Combo player orders favorably: pick matching ability_id/source if given.
-        idx = 0
+        # Combo player orders favorably when actor/ability_id are unspecified.
+        # When either is supplied, require an exact pending match — no idx-0 fallback.
+        idx: int | None = None
         if step.ability_id or step.actor:
             for i, tr in enumerate(state.pending_triggers):
                 if step.ability_id and tr["ability_id"] != step.ability_id:
@@ -511,6 +590,13 @@ class Executor:
                     continue
                 idx = i
                 break
+            if idx is None:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_ACTION,
+                    "no matching pending trigger",
+                )
+        else:
+            idx = 0
         tr = state.pending_triggers.pop(idx)
         source = state.permanents[tr["source_id"]]
         ab = self.find_ability(source.oracle_id, tr["ability_id"])
@@ -536,6 +622,11 @@ class Executor:
             perm = state.permanents.get(step.actor)
             if not perm:
                 return ExecError(VerificationStatus.ILLEGAL_ACTION, "missing permanent")
+            if not self.matches_sacrifice_selector(perm, "self"):
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "cannot sacrifice illegal permanent",
+                )
             self.sacrifice(state, perm)
             return None
         if op == "choose_may":

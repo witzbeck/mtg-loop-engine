@@ -129,6 +129,10 @@ class GameState:
                 return perm.counters.get(parts[3], 0)
             if attr == "summoning_sick":
                 return perm.summoning_sick
+            if attr == "once_per_turn_used":
+                # permanents.<id>.once_per_turn_used.<ability_id> → bool
+                ability_id = parts[3]
+                return ability_id in perm.once_per_turn_used
             raise KeyError(path)
         if head == "count":
             # count.battlefield.creature_tokens
