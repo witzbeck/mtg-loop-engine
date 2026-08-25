@@ -86,13 +86,6 @@ class Executor:
         pool = state.mana
         need = amount.model_copy(deep=True)
 
-        def take(attr: str, n: int) -> bool:
-            avail = getattr(pool, attr)
-            if avail < n:
-                return False
-            setattr(pool, attr, avail - n)
-            return True
-
         for color in ("white", "blue", "black", "red", "green", "colorless"):
             n = getattr(need, color)
             if not n:

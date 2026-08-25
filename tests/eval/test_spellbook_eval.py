@@ -28,6 +28,74 @@ def test_sample_recovers_gold_pairs_and_fails_unsupported():
     assert report.counts.recall_eligible == 1.0
 
 
+def test_recovery_stages_join_miss_and_search_miss():
+    """Synthetic COMPLETE cards: no join → JOIN_MISS; join without accept → SEARCH_MISS."""
+    from mtg_loop_engine.corpus.gold_core.cases import ASHNOD, BASALT
+    from mtg_loop_engine.semantics.ir import (
+        ActivatedAbility,
+        AddManaEffect,
+        CardSemantics,
+        ManaAmount,
+        TapCost,
+    )
+
+    rock_a = CardSemantics(
+        oracle_id="oracle:rock-a",
+        name="Barren Rock A",
+        types=["Artifact"],
+        abilities=[
+            ActivatedAbility(
+                ability_id="tap-mana",
+                costs=[TapCost()],
+                effects=[AddManaEffect(amount=ManaAmount(colorless=1))],
+                is_mana_ability=True,
+            )
+        ],
+    )
+    rock_b = CardSemantics(
+        oracle_id="oracle:rock-b",
+        name="Barren Rock B",
+        types=["Artifact"],
+        abilities=[
+            ActivatedAbility(
+                ability_id="tap-mana",
+                costs=[TapCost()],
+                effects=[AddManaEffect(amount=ManaAmount(colorless=1))],
+                is_mana_ability=True,
+            )
+        ],
+    )
+    lookup = {
+        rock_a.name.casefold(): rock_a,
+        rock_b.name.casefold(): rock_b,
+        BASALT.name.casefold(): BASALT,
+        ASHNOD.name.casefold(): ASHNOD,
+    }
+    variants = [
+        {
+            "id": "syn-join-miss",
+            "uses": [{"card": {"name": rock_a.name}}, {"card": {"name": rock_b.name}}],
+            "requires": [],
+            "produces": [{"name": "Infinite colorless mana"}],
+        },
+        {
+            "id": "syn-search-miss",
+            "uses": [
+                {"card": {"name": BASALT.name}},
+                {"card": {"name": ASHNOD.name}},
+            ],
+            "requires": [],
+            "produces": [{"name": "Infinite colorless mana"}],
+        },
+    ]
+    report = evaluate_reference_subset(variants, cards_by_name=lookup)
+    stages = {row.variant_id: row.stage for row in report.rows}
+    assert stages["syn-join-miss"] == FailureStage.CANDIDATE_JOIN_MISS
+    assert stages["syn-search-miss"] == FailureStage.SEARCH_MISS
+    assert report.counts.join_miss == 1
+    assert report.counts.search_miss == 1
+
+
 def test_gold_extra_adjudications_cover_discovered_extras():
     from mtg_loop_engine.eval.gold_extras import (
         GOLD_EXTRA_ADJUDICATIONS,
