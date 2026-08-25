@@ -125,4 +125,56 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
             "{3}{B}{B}: Creatures you control gain lifelink until end of turn."
         ),
     ),
+    # Path a — self-starting COMPLETE unlocks (ETB damage / untap / power mana).
+    "Viridian Joiner": RealOracleCurriculum(
+        name="Viridian Joiner",
+        types=["Creature", "Elf", "Druid"],
+        oracle_text="{T}: Add an amount of {G} equal to this creature's power.",
+        notes="Power-tap mana; pairs with untappers without external seeds.",
+    ),
+    "Impact Tremors": RealOracleCurriculum(
+        name="Impact Tremors",
+        types=["Enchantment"],
+        oracle_text=(
+            "Whenever a creature you control enters, "
+            "this enchantment deals 1 damage to each opponent."
+        ),
+        notes="Self-starting ETB damage; token engines can close without life seed.",
+    ),
+    "Midnight Guard": RealOracleCurriculum(
+        name="Midnight Guard",
+        types=["Creature", "Human", "Soldier"],
+        oracle_text="Whenever another creature enters, untap this creature.",
+        notes="ETB untap-self; closes with tap outlets / token makers.",
+    ),
+    "Witty Roastmaster": RealOracleCurriculum(
+        name="Witty Roastmaster",
+        types=["Creature", "Devil", "Citizen"],
+        oracle_text=(
+            "Alliance — Whenever another creature you control enters, "
+            "this creature deals 1 damage to each opponent."
+        ),
+        notes="Ability-word prefix + this-creature ETB damage.",
+    ),
+    "Warleader's Call": RealOracleCurriculum(
+        name="Warleader's Call",
+        types=["Enchantment"],
+        oracle_text=(
+            "Creatures you control get +1/+1.\n"
+            "Whenever a creature you control enters, "
+            "this enchantment deals 1 damage to each opponent."
+        ),
+        notes="Anthem is proof-irrelevant; ETB damage is modeled.",
+    ),
+    "Purphoros, God of the Forge": RealOracleCurriculum(
+        name="Purphoros, God of the Forge",
+        types=["Enchantment", "Creature", "God"],
+        oracle_text=(
+            "Indestructible\n"
+            "As long as your devotion to red is less than five, Purphoros isn't a creature.\n"
+            "Whenever another creature you control enters, Purphoros deals 2 damage to each opponent.\n"
+            "{2}{R}: Creatures you control get +1/+0 until end of turn."
+        ),
+        notes="Devotion/anthem riders proof-irrelevant; ETB damage is the loop engine.",
+    ),
 }

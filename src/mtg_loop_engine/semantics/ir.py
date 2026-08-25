@@ -56,7 +56,12 @@ Cost = Annotated[TapCost | ManaCost | SacrificeCost, Field(discriminator="kind")
 
 class AddManaEffect(BaseModel):
     kind: Literal["add_mana"] = "add_mana"
-    amount: ManaAmount
+    amount: ManaAmount = Field(default_factory=ManaAmount)
+    # When set, add that many of the named pool instead of `amount`
+    # (e.g. "{T}: Add an amount of {G} equal to this creature's power").
+    equal_to_source_power: Literal[
+        None, "green", "any_color", "colorless"
+    ] = None
 
 
 class UntapEffect(BaseModel):

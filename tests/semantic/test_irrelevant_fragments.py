@@ -41,6 +41,20 @@ def test_loop_ability_with_flying_still_compiles_complete():
     assert "activated" in kinds
 
 
+def test_lifelink_with_reminder_is_proof_irrelevant():
+    report = compile_oracle_text(
+        oracle_id="oracle:test-lifelink-reminder",
+        name="Test Lifelinker",
+        oracle_text=(
+            "Lifelink (Damage dealt by this creature also causes you to gain that much life.)\n"
+            "{T}: Add {W}."
+        ),
+        types=["Creature"],
+    )
+    assert report.coverage == SemanticCoverage.COMPLETE
+    assert any(a.kind == "proof_irrelevant_static" for a in report.semantics.abilities)
+
+
 def test_unsupported_scepter_still_fail_closed():
     fix = UNSUPPORTED_FIXTURE
     report = compile_oracle_text(
