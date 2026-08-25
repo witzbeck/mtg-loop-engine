@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mtg-loop-engine/eval/reviews/record.schema.json",
+  "title": "LAR review record (phase A or C unit, or phase B pair line)",
+  "type": "object",
+  "required": [
+    "run_id",
+    "tier",
+    "scope_id",
+    "reviewed_at",
+    "reviewer_verdict_summary",
+    "agreement",
+    "failure_stage",
+    "architecture_signals",
+    "evidence_paths"
+  ],
+  "properties": {
+    "run_id": { "type": "string" },
+    "tier": { "enum": ["A", "B", "C"] },
+    "scope_id": {
+      "type": "string",
+      "description": "Class slug, pair key oracle:a__oracle:b, or family slug"
+    },
+    "reviewed_at": { "type": "string", "format": "date-time" },
+    "frozen_adjudication": {
+      "type": ["string", "null"],
+      "description": "Phase B only: committed label"
+    },
+    "reviewer_verdict": {
+      "type": ["string", "null"],
+      "description": "AdjudicationClass value from independent review"
+    },
+    "reviewer_verdict_summary": {
+      "type": "string",
+      "description": "One paragraph human rationale"
+    },
+    "agreement": {
+      "enum": ["agree", "disagree", "partial", "needs_rules_research", "not_applicable"]
+    },
+    "engine_behavior": {
+      "type": "object",
+      "properties": {
+        "live_explore_pair": { "enum": ["accepted", "rejected", "not_applicable", "not_run"] },
+        "verify_status": { "type": ["string", "null"] },
+        "strict_two_card": { "type": ["boolean", "null"] },
+        "used_oracle_ids": { "type": "array", "items": { "type": "string" } },
+        "unused_oracle_ids": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "failure_stage": {
+      "type": ["string", "null"],
+      "description": "FailureStage enum name when misaligned; null if healthy"
+    },
+    "doc_clear": { "type": ["boolean", "null"], "description": "Phase A: class definition unambiguous" },
+    "engine_aligned": { "type": ["boolean", "null"], "description": "Phase A/C: stack matches intent" },
+    "family_checks": {
+      "type": "object",
+      "description": "Phase C only",
+      "properties": {
+        "authored_verify": { "type": "boolean" },
+        "blind_rediscover": { "type": "boolean" },
+        "classify_honest": { "type": "boolean" },
+        "witness_ids": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "architecture_signals": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Short tags e.g. search_over_accept, classify_participation_gap"
+    },
+    "evidence_paths": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "sample_pairs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Phase A: representative pair keys"
+    }
+  }
+}

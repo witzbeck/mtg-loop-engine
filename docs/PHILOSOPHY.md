@@ -52,6 +52,8 @@ machine proposes → proves → human adjudicates → taxonomy / tests improve �
 
 Gold fixtures, hard negatives, adjudication classes, and regression tests are how human judgment becomes machine constraint. The loop is meant to compound: clearer labels and better patterns raise both precision and (eventually) eligible recall.
 
+**Knowledge lifecycle corollary:** Machines may generate far more hypotheses and review material than the repository preserves. Human-reviewed promotion turns useful discoveries into durable cases, tests, measurements, and decisions under `eval/`, `tests/`, and `docs/` — while ordinary LAR execution stays gitignored under `data/eval/lar/runs/`.
+
 ## AI–human flourishing
 
 Flourishing here means complementarity, not replacement. Automation should expand what humans can *reliably* know—auditable witnesses, typed failures, frozen baselines—while humans supply judgment the model must not fake: rules edge cases, novelty claims, and whether a proof is about a real two-piece interaction. The system succeeds when each cycle leaves the machine more precise and the human better equipped, with neither asked to do the other’s job.

@@ -79,6 +79,42 @@ graph TB;
 
 Current frozen counts: [`STATUS.md`](STATUS.md).
 
+## Loop Adjudication Review (LAR)
+
+LAR is a **diagnostic evaluation process** with an explicit **promotion mechanism** — not a single accuracy score.
+
+| Plane | Location | Authority |
+| ----- | -------- | --------- |
+| Execution | `data/eval/lar/runs/` (gitignored) | Ephemeral; safe to delete |
+| Knowledge | `eval/adjudications/`, `eval/calibration/`, `tests/`, `docs/`, `eval/baseline/`, `eval/reviews/promoted/` | Committed; PR-reviewed |
+
+**Primary success metric:** information gain (new/changed cases, tests, docs, baselines) — not headline agreement rate on unchanged inventory.
+
+### Taxonomy calibration coverage
+
+`eval/calibration/` holds curated boundary cases. A class with zero calibration rows is **coverage unknown**, not healthy. LAR Tier A reports classes represented, canonical examples present, and boundary examples present.
+
+### Blind adjudication (LAR v2 Tier B)
+
+Pair reviewers produce `proposed_class` **before** frozen labels are revealed. Outcomes include `agree_high_confidence`, `disagree`, `taxonomy_ambiguous`, etc. — not only boolean agreement.
+
+### Known-family vs held-out-family evidence
+
+- **C1:** gold_core mechanic families — strong regression signal.
+- **C2:** held-out Oracle cases excluded from implementation curriculum — generalization signal (small initially).
+
+Do not describe C1 success as broad generalization.
+
+### Live diagnostic vs certified baseline
+
+During development, live metrics under `data/eval/` may reflect post-fix behavior while `eval/baseline/` remains the last **certified** snapshot until roadmap re-freeze. Do not conflate them in prose.
+
+### No aggregate LAR score
+
+Keep distinct: compiler coverage, reference eligibility/recall, adjudicated precision, taxonomy coverage, blind-label agreement, counterfactual performance, held-out-family performance, and knowledge promotion counts.
+
+Runbook: [`runbooks/LOOP_ADJUDICATION_REVIEW.md`](runbooks/LOOP_ADJUDICATION_REVIEW.md).
+
 ## Anti-patterns
 
 - Quoting "7 valid / 17 duplicate" or other superseded headlines after baselines change.

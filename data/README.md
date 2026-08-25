@@ -15,6 +15,7 @@ graph TB;
   fetchScryfall[fetch-scryfall] --> scryfall[data/scryfall];
   fetchSpellbook[fetch-spellbook] --> spellbook[data/spellbook];
   workbench[adjudicationWorkbench] --> evalDb[data/eval];
+  lar[LAR execution] --> larRuns[data/eval/lar/runs];
   scryfall --> consumers[localConsumers];
   spellbook --> evalPkg[eval.spellbook_eval];
 ```
@@ -28,6 +29,7 @@ graph TB;
 
 - Versioned snapshot directories with `manifest.json`
 - DuckDB / analytics files for local review
+- Ephemeral Loop Adjudication Review runs under `data/eval/lar/runs/`
 
 ## Responsibilities
 
@@ -55,6 +57,16 @@ uv run mtg-loop-engine fetch-spellbook --pages 3
 ```
 
 M4 working adjudications default to gitignored `data/eval/adjudications.duckdb`.
+
+### LAR execution (ephemeral)
+
+Normal LAR runs write to `data/eval/lar/runs/<run_id>/`:
+
+- safe to delete; recreated by evaluation;
+- **never authoritative** — raw reviewer output, working synthesis, and intermediate comparisons live here;
+- valuable findings must be **promoted** to committed `eval/` (adjudications, calibration, baseline), `tests/`, or `docs/` before cleanup.
+
+Exceptional compact evidence packages only: `eval/reviews/promoted/`.
 
 ## Data contracts
 

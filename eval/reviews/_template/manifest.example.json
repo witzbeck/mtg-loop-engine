@@ -1,0 +1,31 @@
+{
+  "schema_version": "2",
+  "run_id": "YYYY-MM-DD_shortsha",
+  "started_at": "2026-01-01T00:00:00Z",
+  "engine": {
+    "git_sha": "abcdef0",
+    "dirty": false
+  },
+  "review_protocol": {
+    "name": "loop-adjudication-review",
+    "version": "2",
+    "skill_sha": null,
+    "blinded_pair_review": true,
+    "adversarial_challenge": true
+  },
+  "evaluator": {
+    "model_identifier": null
+  },
+  "taxonomy": {
+    "source": "docs/ADJUDICATION.md",
+    "sha256": null
+  },
+  "datasets": {
+    "adjudications_sha256": null,
+    "calibration_sha256": null,
+    "gold_core_sha256": null,
+    "oracle_snapshot_id": null
+  },
+  "pytest_passed": true,
+  "notes": "Ephemeral run under data/eval/lar/runs/ — not committed unless promoted."
+}

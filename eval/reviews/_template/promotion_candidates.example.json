@@ -1,0 +1,15 @@
+{
+  "promotion_candidates": [
+    {
+      "candidate_id": "PC-001",
+      "kind": "calibration_case",
+      "target": "eval/calibration",
+      "summary": "Boundary between generic prerequisite and unjustified initial state",
+      "evidence_paths": ["phase-b/pairs.jsonl"],
+      "confidence": "medium",
+      "requires_human_adjudication": true,
+      "suspected_layer": "taxonomy",
+      "recommended_action": "Curate pair and add reviewed expected class via PR"
+    }
+  ]
+}

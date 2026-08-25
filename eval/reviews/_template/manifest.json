@@ -1,0 +1,35 @@
+{
+  "run_id": "YYYY-MM-DD_<git-sha-7>",
+  "created_at": "ISO-8601 UTC",
+  "git_sha": "full commit hash",
+  "engine_version": "from pyproject or proof versions",
+  "pytest_passed": true,
+  "roadmap_milestone": "M4",
+  "participant_gate_shipped": true,
+  "inputs": {
+    "adjudications_jsonl": "eval/adjudications/gold_pool_extras.jsonl",
+    "gold_extras_module": "src/mtg_loop_engine/eval/gold_extras.py",
+    "baseline_gold_pool": "eval/baseline/m4_gold_pool_summary.json",
+    "baseline_spellbook": "eval/baseline/m4_spellbook_recovery_summary.json"
+  },
+  "scope": {
+    "phase_a_classes": 8,
+    "phase_b_pairs": 24,
+    "phase_b_batches": 4,
+    "phase_c_families": 5
+  },
+  "frozen_label_counts": {
+    "valid_strict_two_card": 3,
+    "valid_generic_prerequisite": 0,
+    "duplicate_or_equivalent_interaction": 5,
+    "invalid_candidate_data": 16,
+    "other": 0
+  },
+  "legs": {
+    "phase_a": { "completed": [], "failed": [], "pending": [] },
+    "phase_b": { "completed": [], "failed": [], "pending": ["batch1", "batch2", "batch3", "batch4"] },
+    "phase_c": { "completed": [], "failed": [], "pending": [] },
+    "synthesis": { "status": "pending" }
+  },
+  "notes": "Optional operator context for this run."
+}

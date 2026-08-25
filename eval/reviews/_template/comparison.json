@@ -1,0 +1,32 @@
+{
+  "run_id": "YYYY-MM-DD_<git-sha-7>",
+  "synthesized_at": "ISO-8601 UTC",
+  "unverified_legs": [],
+  "phase_a_summary": [],
+  "pair_agreement": {
+    "agree": 0,
+    "disagree": 0,
+    "partial": 0,
+    "needs_rules_research": 0,
+    "not_applicable": 0,
+    "disagree_pairs": []
+  },
+  "phase_c_summary": [],
+  "cross_tier_signals": [
+    {
+      "signal_id": "example_a_ok_b_bad",
+      "description": "Taxonomy sound but concrete pair labels wrong",
+      "evidence": [],
+      "severity": "medium"
+    }
+  ],
+  "architecture_debt": [
+    {
+      "layer": "search",
+      "finding": "",
+      "evidence_paths": [],
+      "suggested_action": ""
+    }
+  ],
+  "recommended_followups": []
+}
