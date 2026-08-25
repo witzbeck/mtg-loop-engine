@@ -35,7 +35,7 @@ Finish this preflight before implementation.
 | Strict two-card | Exactly two **essential** functional pieces. Generic fodder may appear; a functional external piece is a different claim (ADR 0002). |
 | Deliberate coverage growth | Expand patterns or executor coverage with tests and docs when the model grows — not as a quiet patch to green a failing case. |
 
-Align with frozen decisions in `ROADMAP.md` and ADRs `0001`–`0009`.
+Align with frozen decisions in `ROADMAP.md` and ADRs `0001`–`0010`.
 
 ## Change discipline
 
