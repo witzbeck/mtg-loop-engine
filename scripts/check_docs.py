@@ -35,6 +35,8 @@ REQUIRED_README_DIRS = [
     ROOT / "docs",
     ROOT / "docs" / "runbooks",
     ROOT / "docs" / "decisions",
+    ROOT / "docs" / "decisions" / "reviews",
+    ROOT / ".agents",
     ROOT / "scripts",
     ROOT / "eval",
     ROOT / "eval" / "baseline",
@@ -56,6 +58,8 @@ REQUIRED_FILES = [
     ROOT / "docs" / "CLI.md",
     ROOT / "docs" / "runbooks" / "M4_FOLLOW_THROUGH.md",
     ROOT / "docs" / "runbooks" / "M5_NOVEL_CANDIDATES.md",
+    ROOT / "docs" / "runbooks" / "LOOP_ADJUDICATION_REVIEW.md",
+    ROOT / "docs" / "decisions" / "reviews" / "PROCESS.md",
     ROOT / ".github" / "pull_request_template.md",
 ]
 
@@ -136,7 +140,11 @@ def _link_check_sources() -> list[Path]:
         ROOT / "docs" / "runbooks" / "README.md",
         ROOT / "docs" / "runbooks" / "M4_FOLLOW_THROUGH.md",
         ROOT / "docs" / "runbooks" / "M5_NOVEL_CANDIDATES.md",
+        ROOT / "docs" / "runbooks" / "LOOP_ADJUDICATION_REVIEW.md",
         ROOT / "docs" / "decisions" / "README.md",
+        ROOT / "docs" / "decisions" / "reviews" / "README.md",
+        ROOT / "docs" / "decisions" / "reviews" / "PROCESS.md",
+        ROOT / "eval" / "reviews" / "README.md",
     ]
     return [p for p in sources if p.is_file()]
 

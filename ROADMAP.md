@@ -171,5 +171,5 @@ Longer rationale: [`docs/decisions/`](docs/decisions/) and [`docs/EVALUATION.md`
 
 - **Review at milestone start:** re-read this file and confirm goals, constraints, and deferred items are still accurate.
 - **Update at milestone exit:** the PR that completes a milestone must mark it done and refresh the next milestone's gates.
-- **Feature branches:** all non-trivial work on a `feature/<slug>` branch; CI green before merge into `main`. Policy: [`CONTRIBUTING.md`](CONTRIBUTING.md); Cursor adapters: [`.cursor/rules/feature-branches.mdc`](.cursor/rules/feature-branches.mdc), [`.cursor/rules/ci-merge-gate.mdc`](.cursor/rules/ci-merge-gate.mdc), [`.cursor/rules/land-and-return.mdc`](.cursor/rules/land-and-return.mdc).
-- **Canonical docs:** In-repository documentation is canonical. Agent/session plans under a developer's home directory are ephemeral execution aids—not durable strategy. Durable decisions land in this roadmap, ADRs, `docs/`, and issues/PRs.
+- **Feature branches:** all non-trivial work on a `feature/<slug>` branch; CI green before merge into `main`. Policy: [`CONTRIBUTING.md`](CONTRIBUTING.md).
+- **Canonical docs:** In-repository documentation is canonical. Session notes outside the repository are ephemeral execution aids—not durable strategy. Durable decisions land in this roadmap, ADRs, `docs/`, and issues/PRs.

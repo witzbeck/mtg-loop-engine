@@ -21,10 +21,10 @@ The roadmap sequences corpus → verifier → compiler → discovery → evaluat
   - Deployed / public UI
   - Performance optimization passes
 - Non-trivial implementation uses **`feature/<slug>`** branches with CI green before merge to `main` (see `CONTRIBUTING.md`).
-- **In-repository docs are canonical**; home-directory Cursor plans are ephemeral and never required.
+- **In-repository docs are canonical**; session notes outside the repository are ephemeral and never required.
 
 ## Consequences
 
 - Agents must refuse deferred scaffolding even when it looks like “helpful prep.”
 - Scope disputes escalate to humans via ADR / roadmap edits — not silent reinterpretation (see `AGENTS.md`).
-- Feature-branch and merge adapters under `.cursor/rules/` remain non-authoritative summaries of `CONTRIBUTING.md`.
+- Feature-branch and merge workflow summaries elsewhere remain non-authoritative relative to `CONTRIBUTING.md`.

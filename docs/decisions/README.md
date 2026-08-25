@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Durable, in-repo record of frozen product and architecture decisions for the MTG loop engine. ADRs are canonical; chat and `~/.cursor/plans/` are not.
+Durable, in-repo record of frozen product and architecture decisions for the MTG loop engine. ADRs are canonical; session notes outside the repository are not.
 
 ## Context
 
@@ -17,7 +17,7 @@ graph TB;
 ## What belongs here
 
 - Numbered ADRs (`NNNN-title.md`) with Context, Decision, Consequences, and Status
-- Pre-ADR review matrices under [`reviews/`](reviews/) (see `.cursor/skills/design-decision-review/SKILL.md`)
+- Pre-ADR review matrices under [`reviews/`](reviews/) (process: [`reviews/PROCESS.md`](reviews/PROCESS.md))
 - This index README
 
 ## What does not belong here

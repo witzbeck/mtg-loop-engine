@@ -5,47 +5,6 @@ alwaysApply: true
 
 # Test quality
 
-This project treats tests as **executable epistemic contracts**. Pair with [`tests/README.md`](../../tests/README.md) and [`CONTRIBUTING.md`](../../CONTRIBUTING.md). Pytest mechanics live in `pyproject.toml` `[tool.pytest.ini_options]`.
+Treat tests as executable epistemic contracts. Prefer outcome assertions in the suite that owns the critical path; ban vacuous, mock-only, and coverage-padding tests. The 90% coverage floor is a backstop, not a substitute for contract suites.
 
-## Critical functionality (must be CI-covered)
-
-When behavior changes, add or update tests in the suite that owns that contract:
-
-| Critical path | Suite |
-| --- | --- |
-| Verifier accepts / rejects | `tests/gold_core/`, `tests/hard_negatives/`, relevant `unit/` |
-| Compiler / patterns | `tests/semantic/` |
-| Blind discovery / seams | `tests/discovery/` (+ semantic compile→verify) |
-| Search ↛ verify boundary | `tests/unit/test_search_boundary.py` (and kin) |
-| Eval / adjudication / recovery | `tests/eval/` |
-| Proof shape / hash stability | `tests/golden_proofs/` |
-
-Green CI is merge-OK only if this table’s row for the PR is exercised — see `ci-merge-gate.mdc`.
-
-## Contract tests
-
-- Assert **outcomes**: `VerificationStatus`, typed rejection reasons, rediscovery counts, coverage enums, proof hashes, join reasons.
-- Prefer **one clear contract** per test (or parametrize over corpus cases).
-- Pair positives with hard negatives when adding acceptance behavior.
-- Regress **adjudicated failures** with real witnesses when fixing precision bugs.
-
-## Useless tests (do not add)
-
-- Assertions that cannot fail meaningfully (`assert True`, empty bodies, “runs without exception” with no oracle).
-- Tests that only prove a mock was called, without a domain outcome.
-- Pure coverage padding for private helpers already exercised by gold/seam tests.
-- Duplicating an existing gold_core/discovery case under a new name with no new contract.
-- Weakening expected status/reason so a broken verifier still “passes.”
-- Broadening modeled rules/patterns solely to green a test (expand deliberately with docs).
-
-## Coverage % policy
-
-CI enforces a **90% line-coverage floor** on measured `mtg_loop_engine` code (`--cov-fail-under=90` in `pyproject.toml`).
-
-That floor is a **backstop**, not a substitute for the suites above. Raise coverage with real contract tests.
-
-Intentionally omitted from the %-gate (see `[tool.coverage.run] omit`): CLI entrypoint, Streamlit workbench, and network snapshot download helpers. Do not widen that omit list to green CI — raise coverage with real contract tests.
-
-## Authority
-
-[`tests/README.md`](../../tests/README.md), [`CONTRIBUTING.md`](../../CONTRIBUTING.md). Merge coupling: `ci-merge-gate.mdc`.
+**Authority:** [`tests/README.md`](../../tests/README.md). Merge coupling: [`CONTRIBUTING.md`](../../CONTRIBUTING.md) (CI merge gate).

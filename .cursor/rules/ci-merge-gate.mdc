@@ -5,37 +5,6 @@ alwaysApply: true
 
 # CI merge gate
 
-Standing merge permission for this repo: when the user asks to open a PR or finish the branch, **green CI is sufficient authorization to land** — *provided* the change’s critical behavior is actually exercised by what CI runs.
+When the user asks to open a PR or finish the branch, green CI authorizes land only if this PR’s critical path is exercised by what CI runs (`pytest` + coverage, `check_docs`, `render_status --check`). If not covered, add tests or get an explicit “merge anyway.” Do not weaken tests to manufacture a green badge.
 
-## What CI runs today
-
-See [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml):
-
-- `uv run pytest` — executable contracts (gold, hard negatives, discovery, semantics, eval, …) **and** ≥90% line coverage on measured library code
-- `uv run python scripts/check_docs.py` — docs hygiene
-- `uv run python scripts/render_status.py --check` — STATUS ↔ baseline sync
-
-## Before treating green CI as merge OK
-
-Confirm the PR’s **critical path** is covered by that suite (or by a CI step added in the same PR):
-
-| Change kind | Expect coverage in CI |
-| --- | --- |
-| Verifier / rules / proofs | Tests that assert `VERIFIED` or typed rejection |
-| Compiler / patterns | Semantic / gold compile tests |
-| Search / joins | Discovery or seam tests |
-| Eval metrics / baselines | Eval tests and/or STATUS check |
-| Docs / governance only | Docs + STATUS checks (pytest may be unchanged) |
-
-If critical behavior is **not** covered, do **not** merge on green alone: add tests (preferred) or ask for an explicit “merge anyway.”
-
-## Do not
-
-- Merge with red or pending required checks
-- Assume “tests exist somewhere” if they are not run in CI
-- Weaken or skip tests to manufacture a green badge
-- Count coverage-padding or vacuous tests as satisfying this gate (see `test-quality.mdc`)
-
-## Authority
-
-[`CONTRIBUTING.md`](../../CONTRIBUTING.md). Pair with `land-and-return.mdc` (lifecycle after land), `merge-strategy.mdc` (squash default), and `test-quality.mdc` (what counts as coverage).
+**Authority:** [`CONTRIBUTING.md`](../../CONTRIBUTING.md) (CI merge gate). Test contracts: [`tests/README.md`](../../tests/README.md).

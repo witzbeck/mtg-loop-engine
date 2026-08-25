@@ -30,8 +30,8 @@ eval = [
 testpaths = ["tests"]
 pythonpath = ["src"]
 # Mechanical preferences + coverage floor. Policy for *what* to test
-# (critical path, ban useless tests) lives in CONTRIBUTING.md,
-# tests/README.md, and .cursor/rules/test-quality.mdc.
+# (critical path, ban useless tests) lives in CONTRIBUTING.md and
+# tests/README.md.
 addopts = [
     "-ra",
     "--strict-markers",

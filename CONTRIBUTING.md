@@ -1,8 +1,8 @@
 # Contributing
 
-How humans and agents contribute to this repository. **`CONTRIBUTING.md` and [`AGENTS.md`](AGENTS.md) are authoritative.** Files under `.cursor/rules/` are Cursor adapters (shortcuts for the IDE); on conflict, follow this file and `AGENTS.md`.
+How humans and agents contribute to this repository. **`CONTRIBUTING.md` and [`AGENTS.md`](AGENTS.md) are authoritative.**
 
-In-repository docs are canonical. Home-directory plans under `~/.cursor/plans/` are ephemeral session notes.
+In-repository docs are canonical. Session notes outside the repository are not durable strategy.
 
 ## Environment setup
 
@@ -26,22 +26,78 @@ See the root [`README.md`](README.md) for the full CLI quick-start list. Keep Or
 
 - All non-trivial work lands on a `feature/<slug>` branch (commit non-trivial changes off `main`).
 - Keep `main` mergeable: CI green before merge.
-- Default merge strategy is squash (see `.cursor/rules/merge-strategy.mdc`); say why in the PR if you need otherwise.
-- Cursor adapter only: [`.cursor/rules/feature-branches.mdc`](.cursor/rules/feature-branches.mdc) — this file remains authoritative.
+- Prefer **squash merge** for pull requests by default to keep main-branch history concise and easy to scan.
+- Keep separate commits only when preserving commit-by-commit history provides clear review, rollback, or auditing value.
+- If using a non-squash strategy, state the reason in the PR description before merging.
 
 ## Land and return
 
-When a feature branch is finished, close the loop so the next change starts from current `main`:
+When a feature branch is finished, close the loop so the next change starts from current `main`.
 
-1. Open a PR against `main` (when asked to finish or open a PR).
-2. **Standing merge permission:** once required CI is green **and** the change’s critical behavior is covered by the CI suite (see below), land the PR (squash by default) without waiting for a second “merge it,” unless the user said to wait or hold.
-3. After merge: check out `main`, fast-forward/pull from `origin`, delete the local feature branch, and leave a clean tree ready for the next `feature/<slug>`.
+### When this applies
 
-Cursor adapters: [`.cursor/rules/land-and-return.mdc`](.cursor/rules/land-and-return.mdc), [`.cursor/rules/ci-merge-gate.mdc`](.cursor/rules/ci-merge-gate.mdc).
+After work is ready to open a PR, land, or otherwise declare the branch complete.
+
+### Merge authorization (standing preference)
+
+When asked to open a PR or finish the branch:
+
+1. Wait until required CI checks are **green**.
+2. Confirm the **CI merge gate** below: critical behavior for this PR is covered by what CI runs.
+3. Then **land** (prefer squash unless the PR says otherwise) without waiting for a second “merge it,” unless told to wait, review first, or hold.
+
+If CI is red/pending, or critical behavior is untested in CI, stop and report — do not merge around the gate.
+
+### Sequence
+
+1. Ensure the branch is pushed and a PR against `main` exists (create one when asked to finish or open a PR).
+2. Land under the authorization above once CI and the coverage gate pass.
+3. After the PR is merged:
+   - `git checkout main`
+   - `git pull` (or `git pull --ff-only origin main`) so local `main` matches the remote
+   - Delete the local feature branch (`git branch -d feature/<slug>`; use `-D` only when confirmed obsolete)
+   - Delete the remote feature branch when GitHub did not already
+4. Confirm with `git status` / `git branch` that the working tree is on up-to-date `main` and ready for the next `feature/<slug>`.
+
+### Do not
+
+- Stay checked out on a merged feature branch “for convenience”
+- Force-push or delete `main`
+- Merge with a dirty working tree that would be lost; commit, stash, or ask first
+- Treat a draft PR, “WIP,” or “do not merge” label as landable
 
 ## CI merge gate
 
-Green CI authorizes merge only when critical path behavior is exercised by what CI runs today (`pytest`, `scripts/check_docs.py`, `scripts/render_status.py --check`). If a behavior change is not covered, add tests (or a CI step) in the same PR, or get an explicit “merge anyway.” Do not weaken tests to green the badge.
+Green CI authorizes merge only when the change’s critical behavior is exercised by what CI runs.
+
+### What CI runs today
+
+See [`.github/workflows/ci.yml`](.github/workflows/ci.yml):
+
+- `uv run pytest` — executable contracts (gold, hard negatives, discovery, semantics, eval, …) **and** ≥90% line coverage on measured library code
+- `uv run python scripts/check_docs.py` — docs hygiene
+- `uv run python scripts/render_status.py --check` — STATUS ↔ baseline sync
+
+### Before treating green CI as merge OK
+
+Confirm the PR’s **critical path** is covered by that suite (or by a CI step added in the same PR):
+
+| Change kind | Expect coverage in CI |
+| --- | --- |
+| Verifier / rules / proofs | Tests that assert `VERIFIED` or typed rejection |
+| Compiler / patterns | Semantic / gold compile tests |
+| Search / joins | Discovery or seam tests |
+| Eval metrics / baselines | Eval tests and/or STATUS check |
+| Docs / governance only | Docs + STATUS checks (pytest may be unchanged) |
+
+If critical behavior is **not** covered, do **not** merge on green alone: add tests (preferred) or get an explicit “merge anyway.” Do not weaken tests to green the badge.
+
+### Do not
+
+- Merge with red or pending required checks
+- Assume “tests exist somewhere” if they are not run in CI
+- Weaken or skip tests to manufacture a green badge
+- Count coverage-padding or vacuous tests as satisfying this gate (see [`tests/README.md`](tests/README.md))
 
 ## Testing
 
@@ -49,7 +105,7 @@ Green CI authorizes merge only when critical path behavior is exercised by what 
 - Behavior changes need tests in the same change (regression tests preferred when fixing adjudicated or gold failures).
 - Do not weaken assertions or broaden modeled rules solely to pass existing tests — see [`AGENTS.md`](AGENTS.md).
 - Critical path for a PR must be covered by the CI suite before treating green CI as merge OK (see **CI merge gate** above).
-- Contract tests and coverage floor: [`tests/README.md`](tests/README.md), [`.cursor/rules/test-quality.mdc`](.cursor/rules/test-quality.mdc), product rails in [`AGENTS.md`](AGENTS.md).
+- Contract tests and coverage floor: [`tests/README.md`](tests/README.md); product rails in [`AGENTS.md`](AGENTS.md).
 
 ## Documentation expectations
 

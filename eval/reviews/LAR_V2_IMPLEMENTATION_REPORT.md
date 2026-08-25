@@ -54,9 +54,9 @@ eval/
 docs/runbooks/
   LOOP_ADJUDICATION_REVIEW.md   # v2 rewrite
 
-.cursor/skills/
+.agents/skills/
   loop-adjudication-review/
-    SKILL.md                    # v2 rewrite
+    SKILL.md                    # thin wrapper → runbook (was under .cursor/skills/)
 
 src/mtg_loop_engine/eval/
   lar_contracts.py              # manifest v2, calibration, promotion
