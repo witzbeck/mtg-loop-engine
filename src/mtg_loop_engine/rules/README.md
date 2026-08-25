@@ -30,6 +30,7 @@ graph TB;
 ## Responsibilities
 
 - Replay setup and loop actions faithfully within the modeled rules surface.
+- GY activations when abilities return to battlefield; optional `requires_zombie` gate for cast-from-GY shapes.
 - Combo-player favorable / opponent adversarial choice ownership (see executor docstring and frozen product decisions).
 
 ## Non-responsibilities

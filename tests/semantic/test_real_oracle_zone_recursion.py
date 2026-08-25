@@ -16,10 +16,12 @@ def _compile_curriculum(key: str):
     )
 
 
-def test_live_gravecrawler_is_not_complete_until_cast_from_gy_modeled():
+def test_live_gravecrawler_compiles_complete_with_cast_from_gy():
     report = _compile_curriculum("Gravecrawler")
-    assert report.coverage == SemanticCoverage.PARTIAL_RELEVANT_TO_PROOF
-    assert any("graveyard" in f.lower() for f in report.semantics.unsupported_fragments)
+    assert report.coverage == SemanticCoverage.COMPLETE
+    assert any(
+        getattr(a, "requires_zombie", False) for a in report.semantics.abilities
+    )
 
 
 def test_activated_return_gravecrawler_curriculum_compiles_complete():

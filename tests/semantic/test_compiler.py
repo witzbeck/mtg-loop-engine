@@ -60,3 +60,14 @@ def test_unsupported_scepter_fails_closed():
     assert report.coverage == SemanticCoverage.PARTIAL_RELEVANT_TO_PROOF
     assert report.semantics.unsupported_fragments
     assert report.semantics.relevant_unsupported()
+
+
+def test_empty_oracle_text_fails_closed():
+    report = compile_oracle_text(
+        oracle_id="oracle:empty",
+        name="Blank",
+        oracle_text="",
+        types=["Creature"],
+    )
+    assert report.coverage == SemanticCoverage.PARTIAL_RELEVANT_TO_PROOF
+    assert "(empty oracle text)" in report.semantics.unsupported_fragments

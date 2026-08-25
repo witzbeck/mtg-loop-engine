@@ -74,7 +74,9 @@ CLI: `mtg-loop-engine compile-coverage`.
 
 ## Failure behavior
 
-Unmatched clauses become unsupported fragments → `PARTIAL_RELEVANT_TO_PROOF` (default). No exception for ordinary incomplete text; the failure mode is coverage, then verifier rejection.
+Unmatched clauses become unsupported fragments → `PARTIAL_RELEVANT_TO_PROOF` (default). **Empty Oracle text** is also fail-closed (no silent `COMPLETE`). No exception for ordinary incomplete text; the failure mode is coverage, then verifier rejection.
+
+Real-Oracle curriculum under `real_oracle_curriculum.py` includes live Gravecrawler (cast-from-GY + Zombie) and historical activated-return stand-in.
 
 ## Testing
 

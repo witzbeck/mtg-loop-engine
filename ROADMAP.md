@@ -82,7 +82,7 @@ M4 is **not** complete because evaluation infrastructure exists. Exit requires p
 ### Remaining before M5
 
 3. **Deterministic real-Oracle compiler expansion** — curriculum from unsupported Spellbook/Oracle fragments, not only gold-fixture wording.
-4. **≥1 eligible Spellbook pair** on the conventional sample. Activated-return curriculum (historical Gravecrawler shape) rediscovers with real Phyrexian Altar Oracle (`tests/discovery/test_real_oracle_altar_gravecrawler.py`). **Live Scryfall Gravecrawler** is cast-from-GY + Zombie gate — still unsupported; do not treat curriculum rediscovery as current-Oracle Spellbook recovery. Frozen STATUS remains eligible=0 until item 5.
+4. **≥1 eligible Spellbook pair** on the conventional sample. Live Scryfall **Gravecrawler + Phyrexian Altar** compiles and rediscovers via cast-from-GY + generic Zombie fodder (`tests/discovery/test_real_oracle_altar_gravecrawler.py`). Activated-return curriculum remains for historical Oracle shape. Frozen STATUS remains eligible=0 until item 5 (re-freeze after live Spellbook sample confirms).
 5. **Re-run and freeze** truthful post-fix baselines; refresh STATUS via `scripts/render_status.py`. (Frozen baselines still reflect the pre-gate snapshot until this step.)
 6. **Reconcile docs/status** with the new freeze.
 

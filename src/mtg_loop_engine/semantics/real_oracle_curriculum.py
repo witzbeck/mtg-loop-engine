@@ -23,8 +23,8 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
             "You may cast this card from your graveyard as long as you control a Zombie."
         ),
         notes=(
-            "Post-errata Scryfall text: no activated GY return. Spellbook Altar loops need "
-            "cast-from-GY + another Zombie (generic prerequisite) — not yet modeled."
+            "Post-errata Scryfall text: cast-from-GY + Zombie gate. Modeled as GY→BF "
+            "activation with {B} cost and generic Zombie fodder (ADR 0002)."
         ),
     ),
     # Pre-errata activated return — keeps zone-recursion pattern/rediscovery seam testable

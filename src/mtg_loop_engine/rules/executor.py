@@ -303,6 +303,19 @@ class Executor:
         self._queue_triggers(state, TriggerEvent.SACRIFICED, permanent)
         self.die(state, permanent)
 
+    def _controls_zombie(self, state: GameState) -> bool:
+        for perm in state.permanents.values():
+            if perm.zone != Zone.BATTLEFIELD or not perm.is_creature:
+                continue
+            if perm.controller != "you":
+                continue
+            card = self.semantics.get(perm.oracle_id)
+            if card is not None and any("zombie" in t.casefold() for t in card.types):
+                return True
+            if "zombie" in perm.name.casefold():
+                return True
+        return False
+
     def activate(
         self, state: GameState, step: ActionStep
     ) -> ExecError | None:
@@ -326,6 +339,8 @@ class Executor:
             return ExecError(VerificationStatus.ILLEGAL_ACTION, f"bad zone {perm.zone}")
         if perm.zone == Zone.BATTLEFIELD and from_gy:
             return ExecError(VerificationStatus.ILLEGAL_ACTION, "return ability needs GY")
+        if ab.requires_zombie and not self._controls_zombie(state):
+            return ExecError(VerificationStatus.ILLEGAL_ACTION, "need a Zombie")
         if ab.once_per_turn and ab.ability_id in perm.once_per_turn_used:
             return ExecError(VerificationStatus.ONCE_PER_TURN_LIMIT, ab.ability_id)
 

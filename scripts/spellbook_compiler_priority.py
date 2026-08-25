@@ -13,7 +13,7 @@ from typing import Any
 from mtg_loop_engine.benchmark.spellbook import is_conventional_two_card
 from mtg_loop_engine.cards.ingest import load_oracle_cards, read_manifest
 from mtg_loop_engine.eval.metrics import RecoveryReport
-from mtg_loop_engine.eval.oracle_lookup import types_from_line
+from mtg_loop_engine.eval.oracle_lookup import oracle_text_from_card, types_from_line
 from mtg_loop_engine.eval.spellbook_eval import (
     compile_card,
     evaluate_reference_subset,
@@ -82,7 +82,7 @@ def build_name_index(
 def semantics_from_scryfall(card: dict[str, Any]) -> CardSemantics:
     name = str(card.get("name") or "")
     oracle_id = str(card.get("oracle_id") or card.get("id") or name)
-    text = card.get("oracle_text") or ""
+    text = oracle_text_from_card(card)
     types = types_from_line(card.get("type_line"))
     return compile_card(oracle_id, name, text, types)
 
