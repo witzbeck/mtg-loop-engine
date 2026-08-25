@@ -1,0 +1,16 @@
+{
+  "oracle_id": "oracle:rosie-cotton-of-south-lane",
+  "name": "Rosie Cotton of South Lane",
+  "oracle_text": "When Rosie Cotton enters, create a Food token. (It's an artifact with \"{2}, {T}, Sacrifice this token: You gain 3 life.\")\nWhenever you create a token, put a +1/+1 counter on target creature you control other than Rosie Cotton.",
+  "types": [
+    "Creature",
+    "Halfling",
+    "Peasant"
+  ],
+  "type_line": "Legendary Creature — Halfling Peasant",
+  "audit": {
+    "audited_at": "2026-08-25",
+    "source": "manual_oracle_audit",
+    "notes": "Wave 2 Rosie/Scurry"
+  }
+}

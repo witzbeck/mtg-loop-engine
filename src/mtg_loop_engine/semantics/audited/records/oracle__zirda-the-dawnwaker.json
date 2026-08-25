@@ -1,0 +1,16 @@
+{
+  "oracle_id": "oracle:zirda-the-dawnwaker",
+  "name": "Zirda, the Dawnwaker",
+  "oracle_text": "Companion \u2014 Each permanent card in your starting deck has an activated ability. (If this card is your chosen companion, you may put it into your hand from outside the game for {3} as a sorcery.)\nAbilities you activate that aren't mana abilities cost {2} less to activate. This effect can't reduce the mana in that cost to less than one mana.\n{1}, {T}: Target creature can't block this turn.",
+  "types": [
+    "Creature",
+    "Elemental",
+    "Fox"
+  ],
+  "type_line": "Legendary Creature \u2014 Elemental Fox",
+  "audit": {
+    "audited_at": "2026-08-25",
+    "source": "manual_oracle_audit",
+    "notes": "Wave 2"
+  }
+}

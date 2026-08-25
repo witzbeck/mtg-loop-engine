@@ -99,10 +99,18 @@ def test_recovery_stages_join_miss_and_search_miss():
 def test_gold_extra_adjudications_cover_discovered_extras():
     from mtg_loop_engine.eval.gold_extras import (
         GOLD_EXTRA_ADJUDICATIONS,
+        PHYSICS_EXTRA_ADJUDICATIONS,
         collect_gold_pool_extras,
+        collect_physics_pool_extras,
     )
 
+    # Wave 1: Oracle gold has four pairs; extras may include other EXACT discoveries.
     extras = collect_gold_pool_extras()
     keys = {frozenset({r.left_id, r.right_id}) for r in extras}
     assert keys == set(GOLD_EXTRA_ADJUDICATIONS)
-    assert len(extras) == 11
+    assert len(extras) == len(GOLD_EXTRA_ADJUDICATIONS)
+
+    physics_extras = collect_physics_pool_extras()
+    physics_keys = {frozenset({r.left_id, r.right_id}) for r in physics_extras}
+    assert physics_keys == set(PHYSICS_EXTRA_ADJUDICATIONS)
+    assert len(physics_extras) == 11

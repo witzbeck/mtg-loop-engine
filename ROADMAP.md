@@ -35,7 +35,7 @@ Quantitative snapshot (baselines): [`docs/STATUS.md`](docs/STATUS.md). Keep vola
 
 - Scryfall Oracle bulk ingest; gitignored snapshots with manifest hashes.
 - Commander Spellbook extract → DuckDB; conventional two-card filter.
-- `gold_core` (10 positive witnesses, 9 hard negatives), `gold_extended` (15 stubs).
+- Initial physics gold spine (later split under ADR 0007 Wave 0); `gold_extended` stubs.
 - Essential vs generic vs functional-external labels on every corpus entry.
 
 ### M1 — Witness verifier ✓
@@ -56,9 +56,9 @@ Quantitative snapshot (baselines): [`docs/STATUS.md`](docs/STATUS.md). Keep vola
 ### M3 — Blind discovery ✓
 
 - Capability signatures + inverted-index joins → bounded BFS → same verifier.
-- 10/10 `gold_core` pairs rediscovered without pair labels.
+- Historical physics suite: 10/10 pairs rediscovered without pair labels (now `discover-physics`).
 - Explorer is the single acceptance oracle; `discover_loops` does not re-verify.
-- `corpus.builders` shared between gold fixtures and discovery so witness shapes stay comparable.
+- `corpus.builders` shared between fixtures and discovery so witness shapes stay comparable.
 
 ### M4 — Evaluation ✓
 
@@ -67,7 +67,7 @@ Exit criteria: **precision correctness** + **minimum real-Oracle eligibility** (
 | Gate | Evidence |
 |------|----------|
 | Participant enforcement | `explore_pair` requires `VERIFIED` + `strict_two_card`; Basalt bystander regressions in `tests/eval/test_classify_store.py` |
-| Gold-pool precision | `eval/baseline/m4_gold_pool_summary.json` — precision **1.0** (3/3 real) |
+| Gold-pool precision | `eval/baseline/m4_gold_pool_summary.json` — precision **null** (0 Oracle-eligible pairs; ADR 0007) |
 | ≥1 eligible Spellbook pair | `eval/baseline/m4_spellbook_recovery_summary.json` — **eligible=1** / **rediscovered=1** (Gravecrawler + Phyrexian Altar) |
 | Baselines + STATUS | `scripts/render_status.py --check`; [`docs/STATUS.md`](docs/STATUS.md) |
 
@@ -100,8 +100,17 @@ Blind discovery among real **COMPLETE**-compiled Oracle cards from Spellbook nam
    verifier-owned once-per-turn + pending-trigger recurrence dims.
    ADR [0009](docs/decisions/0009-claim-bound-proof-hash.md) (**Accepted**): claim-bound
    `proof_hash` / proof schema **0.2.0**.
-   Campaign trust-boundary slices for provenance + recurrence + claim identity are
-   landed; keep **line coverage floor at 92%** until percentages measure faithful
+   **Wave 0 (claims boundary):** ✓ `gold_core` holds only Oracle-exact positives;
+   historical synthetic/divergent witnesses live in `corpus.physics_fixtures`;
+   `verify-gold` / `discover-gold` are Oracle-only; `verify-physics` /
+   `discover-physics` cover the moved suite.
+   **Net-state gate:** ✓ additive `events` / `net_state` / `claim_consequence`
+   (proof schema **0.3.0**); gross counters alone do not justify `ACCUMULATES`.
+   **Waves 1–2 + Heliod:** ✓ eight Oracle gold positives
+   (`core_guard_gond` … `core_heliod_ballista`). Wave 3 remainders
+   (`core_saffi_champion`, `core_mikaeus_triskelion`) staged in
+   `corpus.gold_extended.oracle_gaps` until delayed triggers / undying+SBA land.
+   Keep **line coverage floor at 92%** until percentages measure faithful
    claims (optional next: path-grammar fail-closed, noncreature death cleanup).
 
 1. **Absent-discovery path** ✓ — `eval/reference_absent.py` + `scripts/spellbook_absent_discovery.py`.
@@ -112,7 +121,10 @@ Blind discovery among real **COMPLETE**-compiled Oracle cards from Spellbook nam
    - **Path a (active):** unlock more COMPLETE cards whose abilities can initiate and close a two-card loop from the default board (tap-for-mana engines, ETB untap/damage/life, etc.).
      - **Slice 5 (self-starters)** ✓ — power-tap mana (Viridian Joiner); ETB damage (Impact Tremors / Purphoros / Alliance); ETB untap-self (Midnight Guard); anthem/devotion/lifelink-reminder as proof-irrelevant.
      - **Slice 6 (token auras + false-COMPLETE fix)** ✓ — Presence of Gond host-tap tokens; narrow Enchant irrelevant so Splinter Twin/Bear Umbra fail closed; Aphetto/Morph.
-   - **Path b (deferred, deliberate):** generic **life-gain seed** in `default_initial_state` when a searched card has `GAIN_LIFE` triggers (ADR 0002 fodder-style). Would let Vito/Bond + Exquisite-class pairs rediscover without a third piece. **Do not implement until path a plateaus or a human widens scope** — document only.
+   - **Path b (Wave 1 widen for Bond/Blood):** explicit generic life-gain seed when a
+     searched card has `GAIN_LIFE` triggers (ADR 0002 fodder-style). Documented on the
+     witness; not a silent invented trigger. Required for Sanguine Bond + Exquisite Blood
+     gold promotion.
    - **Rules-evidence rails (supporting; land before widening modeled physics):** cheap epistemic adapters so coverage growth stays deliberate (ADR 0003). Not an M5 exit gate; not CR ingest or executor expansion.
 
    | Piece | Why |
@@ -129,7 +141,7 @@ Playbook: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDID
 
 ### First local probe (not a baseline)
 
-Post–slice 6 + host-recurrence fix: **31** COMPLETE; **5** verified; **5** in-reference; **`absent_from_reference=0`**. Gond + Tremors / Warleader / Basalt no longer verify (host tap in `LoopRelevantState`); Guard/Alarm + Gond remain in-reference. Continue path **a**; path **b** stays deferred.
+Post–slice 6 + host-recurrence fix: **31** COMPLETE; **5** verified; **5** in-reference; **`absent_from_reference=0`**. Gond + Tremors / Warleader / Basalt no longer verify (host tap in `LoopRelevantState`); Guard/Alarm + Gond remain in-reference. Path **b** widened for Bond/Blood gold promotion (explicit life-gain seed).
 
 ---
 

@@ -8,7 +8,12 @@ from mtg_loop_engine.eval.schema import (
     StateAssumption,
 )
 from mtg_loop_engine.proofs.models import LoopWitness
-from mtg_loop_engine.semantics.ir import ContinuousCostReduction, ManaCost
+from mtg_loop_engine.semantics.ir import (
+    ContinuousCostReduction,
+    ManaCost,
+    ReplacementReduceM1M1Counters,
+    AddCounterCost,
+)
 
 # Must match `AURA_HOST_OBJECT_ID` in search.explorer (avoid import cycle).
 _AURA_HOST_OBJECT_ID = "aura-host"
@@ -31,6 +36,30 @@ def _loop_pays_mana(witness: LoopWitness) -> bool:
                 continue
             for cost in getattr(ability, "costs", []):
                 if isinstance(cost, ManaCost) and cost.amount.total() > 0:
+                    return True
+    return False
+
+
+def _loop_pays_m1m1_counter(witness: LoopWitness) -> bool:
+    by_oracle = {card.oracle_id: card for card in witness.card_semantics}
+    perms = {p.object_id: p for p in witness.initial_state.permanents}
+    for step in witness.loop_actions:
+        if step.op != "activate" or not step.actor:
+            continue
+        perm = perms.get(step.actor)
+        if perm is None:
+            continue
+        card = by_oracle.get(perm.oracle_id)
+        if card is None:
+            continue
+        for ability in card.abilities:
+            if getattr(ability, "ability_id", None) != step.ability_id:
+                continue
+            for cost in getattr(ability, "costs", []):
+                if isinstance(cost, AddCounterCost) and cost.counter_type in {
+                    "m1m1",
+                    "-1/-1",
+                }:
                     return True
     return False
 
@@ -106,6 +135,14 @@ def analyze_prerequisites(witness: LoopWitness) -> PrerequisiteAnalysis:
                 used.add(card.oracle_id)
                 notes.append(
                     f"{card.name} participates via continuous activation-cost reduction"
+                )
+
+    if _loop_pays_m1m1_counter(witness):
+        for card in witness.card_semantics:
+            if any(isinstance(ab, ReplacementReduceM1M1Counters) for ab in card.abilities):
+                used.add(card.oracle_id)
+                notes.append(
+                    f"{card.name} participates via -1/-1 counter put replacement"
                 )
 
     unused = [oid for oid in pair_ids if oid not in used]

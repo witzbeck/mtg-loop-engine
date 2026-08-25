@@ -5,6 +5,7 @@ from __future__ import annotations
 from mtg_loop_engine.eval.gold_extras import (
     FIXTURE_ORACLE_IDS,
     GOLD_EXTRA_ADJUDICATIONS,
+    PHYSICS_EXTRA_ADJUDICATIONS,
     _pair_has_fixture,
 )
 from mtg_loop_engine.eval.schema import AdjudicationClass
@@ -36,12 +37,24 @@ KNOWN_EXACT = {
     "oracle:ashnods-altar",
     "oracle:viscera-seer",
     "oracle:soul-warden",
-}
-
-KNOWN_DIVERGENT = {
     "oracle:phyrexian-altar",
     "oracle:gravecrawler",
     "oracle:intruder-alarm",
+    "oracle:midnight-guard",
+    "oracle:presence-of-gond",
+    "oracle:thraben-doomsayer",
+    "oracle:sanguine-bond",
+    "oracle:exquisite-blood",
+    "oracle:zirda-the-dawnwaker",
+    "oracle:devoted-druid",
+    "oracle:vizier-of-remedies",
+    "oracle:rosie-cotton-of-south-lane",
+    "oracle:scurry-oak",
+    "oracle:heliod-sun-crowned",
+    "oracle:walking-ballista",
+}
+
+KNOWN_DIVERGENT = {
     "oracle:blood-artist",
     "oracle:reassembling-skeleton",
     "oracle:rest-in-peace",
@@ -103,15 +116,22 @@ def test_precision_requires_both_exact():
 
 
 def test_synthetic_extra_pairs_labelled_invalid():
-    for pair, (cls, _) in GOLD_EXTRA_ADJUDICATIONS.items():
+    for pair, (cls, _) in PHYSICS_EXTRA_ADJUDICATIONS.items():
         ids = list(pair)
         if _pair_has_fixture(ids[0], ids[1]):
             assert cls == AdjudicationClass.INVALID_CANDIDATE_DATA, pair
+    # Oracle gold extras are EXACT×EXACT; classes may be VALID or finite mislabels.
+    for pair, (cls, _) in GOLD_EXTRA_ADJUDICATIONS.items():
+        assert not _pair_has_fixture(*pair)
+        assert cls in {
+            AdjudicationClass.VALID_STRICT_TWO_CARD,
+            AdjudicationClass.FINITE_INTERACTION_MISCLASSIFIED_AS_LOOP,
+        }
 
 
 def test_divergent_skeleton_altar_still_valid_physics():
     key = frozenset({"oracle:phyrexian-altar", "oracle:reassembling-skeleton"})
-    cls, _ = GOLD_EXTRA_ADJUDICATIONS[key]
+    cls, _ = PHYSICS_EXTRA_ADJUDICATIONS[key]
     assert cls == AdjudicationClass.VALID_STRICT_TWO_CARD
     assert not is_precision_eligible_ids(*key)
 
@@ -137,17 +157,19 @@ def test_physics_and_oracle_pool_selectors():
         physics_gold_compiled_card_pool,
     )
 
-    mixed = {c.oracle_id for c in gold_core_card_pool()}
+    oracle = {c.oracle_id for c in gold_core_card_pool()}
     physics = {c.oracle_id for c in physics_gold_card_pool()}
-    exact = {c.oracle_id for c in oracle_gold_card_pool()}
-    assert physics == mixed
-    assert exact == KNOWN_EXACT & mixed
-    assert all(oid in mixed for oid in exact)
+    exact_pool = {c.oracle_id for c in oracle_gold_card_pool()}
+    # Wave 0: Oracle gold empty; physics holds historical synthetic/divergent suite.
+    assert exact_pool == oracle
+    assert physics
     assert any(oid.startswith("synthetic:") for oid in physics)
-    assert not any(oid.startswith("synthetic:") for oid in exact)
+    assert not any(oid.startswith("synthetic:") for oid in oracle)
+    assert oracle <= KNOWN_EXACT
     assert {c.oracle_id for c in physics_gold_compiled_card_pool()} == physics
-    assert {c.oracle_id for c in oracle_gold_compiled_card_pool()} == exact
-
+    assert {c.oracle_id for c in oracle_gold_compiled_card_pool()} == exact_pool
+    # Physics and Oracle pools are separate after Wave 0 (not aliases).
+    assert physics != oracle or (not oracle and physics)
 
 def test_canonicalize_and_is_precision_eligible_pair_alias():
     from mtg_loop_engine.semantics.provenance import (

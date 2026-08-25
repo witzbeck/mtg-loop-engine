@@ -267,16 +267,19 @@ def _render_study_tab(st) -> None:
         "Use them to get a feel for what a confirmed valid loop looks like."
     )
     try:
-        from mtg_loop_engine.corpus import all_gold_core
+        from mtg_loop_engine.corpus import all_gold_core, physics_all_positives
         from mtg_loop_engine.verify.verifier import Verifier
 
         witnesses = all_gold_core()
+        if not witnesses:
+            # Wave 0: Oracle gold empty; show physics fixtures for study UX.
+            witnesses = physics_all_positives()
     except Exception as exc:
         st.error(f"Could not load gold-core corpus: {exc}")
         return
 
     if not witnesses:
-        st.info("No gold-core witnesses found.")
+        st.info("No gold-core or physics witnesses found.")
         return
 
     verifier = Verifier()

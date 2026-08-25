@@ -50,9 +50,11 @@ GOLD_ORACLE_FIXTURES: dict[str, OracleFixture] = {
         name="Intruder Alarm",
         types=["Enchantment"],
         type_line="Enchantment",
-        # Real Oracle also has the don't-untap static; simplified → quarantine.
-        oracle_text="Whenever a creature enters the battlefield, untap target permanent.",
-        provenance=Provenance.ORACLE_DIVERGENT,
+        oracle_text=(
+            "Creatures don't untap during their controllers' untap steps.\n"
+            "Whenever a creature enters, untap all creatures."
+        ),
+        provenance=Provenance.ORACLE_EXACT,
     ),
     "synthetic:token-tapper": OracleFixture(
         oracle_id="synthetic:token-tapper",
@@ -67,18 +69,66 @@ GOLD_ORACLE_FIXTURES: dict[str, OracleFixture] = {
         name="Phyrexian Altar",
         types=["Artifact"],
         type_line="Artifact",
-        # Real Oracle: any color. Tuned black → quarantine.
-        oracle_text="Sacrifice a creature: Add {B}.",
-        provenance=Provenance.ORACLE_DIVERGENT,
+        oracle_text="Sacrifice a creature: Add one mana of any color.",
+        provenance=Provenance.ORACLE_EXACT,
     ),
     "oracle:gravecrawler": OracleFixture(
         oracle_id="oracle:gravecrawler",
         name="Gravecrawler",
-        types=["Creature"],
+        types=["Creature", "Zombie"],
         type_line="Creature — Zombie",
-        # Activated return ≠ cast-from-GY + Zombie restriction → quarantine.
-        oracle_text="{B}: Return Gravecrawler from your graveyard to the battlefield.",
-        provenance=Provenance.ORACLE_DIVERGENT,
+        oracle_text=(
+            "This creature can't block.\n"
+            "You may cast this card from your graveyard as long as you control a Zombie."
+        ),
+        provenance=Provenance.ORACLE_EXACT,
+    ),
+    "oracle:midnight-guard": OracleFixture(
+        oracle_id="oracle:midnight-guard",
+        name="Midnight Guard",
+        types=["Creature", "Human", "Soldier"],
+        type_line="Creature — Human Soldier",
+        oracle_text="Whenever another creature enters, untap this creature.",
+        provenance=Provenance.ORACLE_EXACT,
+    ),
+    "oracle:presence-of-gond": OracleFixture(
+        oracle_id="oracle:presence-of-gond",
+        name="Presence of Gond",
+        types=["Enchantment", "Aura"],
+        type_line="Enchantment — Aura",
+        oracle_text=(
+            "Enchant creature\n"
+            'Enchanted creature has "{T}: Create a 1/1 green Elf Warrior creature token."'
+        ),
+        provenance=Provenance.ORACLE_EXACT,
+    ),
+    "oracle:thraben-doomsayer": OracleFixture(
+        oracle_id="oracle:thraben-doomsayer",
+        name="Thraben Doomsayer",
+        types=["Creature", "Human", "Cleric"],
+        type_line="Creature — Human Cleric",
+        oracle_text=(
+            "{T}: Create a 1/1 white Human creature token.\n"
+            "Fateful hour — As long as you have 5 or less life, "
+            "other creatures you control get +2/+2."
+        ),
+        provenance=Provenance.ORACLE_EXACT,
+    ),
+    "oracle:sanguine-bond": OracleFixture(
+        oracle_id="oracle:sanguine-bond",
+        name="Sanguine Bond",
+        types=["Enchantment"],
+        type_line="Enchantment",
+        oracle_text="Whenever you gain life, target opponent loses that much life.",
+        provenance=Provenance.ORACLE_EXACT,
+    ),
+    "oracle:exquisite-blood": OracleFixture(
+        oracle_id="oracle:exquisite-blood",
+        name="Exquisite Blood",
+        types=["Enchantment"],
+        type_line="Enchantment",
+        oracle_text="Whenever an opponent loses life, you gain that much life.",
+        provenance=Provenance.ORACLE_EXACT,
     ),
     "synthetic:persistent-phoenix": OracleFixture(
         oracle_id="synthetic:persistent-phoenix",
@@ -200,6 +250,96 @@ GOLD_ORACLE_FIXTURES: dict[str, OracleFixture] = {
             "{T}, Sacrifice a creature token: Create two 1/1 Spawn creature tokens."
         ),
         provenance=Provenance.SYNTHETIC,
+    ),
+    "oracle:zirda-the-dawnwaker": OracleFixture(
+        oracle_id="oracle:zirda-the-dawnwaker",
+        name="Zirda, the Dawnwaker",
+        types=["Creature", "Elemental", "Fox"],
+        type_line="Legendary Creature — Elemental Fox",
+        oracle_text=(
+            "Companion — Each permanent card in your starting deck has an activated ability. "
+            "(If this card is your chosen companion, you may put it into your hand from outside "
+            "the game for {3} as a sorcery.)\n"
+            "Abilities you activate that aren't mana abilities cost {2} less to activate. "
+            "This effect can't reduce the mana in that cost to less than one mana.\n"
+            "{1}, {T}: Target creature can't block this turn."
+        ),
+        provenance=Provenance.ORACLE_EXACT,
+    ),
+    "oracle:devoted-druid": OracleFixture(
+        oracle_id="oracle:devoted-druid",
+        name="Devoted Druid",
+        types=["Creature", "Elf", "Druid"],
+        type_line="Creature — Elf Druid",
+        oracle_text=(
+            "{T}: Add {G}.\n"
+            "Put a -1/-1 counter on this creature: Untap this creature."
+        ),
+        provenance=Provenance.ORACLE_EXACT,
+    ),
+    "oracle:vizier-of-remedies": OracleFixture(
+        oracle_id="oracle:vizier-of-remedies",
+        name="Vizier of Remedies",
+        types=["Creature", "Human", "Cleric"],
+        type_line="Creature — Human Cleric",
+        oracle_text=(
+            "If one or more -1/-1 counters would be put on a creature you control, "
+            "that many -1/-1 counters minus one are put on it instead."
+        ),
+        provenance=Provenance.ORACLE_EXACT,
+    ),
+    "oracle:rosie-cotton-of-south-lane": OracleFixture(
+        oracle_id="oracle:rosie-cotton-of-south-lane",
+        name="Rosie Cotton of South Lane",
+        types=["Creature", "Halfling", "Peasant"],
+        type_line="Legendary Creature — Halfling Peasant",
+        oracle_text=(
+            "When Rosie Cotton enters, create a Food token. "
+            '(It\'s an artifact with "{2}, {T}, Sacrifice this token: You gain 3 life.")\n'
+            "Whenever you create a token, put a +1/+1 counter on target creature "
+            "you control other than Rosie Cotton."
+        ),
+        provenance=Provenance.ORACLE_EXACT,
+    ),
+    "oracle:scurry-oak": OracleFixture(
+        oracle_id="oracle:scurry-oak",
+        name="Scurry Oak",
+        types=["Creature", "Treefolk"],
+        type_line="Creature — Treefolk",
+        oracle_text=(
+            "Evolve (Whenever a creature you control enters, if that creature has "
+            "greater power or toughness than this creature, put a +1/+1 counter "
+            "on this creature.)\n"
+            "Whenever one or more +1/+1 counters are put on this creature, "
+            "you may create a 1/1 green Squirrel creature token."
+        ),
+        provenance=Provenance.ORACLE_EXACT,
+    ),
+    "oracle:heliod-sun-crowned": OracleFixture(
+        oracle_id="oracle:heliod-sun-crowned",
+        name="Heliod, Sun-Crowned",
+        types=["Enchantment", "Creature", "God"],
+        type_line="Legendary Enchantment Creature — God",
+        oracle_text=(
+            "Indestructible\n"
+            "As long as your devotion to white is less than five, Heliod isn't a creature.\n"
+            "Whenever you gain life, put a +1/+1 counter on target creature or "
+            "enchantment you control.\n"
+            "{1}{W}: Another target creature gains lifelink until end of turn."
+        ),
+        provenance=Provenance.ORACLE_EXACT,
+    ),
+    "oracle:walking-ballista": OracleFixture(
+        oracle_id="oracle:walking-ballista",
+        name="Walking Ballista",
+        types=["Artifact", "Creature", "Construct"],
+        type_line="Artifact Creature — Construct",
+        oracle_text=(
+            "This creature enters with X +1/+1 counters on it.\n"
+            "{4}: Put a +1/+1 counter on this creature.\n"
+            "Remove a +1/+1 counter from this creature: It deals 1 damage to any target."
+        ),
+        provenance=Provenance.ORACLE_EXACT,
     ),
 }
 

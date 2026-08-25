@@ -64,6 +64,14 @@ def build_claim_payload(
             "dimensions": [_dump(d) for d in dims],
         },
         "expected_outputs": [_dump(o) for o in witness.expected_outputs],
+        "expected_net_state": _dump(witness.expected_net_state)
+        if witness.expected_net_state is not None
+        else None,
+        "expected_claim_consequence": (
+            witness.expected_claim_consequence.value
+            if witness.expected_claim_consequence is not None
+            else None
+        ),
         "prerequisites": [_dump(p) for p in prereqs],
         "assumptions": sorted(witness.assumptions),
     }

@@ -72,17 +72,17 @@ def test_ability_hint_short_id():
 
 
 def test_narrate_loop_gold_basalt_training():
-    """Basalt Monolith + Synthetic Cost Reducer is the gold_core mana_tap_untap witness."""
-    from mtg_loop_engine.corpus import all_gold_core
+    """Basalt Monolith + Synthetic Cost Reducer physics mana_tap_untap witness."""
+    from mtg_loop_engine.corpus import physics_all_positives
 
     witnesses = {
-        " + ".join(sorted(c.name for c in w.essential_cards)): w for w in all_gold_core()
+        " + ".join(sorted(c.name for c in w.essential_cards)): w for w in physics_all_positives()
     }
     key = next(
         (k for k in witnesses if "Basalt" in k and "Synthetic Cost Reducer" in k),
         None,
     )
-    assert key is not None, "expected core_basalt_training in gold_core"
+    assert key is not None, "expected core_basalt_training in physics fixtures"
     steps = narrate_loop(witnesses[key])
     assert len(steps) >= 2
     for step in steps:
@@ -91,9 +91,9 @@ def test_narrate_loop_gold_basalt_training():
 
 
 def test_narrate_loop_empty_actions_returns_placeholder():
-    from mtg_loop_engine.corpus import all_gold_core
+    from mtg_loop_engine.corpus import physics_all_positives
 
-    base = all_gold_core()[0]
+    base = physics_all_positives()[0]
     stub = base.model_copy(update={"loop_actions": []})
     steps = narrate_loop(stub)
     assert steps == ["(no loop steps recorded)"]
@@ -105,9 +105,9 @@ def test_narrate_loop_empty_actions_returns_placeholder():
 
 
 def test_narrate_setup_no_setup_actions():
-    from mtg_loop_engine.corpus import all_gold_core
+    from mtg_loop_engine.corpus import physics_all_positives
 
-    base = all_gold_core()[0]
+    base = physics_all_positives()[0]
     stub = base.model_copy(update={"setup_actions": []})
     assert narrate_setup(stub) == []
 
@@ -118,11 +118,11 @@ def test_narrate_setup_no_setup_actions():
 
 
 def test_narrate_outputs_non_empty_for_verified_gold():
-    from mtg_loop_engine.corpus import all_gold_core
+    from mtg_loop_engine.corpus import physics_all_positives
     from mtg_loop_engine.verify.verifier import Verifier
 
     verifier = Verifier()
-    for w in all_gold_core():
+    for w in physics_all_positives():
         proof = verifier.verify(w)
         lines = narrate_outputs(proof)
         assert isinstance(lines, list)
@@ -132,11 +132,11 @@ def test_narrate_outputs_non_empty_for_verified_gold():
 
 
 def test_narrate_recurrence_non_empty_for_verified_gold():
-    from mtg_loop_engine.corpus import all_gold_core
+    from mtg_loop_engine.corpus import physics_all_positives
     from mtg_loop_engine.verify.verifier import Verifier
 
     verifier = Verifier()
-    for w in all_gold_core():
+    for w in physics_all_positives():
         proof = verifier.verify(w)
         lines = narrate_recurrence(proof)
         assert isinstance(lines, list) and lines
@@ -149,11 +149,11 @@ def test_narrate_recurrence_non_empty_for_verified_gold():
 
 
 def test_full_narrative_contains_card_names():
-    from mtg_loop_engine.corpus import all_gold_core
+    from mtg_loop_engine.corpus import physics_all_positives
     from mtg_loop_engine.verify.verifier import Verifier
 
     verifier = Verifier()
-    w = all_gold_core()[0]
+    w = physics_all_positives()[0]
     proof = verifier.verify(w)
     narrative = full_narrative(w, proof)
     for card in w.essential_cards:
@@ -161,11 +161,11 @@ def test_full_narrative_contains_card_names():
 
 
 def test_full_narrative_contains_section_headers():
-    from mtg_loop_engine.corpus import all_gold_core
+    from mtg_loop_engine.corpus import physics_all_positives
     from mtg_loop_engine.verify.verifier import Verifier
 
     verifier = Verifier()
-    w = all_gold_core()[0]
+    w = physics_all_positives()[0]
     proof = verifier.verify(w)
     narrative = full_narrative(w, proof)
     assert "Repeating loop body" in narrative

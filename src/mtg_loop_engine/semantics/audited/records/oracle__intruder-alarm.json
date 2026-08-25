@@ -1,0 +1,14 @@
+{
+  "oracle_id": "oracle:intruder-alarm",
+  "name": "Intruder Alarm",
+  "oracle_text": "Creatures don't untap during their controllers' untap steps.\nWhenever a creature enters, untap all creatures.",
+  "types": [
+    "Enchantment"
+  ],
+  "type_line": "Enchantment",
+  "audit": {
+    "audited_at": "2026-08-25",
+    "source": "manual_oracle_audit",
+    "notes": "Wave 1 Oracle gold promotion; types engine-derived; type_line Scryfall."
+  }
+}

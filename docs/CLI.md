@@ -4,11 +4,13 @@ Entry point: `uv run mtg-loop-engine` (`mtg_loop_engine.cli`).
 
 | Command | Milestone | Purpose | Expected output |
 | ------- | --------- | ------- | --------------- |
-| `verify-gold` | M1 | Run `gold_core` positives and hard negatives through the witness verifier | Per-witness status + proof hash; exit `0` if all gold positives verify and hard negatives match expected rejections |
+| `verify-gold` | M5 | Run Oracle-exact `gold_core` positives and Oracle hard negatives | Per-witness status + proof hash; exit `0` if all match (Wave 0: empty gold is success) |
+| `verify-physics` | M5 | Run synthetic/divergent physics fixtures + physics hard negatives | Same shape as verify-gold for the physics suite |
 | `fetch-scryfall` | M0 | Download Scryfall Oracle Cards bulk snapshot into gitignored `data/` | JSON manifest (paths, hashes); creates local snapshot dirs |
 | `fetch-spellbook` | M0 | Download Commander Spellbook sample pages into gitignored `data/` | JSON manifest; `--pages` controls how many API pages (default 2) |
 | `compile-coverage` | M2 | Report deterministic compiler coverage on gold Oracle fixtures | Per-card fragment counts; JSON summary with `fragment_coverage`; exit `0` only if coverage is `1.0` on gold fixtures |
-| `discover-gold` | M3 | Blind-discover `gold_core` pairs without pair labels | JSON discovery stats (`rediscovered`, `missing`, …); `VERIFIED` lines per hit; exit `0` if all gold pairs rediscovered |
+| `discover-gold` | M5 | Blind-discover Oracle `gold_core` pairs without pair labels | JSON discovery stats; exit `0` if all Oracle gold pairs rediscovered |
+| `discover-physics` | M5 | Blind-discover physics fixture pairs without pair labels | JSON discovery stats for the physics suite |
 | `eval-gold-extras` | M4 | Snapshot gold-pool extra discoveries and report adjudicated precision over real-card pairs | JSON: `extras_total`, real/fixture splits, `adjudicated`, `valid`, `precision`, `by_class`; persists store/JSONL |
 | `eval-spellbook` | M4 | Reference recovery on a conventional two-card Spellbook-shaped JSONL | `RecoveryReport` JSON (`counts`, `rows`); optional `--out`; `--fetch-oracle` resolves names via Scryfall then compiles |
 | `adjudicate-workbench` | M4 | Launch local Streamlit adjudication UI | Opens Streamlit on the workbench app; requires eval optional deps (`uv run --group eval …`) |

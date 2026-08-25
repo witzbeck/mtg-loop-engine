@@ -100,6 +100,7 @@ class TriggerEvent(StrEnum):
     TAP = "tap"
     UNTAP = "untap"
     COUNTER_ADDED = "counter_added"
+    CREATE_TOKEN = "create_token"
     GAIN_LIFE = "gain_life"
     OPPONENT_LOSE_LIFE = "opponent_lose_life"
 

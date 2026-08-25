@@ -1,0 +1,15 @@
+{
+  "oracle_id": "oracle:scurry-oak",
+  "name": "Scurry Oak",
+  "oracle_text": "Evolve (Whenever a creature you control enters, if that creature has greater power or toughness than this creature, put a +1/+1 counter on this creature.)\nWhenever one or more +1/+1 counters are put on this creature, you may create a 1/1 green Squirrel creature token.",
+  "types": [
+    "Creature",
+    "Treefolk"
+  ],
+  "type_line": "Creature — Treefolk",
+  "audit": {
+    "audited_at": "2026-08-25",
+    "source": "manual_oracle_audit",
+    "notes": "Wave 2 Rosie/Scurry; Evolve proof-irrelevant"
+  }
+}

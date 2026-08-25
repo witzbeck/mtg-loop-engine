@@ -52,7 +52,19 @@ class SacrificeCost(BaseModel):
     )
 
 
-Cost = Annotated[TapCost | ManaCost | SacrificeCost, Field(discriminator="kind")]
+class AddCounterCost(BaseModel):
+    """Pay by putting counters on self (Devoted Druid)."""
+
+    kind: Literal["add_counter"] = "add_counter"
+    counter_type: str = "m1m1"
+    quantity: int = 1
+    target: Literal["self"] = "self"
+
+
+Cost = Annotated[
+    TapCost | ManaCost | SacrificeCost | AddCounterCost,
+    Field(discriminator="kind"),
+]
 
 
 class AddManaEffect(BaseModel):
@@ -90,7 +102,7 @@ class AddCounterEffect(BaseModel):
     kind: Literal["add_counter"] = "add_counter"
     counter_type: str = "p1p1"
     quantity: int = 1
-    target: Literal["self", "target_permanent"] = "self"
+    target: Literal["self", "target_permanent", "target_other_creature"] = "self"
 
 
 class RemoveCounterEffect(BaseModel):
@@ -184,6 +196,9 @@ class ContinuousCostReduction(BaseModel):
     applies_to: Literal["activated_abilities_you_control"] = (
         "activated_abilities_you_control"
     )
+    # Zirda: ignore mana abilities; leave at least one mana in the cost.
+    exclude_mana_abilities: bool = False
+    min_mana_remaining: int = 0
     supported: bool = True
 
 
@@ -193,6 +208,15 @@ class ReplacementExileInsteadOfGraveyard(BaseModel):
     kind: Literal["replacement_exile_on_death"] = "replacement_exile_on_death"
     ability_id: str
     applies_to: Literal["creatures_you_control"] = "creatures_you_control"
+    supported: bool = True
+
+
+class ReplacementReduceM1M1Counters(BaseModel):
+    """Vizier of Remedies: reduce -1/-1 puts by one (may reduce to zero)."""
+
+    kind: Literal["replacement_reduce_m1m1"] = "replacement_reduce_m1m1"
+    ability_id: str
+    reduce_by: int = 1
     supported: bool = True
 
 
@@ -210,6 +234,7 @@ Ability = Annotated[
     | TriggeredAbility
     | ContinuousCostReduction
     | ReplacementExileInsteadOfGraveyard
+    | ReplacementReduceM1M1Counters
     | ProofIrrelevantStatic,
     Field(discriminator="kind"),
 ]

@@ -10,6 +10,7 @@ from mtg_loop_engine.semantics.enums import TriggerEvent
 from mtg_loop_engine.semantics.ir import (
     Ability,
     ActivatedAbility,
+    AddCounterCost,
     AddCounterEffect,
     AddManaEffect,
     ContinuousCostReduction,
@@ -22,6 +23,7 @@ from mtg_loop_engine.semantics.ir import (
     ManaCost,
     RemoveCounterEffect,
     ReplacementExileInsteadOfGraveyard,
+    ReplacementReduceM1M1Counters,
     ProofIrrelevantStatic,
     ReturnToBattlefieldEffect,
     SacrificeCost,
@@ -300,6 +302,95 @@ def pat_cost_reduction(text: str, name: str) -> Ability | None:
     return ContinuousCostReduction(
         ability_id=_ability_id("cost-reduce", text),
         reduce_generic=int(m.group(1)),
+    )
+
+
+def pat_cant_block_this_turn(text: str, name: str) -> Ability | None:
+    """Compile Zirda-style can't-block grant (not used by gold loops)."""
+    m = re.match(
+        r"^\{(\d+)\}, \{T\}: Target creature can't block this turn\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("cant-block", text),
+        costs=[
+            ManaCost(amount=ManaAmount(generic=int(m.group(1)))),
+            TapCost(),
+        ],
+        effects=[],
+    )
+
+
+def pat_zirda_cost_reduction(text: str, name: str) -> Ability | None:
+    """Zirda: non-mana activated abilities cost {N} less; floor one mana."""
+    m = re.match(
+        r"^Abilities you activate that aren't mana abilities cost \{(\d+)\} less to activate\.?"
+        r"(?:\s+This effect can't reduce the mana (?:in that cost|an ability costs to activate) "
+        r"to less than one mana\.?)?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ContinuousCostReduction(
+        ability_id=_ability_id("zirda-cost-reduce", text),
+        reduce_generic=int(m.group(1)),
+        exclude_mana_abilities=True,
+        min_mana_remaining=1,
+    )
+
+
+def pat_put_m1m1_untap_self(text: str, name: str) -> Ability | None:
+    m = re.match(
+        r"^Put a -1/-1 counter on (?:this creature|~|"
+        + re.escape(name)
+        + r"): Untap (?:this creature|~|"
+        + re.escape(name)
+        + r")\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("m1m1-untap", text),
+        costs=[AddCounterCost(counter_type="m1m1", quantity=1)],
+        effects=[UntapEffect(target="self")],
+    )
+
+
+def pat_vizier_m1m1_replacement(text: str, name: str) -> Ability | None:
+    m = re.match(
+        r"^If one or more -1/-1 counters would be put on a creature you control, "
+        r"that many -1/-1 counters minus one are put on it instead\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ReplacementReduceM1M1Counters(
+        ability_id=_ability_id("vizier-m1m1", text),
+        reduce_by=1,
+    )
+
+    """Zirda: non-mana activated abilities cost {N} less; floor one mana."""
+    m = re.match(
+        r"^Abilities you activate that aren't mana abilities cost \{(\d+)\} less to activate\.?"
+        r"(?:\s+This effect can't reduce the mana (?:in that cost|an ability costs to activate) "
+        r"to less than one mana\.?)?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ContinuousCostReduction(
+        ability_id=_ability_id("zirda-cost-reduce", text),
+        reduce_generic=int(m.group(1)),
+        exclude_mana_abilities=True,
+        min_mana_remaining=1,
     )
 
 
@@ -652,9 +743,82 @@ def pat_etb_gain_life(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_gain_life_put_p1p1_target(text: str, name: str) -> Ability | None:
+    """Heliod: Whenever you gain life, put +1/+1 on target creature/enchantment."""
+    m = re.match(
+        r"^Whenever you gain life, put a \+1/\+1 counter on target "
+        r"(?:creature or enchantment|creature) you control\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("gain-life-p1p1", text),
+        event=TriggerEvent.GAIN_LIFE,
+        filter="any",
+        effects=[
+            AddCounterEffect(
+                counter_type="p1p1",
+                quantity=1,
+                target="target_permanent",
+            )
+        ],
+    )
+
+
+def pat_mana_put_p1p1_self(text: str, name: str) -> Ability | None:
+    """Walking Ballista: {N}: Put a +1/+1 counter on this creature."""
+    m = re.match(
+        r"^\{(\d+)\}: Put a \+1/\+1 counter on (?:this creature|~|"
+        + re.escape(name)
+        + r")\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("mana-put-p1p1", text),
+        costs=[ManaCost(amount=ManaAmount(generic=int(m.group(1))))],
+        effects=[
+            AddCounterEffect(counter_type="p1p1", quantity=1, target="self")
+        ],
+    )
+
+
+def pat_etb_with_counters_irrelevant(text: str, name: str) -> Ability | None:
+    """X-counter ETB (Ballista/Triskelion): seed counters instead of casting X."""
+    m = re.match(
+        r"^This creature enters(?: the battlefield)? with "
+        r"(?:X|three|\d+) \+1/\+1 counters? on it\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return _proof_irrelevant(text.strip().rstrip("."))
+
+
+def pat_grant_lifelink_activated(text: str, name: str) -> Ability | None:
+    """Heliod: {cost}: Another target creature gains lifelink until end of turn.
+
+    Modeled as proof-irrelevant activation text; explore uses seed_grant_lifelink.
+    """
+    m = re.match(
+        r"^(?:\{[^}]+\})+: Another target creature gains lifelink "
+        r"until end of turn\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return _proof_irrelevant(text.strip().rstrip("."))
+
+
 def pat_remove_counter_damage(text: str, name: str) -> Ability | None:
     m = re.match(
-        r"^Remove a \+1/\+1 counter from (~|this permanent|"
+        r"^Remove a \+1/\+1 counter from (~|this permanent|this creature|"
         + re.escape(name)
         + r"): (~|it|"
         + re.escape(name)
@@ -665,7 +829,7 @@ def pat_remove_counter_damage(text: str, name: str) -> Ability | None:
     if not m:
         # Simplified gold wording
         m = re.match(
-            r"^Remove a \+1/\+1 counter from (~|this permanent): "
+            r"^Remove a \+1/\+1 counter from (~|this permanent|this creature): "
             r"It deals 1 damage to (?:any target|target opponent)\.?$",
             text,
             re.IGNORECASE,
@@ -678,6 +842,98 @@ def pat_remove_counter_damage(text: str, name: str) -> Ability | None:
         effects=[
             RemoveCounterEffect(counter_type="p1p1", quantity=1),
             DealDamageEffect(amount=1, target="opponent"),
+        ],
+    )
+
+
+def pat_etb_create_food(text: str, name: str) -> Ability | None:
+    """Rosie ETB: When NAME enters, create a Food token."""
+    short = name.split(" of ")[0].strip() if " of " in name else name
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^When (?:{name_alt}) enters(?: the battlefield)?, create a Food token\.?"
+        rf"(?: \([^)]*\))?\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("etb-food", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="self",
+        effects=[
+            CreateTokenEffect(
+                name="Food",
+                power=0,
+                toughness=0,
+                quantity=1,
+                is_creature=False,
+                is_artifact=True,
+            )
+        ],
+    )
+
+
+def pat_create_token_put_p1p1_other(text: str, name: str) -> Ability | None:
+    """Rosie: Whenever you create a token, put +1/+1 on another creature you control."""
+    short = name.split(" of ")[0].strip() if " of " in name else name
+    name_alt = "|".join(re.escape(n) for n in dict.fromkeys([name, short]))
+    m = re.match(
+        rf"^Whenever you create a token, put a \+1/\+1 counter on target creature "
+        rf"you control other than (?:{name_alt})\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("create-token-p1p1", text),
+        event=TriggerEvent.CREATE_TOKEN,
+        filter="any",
+        effects=[
+            AddCounterEffect(
+                counter_type="p1p1",
+                quantity=1,
+                target="target_other_creature",
+            )
+        ],
+    )
+
+
+def pat_counters_put_may_create_token(text: str, name: str) -> Ability | None:
+    """Scurry Oak: when +1/+1 counters are put on this, may create a token."""
+    short = name.split(" of ")[0].strip() if " of " in name else name
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^Whenever one or more \+1/\+1 counters are put on (?:{name_alt}), "
+        rf"(?:you may )?create (?:a|one)(?: (\d+)/(\d+))? "
+        rf"(?:(?:white|blue|black|red|green|colorless) )?"
+        rf"(.+?) creature token\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    power = int(m.group(1) or 1)
+    toughness = int(m.group(2) or 1)
+    token_name = m.group(3).strip()
+    # Combo-player-favorable: treat optional create as mandatory.
+    return TriggeredAbility(
+        ability_id=_ability_id("counters-create-token", text),
+        event=TriggerEvent.COUNTER_ADDED,
+        filter="self",
+        effects=[
+            CreateTokenEffect(
+                name=token_name,
+                power=power,
+                toughness=toughness,
+                quantity=1,
+            )
         ],
     )
 
@@ -808,6 +1064,18 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
     if lowered in _KEYWORD_ABILITIES:
         return _proof_irrelevant(clause)
 
+    # Companion reminder / ability word block.
+    if re.match(r"^Companion\b", clause, re.IGNORECASE):
+        return _proof_irrelevant(clause)
+
+    # Temporary "can't block" grant (Zirda activated effect as static leftover — skip activated).
+    if re.match(
+        r"^Target creature can't block this turn\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
     words = [part.strip().lower().rstrip(",.") for part in clause.split() if part.strip()]
     if words and all(word in _KEYWORD_ABILITIES for word in words):
         return _proof_irrelevant(clause)
@@ -894,6 +1162,16 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
     # Static anthem (Warleader's Call): not modeled loop physics.
     if re.match(
         r"^Creatures you control get [+-]\d+/[+-]\d+\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    # Fateful hour / conditional life anthem (Thraben Doomsayer).
+    if re.match(
+        r"^(?:[A-Z][a-z]+(?: [a-z]+)? — )?"
+        r"As long as you have \d+ or less life, "
+        r"other creatures you control get [+-]\d+/[+-]\d+\.?$",
         clause,
         re.IGNORECASE,
     ):
@@ -996,6 +1274,13 @@ PATTERNS: list[Pattern] = [
     Pattern("mana_tap_draw", pat_mana_tap_draw),
     Pattern("mana_untap_self", pat_mana_untap_self),
     Pattern("cost_reduction", pat_cost_reduction),
+    Pattern("zirda_cost_reduction", pat_zirda_cost_reduction),
+    Pattern("cant_block_this_turn", pat_cant_block_this_turn),
+    Pattern("put_m1m1_untap_self", pat_put_m1m1_untap_self),
+    Pattern("vizier_m1m1_replacement", pat_vizier_m1m1_replacement),
+    Pattern("etb_create_food", pat_etb_create_food),
+    Pattern("create_token_put_p1p1_other", pat_create_token_put_p1p1_other),
+    Pattern("counters_put_may_create_token", pat_counters_put_may_create_token),
     Pattern("etb_untap_target", pat_etb_untap_target),
     Pattern("sac_creature_add_mana", pat_sac_creature_add_mana),
     Pattern("sac_creature_outlet", pat_sac_creature_outlet),
@@ -1009,6 +1294,10 @@ PATTERNS: list[Pattern] = [
     Pattern("opponent_lose_life_you_gain_that_much", pat_opponent_lose_life_you_gain_that_much),
     Pattern("etb_damage", pat_etb_damage),
     Pattern("etb_gain_life", pat_etb_gain_life),
+    Pattern("gain_life_put_p1p1_target", pat_gain_life_put_p1p1_target),
+    Pattern("mana_put_p1p1_self", pat_mana_put_p1p1_self),
+    Pattern("etb_with_counters_irrelevant", pat_etb_with_counters_irrelevant),
+    Pattern("grant_lifelink_activated", pat_grant_lifelink_activated),
     Pattern("remove_counter_damage", pat_remove_counter_damage),
     Pattern("put_p1p1_counter", pat_put_p1p1_counter),
     Pattern("exile_instead_of_gy", pat_exile_instead_of_gy),

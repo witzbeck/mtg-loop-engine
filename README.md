@@ -77,14 +77,20 @@ uv run pytest
 Core smoke commands (one sentence each):
 
 ```bash
-# Confirm gold_core positives verify and hard negatives reject as expected.
+# Oracle gold_core (Wave 0 may be empty) + Oracle hard negatives.
 uv run mtg-loop-engine verify-gold
+
+# Synthetic/divergent physics suite regressions.
+uv run mtg-loop-engine verify-physics
 
 # Report deterministic compiler coverage on gold Oracle fixtures.
 uv run mtg-loop-engine compile-coverage
 
-# Blind-discover gold_core pairs without pair labels; explorer is the acceptance oracle.
+# Blind-discover Oracle gold pairs (no pair labels).
 uv run mtg-loop-engine discover-gold
+
+# Blind-discover physics fixture pairs.
+uv run mtg-loop-engine discover-physics
 ```
 
 Evaluation / adjudication:

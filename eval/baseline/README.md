@@ -25,7 +25,7 @@ graph TB;
 
 | File | Frozen meaning (current) |
 | --- | --- |
-| `m4_gold_pool_summary.json` | Post-participant-gate extras: **10** total; **3** real / **7** fixture; precision **1.0** (3 valid / 3 real). |
+| `m4_gold_pool_summary.json` | Wave 0: **0** Oracle gold-pool extras; precision **null** (0 ORACLE_EXACT×ORACLE_EXACT). Former physics extras live under `PHYSICS_EXTRA_ADJUDICATIONS`. |
 | `m4_spellbook_recovery_summary.json` | Local 50-page conventional sample: **1196** selected; **1** eligible; **1** rediscovered (Gravecrawler + Phyrexian Altar); recall **1.0** |
 
 ## Responsibilities

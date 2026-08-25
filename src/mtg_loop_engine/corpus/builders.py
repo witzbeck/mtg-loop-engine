@@ -64,6 +64,8 @@ def witness(
     expected_outputs: list[OutputDelta],
     setup_actions: list[ActionStep] | None = None,
     expected_status: VerificationStatus | None = None,
+    expected_net_state=None,
+    expected_claim_consequence: Consequence | None = None,
     tier: str = "gold_core",
     coverage: SemanticCoverage = SemanticCoverage.COMPLETE,
     prerequisites: list[Prerequisite] | None = None,
@@ -80,6 +82,8 @@ def witness(
         loop_actions=loop_actions,
         relevant_state=relevant_state,
         expected_outputs=expected_outputs,
+        expected_net_state=expected_net_state,
+        expected_claim_consequence=expected_claim_consequence,
         expected_status=expected_status,
         tier=tier,  # type: ignore[arg-type]
         semantic_coverage=coverage,

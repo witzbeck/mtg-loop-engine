@@ -7,14 +7,24 @@ import json
 import sys
 
 from mtg_loop_engine import __version__
-from mtg_loop_engine.corpus import all_gold_core, gold_extended_catalog, hard_negatives
+from mtg_loop_engine.corpus import (
+    all_gold_core,
+    gold_extended_catalog,
+    hard_negatives,
+    physics_all_positives,
+    physics_hard_negatives,
+)
 from mtg_loop_engine.verify.verifier import Verifier
 
 
 def cmd_verify_gold(_: argparse.Namespace) -> int:
+    """Verify Oracle-exact gold_core positives and Oracle hard negatives."""
     v = Verifier()
     failures = 0
-    for w in all_gold_core():
+    positives = all_gold_core()
+    if not positives:
+        print("gold_core positives: 0 (Oracle promotions pending)")
+    for w in positives:
         proof = v.verify(w)
         ok = proof.status.value == "verified"
         print(f"{w.id}: {proof.status.value} hash={proof.proof_hash}")
@@ -22,6 +32,27 @@ def cmd_verify_gold(_: argparse.Namespace) -> int:
             failures += 1
             print(f"  reason: {proof.rejection_reason}")
     for w in hard_negatives():
+        proof = v.verify(w)
+        expected = w.expected_status.value if w.expected_status else None
+        match = expected is None or proof.status == w.expected_status
+        print(f"{w.id}: {proof.status.value} (expected {expected}) ok={match}")
+        if not match:
+            failures += 1
+    return 1 if failures else 0
+
+
+def cmd_verify_physics(_: argparse.Namespace) -> int:
+    """Verify synthetic/divergent physics fixtures (not precision-eligible)."""
+    v = Verifier()
+    failures = 0
+    for w in physics_all_positives():
+        proof = v.verify(w)
+        ok = proof.status.value == "verified"
+        print(f"{w.id}: {proof.status.value} hash={proof.proof_hash}")
+        if not ok:
+            failures += 1
+            print(f"  reason: {proof.rejection_reason}")
+    for w in physics_hard_negatives():
         proof = v.verify(w)
         expected = w.expected_status.value if w.expected_status else None
         match = expected is None or proof.status == w.expected_status
@@ -98,6 +129,7 @@ def cmd_compile_coverage(_: argparse.Namespace) -> int:
 
 
 def cmd_discover_gold(_: argparse.Namespace) -> int:
+    """Blind-discover Oracle gold_core pairs (no pair labels)."""
     from mtg_loop_engine.corpus import gold_core_card_pool, gold_core_pair_keys
     from mtg_loop_engine.search.discover import discover_loops
 
@@ -113,6 +145,35 @@ def cmd_discover_gold(_: argparse.Namespace) -> int:
                 "searched_pairs": report.searched_pairs,
                 "verified": len(report.verified),
                 "gold_pairs": len(gold),
+                "rediscovered": len(gold & found),
+                "missing": [sorted(p) for p in sorted(missing, key=lambda s: tuple(sorted(s)))],
+            },
+            indent=2,
+        )
+    )
+    for hit in report.verified:
+        names = " + ".join(c.name for c in hit.witness.essential_cards)
+        print(f"VERIFIED  {names}  reasons={hit.reasons}")
+    return 1 if missing else 0
+
+
+def cmd_discover_physics(_: argparse.Namespace) -> int:
+    """Blind-discover physics fixture pairs (synthetic/divergent OK)."""
+    from mtg_loop_engine.corpus import physics_gold_card_pool, physics_gold_pair_keys
+    from mtg_loop_engine.search.discover import discover_loops
+
+    gold = physics_gold_pair_keys()
+    report = discover_loops(physics_gold_card_pool())
+    found = report.verified_pairs
+    missing = gold - found
+    print(
+        json.dumps(
+            {
+                "cards": report.cards,
+                "candidate_pairs": report.candidate_pairs,
+                "searched_pairs": report.searched_pairs,
+                "verified": len(report.verified),
+                "physics_pairs": len(gold),
                 "rediscovered": len(gold & found),
                 "missing": [sorted(p) for p in sorted(missing, key=lambda s: tuple(sorted(s)))],
             },
@@ -215,8 +276,17 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--version", action="version", version=__version__)
     sub = parser.add_subparsers(dest="cmd", required=True)
 
-    p_gold = sub.add_parser("verify-gold", help="Run gold_core + hard negatives")
+    p_gold = sub.add_parser(
+        "verify-gold",
+        help="Run Oracle-exact gold_core positives + Oracle hard negatives",
+    )
     p_gold.set_defaults(func=cmd_verify_gold)
+
+    p_phys = sub.add_parser(
+        "verify-physics",
+        help="Run synthetic/divergent physics fixtures + physics hard negatives",
+    )
+    p_phys.set_defaults(func=cmd_verify_physics)
 
     p_sc = sub.add_parser("fetch-scryfall", help="Download Oracle Cards snapshot")
     p_sc.set_defaults(func=cmd_fetch_scryfall)
@@ -232,9 +302,15 @@ def main(argv: list[str] | None = None) -> None:
 
     p_disc = sub.add_parser(
         "discover-gold",
-        help="Blind-discover gold_core pairs (no pair labels)",
+        help="Blind-discover Oracle gold_core pairs (no pair labels)",
     )
     p_disc.set_defaults(func=cmd_discover_gold)
+
+    p_disc_phys = sub.add_parser(
+        "discover-physics",
+        help="Blind-discover physics fixture pairs (no pair labels)",
+    )
+    p_disc_phys.set_defaults(func=cmd_discover_physics)
 
     p_ex = sub.add_parser(
         "eval-gold-extras",

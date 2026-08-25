@@ -2,70 +2,50 @@
 
 ## Purpose
 
-Ten positive two-card loop witnesses that must verify, plus nine hard-negative witnesses that must reject with specific statuses. Core epistemic contract for M1 and blind-discovery recall.
+Oracle-exact gold positives and Oracle hard negatives. Product epistemic contract
+for verified Magic loops (ADR 0007). Synthetic physics lives under `physics_fixtures/`.
 
 ## Role in pipeline
 
-Authored cases → **THIS** → `Verifier` (positives/negatives) and card pool → `search` (labels stripped).
+Authored Oracle cases → **THIS** → `Verifier` and `discover-gold` (labels stripped).
 
 ```mermaid
 graph TB;
-  cases[cases.py] --> positives[positives];
-  cases --> hardNeg[hardNegatives];
-  positives --> verifier[Verifier];
-  hardNeg --> verifier;
-  positives --> pool[cardPool];
-  pool --> discover[discover_loops];
+  oracleCases[oracle_cases] --> positives[all_gold_core];
+  hardNeg[hard_negatives] --> verifier[Verifier];
+  positives --> verifier;
+  positives --> pool[oracle_gold_card_pool];
+  pool --> discover[discover-gold];
 ```
 
 ## Inputs
 
-- Hand-authored card IR constants and `LoopWitness` definitions in `cases.py`
+- Audited `ORACLE_EXACT` records + compiled semantics
+- Handwritten / rediscovered witnesses with **new** IDs (never reuse physics `core_*` claim IDs)
 
 ## Outputs
 
-- Positive witnesses (`gold_core_positives` / `all_gold_core`)
-- Hard-negative witnesses with `expected_status`
-- Pool/key helpers at package level for tests/CLI
-
-## Responsibilities
-
-- Remain the minimal “known good / known bad” set for verifier correctness and discovery recall.
-- Keep Oracle fixtures aligned for the compiled seam (`semantics.oracle_fixtures`).
-
-## Non-responsibilities
-
-- Extended unsupported stubs (`gold_extended/`)
-- Spellbook reference rows
-- Pair labels inside search
+- `all_gold_core()` — currently **8** Oracle positives (Waves 1–3 Heliod)
+- `hard_negatives()` — currently **7** Oracle counterfactuals
 
 ## Core invariants
 
 - Every positive → `VerificationStatus.VERIFIED`
-- Every hard negative → exact expected typed rejection (not mere failure)
-- Discovery without pair labels rediscovers all positive pairs (M3 / M3.5)
+- Both essentials `ORACLE_EXACT`; semantics compiled from audited records
+- Reported `events` and `net_state` match the claim (gross counters alone never justify `ACCUMULATES`)
+- Blind discovery rediscovers all positive pairs without pair labels
 
 ## Main entry points
 
-- `cases.py` — card constants, witness factories, catalogs
-- Consumers: `tests/gold_core`, `tests/hard_negatives`, `tests/discovery`, CLI `verify-gold` / `discover-gold`
-
-## Data contracts
-
-Witness IDs and oracle IDs are stable references for golden proofs and eval fixture detection.
-
-## Failure behavior
-
-Any status drift fails CI. Treat failures as contract breaks, not flaky tests.
-
-## Testing
-
-`tests/gold_core/test_positives.py`, `tests/hard_negatives/`, discovery recall tests.
+- `oracle_cases.py`, `hard_negatives.py`
+- Compatibility shim: `cases.py` (re-exports Oracle APIs + physics card IR for unit tests)
 
 ## Extension guide
 
-Prefer extending `gold_extended` for new unsupported families. Grow gold_core only when a new family is both verified and intended as a permanent regression anchor.
+Promote a pair only under the campaign acceptance contract (verify + rediscover +
+hard negative + LAR + net/events). Park incomplete real pairs in
+`gold_extended/oracle_gaps.py` — do not simplify Oracle to force `COMPLETE`.
 
 ## Bigger-picture relationship
 
-Parent: [`../README.md`](../README.md). Architecture: [`docs/ARCHITECTURE.md`](../../../../docs/ARCHITECTURE.md).
+Parent: [`../README.md`](../README.md). Physics: [`../physics_fixtures/README.md`](../physics_fixtures/README.md).
