@@ -30,7 +30,7 @@ from mtg_loop_engine.semantics.enums import (
     VerificationStatus,
     Zone,
 )
-from mtg_loop_engine.semantics.ir import ActivatedAbility, CardSemantics, SacrificeCost
+from mtg_loop_engine.semantics.ir import ActivatedAbility, CardSemantics, SacrificeCost, TapCost
 from mtg_loop_engine.state.game import GameState
 from mtg_loop_engine.verify.verifier import Verifier
 
@@ -69,6 +69,14 @@ def _needs_zombie_gate(card: CardSemantics) -> bool:
     )
 
 
+def _needs_tap_host(card: CardSemantics) -> bool:
+    return any(
+        isinstance(ab, ActivatedAbility)
+        and any(isinstance(c, TapCost) and not c.source_self for c in ab.costs)
+        for ab in card.abilities
+    )
+
+
 def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpec:
     """Place both cards on the battlefield with generic fodder/counters as needed."""
     ordered = sorted([a, b], key=lambda c: c.oracle_id)
@@ -92,6 +100,8 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
         )
     need_token = any(extract_capabilities(c).needs_token_fodder() for c in ordered)
     need_zombie = any(_needs_zombie_gate(c) for c in ordered)
+    need_tap_host = any(_needs_tap_host(c) for c in ordered)
+    has_creature = any(p.is_creature for p in permanents)
     # One generic Zombie token covers cast-from-GY gates and sac fodder when both apply.
     if need_zombie:
         permanents.append(
@@ -117,6 +127,19 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
                 toughness=1,
             )
         )
+    # Presence of Gond class: tap a host creature (prefer partner; else seed).
+    if need_tap_host and not has_creature:
+        permanents.append(
+            bf(
+                "aura-host",
+                "token:aura-host",
+                "Aura Host",
+                is_creature=True,
+                is_token=True,
+                power=1,
+                toughness=1,
+            )
+        )
     return InitialStateSpec(permanents=permanents)
 
 
@@ -132,6 +155,9 @@ def _effect_needs_permanent_target(ability: ActivatedAbility) -> bool:
             return True
     return False
 
+
+def _tap_cost_needs_host(ability: ActivatedAbility) -> bool:
+    return any(isinstance(c, TapCost) and not c.source_self for c in ability.costs)
 
 def _sac_selector(ability: ActivatedAbility) -> str | None:
     for cost in ability.costs:
@@ -201,8 +227,19 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
                 continue
             selector = _sac_selector(ab)
             need_effect_target = _effect_needs_permanent_target(ab)
+            need_tap_host = _tap_cost_needs_host(ab)
             if selector:
                 targets = _fodder_ids(state, selector)
+            elif need_tap_host:
+                targets = [
+                    p.object_id
+                    for p in state.permanents.values()
+                    if p.zone == Zone.BATTLEFIELD
+                    and p.controller == "you"
+                    and p.is_creature
+                    and not p.tapped
+                    and p.object_id != perm.object_id
+                ]
             elif need_effect_target:
                 targets = [
                     p.object_id

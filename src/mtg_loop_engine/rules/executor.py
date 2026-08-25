@@ -416,12 +416,30 @@ class Executor:
         reduction = self.cost_reduction(state)
         for cost in ab.costs:
             if isinstance(cost, TapCost):
-                if perm.tapped:
+                tap_perm = perm
+                if not cost.source_self:
+                    if not step.target:
+                        return ExecError(
+                            VerificationStatus.ILLEGAL_ACTION, "tap cost needs host"
+                        )
+                    tap_perm = state.permanents.get(step.target)
+                    if tap_perm is None:
+                        return ExecError(
+                            VerificationStatus.ILLEGAL_ACTION, "tap host missing"
+                        )
+                if tap_perm.tapped:
                     return ExecError(VerificationStatus.ILLEGAL_ACTION, "already tapped")
-                if perm.is_creature and perm.summoning_sick and not ab.is_mana_ability:
-                    # mana abilities also care about sickness for tap - simplify: block tap if sick
+                if (
+                    tap_perm.is_creature
+                    and tap_perm.summoning_sick
+                    and not ab.is_mana_ability
+                ):
                     return ExecError(VerificationStatus.TIMING_VIOLATION, "summoning sick")
-                perm.tapped = True
+                tap_perm.tapped = True
+                # Host-tap activations still apply effects from the aura actor;
+                # do not pass the host as an effect target unless the effect asks.
+                if not cost.source_self:
+                    step = step.model_copy(update={"target": None})
             elif isinstance(cost, ManaCost):
                 need = cost.amount.model_copy(deep=True)
                 reduced = min(reduction, need.generic)
