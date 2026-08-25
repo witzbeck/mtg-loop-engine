@@ -13,6 +13,10 @@ from mtg_loop_engine.proofs.models import (
     RecurrenceResult,
     VersionIdentity,
 )
+from mtg_loop_engine.proofs.consequence import (
+    claim_consequence_mismatch,
+    derive_claim_consequence,
+)
 from mtg_loop_engine.proofs.net_state import derive_net_state, net_state_matches
 from mtg_loop_engine.rules.executor import Executor
 from mtg_loop_engine.semantics.enums import (
@@ -259,8 +263,21 @@ class Verifier:
                     relevant_state=relevant,
                 )
 
+        # Claim consequence is derived from net state + gross outputs under
+        # recurrence — never copied from the witness label alone.
+        derived_claim = derive_claim_consequence(net, gross_event_ok=True)
+        mismatch = claim_consequence_mismatch(
+            derived_claim, witness.expected_claim_consequence
+        )
+        if mismatch is not None:
+            return reject(
+                VerificationStatus.NOT_A_LOOP,
+                mismatch,
+                recurrence=recurrence,
+                relevant_state=relevant,
+            )
+
         consequences = [o.consequence for o in witness.expected_outputs]
-        claim_cons = witness.expected_claim_consequence
         return LoopProof(
             kind=ProofKind.VALID,
             witness_id=witness.id,
@@ -280,7 +297,7 @@ class Verifier:
             recurrence=recurrence,
             output_deltas=witness.expected_outputs,
             net_state=net,
-            claim_consequence=claim_cons,
+            claim_consequence=derived_claim,
             consequences=consequences,
             status=VerificationStatus.VERIFIED,
             rejection_reason=None,
