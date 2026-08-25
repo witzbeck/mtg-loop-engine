@@ -91,7 +91,8 @@ Blind discovery among real **COMPLETE**-compiled Oracle cards from Spellbook nam
 ### Remaining
 
 1. **Absent-discovery path** ✓ — `eval/reference_absent.py` + `scripts/spellbook_absent_discovery.py`.
-2. **Grow COMPLETE pool** — curriculum order in [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDIDATES.md); **aura channel (slice 1)** in progress via Freed / Pemmin’s patterns.
+2. **Grow COMPLETE pool** — curriculum order in [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDIDATES.md).
+   - **Slice 1 (aura channel)** ✓ — Freed / Pemmin’s; live COMPLETE **17→19**; next is generic activated artifacts.
    - **Rules-evidence rails (supporting; land before widening modeled physics):** cheap epistemic adapters so coverage growth stays deliberate (ADR 0003). Not an M5 exit gate; not CR ingest or executor expansion.
 
    | Piece | Why |
