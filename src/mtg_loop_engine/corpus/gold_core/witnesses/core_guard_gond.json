@@ -1,0 +1,204 @@
+{
+  "artifact_schema_version": 1,
+  "assumptions": [
+    "intrinsic: Midnight Guard begins on the battlefield",
+    "intrinsic: Presence of Gond begins on the battlefield",
+    "oracle_exact_gold",
+    "compiled_from_audited_fixture"
+  ],
+  "classification": {
+    "essential_card_count": 2,
+    "functional_external_requirements": [],
+    "generic_prerequisites": [],
+    "loop_type": "arbitrary_repeatable",
+    "strict_two_card": true
+  },
+  "deterministic": true,
+  "essential_cards": [
+    {
+      "name": "Midnight Guard",
+      "oracle_id": "oracle:midnight-guard",
+      "role": null
+    },
+    {
+      "name": "Presence of Gond",
+      "oracle_id": "oracle:presence-of-gond",
+      "role": null
+    }
+  ],
+  "expected_claim_consequence": "accumulates",
+  "expected_net_state": {
+    "creature_tokens": 1,
+    "life_opponent": 0,
+    "life_you": 0,
+    "mana": {
+      "any_color": 0,
+      "black": 0,
+      "blue": 0,
+      "colorless": 0,
+      "generic": 0,
+      "green": 0,
+      "red": 0,
+      "white": 0
+    },
+    "plus_one_counters": 0
+  },
+  "expected_outputs": [
+    {
+      "consequence": "accumulates",
+      "delta_per_iteration": 1,
+      "repeatable": true,
+      "type": "token"
+    },
+    {
+      "consequence": "accumulates",
+      "delta_per_iteration": 1,
+      "repeatable": true,
+      "type": "etb"
+    },
+    {
+      "consequence": "accumulates",
+      "delta_per_iteration": 1,
+      "repeatable": true,
+      "type": "untap"
+    }
+  ],
+  "id": "core_guard_gond",
+  "initial_state": {
+    "event_counters": {},
+    "life_opponent": 40,
+    "life_you": 40,
+    "mana": {
+      "any_color": 0,
+      "black": 0,
+      "blue": 0,
+      "colorless": 0,
+      "generic": 0,
+      "green": 0,
+      "red": 0,
+      "white": 0
+    },
+    "permanents": [
+      {
+        "controller": "you",
+        "counters": {},
+        "damage_marked": 0,
+        "is_artifact": false,
+        "is_creature": true,
+        "is_token": false,
+        "name": "Midnight Guard",
+        "object_id": "c0",
+        "oracle_id": "oracle:midnight-guard",
+        "power": 1,
+        "summoning_sick": false,
+        "tapped": false,
+        "toughness": 1,
+        "undying": false,
+        "zone": "battlefield"
+      },
+      {
+        "controller": "you",
+        "counters": {},
+        "damage_marked": 0,
+        "is_artifact": false,
+        "is_creature": false,
+        "is_token": false,
+        "name": "Presence of Gond",
+        "object_id": "c1",
+        "oracle_id": "oracle:presence-of-gond",
+        "power": null,
+        "summoning_sick": false,
+        "tapped": false,
+        "toughness": null,
+        "undying": false,
+        "zone": "battlefield"
+      }
+    ]
+  },
+  "loop_actions": [
+    {
+      "ability_id": "enchanted-tap-token-enchanted-creature-has-t-create-a-1-1-gr",
+      "actor": "c1",
+      "choose_may": null,
+      "note": null,
+      "op": "activate",
+      "target": "c0"
+    },
+    {
+      "ability_id": "etb-untap-self-whenever-another-creature-enters-untap-t",
+      "actor": "c0",
+      "choose_may": null,
+      "note": null,
+      "op": "resolve_trigger",
+      "target": null
+    }
+  ],
+  "prerequisites": [],
+  "relevant_state": {
+    "dimensions": [
+      {
+        "op": "exact",
+        "path": "permanents.c0.zone",
+        "value": "battlefield"
+      },
+      {
+        "op": "exact",
+        "path": "permanents.c0.tapped",
+        "value": false
+      },
+      {
+        "op": "exact",
+        "path": "permanents.c1.zone",
+        "value": "battlefield"
+      },
+      {
+        "op": "exact",
+        "path": "permanents.c1.tapped",
+        "value": false
+      },
+      {
+        "op": "exact",
+        "path": "pending_triggers.count",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.white",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.blue",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.black",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.red",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.green",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.colorless",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.any_color",
+        "value": 0
+      }
+    ]
+  },
+  "semantic_coverage": "complete",
+  "setup_actions": [],
+  "tier": "gold_core"
+}

@@ -46,12 +46,16 @@ def test_blind_discovery_rediscovers_physics_core():
 
 
 def test_oracle_gold_discovery_rediscovers_promoted_pairs():
-    """Wave 1+: Oracle gold_core pairs rediscover without pair labels."""
+    """Blind rediscovery of frozen gold pair keys (separate from gold load)."""
     pool = gold_core_card_pool()
     gold = gold_core_pair_keys()
-    report = discover_loops(pool, max_depth=8)
+    report = discover_loops(pool, max_depth=10)
     missing = gold - report.verified_pairs
     assert gold
     assert not missing, (
         f"failed to rediscover {len(missing)}/{len(gold)} Oracle gold pairs: {missing}"
     )
+    for hit in report.verified:
+        if frozenset(c.oracle_id for c in hit.witness.essential_cards) in gold:
+            assert hit.proof.status == VerificationStatus.VERIFIED
+            assert "discovered_without_pair_labels" in hit.witness.assumptions

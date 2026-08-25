@@ -1,6 +1,6 @@
 """Compatibility shim: Oracle gold APIs + physics card IR re-exports.
 
-Oracle positives: ``oracle_cases.all_gold_core``.
+Oracle positives: ``oracle_cases.all_gold_core`` (frozen ``witnesses/*.json``).
 Oracle hard negatives: ``hard_negatives.hard_negatives``.
 Physics suite + card constants: ``corpus.physics_fixtures.synthetic_cases``.
 

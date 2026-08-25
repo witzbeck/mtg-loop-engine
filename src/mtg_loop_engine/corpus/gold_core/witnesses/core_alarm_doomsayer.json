@@ -1,0 +1,204 @@
+{
+  "artifact_schema_version": 1,
+  "assumptions": [
+    "intrinsic: Intruder Alarm begins on the battlefield",
+    "intrinsic: Thraben Doomsayer begins on the battlefield",
+    "oracle_exact_gold",
+    "compiled_from_audited_fixture"
+  ],
+  "classification": {
+    "essential_card_count": 2,
+    "functional_external_requirements": [],
+    "generic_prerequisites": [],
+    "loop_type": "arbitrary_repeatable",
+    "strict_two_card": true
+  },
+  "deterministic": true,
+  "essential_cards": [
+    {
+      "name": "Intruder Alarm",
+      "oracle_id": "oracle:intruder-alarm",
+      "role": null
+    },
+    {
+      "name": "Thraben Doomsayer",
+      "oracle_id": "oracle:thraben-doomsayer",
+      "role": null
+    }
+  ],
+  "expected_claim_consequence": "accumulates",
+  "expected_net_state": {
+    "creature_tokens": 1,
+    "life_opponent": 0,
+    "life_you": 0,
+    "mana": {
+      "any_color": 0,
+      "black": 0,
+      "blue": 0,
+      "colorless": 0,
+      "generic": 0,
+      "green": 0,
+      "red": 0,
+      "white": 0
+    },
+    "plus_one_counters": 0
+  },
+  "expected_outputs": [
+    {
+      "consequence": "accumulates",
+      "delta_per_iteration": 1,
+      "repeatable": true,
+      "type": "token"
+    },
+    {
+      "consequence": "accumulates",
+      "delta_per_iteration": 1,
+      "repeatable": true,
+      "type": "etb"
+    },
+    {
+      "consequence": "accumulates",
+      "delta_per_iteration": 2,
+      "repeatable": true,
+      "type": "untap"
+    }
+  ],
+  "id": "core_alarm_doomsayer",
+  "initial_state": {
+    "event_counters": {},
+    "life_opponent": 40,
+    "life_you": 40,
+    "mana": {
+      "any_color": 0,
+      "black": 0,
+      "blue": 0,
+      "colorless": 0,
+      "generic": 0,
+      "green": 0,
+      "red": 0,
+      "white": 0
+    },
+    "permanents": [
+      {
+        "controller": "you",
+        "counters": {},
+        "damage_marked": 0,
+        "is_artifact": false,
+        "is_creature": false,
+        "is_token": false,
+        "name": "Intruder Alarm",
+        "object_id": "c0",
+        "oracle_id": "oracle:intruder-alarm",
+        "power": null,
+        "summoning_sick": false,
+        "tapped": false,
+        "toughness": null,
+        "undying": false,
+        "zone": "battlefield"
+      },
+      {
+        "controller": "you",
+        "counters": {},
+        "damage_marked": 0,
+        "is_artifact": false,
+        "is_creature": true,
+        "is_token": false,
+        "name": "Thraben Doomsayer",
+        "object_id": "c1",
+        "oracle_id": "oracle:thraben-doomsayer",
+        "power": 1,
+        "summoning_sick": false,
+        "tapped": false,
+        "toughness": 1,
+        "undying": false,
+        "zone": "battlefield"
+      }
+    ]
+  },
+  "loop_actions": [
+    {
+      "ability_id": "tap-token-t-create-a-1-1-white-human-creature-toke",
+      "actor": "c1",
+      "choose_may": null,
+      "note": null,
+      "op": "activate",
+      "target": null
+    },
+    {
+      "ability_id": "etb-untap-all-whenever-a-creature-enters-untap-all-cre",
+      "actor": "c0",
+      "choose_may": null,
+      "note": null,
+      "op": "resolve_trigger",
+      "target": null
+    }
+  ],
+  "prerequisites": [],
+  "relevant_state": {
+    "dimensions": [
+      {
+        "op": "exact",
+        "path": "permanents.c0.zone",
+        "value": "battlefield"
+      },
+      {
+        "op": "exact",
+        "path": "permanents.c0.tapped",
+        "value": false
+      },
+      {
+        "op": "exact",
+        "path": "permanents.c1.zone",
+        "value": "battlefield"
+      },
+      {
+        "op": "exact",
+        "path": "permanents.c1.tapped",
+        "value": false
+      },
+      {
+        "op": "exact",
+        "path": "pending_triggers.count",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.white",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.blue",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.black",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.red",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.green",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.colorless",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.any_color",
+        "value": 0
+      }
+    ]
+  },
+  "semantic_coverage": "complete",
+  "setup_actions": [],
+  "tier": "gold_core"
+}

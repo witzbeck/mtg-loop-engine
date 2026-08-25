@@ -7,11 +7,12 @@ for verified Magic loops (ADR 0007). Synthetic physics lives under `physics_fixt
 
 ## Role in pipeline
 
-Authored Oracle cases → **THIS** → `Verifier` and `discover-gold` (labels stripped).
+Frozen witness JSON → **THIS** → `Verifier` and `discover-gold` (labels stripped).
 
 ```mermaid
 graph TB;
-  oracleCases[oracle_cases] --> positives[all_gold_core];
+  witnesses[witnesses JSON] --> positives[all_gold_core];
+  fixtures[audited fixtures] --> positives;
   hardNeg[hard_negatives] --> verifier[Verifier];
   positives --> verifier;
   positives --> pool[oracle_gold_card_pool];
@@ -20,8 +21,8 @@ graph TB;
 
 ## Inputs
 
-- Audited `ORACLE_EXACT` records + compiled semantics
-- Handwritten / rediscovered witnesses with **new** IDs (never reuse physics `core_*` claim IDs)
+- Frozen artifacts under `witnesses/{gold_id}.json` (actions, board, claim)
+- Audited `ORACLE_EXACT` fixtures (semantics recompiled on load)
 
 ## Outputs
 
@@ -32,19 +33,23 @@ graph TB;
 
 - Every positive → `VerificationStatus.VERIFIED`
 - Both essentials `ORACLE_EXACT`; semantics compiled from audited records
+- Gold load never calls `explore_pair` / search (frozen artifacts only)
+- Assumptions include `oracle_exact_gold` + `compiled_from_audited_fixture`; never
+  `discovered_without_pair_labels` on gold
 - Reported `events` and `net_state` match the claim (gross counters alone never justify `ACCUMULATES`)
-- Blind discovery rediscovers all positive pairs without pair labels
+- Blind discovery rediscovers all positive **pair keys** in `tests/discovery/` (separate suite)
 
 ## Main entry points
 
-- `oracle_cases.py`, `hard_negatives.py`
+- `oracle_cases.py`, `witnesses/`, `hard_negatives.py`
 - Compatibility shim: `cases.py` (re-exports Oracle APIs + physics card IR for unit tests)
+- Re-freeze (deliberate, reviewed): `scripts/freeze_gold_witnesses.py`
 
 ## Extension guide
 
-Promote a pair only under the campaign acceptance contract (verify + rediscover +
-hard negative + LAR + net/events). Park incomplete real pairs in
-`gold_extended/oracle_gaps.py` — do not simplify Oracle to force `COMPLETE`.
+Capture a new pair with the freeze script after verify + rediscover + hard negative +
+LAR + net/events. Do not call explore from `all_gold_core`. Park incomplete real pairs
+in `gold_extended/oracle_gaps.py` — Heliod remains gaps until product-legal activation.
 
 ## Bigger-picture relationship
 
