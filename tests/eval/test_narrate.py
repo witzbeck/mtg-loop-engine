@@ -1,8 +1,4 @@
-"""Unit tests for eval.narrate — plain-English loop narrative."""
-
-from __future__ import annotations
-
-import pytest
+"""Narration + real-Oracle curriculum honesty; Basalt gold_core uses Training Grounds."""
 
 from mtg_loop_engine.eval.narrate import (
     _ability_hint,
@@ -14,7 +10,6 @@ from mtg_loop_engine.eval.narrate import (
     narrate_recurrence,
     narrate_setup,
 )
-
 
 # ---------------------------------------------------------------------------
 # card_image_url
@@ -76,19 +71,20 @@ def test_ability_hint_short_id():
 # ---------------------------------------------------------------------------
 
 
-def test_narrate_loop_gold_basalt_rings():
-    """Basalt Monolith + Rings of Brighthearth has at least 2 loop steps."""
+def test_narrate_loop_gold_basalt_training():
+    """Basalt Monolith + Training Grounds is the gold_core mana_tap_untap witness."""
     from mtg_loop_engine.corpus import all_gold_core
 
     witnesses = {
         " + ".join(sorted(c.name for c in w.essential_cards)): w for w in all_gold_core()
     }
-    key = next((k for k in witnesses if "Basalt" in k and "Rings" in k), None)
-    if key is None:
-        pytest.skip("Basalt + Rings witness not in gold_core")
+    key = next(
+        (k for k in witnesses if "Basalt" in k and "Training Grounds" in k),
+        None,
+    )
+    assert key is not None, "expected core_basalt_training in gold_core"
     steps = narrate_loop(witnesses[key])
     assert len(steps) >= 2
-    # Each step should be a non-empty string ending with a period
     for step in steps:
         assert isinstance(step, str) and step.strip()
         assert step.endswith(".")

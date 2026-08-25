@@ -1,26 +1,31 @@
 """Real Oracle zone-recursion + sacrifice curriculum (M4 compiler track 2)."""
 
 from mtg_loop_engine.eval.spellbook_eval import compile_card, evaluate_reference_subset
+from mtg_loop_engine.semantics.compiler import compile_oracle_text
 from mtg_loop_engine.semantics.enums import SemanticCoverage
 from mtg_loop_engine.semantics.real_oracle_curriculum import REAL_ORACLE_CURRICULUM
-from mtg_loop_engine.semantics.compiler import compile_oracle_text
 
 
-def _compile_curriculum(name: str):
-    row = REAL_ORACLE_CURRICULUM[name]
+def _compile_curriculum(key: str):
+    row = REAL_ORACLE_CURRICULUM[key]
     return compile_oracle_text(
-        oracle_id=f"oracle:{name.lower().replace(' ', '-')}",
+        oracle_id=f"oracle:{key.lower().replace(' ', '-')}",
         name=row.name,
         oracle_text=row.oracle_text,
         types=row.types,
     )
 
 
-def test_real_gravecrawler_compiles_complete():
+def test_live_gravecrawler_is_not_complete_until_cast_from_gy_modeled():
     report = _compile_curriculum("Gravecrawler")
+    assert report.coverage == SemanticCoverage.PARTIAL_RELEVANT_TO_PROOF
+    assert any("graveyard" in f.lower() for f in report.semantics.unsupported_fragments)
+
+
+def test_activated_return_gravecrawler_curriculum_compiles_complete():
+    report = _compile_curriculum("GravecrawlerActivatedReturn")
     assert report.coverage == SemanticCoverage.COMPLETE
     assert any(a.kind == "activated" for a in report.semantics.abilities)
-    assert any(a.kind == "proof_irrelevant_static" for a in report.semantics.abilities)
 
 
 def test_real_phyrexian_altar_compiles_complete():
@@ -35,9 +40,9 @@ def test_real_reassembling_skeleton_compiles_complete():
     assert any(a.kind == "activated" for a in report.semantics.abilities)
 
 
-def test_spellbook_gravecrawler_altar_pair_is_compiler_eligible():
+def test_activated_return_curriculum_pair_is_compiler_eligible():
     variant = {
-        "id": "curriculum-gravecrawler-altar",
+        "id": "curriculum-activated-gravecrawler-altar",
         "uses": [
             {"card": {"name": "Gravecrawler"}},
             {"card": {"name": "Phyrexian Altar"}},
@@ -45,16 +50,20 @@ def test_spellbook_gravecrawler_altar_pair_is_compiler_eligible():
         "requires": [],
         "produces": [{"name": "Infinite mana"}],
     }
-    cards = {}
-    for name in ("Gravecrawler", "Phyrexian Altar"):
-        row = REAL_ORACLE_CURRICULUM[name]
-        sem = compile_card(
-            f"oracle:{name.lower().replace(' ', '-')}",
-            row.name,
-            row.oracle_text,
-            row.types,
-        )
-        cards[row.name.casefold()] = sem
+    cards = {
+        "gravecrawler": compile_card(
+            "oracle:gravecrawler-activated-return",
+            REAL_ORACLE_CURRICULUM["GravecrawlerActivatedReturn"].name,
+            REAL_ORACLE_CURRICULUM["GravecrawlerActivatedReturn"].oracle_text,
+            REAL_ORACLE_CURRICULUM["GravecrawlerActivatedReturn"].types,
+        ),
+        "phyrexian altar": compile_card(
+            "oracle:phyrexian-altar",
+            REAL_ORACLE_CURRICULUM["Phyrexian Altar"].name,
+            REAL_ORACLE_CURRICULUM["Phyrexian Altar"].oracle_text,
+            REAL_ORACLE_CURRICULUM["Phyrexian Altar"].types,
+        ),
+    }
     report = evaluate_reference_subset([variant], cards_by_name=cards)
     assert report.counts.eligible >= 1
     assert report.counts.compiler_unsupported == 0
