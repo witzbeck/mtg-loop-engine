@@ -36,7 +36,7 @@ def _compile(oracle_id: str):
 
 def test_compiled_basalt_training_verifies():
     basalt = _compile("oracle:basalt-monolith")
-    grounds = _compile("oracle:training-grounds")
+    grounds = _compile("synthetic:generic-activated-cost-reducer")
     tap_id = next(
         a.ability_id
         for a in basalt.abilities

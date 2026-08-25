@@ -75,7 +75,7 @@ BFS stops at depth/state limits; fingerprints avoid re-expanding reusable states
 | **Detection** | `build_witness` calls `analyze_prerequisites`, which fills `used_oracle_ids` / `unused_oracle_ids` / `strict_two_card` (including continuous cost-reduction participation). |
 | **Enforcement** | `explore_pair` accepts only `VERIFIED` + `strict_two_card`. Bystander-verified sequences are skipped; BFS continues. |
 | **Verifier** | Does not read `strict_two_card` / `unused_oracle_ids`. Physics/coverage/externals only. |
-| **Evidence** | `tests/eval/test_classify_store.py` — five real Basalt bystander pairs → `None`; Basalt + Training Grounds still accepted. |
+| **Evidence** | `tests/eval/test_classify_store.py` — five real Basalt bystander pairs → `None`; Basalt + Synthetic Cost Reducer still accepted. |
 
 ## Main entry points
 

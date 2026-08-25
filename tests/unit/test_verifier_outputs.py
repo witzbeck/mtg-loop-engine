@@ -1,7 +1,7 @@
 """Verifier rejects non-productive loops (empty / insufficient outputs)."""
 
 from mtg_loop_engine.corpus.builders import bf, dim, out, two_card, witness
-from mtg_loop_engine.corpus.gold_core.cases import BASALT, TRAINING_GROUNDS
+from mtg_loop_engine.corpus.gold_core.cases import BASALT, SYNTHETIC_COST_REDUCER
 from mtg_loop_engine.proofs.models import (
     ActionStep,
     EssentialCardRef,
@@ -30,7 +30,7 @@ def _basalt_grounds_actions():
 def _basalt_grounds_board():
     return [
         bf("p_basalt", BASALT.oracle_id, BASALT.name, is_artifact=True),
-        bf("p_grounds", TRAINING_GROUNDS.oracle_id, TRAINING_GROUNDS.name),
+        bf("p_grounds", SYNTHETIC_COST_REDUCER.oracle_id, SYNTHETIC_COST_REDUCER.name),
     ]
 
 
@@ -38,9 +38,9 @@ def test_empty_expected_outputs_is_not_a_loop():
     """Physics may recur; without declared productive outputs → NOT_A_LOOP."""
     w = witness(
         id="neg_empty_outputs",
-        classification=two_card(essential=_refs(BASALT, TRAINING_GROUNDS)),
-        essential_cards=_refs(BASALT, TRAINING_GROUNDS),
-        card_semantics=[BASALT, TRAINING_GROUNDS],
+        classification=two_card(essential=_refs(BASALT, SYNTHETIC_COST_REDUCER)),
+        essential_cards=_refs(BASALT, SYNTHETIC_COST_REDUCER),
+        card_semantics=[BASALT, SYNTHETIC_COST_REDUCER],
         initial_state=InitialStateSpec(permanents=_basalt_grounds_board()),
         loop_actions=_basalt_grounds_actions(),
         relevant_state=LoopRelevantState(
@@ -62,9 +62,9 @@ def test_empty_expected_outputs_is_not_a_loop():
 def test_insufficient_output_delta_is_not_a_loop():
     w = witness(
         id="neg_insufficient_mana_delta",
-        classification=two_card(essential=_refs(BASALT, TRAINING_GROUNDS)),
-        essential_cards=_refs(BASALT, TRAINING_GROUNDS),
-        card_semantics=[BASALT, TRAINING_GROUNDS],
+        classification=two_card(essential=_refs(BASALT, SYNTHETIC_COST_REDUCER)),
+        essential_cards=_refs(BASALT, SYNTHETIC_COST_REDUCER),
+        card_semantics=[BASALT, SYNTHETIC_COST_REDUCER],
         initial_state=InitialStateSpec(permanents=_basalt_grounds_board()),
         loop_actions=_basalt_grounds_actions(),
         relevant_state=LoopRelevantState(

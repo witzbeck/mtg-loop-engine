@@ -83,9 +83,9 @@ BASALT_EXPENSIVE = CardSemantics(
     ],
 )
 
-TRAINING_GROUNDS = CardSemantics(
-    oracle_id="oracle:training-grounds",
-    name="Training Grounds",
+SYNTHETIC_COST_REDUCER = CardSemantics(
+    oracle_id="synthetic:generic-activated-cost-reducer",
+    name="Synthetic Cost Reducer",
     types=["Enchantment"],
     abilities=[ContinuousCostReduction(ability_id="tg-reduce", reduce_generic=1)],
 )
@@ -105,7 +105,7 @@ INTRUDER_ALARM = CardSemantics(
 )
 
 TOKEN_TAPPER = CardSemantics(
-    oracle_id="oracle:token-tapper",
+    oracle_id="synthetic:token-tapper",
     name="Eager Apprentice",
     types=["Creature"],
     abilities=[
@@ -160,7 +160,7 @@ GRAVECRAWLER = CardSemantics(
 )
 
 PHOENIX = CardSemantics(
-    oracle_id="oracle:phoenix",
+    oracle_id="synthetic:persistent-phoenix",
     name="Persistent Phoenix",
     types=["Creature"],
     abilities=[
@@ -201,7 +201,7 @@ BLOOD_ARTIST = CardSemantics(
 )
 
 SCALED_GUN = CardSemantics(
-    oracle_id="oracle:scaled-gun",
+    oracle_id="synthetic:scaled-gun",
     name="Scaled Gun",
     types=["Artifact"],
     abilities=[
@@ -216,9 +216,9 @@ SCALED_GUN = CardSemantics(
     ],
 )
 
-HARDENED_SCALES = CardSemantics(
-    oracle_id="oracle:hardened-scales",
-    name="Hardened Scales",
+SYNTHETIC_PUT_COUNTER = CardSemantics(
+    oracle_id="synthetic:put-counter-activated",
+    name="Synthetic Put-Counter Activated",
     types=["Enchantment"],
     abilities=[
         ActivatedAbility(
@@ -269,7 +269,7 @@ REST_IN_PEACE = CardSemantics(
 )
 
 ETB_PING = CardSemantics(
-    oracle_id="oracle:etb-ping",
+    oracle_id="synthetic:etb-ping",
     name="Impact Tremors Lite",
     types=["Enchantment"],
     abilities=[
@@ -339,13 +339,13 @@ def gold_core_positives() -> list[LoopWitness]:
         # 1) Mana / tap-untap + continuous cost reduction
         witness(
             id="core_basalt_training",
-            classification=two_card(essential=_refs(BASALT, TRAINING_GROUNDS)),
-            essential_cards=_refs(BASALT, TRAINING_GROUNDS),
-            card_semantics=[BASALT, TRAINING_GROUNDS],
+            classification=two_card(essential=_refs(BASALT, SYNTHETIC_COST_REDUCER)),
+            essential_cards=_refs(BASALT, SYNTHETIC_COST_REDUCER),
+            card_semantics=[BASALT, SYNTHETIC_COST_REDUCER],
             initial_state=InitialStateSpec(
                 permanents=[
                     bf("p_basalt", BASALT.oracle_id, BASALT.name, is_artifact=True),
-                    bf("p_tg", TRAINING_GROUNDS.oracle_id, TRAINING_GROUNDS.name),
+                    bf("p_tg", SYNTHETIC_COST_REDUCER.oracle_id, SYNTHETIC_COST_REDUCER.name),
                 ]
             ),
             loop_actions=[
@@ -498,9 +498,9 @@ def gold_core_positives() -> list[LoopWitness]:
         # 5) Counters + damage
         witness(
             id="core_gun_scales",
-            classification=two_card(essential=_refs(SCALED_GUN, HARDENED_SCALES)),
-            essential_cards=_refs(SCALED_GUN, HARDENED_SCALES),
-            card_semantics=[SCALED_GUN, HARDENED_SCALES],
+            classification=two_card(essential=_refs(SCALED_GUN, SYNTHETIC_PUT_COUNTER)),
+            essential_cards=_refs(SCALED_GUN, SYNTHETIC_PUT_COUNTER),
+            card_semantics=[SCALED_GUN, SYNTHETIC_PUT_COUNTER],
             initial_state=InitialStateSpec(
                 permanents=[
                     bf(
@@ -510,7 +510,7 @@ def gold_core_positives() -> list[LoopWitness]:
                         is_artifact=True,
                         counters={"p1p1": 1},
                     ),
-                    bf("p_scales", HARDENED_SCALES.oracle_id, HARDENED_SCALES.name),
+                    bf("p_scales", SYNTHETIC_PUT_COUNTER.oracle_id, SYNTHETIC_PUT_COUNTER.name),
                 ]
             ),
             loop_actions=[
@@ -594,7 +594,7 @@ def gold_core_positives_fixed() -> list[LoopWitness]:
 
     # Self-untapping token maker for tremor loop (still two cards: tremor + tapper)
     self_untap_tapper = CardSemantics(
-        oracle_id="oracle:self-untap-tapper",
+        oracle_id="synthetic:self-untap-tapper",
         name="Perpetual Apprentice",
         types=["Creature"],
         abilities=[
@@ -725,7 +725,7 @@ def gold_core_positives_fixed() -> list[LoopWitness]:
     # Life-loss death loop: phoenix + blood artist — sac phoenix somehow.
     # Phoenix needs an outlet. Combine phoenix ability: activated sac self?
     suicidal_phoenix = CardSemantics(
-        oracle_id="oracle:suicidal-phoenix",
+        oracle_id="synthetic:suicidal-phoenix",
         name="Ember Phoenix",
         types=["Creature"],
         abilities=[
@@ -907,7 +907,7 @@ def gold_core_positives_fixed() -> list[LoopWitness]:
 
     # 10) Token sacrifice breeding + ETB untap
     breeder = CardSemantics(
-        oracle_id="oracle:token-breeder",
+        oracle_id="synthetic:token-breeder",
         name="Token Breeder",
         types=["Creature"],
         abilities=[
@@ -1006,9 +1006,9 @@ def hard_negatives() -> list[LoopWitness]:
     negs.append(
         witness(
             id="neg_basalt_no_reduction",
-            classification=two_card(essential=_refs(BASALT_EXPENSIVE, TRAINING_GROUNDS)),
-            essential_cards=_refs(BASALT_EXPENSIVE, TRAINING_GROUNDS),
-            card_semantics=[BASALT_EXPENSIVE, TRAINING_GROUNDS],
+            classification=two_card(essential=_refs(BASALT_EXPENSIVE, SYNTHETIC_COST_REDUCER)),
+            essential_cards=_refs(BASALT_EXPENSIVE, SYNTHETIC_COST_REDUCER),
+            card_semantics=[BASALT_EXPENSIVE, SYNTHETIC_COST_REDUCER],
             initial_state=InitialStateSpec(
                 permanents=[
                     bf(
@@ -1017,7 +1017,7 @@ def hard_negatives() -> list[LoopWitness]:
                         BASALT_EXPENSIVE.name,
                         is_artifact=True,
                     ),
-                    bf("p_tg", TRAINING_GROUNDS.oracle_id, TRAINING_GROUNDS.name),
+                    bf("p_tg", SYNTHETIC_COST_REDUCER.oracle_id, SYNTHETIC_COST_REDUCER.name),
                 ]
             ),
             loop_actions=[
@@ -1212,13 +1212,13 @@ def hard_negatives() -> list[LoopWitness]:
     negs.append(
         witness(
             id="neg_opponent_coop",
-            classification=two_card(essential=_refs(COOP_CARD, TRAINING_GROUNDS)),
-            essential_cards=_refs(COOP_CARD, TRAINING_GROUNDS),
-            card_semantics=[COOP_CARD, TRAINING_GROUNDS],
+            classification=two_card(essential=_refs(COOP_CARD, SYNTHETIC_COST_REDUCER)),
+            essential_cards=_refs(COOP_CARD, SYNTHETIC_COST_REDUCER),
+            card_semantics=[COOP_CARD, SYNTHETIC_COST_REDUCER],
             initial_state=InitialStateSpec(
                 permanents=[
                     bf("p_coop", COOP_CARD.oracle_id, COOP_CARD.name),
-                    bf("p_tg", TRAINING_GROUNDS.oracle_id, TRAINING_GROUNDS.name),
+                    bf("p_tg", SYNTHETIC_COST_REDUCER.oracle_id, SYNTHETIC_COST_REDUCER.name),
                 ]
             ),
             loop_actions=[
@@ -1302,7 +1302,7 @@ def hard_negatives() -> list[LoopWitness]:
         witness(
             id="neg_functional_external",
             classification=two_card(
-                essential=_refs(BASALT, TRAINING_GROUNDS),
+                essential=_refs(BASALT, SYNTHETIC_COST_REDUCER),
                 functional=[
                     Prerequisite(
                         kind="mana",
@@ -1310,12 +1310,12 @@ def hard_negatives() -> list[LoopWitness]:
                     )
                 ],
             ),
-            essential_cards=_refs(BASALT, TRAINING_GROUNDS),
-            card_semantics=[BASALT, TRAINING_GROUNDS],
+            essential_cards=_refs(BASALT, SYNTHETIC_COST_REDUCER),
+            card_semantics=[BASALT, SYNTHETIC_COST_REDUCER],
             initial_state=InitialStateSpec(
                 permanents=[
                     bf("p_basalt", BASALT.oracle_id, BASALT.name, is_artifact=True),
-                    bf("p_tg", TRAINING_GROUNDS.oracle_id, TRAINING_GROUNDS.name),
+                    bf("p_tg", SYNTHETIC_COST_REDUCER.oracle_id, SYNTHETIC_COST_REDUCER.name),
                 ]
             ),
             loop_actions=[
@@ -1364,13 +1364,13 @@ def hard_negatives() -> list[LoopWitness]:
     negs.append(
         witness(
             id="neg_nondeterministic",
-            classification=two_card(essential=_refs(BASALT, TRAINING_GROUNDS)),
-            essential_cards=_refs(BASALT, TRAINING_GROUNDS),
-            card_semantics=[BASALT, TRAINING_GROUNDS],
+            classification=two_card(essential=_refs(BASALT, SYNTHETIC_COST_REDUCER)),
+            essential_cards=_refs(BASALT, SYNTHETIC_COST_REDUCER),
+            card_semantics=[BASALT, SYNTHETIC_COST_REDUCER],
             initial_state=InitialStateSpec(
                 permanents=[
                     bf("p_basalt", BASALT.oracle_id, BASALT.name, is_artifact=True),
-                    bf("p_tg", TRAINING_GROUNDS.oracle_id, TRAINING_GROUNDS.name),
+                    bf("p_tg", SYNTHETIC_COST_REDUCER.oracle_id, SYNTHETIC_COST_REDUCER.name),
                 ]
             ),
             loop_actions=[

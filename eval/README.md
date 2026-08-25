@@ -48,7 +48,7 @@ graph TB;
 | Instrument | Question | Spellbook absence |
 | --- | --- | --- |
 | Reference recovery | Eligible/supported rediscovery | N/A (eligible denominator) |
-| Adjudicated precision | Valid among real-card accepted discoveries | `ABSENT_FROM_REFERENCE` (label; adjudicate class separately) |
+| Adjudicated precision | Valid among `ORACLE_EXACT`×`ORACLE_EXACT` accepted discoveries | `ABSENT_FROM_REFERENCE` (label; adjudicate class separately) |
 
 Prefer numbers in `baseline/*.json` over narrative elsewhere.
 
@@ -63,7 +63,7 @@ Prefer numbers in `baseline/*.json` over narrative elsewhere.
 
 ## Core invariants
 
-- Fixture pairs are inventory (`INVALID_CANDIDATE_DATA`), not precision positives.
+- SYNTHETIC / divergent pairs are inventory (not product precision); denominator is `ORACLE_EXACT`×`ORACLE_EXACT` (ADR 0007).
 - Baselines are distribution records for STATUS and regression, not join-tuning targets.
 - CI uses fixtures with network-free runs.
 

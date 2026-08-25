@@ -63,7 +63,9 @@ Coverage enum (`enums.SemanticCoverage`):
 | `ir.py` | `CardSemantics`, costs/effects/abilities, `relevant_unsupported()` |
 | `enums.py` | `SemanticCoverage`, proof/verification enums |
 | `coverage.py` | `CompileReport`, `aggregate_coverage` |
-| `oracle_fixtures.py` | `GOLD_ORACLE_FIXTURES`, unsupported fixture |
+| `oracle_fixtures.py` | `GOLD_ORACLE_FIXTURES` + `Provenance` | 
+| `provenance.py` | Exactness, divergent freeze, `is_precision_eligible_ids` |
+| `audited/records/` | Committed ORACLE_EXACT source records |
 | `patterns/` | Ordered matchers |
 
 CLI: `mtg-loop-engine compile-coverage`.

@@ -1,11 +1,11 @@
-"""Basalt + Training Grounds: freeze gross event vs net pool semantics.
+"""Basalt + Synthetic Cost Reducer: freeze gross event vs net pool semantics.
 
 OutputDelta today reports gross produced events (mana event counter), not net
 mana-pool accumulation. Do not silently redefine OutputDelta to mean net.
 Schema/explanation refinement is a separate design decision (ADR follow-up).
 """
 
-from mtg_loop_engine.corpus.gold_core.cases import BASALT, TRAINING_GROUNDS
+from mtg_loop_engine.corpus.gold_core.cases import BASALT, SYNTHETIC_COST_REDUCER
 from mtg_loop_engine.rules.executor import Executor
 from mtg_loop_engine.search.explorer import explore_pair
 from mtg_loop_engine.semantics.enums import Consequence, OutputType, VerificationStatus
@@ -13,7 +13,7 @@ from mtg_loop_engine.state.game import GameState
 
 
 def test_basalt_grounds_gross_mana_vs_net_pool():
-    found = explore_pair(BASALT, TRAINING_GROUNDS)
+    found = explore_pair(BASALT, SYNTHETIC_COST_REDUCER)
     assert found is not None
     witness, proof = found.witness, found.proof
     assert proof.status == VerificationStatus.VERIFIED
@@ -31,7 +31,7 @@ def test_basalt_grounds_gross_mana_vs_net_pool():
     before = state.copy()
     assert executor.run_sequence(state, witness.loop_actions) is None
 
-    # Untap cost after Training Grounds reduction is {2}; produce {C}{C}{C}.
+    # Untap cost after Synthetic Cost Reducer is {2}; produce {C}{C}{C}.
     assert state.event_counters.get("mana", 0) - before.event_counters.get("mana", 0) == 3
     net_colorless = state.mana.colorless - before.mana.colorless
     assert net_colorless == 1

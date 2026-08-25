@@ -57,7 +57,10 @@ Builders’ `two_card()` sets `strict_two_card=len(functional)==0` with authored
 
 - `builders.py`: `witness`, `two_card`, `bf`, `out`, …
 - `gold_core/cases.py`: positives, hard negatives, catalogs
-- Package helpers: `gold_core_card_pool`, `gold_core_compiled_card_pool`, `gold_core_pair_keys`
+- Package helpers: `gold_core_card_pool` (mixed), `physics_gold_card_pool`,
+  `oracle_gold_card_pool` (ORACLE_EXACT only), compiled variants, `gold_core_pair_keys`
+- Provenance lives on fixtures (`semantics.oracle_fixtures` / ADR 0007); product
+  precision uses `semantics.provenance.is_precision_eligible_ids`
 
 ## Data contracts
 

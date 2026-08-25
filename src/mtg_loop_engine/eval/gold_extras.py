@@ -18,84 +18,87 @@ from mtg_loop_engine.eval.schema import (
 )
 from mtg_loop_engine.eval.store import DEFAULT_JSONL, AdjudicationStore
 from mtg_loop_engine.search.discover import discover_loops
+from mtg_loop_engine.semantics.enums import Provenance
 from mtg_loop_engine.semantics.oracle_fixtures import GOLD_ORACLE_FIXTURES
+from mtg_loop_engine.semantics.provenance import is_precision_eligible_ids
 
 DEFAULT_SUMMARY = Path(__file__).resolve().parents[3] / "eval" / "baseline" / "m4_gold_pool_summary.json"
 
-# Oracle IDs of gold-corpus test fixtures that have no real Magic card equivalent.
-# Any extra discovery involving one of these IDs is INVALID_CANDIDATE_DATA and is
-# excluded from precision metrics.
+# SYNTHETIC ids (physics stand-ins). Kept as FIXTURE_ORACLE_IDS for CLI/compat.
 FIXTURE_ORACLE_IDS: frozenset[str] = frozenset(
-    oid for oid, fx in GOLD_ORACLE_FIXTURES.items() if fx.is_fixture
+    oid
+    for oid, fx in GOLD_ORACLE_FIXTURES.items()
+    if fx.provenance is Provenance.SYNTHETIC
 )
 
 
 def _pair_has_fixture(left_id: str, right_id: str) -> bool:
+    """True if either side is SYNTHETIC (legacy name: fixture)."""
     return bool({left_id, right_id} & FIXTURE_ORACLE_IDS)
 
 
 # Human adjudication of extras still accepted after the participant gate
 # (search requires strict_two_card). Keys are frozensets of oracle ids.
 # Notes explain the class; they are not search hints.
-# Pairs containing fictional fixture cards are INVALID_CANDIDATE_DATA.
 #
 # Pre-gate bystander duplicates (Basalt self-untap + spectator) are no longer
 # discovered; they are regression-locked in tests/eval/test_classify_store.py.
 # Frozen baselines under eval/baseline/ match this post-gate adjudication set
-# (ROADMAP M4 items 5–6).
+# (ROADMAP M4 items 5–6). Product precision uses is_precision_eligible_ids only
+# (ADR 0007): both essentials must be ORACLE_EXACT.
 GOLD_EXTRA_ADJUDICATIONS: dict[frozenset[str], tuple[AdjudicationClass, str]] = {
-    # ---- Real-card pairs (precision-eligible) --------------------------------
-    frozenset({"oracle:ashnods-altar", "oracle:phoenix"}): (
-        AdjudicationClass.VALID_STRICT_TWO_CARD,
-        "Altar sacrifices Persistent Phoenix; dies-return closes. Both pieces required.",
+    # ---- SYNTHETIC physics extras (not product-precision) --------------------
+    frozenset({"oracle:ashnods-altar", "synthetic:persistent-phoenix"}): (
+        AdjudicationClass.INVALID_CANDIDATE_DATA,
+        "Persistent Phoenix is SYNTHETIC physics (dies-return); not Oracle product evidence.",
     ),
-    frozenset({"oracle:phoenix", "oracle:phyrexian-altar"}): (
-        AdjudicationClass.VALID_STRICT_TWO_CARD,
-        "Phyrexian Altar sacrifices Persistent Phoenix; dies-return closes.",
+    frozenset({"synthetic:persistent-phoenix", "oracle:phyrexian-altar"}): (
+        AdjudicationClass.INVALID_CANDIDATE_DATA,
+        "Persistent Phoenix is SYNTHETIC; Phyrexian Altar fixture remains ORACLE_DIVERGENT.",
     ),
+    # ---- Divergent quarantine physics (VALID engine claim; not precision) ---
     frozenset({"oracle:phyrexian-altar", "oracle:reassembling-skeleton"}): (
         AdjudicationClass.VALID_STRICT_TWO_CARD,
-        "Altar sacrifice plus Skeleton's graveyard return. Distinct from Ashnod gold pair.",
+        "Divergent Altar+Skeleton physics; neither side ORACLE_EXACT → not precision-eligible.",
     ),
-    # ---- Fixture pairs (excluded from precision) -----------------------------
-    frozenset({"oracle:ashnods-altar", "oracle:suicidal-phoenix"}): (
+    # ---- Other SYNTHETIC pairs -----------------------------------------------
+    frozenset({"oracle:ashnods-altar", "synthetic:suicidal-phoenix"}): (
         AdjudicationClass.INVALID_CANDIDATE_DATA,
-        "Ember Phoenix (oracle:suicidal-phoenix) is a gold-core fixture with no real Oracle card.",
+        "Ember Phoenix (synthetic:suicidal-phoenix) is SYNTHETIC physics.",
     ),
-    frozenset({"oracle:etb-ping", "oracle:suicidal-phoenix"}): (
+    frozenset({"synthetic:etb-ping", "synthetic:suicidal-phoenix"}): (
         AdjudicationClass.INVALID_CANDIDATE_DATA,
-        "Both cards are gold-core fixtures (Impact Tremors Lite, Ember Phoenix); no real Oracle cards.",
+        "Both cards are SYNTHETIC physics fixtures.",
     ),
-    frozenset({"oracle:phyrexian-altar", "oracle:suicidal-phoenix"}): (
+    frozenset({"oracle:phyrexian-altar", "synthetic:suicidal-phoenix"}): (
         AdjudicationClass.INVALID_CANDIDATE_DATA,
-        "Ember Phoenix (oracle:suicidal-phoenix) is a gold-core fixture with no real Oracle card.",
+        "Ember Phoenix (synthetic:suicidal-phoenix) is SYNTHETIC physics.",
     ),
-    frozenset({"oracle:soul-warden", "oracle:suicidal-phoenix"}): (
+    frozenset({"oracle:soul-warden", "synthetic:suicidal-phoenix"}): (
         AdjudicationClass.INVALID_CANDIDATE_DATA,
-        "Ember Phoenix (oracle:suicidal-phoenix) is a gold-core fixture with no real Oracle card.",
+        "Ember Phoenix (synthetic:suicidal-phoenix) is SYNTHETIC physics.",
     ),
-    frozenset({"oracle:basalt-monolith", "oracle:self-untap-tapper"}): (
+    frozenset({"oracle:viscera-seer", "synthetic:suicidal-phoenix"}): (
         AdjudicationClass.INVALID_CANDIDATE_DATA,
-        "Perpetual Apprentice (oracle:self-untap-tapper) is a gold-core fixture with no real Oracle card.",
+        "Ember Phoenix (synthetic:suicidal-phoenix) is SYNTHETIC physics.",
     ),
-    frozenset({"oracle:intruder-alarm", "oracle:self-untap-tapper"}): (
+    frozenset({"oracle:basalt-monolith", "synthetic:self-untap-tapper"}): (
         AdjudicationClass.INVALID_CANDIDATE_DATA,
-        "Perpetual Apprentice (oracle:self-untap-tapper) is a gold-core fixture with no real Oracle card.",
+        "Perpetual Apprentice (synthetic:self-untap-tapper) is SYNTHETIC physics.",
     ),
-    frozenset({"oracle:intruder-alarm", "oracle:suicidal-phoenix"}): (
+    frozenset({"oracle:intruder-alarm", "synthetic:self-untap-tapper"}): (
         AdjudicationClass.INVALID_CANDIDATE_DATA,
-        "Ember Phoenix (oracle:suicidal-phoenix) is a gold-core fixture with no real Oracle card.",
+        "Perpetual Apprentice (synthetic:self-untap-tapper) is SYNTHETIC physics.",
+    ),
+    frozenset({"oracle:intruder-alarm", "synthetic:suicidal-phoenix"}): (
+        AdjudicationClass.INVALID_CANDIDATE_DATA,
+        "Ember Phoenix (synthetic:suicidal-phoenix) is SYNTHETIC physics.",
     ),
 }
 
 
 def collect_gold_pool_extras(*, max_depth: int = 6) -> list[CandidateRecord]:
-    """Run unlabeled discovery on gold_core cards and keep non-gold accepted pairs.
-
-    Pairs where either card is a fixture stand-in (is_fixture=True) are still
-    returned but will be auto-labelled INVALID_CANDIDATE_DATA by
-    persist_gold_pool_extras. They are excluded from precision metrics.
-    """
+    """Run unlabeled discovery on gold_core cards and keep non-gold accepted pairs."""
     gold = gold_core_pair_keys()
     report = discover_loops(gold_core_card_pool(), max_depth=max_depth)
     extras: list[CandidateRecord] = []
@@ -136,7 +139,9 @@ def persist_gold_pool_extras(
         key = frozenset({record.left_id, record.right_id})
         if apply_adjudications:
             if key not in GOLD_EXTRA_ADJUDICATIONS:
-                raise RuntimeError(f"no adjudication for {record.left_name} + {record.right_name}")
+                raise RuntimeError(
+                    f"no adjudication for {record.left_name} + {record.right_name}"
+                )
             klass, notes = GOLD_EXTRA_ADJUDICATIONS[key]
             store.save_adjudication(
                 AdjudicationRecord(
@@ -154,24 +159,25 @@ def persist_gold_pool_extras(
         record.candidate_id: store.get_adjudication(record.candidate_id)
         for record in extras
     }
-    # Separate precision-eligible (real-card) pairs from fixture pairs
-    real_extras = [
-        r for r in extras if not _pair_has_fixture(r.left_id, r.right_id)
+    precision_extras = [
+        r for r in extras if is_precision_eligible_ids(r.left_id, r.right_id)
     ]
-    fixture_count = len(extras) - len(real_extras)
-    report = precision_from_records(real_extras, {k: v for k, v in adjs.items() if v})
+    non_precision = len(extras) - len(precision_extras)
+    report = precision_from_records(
+        precision_extras, {k: v for k, v in adjs.items() if v}
+    )
     summary = {
         "extras_total": len(extras),
-        "extras_real_card_pairs": len(real_extras),
-        "extras_fixture_pairs": fixture_count,
+        "extras_real_card_pairs": len(precision_extras),
+        "extras_fixture_pairs": non_precision,
         "adjudicated": report.adjudicated,
         "valid": report.valid,
         "precision": report.precision,
         "by_class": report.by_class,
         "notes": (
-            "Precision computed over real-card pairs only; fixture pairs "
-            "(is_fixture=True) are INVALID_CANDIDATE_DATA and excluded. "
-            "Joins were not tightened to chase this distribution."
+            "ADR 0007: precision denominator is ORACLE_EXACT×ORACLE_EXACT only "
+            "(is_precision_eligible_ids). Pre-migration gold-pool precision 1.0 "
+            "is historical and not comparable. Zero eligible pairs → precision null."
         ),
     }
     out = summary_path or DEFAULT_SUMMARY
