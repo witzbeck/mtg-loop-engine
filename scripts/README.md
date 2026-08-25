@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Optional operator helpers for documentation and evaluation hygiene. Primary product CLI remains `uv run mtg-loop-engine` (`mtg_loop_engine.cli`).
+Optional operator helpers for documentation and evaluation hygiene. Primary product CLI remains `uv run mtg-loop-engine` (`mtg_loop_engine.cli`). Criteria for selectively promoting a helper into that CLI (vs keeping it here) live in [`docs/CLI.md`](../docs/CLI.md) under **Scripts vs product CLI**.
 
 ## Role in pipeline
 
@@ -54,6 +54,7 @@ CI currently runs `check_docs.py` (includes STATUS freshness unless `--skip-stat
 
 - `scripts/render_status.py`
 - `scripts/check_docs.py`
+- `scripts/spellbook_compiler_priority.py`
 
 ## Data contracts
 
@@ -73,4 +74,4 @@ Add maintenance scripts here only when they should not be library imports. Keep 
 
 ## Bigger-picture relationship
 
-Docs map: [`docs/README.md`](../docs/README.md). Baselines: [`eval/baseline/README.md`](../eval/baseline/README.md).
+Docs map: [`docs/README.md`](../docs/README.md). Baselines: [`eval/baseline/README.md`](../eval/baseline/README.md). Product CLI architecture and promotion criteria: [`docs/CLI.md`](../docs/CLI.md).
