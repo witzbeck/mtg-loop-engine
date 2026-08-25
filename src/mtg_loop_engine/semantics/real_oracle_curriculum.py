@@ -76,4 +76,35 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         ),
         notes="Untap is modeled; keyword/pump riders are proof-irrelevant.",
     ),
+    "Staff of Domination": RealOracleCurriculum(
+        name="Staff of Domination",
+        types=["Artifact"],
+        oracle_text=(
+            "{1}: Untap this artifact.\n"
+            "{2}, {T}: You gain 1 life.\n"
+            "{3}, {T}: Untap target creature.\n"
+            "{4}, {T}: Tap target creature.\n"
+            "{5}, {T}: Draw a card."
+        ),
+        notes="M5 activated-artifact slice: parameterized mana+tap activations.",
+    ),
+    "Basalt Monolith Live": RealOracleCurriculum(
+        name="Basalt Monolith",
+        types=["Artifact"],
+        oracle_text=(
+            "This artifact doesn't untap during your untap step.\n"
+            "{T}: Add {C}{C}{C}.\n"
+            "{3}: Untap this artifact."
+        ),
+        notes="Live Scryfall wording (doesn't-untap static + this artifact).",
+    ),
+    "Intruder Alarm Live": RealOracleCurriculum(
+        name="Intruder Alarm",
+        types=["Enchantment"],
+        oracle_text=(
+            "Creatures don't untap during their controllers' untap steps.\n"
+            "Whenever a creature enters, untap all creatures."
+        ),
+        notes="Live Scryfall: untap-all on ETB; static is proof-irrelevant.",
+    ),
 }
