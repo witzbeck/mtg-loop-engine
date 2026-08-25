@@ -38,7 +38,7 @@ addopts = [
     "--strict-config",
     "--cov=mtg_loop_engine",
     "--cov-report=term-missing",
-    "--cov-fail-under=90",
+    "--cov-fail-under=92",
 ]
 xfail_strict = true
 filterwarnings = [
@@ -53,7 +53,9 @@ branch = false
 source = ["mtg_loop_engine"]
 # Intentionally out of the %-gate: thin CLI entrypoint, Streamlit UI, and
 # network snapshot download helpers. Core verify/search/semantics/eval logic
-# stays measured. Do not omit engine packages to manufacture 90%.
+# stays measured. Do not omit engine packages to manufacture 92%.
+# Branch coverage is reported in a separate CI step (no fail-under) so the
+# line floor stays a pure line gate — see .github/workflows/ci.yml.
 omit = [
     "*/mtg_loop_engine/cli.py",
     "*/mtg_loop_engine/eval/workbench.py",
@@ -63,6 +65,6 @@ omit = [
 ]
 
 [tool.coverage.report]
-fail_under = 90
+fail_under = 92
 show_missing = true
 skip_empty = true

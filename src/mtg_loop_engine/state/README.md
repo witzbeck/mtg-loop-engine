@@ -30,6 +30,7 @@ graph TB;
 
 - Represent permanents, mana pools, life, pending triggers, and event counters needed by the modeled rules surface.
 - Provide `from_spec`, `copy`, and `get_path` for recurrence.
+- Path vocabulary used by `LoopRelevantState`: mana colors, life, events, permanent zone/tapped/counters/summoning_sick/`once_per_turn_used.<ability_id>`, and battlefield counts (creature_tokens / creatures / artifacts).
 - Path `permanents.<id>.once_per_turn_used.<ability_id>` → boolean (whether that ability id is marked used this turn).
 
 ## Non-responsibilities

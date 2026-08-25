@@ -5,6 +5,6 @@ alwaysApply: true
 
 # Test quality
 
-Treat tests as executable epistemic contracts. Prefer outcome assertions in the suite that owns the critical path; ban vacuous, mock-only, and coverage-padding tests. The 90% coverage floor is a backstop, not a substitute for contract suites.
+Treat tests as executable epistemic contracts. Prefer outcome assertions in the suite that owns the critical path; ban vacuous, mock-only, and coverage-padding tests. The 92% line-coverage floor is a backstop, not a substitute for contract suites.
 
 **Authority:** [`tests/README.md`](../../tests/README.md). Merge coupling: [`CONTRIBUTING.md`](../../CONTRIBUTING.md) (CI merge gate).

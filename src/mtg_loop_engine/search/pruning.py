@@ -7,13 +7,20 @@ from mtg_loop_engine.state.game import GameState
 
 
 def reusable_fingerprint(state: GameState) -> tuple:
-    """Hash reusable board+mana+triggers, ignoring monotonic event counters."""
+    """Hash reusable board+mana+triggers, ignoring monotonic event counters.
+
+    Equality of reusable fingerprints asserts search-equivalence for all
+    currently modeled future legal behavior. States that can diverge in
+    activation legality or trigger resolution (summoning sickness, trigger
+    subject/amount) must not collapse.
+    """
     perms = tuple(
         sorted(
             (
                 p.oracle_id,
                 p.zone.value,
                 p.tapped,
+                p.summoning_sick,
                 tuple(sorted(p.counters.items())),
                 tuple(sorted(p.once_per_turn_used)),
             )
@@ -37,6 +44,12 @@ def reusable_fingerprint(state: GameState) -> tuple:
         state.mana.any_color,
     )
     triggers = tuple(
-        (t.get("ability_id"), t.get("source_id")) for t in state.pending_triggers
+        (
+            t.get("ability_id"),
+            t.get("source_id"),
+            t.get("subject_id"),
+            t.get("amount"),
+        )
+        for t in state.pending_triggers
     )
     return (perms, tokens, mana, triggers)

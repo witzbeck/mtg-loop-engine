@@ -21,7 +21,7 @@ Individual modules → **THIS** → fast regression signals.
 - Lock capability joins and inverted-index behavior.
 - Prove explorer treats injected verifier as acceptance oracle and does not double-verify.
 - Enforce `verify` does not import `search` (`test_search_boundary.py`).
-- Cover ingest hashing and recurrence helpers.
+- Cover ingest hashing, recurrence/`get_path` matrices, fingerprint search-equivalence, executor soundness, and gross-vs-net output characterization.
 
 ## Non-responsibilities
 
@@ -35,7 +35,7 @@ Individual modules → **THIS** → fast regression signals.
 
 ## Main entry points
 
-- `test_interactions.py`, `test_explorer.py`, `test_search_boundary.py`, `test_scryfall_ingest.py`, `test_recurrence.py`, `test_spellbook_filter.py`, …
+- `test_interactions.py`, `test_explorer.py`, `test_search_boundary.py`, `test_scryfall_ingest.py`, `test_recurrence.py`, `test_executor_soundness.py`, `test_once_per_turn_recurrence.py`, `test_output_gross_vs_net.py`, `test_spellbook_filter.py`, …
 
 ## Data contracts
 

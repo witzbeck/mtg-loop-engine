@@ -95,11 +95,13 @@ Green CI is merge-OK only if this table’s row for the PR is exercised — see 
 
 ### Coverage % policy
 
-CI enforces a **90% line-coverage floor** on measured `mtg_loop_engine` code (`--cov-fail-under=90` in `pyproject.toml`).
+CI enforces a **92% line-coverage floor** on measured `mtg_loop_engine` code (`--cov-fail-under=92` in `pyproject.toml`).
 
-That floor is a **backstop**, not a substitute for the suites above. Raise coverage with real contract tests.
+That floor is a **backstop**, not a substitute for the suites above. Raise coverage with real contract tests. A separate CI step reports **branch** coverage without a fail-under (so line and branch gates stay distinct).
 
 Intentionally omitted from the %-gate (see `[tool.coverage.run] omit`): CLI entrypoint, Streamlit workbench, and network snapshot download helpers. Do not widen that omit list to green CI — raise coverage with real contract tests.
+
+**95%** remains a subsequent milestone after soundness + recurrence/pruning contracts are in place and remaining misses are product-classified.
 
 Pytest mechanics (`--strict-markers`, `xfail_strict`, warnings-as-errors, coverage fail-under) are configured in `pyproject.toml`.
 

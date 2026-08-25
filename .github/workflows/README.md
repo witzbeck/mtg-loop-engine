@@ -11,8 +11,9 @@ GitHub Actions job definitions for the repository merge gate.
 ```mermaid
 graph LR;
   checkout[checkout] --> uv[uv sync];
-  uv --> pytest[pytest cov>=90%];
-  pytest --> checkDocs[check_docs.py];
+  uv --> pytest[pytest line cov>=92%];
+  pytest --> branchReport[branch cov report only];
+  branchReport --> checkDocs[checkDocs.py];
   checkDocs --> status[render_status.py --check];
 ```
 
@@ -29,9 +30,10 @@ graph LR;
 
 - `ci.yml` currently:
   1. `uv sync --frozen --group dev`
-  2. `uv run pytest` (includes `--cov-fail-under=90` from `pyproject.toml`)
-  3. `uv run python scripts/check_docs.py`
-  4. `uv run python scripts/render_status.py --check`
+  2. `uv run pytest` (includes `--cov-fail-under=92` line floor from `pyproject.toml`)
+  3. Branch-coverage report pass (`--cov-branch --cov-fail-under=0`) — visibility only
+  4. `uv run python scripts/check_docs.py`
+  5. `uv run python scripts/render_status.py --check`
 
 ## Non-responsibilities
 
