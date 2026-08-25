@@ -11,7 +11,7 @@ Eval runs / adjudication → **THIS (committed summaries)** → `docs/STATUS.md`
 ```mermaid
 graph TB;
   goldExtras[persist_gold_pool_extras] --> goldSummary[m4_gold_pool_summary.json];
-  spellbookRun[eval-spellbook] --> spellSummary[m4_spellbook_recovery_summary.json];
+  spellbookRun[spellbook_compiler_priority or eval-spellbook] --> spellSummary[m4_spellbook_recovery_summary.json];
   goldSummary --> status[docs/STATUS.md];
   spellSummary --> status;
 ```
@@ -25,8 +25,8 @@ graph TB;
 
 | File | Frozen meaning (current) |
 | --- | --- |
-| `m4_gold_pool_summary.json` | **Pre-gate freeze:** 24 extras; 8 real / 16 fixture; precision **0.375** (3 valid / 8 real); 5 duplicates. Live discovery after participant enforcement yields fewer extras (see `GOLD_EXTRA_ADJUDICATIONS`); treat as historical until ROADMAP item 5 re-freeze. |
-| `m4_spellbook_recovery_summary.json` | 99 selected; **0 eligible**; all `compiler_unsupported`; recall null |
+| `m4_gold_pool_summary.json` | Post-participant-gate extras: **10** total; **3** real / **7** fixture; precision **1.0** (3 valid / 3 real). |
+| `m4_spellbook_recovery_summary.json` | Local 50-page conventional sample: **1196** selected; **1** eligible; **1** rediscovered (Gravecrawler + Phyrexian Altar); recall **1.0** |
 
 ## Responsibilities
 

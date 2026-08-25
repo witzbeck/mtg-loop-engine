@@ -66,7 +66,7 @@ LAR v2 contracts (`lar_contracts.py`, `lar_calibration.py`) support ephemeral ru
 
 - Precision denominator excludes skipped and `INVALID_CANDIDATE_DATA` (fixture pairs).
 - Recovery recall is undefined / null when eligible count is 0.
-- Gold-extra persistence expects adjudications to cover **currently discovered** extras (10-row post-gate contract in tests). Frozen baseline JSON may still show the pre-gate 24-row snapshot until ROADMAP item 5.
+- Gold-extra persistence expects adjudications to cover **currently discovered** extras (10-row post-gate contract in tests). Frozen baseline JSON matches that contract after ROADMAP items 5–6.
 
 ## Main entry points
 

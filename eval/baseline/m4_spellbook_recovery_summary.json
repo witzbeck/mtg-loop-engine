@@ -1,33 +1,35 @@
 {
-  "snapshot": "local data/spellbook/latest (2 pages, 200 raw variants, gitignored)",
+  "snapshot": "local data/spellbook/latest (50 pages, 5000 raw variants, gitignored) + data/scryfall/latest oracle bulk",
+  "spellbook_snapshot_hash": "e87a2d407d097e2ba1eb9bf79c6bbe6f853427646867354d8c9cad9e01ad7679",
+  "oracle_snapshot_hash": "909295a843fea802894f91db0f1688b8ed0b1bc003234f51f660b2176d9b1ac6",
   "filter": "conventional two-card, zero templates, repeatable feature, distinct names",
   "counts": {
-    "selected": 99,
-    "cards_resolved_from_scryfall": 96,
-    "supported_complete_semantics": 0,
-    "eligible": 0,
-    "rediscovered": 0,
-    "compiler_unsupported": 99,
-    "recall_eligible": null
+    "selected": 1196,
+    "cards_resolved_from_scryfall": 914,
+    "supported_complete_semantics": 1,
+    "eligible": 1,
+    "rediscovered": 1,
+    "compiler_unsupported": 1195,
+    "recall_eligible": 1.0
   },
   "stage_breakdown": {
-    "compiler_unsupported": 99,
+    "compiler_unsupported": 1195,
     "candidate_join_miss": 0,
     "search_miss": 0,
     "verifier_rejection": 0,
     "prerequisite_classification_mismatch": 0,
-    "recovered": 0
+    "recovered": 1
   },
   "examples": [
     {
       "names": ["Gravecrawler", "Phyrexian Altar"],
-      "stage": "compiler_unsupported",
-      "note": "Real Oracle has extra clauses vs gold fixtures; fail-closed."
+      "stage": "recovered",
+      "note": "Live Scryfall Oracle: cast-from-GY + Zombie gate + Altar any-color; generic Zombie fodder (ADR 0002)."
     },
     {
       "names": ["Basalt Monolith", "Forsaken Monument"],
       "stage": "compiler_unsupported",
-      "note": "Monument text is outside current patterns."
+      "note": "Monument text remains outside current patterns."
     },
     {
       "names": ["Isochron Scepter", "Dramatic Reversal"],
@@ -35,6 +37,6 @@
       "note": "Imprint/copy is gold_extended, not modeled."
     }
   ],
-  "reference_absent_sample": "none — zero eligible/supported entries, so no accepted discoveries to adjudicate from this subset",
-  "notes": "Recall is defined only over eligible/supported entries. Spellbook absence is not a false positive. Gold-fixture eval-spellbook sample still recovers 2/2 eligible rows."
+  "reference_absent_sample": "none in this freeze — the sole eligible pair is in Spellbook",
+  "notes": "Recall is defined only over eligible/supported entries. Measured via scripts/spellbook_compiler_priority.py against local Scryfall bulk (not network). Gold-fixture eval-spellbook sample still recovers 2/2 eligible rows. Most conventional pairs remain compiler_unsupported."
 }

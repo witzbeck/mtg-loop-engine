@@ -45,22 +45,22 @@ Notes from baseline: Precision computed over real-card pairs only; fixture pairs
 
 | Metric | Value |
 | ------ | ----- |
-| selected | 99 |
-| eligible | 0 |
-| rediscovered | 0 |
-| compiler_unsupported | 99 |
-| recall_eligible | null (no eligible pairs) |
+| selected | 1196 |
+| eligible | 1 |
+| rediscovered | 1 |
+| compiler_unsupported | 1195 |
+| recall_eligible | 1.0 |
 
-Notes from baseline: Recall is defined only over eligible/supported entries. Spellbook absence is not a false positive. Gold-fixture eval-spellbook sample still recovers 2/2 eligible rows.
+Notes from baseline: Recall is defined only over eligible/supported entries. Measured via scripts/spellbook_compiler_priority.py against local Scryfall bulk (not network). Gold-fixture eval-spellbook sample still recovers 2/2 eligible rows. Most conventional pairs remain compiler_unsupported.
 <!-- END:GENERATED_FROM_BASELINES -->
 
 ---
 
 ## How to read these numbers
 
-- **24 extras** is the full gold-pool extra artifact population (real cards + fixture stand-ins).
-- **16 fixture pairs** are evaluation artifacts (`INVALID_CANDIDATE_DATA`); they are not in the precision denominator.
-- **8 real pairs** were adjudicated: **3** `valid_strict_two_card`, **5** `duplicate_or_equivalent_interaction` → precision **0.375**.
-- Spellbook conventional recovery remains blocked by compiler coverage: **0 eligible** of **99** selected.
+- **10 extras** is the post-participant-gate gold-pool extra population (real cards + fixture stand-ins).
+- **7 fixture pairs** are evaluation artifacts (`INVALID_CANDIDATE_DATA`); they are not in the precision denominator.
+- **3 real pairs** were adjudicated: all `valid_strict_two_card` → precision **1.0**.
+- Spellbook conventional recovery (50-page local sample): **1 eligible / 1 rediscovered** (Gravecrawler + Phyrexian Altar); most pairs remain `compiler_unsupported`.
 
-See [`EVALUATION.md`](EVALUATION.md) for denominators and [`runbooks/M4_FOLLOW_THROUGH.md`](runbooks/M4_FOLLOW_THROUGH.md) for the engineering sequence that must change these numbers before M5.
+See [`EVALUATION.md`](EVALUATION.md) for denominators and [`runbooks/M4_FOLLOW_THROUGH.md`](runbooks/M4_FOLLOW_THROUGH.md) for remaining M4 exit review before M5.
