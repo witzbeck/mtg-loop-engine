@@ -38,6 +38,7 @@ graph TB;
 | Concern | Module | Meaning |
 | --- | --- | --- |
 | Reference recovery | `spellbook_eval.py`, `metrics.py` | Among **eligible/supported** reference rows, how many rediscover? Stages: compile → join → search → optional prerequisite mismatch → recovered. |
+| Compiler frontier (M5.1) | `compiler_frontier.py` + `scripts/spellbook_compiler_priority.py` | Rank missing fragments by COMPLETE / both-COMPLETE pair unlock (not rediscovery). Live under `data/eval/`. |
 | Human-adjudicated precision | `metrics.precision_from_records` + `provenance.is_precision_eligible_ids` | Among adjudicated **ORACLE_EXACT×ORACLE_EXACT** discoveries, how many are valid classes? (ADR 0007) |
 | Prerequisite analysis | `classify.py` | Participation / assumptions / `strict_two_card` **detection** |
 | Persistence / UX | `store.py`, `workbench.py`, `narrate.py`, `glossary.py`, `explain.py` | Reviewer workflow; `AdjudicationClass` + optional `AdjudicationFailureReason` |
@@ -83,6 +84,7 @@ LAR v2 contracts (`lar_contracts.py`, `lar_calibration.py`) support ephemeral ru
 | `schema.py` | Adjudication classes / records |
 | `metrics.py` | Recovery + precision reports |
 | `spellbook_eval.py` | Reference subset evaluation |
+| `compiler_frontier.py` | M5.1 frontier: distance / gap kind / pair unlock / P0–P2 tiers |
 | `reference_absent.py` | Label verified discoveries vs reference pairs; persist absent candidates for workbench (M5) |
 | `gold_extras.py` | Gold-pool extras snapshot / summary |
 | `store.py` | DuckDB + JSONL |
@@ -101,7 +103,7 @@ Committed outputs land in repo-root `eval/` (fixtures, adjudications, baselines)
 
 ## Testing
 
-`tests/eval/` — classify (including bystander detection), store roundtrip, sample recovery 2/2, extras↔adjudications, narrate helpers.
+`tests/eval/` — classify (including bystander detection), store roundtrip, sample recovery 2/2, extras↔adjudications, narrate helpers, compiler-frontier ranking contracts.
 
 ## Extension guide
 
