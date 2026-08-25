@@ -59,6 +59,8 @@ Accepted discoveries missing from Spellbook are `ABSENT_FROM_REFERENCE` (or simi
 
 Committed baseline *files* live under repo-root `eval/baseline/`. This package **does** write/read them (e.g. `gold_extras.persist_gold_pool_extras` → `m4_gold_pool_summary.json`); the artifact tree is the committed home, not a separate owner.
 
+LAR v2 contracts (`lar_contracts.py`, `lar_calibration.py`) support ephemeral runs under `data/eval/lar/runs/` and durable calibration loading from `eval/calibration/`.
+
 ## Core invariants
 
 - Precision denominator excludes skipped and `INVALID_CANDIDATE_DATA` (fixture pairs).
