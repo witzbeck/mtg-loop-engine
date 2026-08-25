@@ -28,7 +28,7 @@ def test_verified_proof_uses_schema_0_2_and_stable_claim_hash():
     witness = physics_all_positives()[0]
     proof = Verifier().verify(witness)
     assert proof.status == VerificationStatus.VERIFIED
-    assert proof.versions.proof_schema_version == "0.2.0"
+    assert proof.versions.proof_schema_version == "0.3.0"
     assert len(proof.proof_hash) == 32
     state = GameState.from_spec(witness.initial_state)
     relevant = effective_relevant_state(witness, state)

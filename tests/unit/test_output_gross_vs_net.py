@@ -1,15 +1,18 @@
 """Basalt + Synthetic Cost Reducer: freeze gross event vs net pool semantics.
 
-OutputDelta today reports gross produced events (mana event counter), not net
-mana-pool accumulation. Do not silently redefine OutputDelta to mean net.
-Schema/explanation refinement is a separate design decision (ADR follow-up).
+OutputDelta reports gross produced events (mana event counter), not net
+mana-pool accumulation. NetStateDelta reports pool benefit separately.
 """
 
 from mtg_loop_engine.corpus.gold_core.cases import BASALT, SYNTHETIC_COST_REDUCER
+from mtg_loop_engine.proofs.models import NetStateDelta
+from mtg_loop_engine.proofs.net_state import derive_net_state
 from mtg_loop_engine.rules.executor import Executor
 from mtg_loop_engine.search.explorer import explore_pair
 from mtg_loop_engine.semantics.enums import Consequence, OutputType, VerificationStatus
+from mtg_loop_engine.semantics.ir import ManaAmount
 from mtg_loop_engine.state.game import GameState
+from mtg_loop_engine.verify.verifier import Verifier
 
 
 def test_basalt_grounds_gross_mana_vs_net_pool():
@@ -37,3 +40,21 @@ def test_basalt_grounds_gross_mana_vs_net_pool():
     assert net_colorless == 1
     # Spent = produced − net (characterization of today's physics).
     assert 3 - net_colorless == 2
+
+    net = derive_net_state(before, state)
+    assert net.mana.colorless == 1
+    assert proof.net_state is not None
+    assert proof.net_state.mana.colorless == 1
+
+
+def test_expected_net_state_gate_rejects_mismatch():
+    found = explore_pair(BASALT, SYNTHETIC_COST_REDUCER)
+    assert found is not None
+    bad = found.witness.model_copy(
+        update={
+            "expected_net_state": NetStateDelta(mana=ManaAmount(colorless=99)),
+        }
+    )
+    proof = Verifier().verify(bad)
+    assert proof.status == VerificationStatus.NOT_A_LOOP
+    assert proof.rejection_reason and "net mana.colorless" in proof.rejection_reason

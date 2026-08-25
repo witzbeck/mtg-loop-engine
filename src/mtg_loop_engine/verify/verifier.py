@@ -13,6 +13,7 @@ from mtg_loop_engine.proofs.models import (
     RecurrenceResult,
     VersionIdentity,
 )
+from mtg_loop_engine.proofs.net_state import derive_net_state, net_state_matches
 from mtg_loop_engine.rules.executor import Executor
 from mtg_loop_engine.semantics.enums import (
     ComparisonOp,
@@ -222,7 +223,19 @@ class Verifier:
                 relevant_state=relevant,
             )
 
+        net = derive_net_state(before, after)
+        if witness.expected_net_state is not None:
+            net_problems = net_state_matches(net, witness.expected_net_state)
+            if net_problems:
+                return reject(
+                    VerificationStatus.NOT_A_LOOP,
+                    "; ".join(net_problems),
+                    recurrence=recurrence,
+                    relevant_state=relevant,
+                )
+
         consequences = [o.consequence for o in witness.expected_outputs]
+        claim_cons = witness.expected_claim_consequence
         return LoopProof(
             kind=ProofKind.VALID,
             witness_id=witness.id,
@@ -241,6 +254,8 @@ class Verifier:
             loop_actions=witness.loop_actions,
             recurrence=recurrence,
             output_deltas=witness.expected_outputs,
+            net_state=net,
+            claim_consequence=claim_cons,
             consequences=consequences,
             status=VerificationStatus.VERIFIED,
             rejection_reason=None,

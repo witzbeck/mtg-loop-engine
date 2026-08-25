@@ -60,6 +60,16 @@ class OutputDelta(BaseModel):
     repeatable: bool = True
 
 
+class NetStateDelta(BaseModel):
+    """Net pool/life/board benefit across one loop iteration (not gross events)."""
+
+    mana: ManaAmount = Field(default_factory=ManaAmount)
+    life_you: int = 0
+    life_opponent: int = 0
+    creature_tokens: int = 0
+    plus_one_counters: int = 0
+
+
 class PermanentSpec(BaseModel):
     object_id: str
     oracle_id: str
@@ -108,6 +118,8 @@ class LoopWitness(BaseModel):
     loop_actions: list[ActionStep]
     relevant_state: LoopRelevantState
     expected_outputs: list[OutputDelta] = Field(default_factory=list)
+    expected_net_state: NetStateDelta | None = None
+    expected_claim_consequence: Consequence | None = None
     assumptions: list[str] = Field(default_factory=list)
     prerequisites: list[Prerequisite] = Field(default_factory=list)
     deterministic: bool = True
@@ -145,6 +157,8 @@ class LoopProof(BaseModel):
     loop_actions: list[ActionStep] = Field(default_factory=list)
     recurrence: RecurrenceResult
     output_deltas: list[OutputDelta] = Field(default_factory=list)
+    net_state: NetStateDelta | None = None
+    claim_consequence: Consequence | None = None
     consequences: list[Consequence] = Field(default_factory=list)
     status: VerificationStatus
     rejection_reason: str | None = None
