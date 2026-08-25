@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Tiny committed Spellbook-shaped JSONL rows for CI and unit recovery tests. Not a full reference corpus.
+Tiny committed Spellbook-shaped JSONL rows for CI and unit recovery tests. Full reference snapshots stay under gitignored `data/`.
 
 ## Role in pipeline
 

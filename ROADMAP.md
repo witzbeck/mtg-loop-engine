@@ -6,7 +6,7 @@
 Oracle text → semantics → blind discovery → rules proof
 ```
 
-Discovery may speculate. Verification may not. **Optimize verified precision over recall.**
+Search may speculate. Verification may not. **Optimize verified precision over recall.**
 
 No LLM-generated semantics on the path to `VERIFIED`. No binary "infinite." Loop type × output × consequence × delta.
 
@@ -25,7 +25,7 @@ graph TB;
 
 **Active milestone:** M4 — Evaluation ◐ **IN PROGRESS**
 
-Quantitative snapshot (baselines): [`docs/STATUS.md`](docs/STATUS.md). Do not paste volatile counts into this file.
+Quantitative snapshot (baselines): [`docs/STATUS.md`](docs/STATUS.md). Keep volatile counts out of this file.
 
 ---
 
@@ -40,10 +40,10 @@ Quantitative snapshot (baselines): [`docs/STATUS.md`](docs/STATUS.md). Do not pa
 
 ### M1 — Witness verifier ✓
 
-- `LoopWitness` in → `LoopProof` out. No search inside the verifier; no LLM.
+- `LoopWitness` in → `LoopProof` out. Verifier is witness-in / proof-out (deterministic semantics).
 - Rules-aware executor: costs, tap/untap, sac, simple triggers, cost modifiers, replacements.
 - Proof-specific `LoopRelevantState` (`EXACT` / `MINIMUM` / `MAXIMUM`).
-- Fail-closed: `PARTIAL_RELEVANT_TO_PROOF` may never emit `VERIFIED`.
+- Fail-closed: `PARTIAL_RELEVANT_TO_PROOF` → typed rejection.
 - Typed rejection vocabulary (`RESOURCE_DEFICIT`, `STATE_NOT_RECURRENT`, …).
 - All `gold_core` positives `VERIFIED`; hard negatives produce correct typed rejection.
 
@@ -104,7 +104,7 @@ graph TB;
     --> m5[M5 reference-absent candidate discovery];
 ```
 
-Do not begin M5 merely because evaluation tooling exists.
+Start M5 after M4 correctness and eligibility gates pass.
 
 ---
 
@@ -116,7 +116,7 @@ Once M4 correctness and eligibility gates are in:
 - Accepted pairs not in Spellbook start as `ABSENT_FROM_REFERENCE`.
 - Human adjudication upgrades to `NOVEL` only after review.
 - Report `NOVEL` separately from precision denominator.
-- Do not tighten joins to suppress `ABSENT_FROM_REFERENCE` results — label them.
+- Label `ABSENT_FROM_REFERENCE` results; leave joins open unless a precision bug is proven.
 
 ---
 
@@ -131,9 +131,9 @@ Once M4 correctness and eligibility gates are in:
 ## M7 — Explorer
 
 - Local web UI beyond the adjudication workbench.
-- Card images via Scryfall URL (never committed art).
+- Card images via Scryfall URL (art stays gitignored).
 - Search, filter, and browse all verified loops.
-- FastAPI or equivalent; still no Postgres in the first cut.
+- FastAPI or equivalent; first cut without Postgres.
 
 ---
 
@@ -159,7 +159,7 @@ Once M4 correctness and eligibility gates are in:
 | Fail-closed coverage | `PARTIAL_RELEVANT_TO_PROOF` → never `VERIFIED` |
 | Determinism | V1 deterministic-only; nondeterministic → typed rejection |
 | LLM ban | No LLM on the `VERIFIED` path, indefinitely |
-| Data hygiene | Never commit Oracle bulk JSON; `data/` gitignored |
+| Data hygiene | Oracle bulk JSON stays under gitignored `data/` |
 | Loop model | No binary `infinite`; loop type × output × consequence × delta |
 | Spellbook absence | `ABSENT_FROM_REFERENCE`, not false positive; `NOVEL` only after adjudication |
 | Precision goal | Adjudicated precision over raw recall |

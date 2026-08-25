@@ -2,9 +2,7 @@
 
 ## Purpose
 
-Evaluation answers several different questions. Collapsing them into a single "accuracy" number hides failure modes and invites gaming the wrong metric.
-
-There is **no** project-wide aggregate accuracy score.
+Evaluation answers several different questions. Collapsing them into a single accuracy number hides failure modes and invites gaming the wrong metric. Keep denominators separate; there is no project-wide aggregate accuracy score.
 
 ## Source hierarchy
 
@@ -22,7 +20,7 @@ There is **no** project-wide aggregate accuracy score.
 
 **Typical signals:** fragment coverage on gold Oracle fixtures; fraction of real cards with `COMPLETE` semantics in a Spellbook sample.
 
-**Not the same as:** finding loops, recovering Spellbook pairs, or adjudicated precision.
+**Distinct from:** loop finding, Spellbook recovery, adjudicated precision.
 
 ### 2. Reference eligibility
 
@@ -30,7 +28,7 @@ There is **no** project-wide aggregate accuracy score.
 
 **Typical signals:** `eligible` in Spellbook recovery summaries.
 
-**Rule:** If a pair is not eligible, it cannot contribute to reference recall. Compiler unsupported rows inflate `selected` but leave `eligible` at zero.
+**Rule:** Only eligible pairs contribute to reference recall. Compiler-unsupported rows inflate `selected` and leave `eligible` at zero.
 
 ### 3. Reference recall
 
@@ -40,15 +38,15 @@ There is **no** project-wide aggregate accuracy score.
 \text{recall\_eligible} = \frac{\text{rediscovered}}{\text{eligible}}
 \]
 
-when `eligible > 0`; otherwise recall is undefined / null—not "0% accuracy."
+when `eligible > 0`; otherwise recall is undefined / null.
 
-**Not the same as:** adjudicated precision on accepted extras, or compiler coverage.
+**Distinct from:** adjudicated precision on accepted extras; compiler coverage.
 
 ### 4. Accepted discovery count
 
 **Question:** How many candidate pairs did search accept as verified witnesses in a given pool (gold extras, Spellbook-backed scan, etc.)?
 
-This is a **volume** metric. High accepted count with low adjudicated precision is a correctness problem, not success.
+This is a **volume** metric. High accepted count with low adjudicated precision is a correctness problem.
 
 ### 5. Adjudicated precision
 
@@ -58,9 +56,9 @@ This is a **volume** metric. High accepted count with low adjudicated precision 
 \text{precision} = \frac{\text{valid}}{\text{adjudicated}}
 \]
 
-**Exclusions:** `INVALID_CANDIDATE_DATA` (fixture stand-ins, missing Oracle, lookup failures) are counted for inventory but **excluded** from the precision denominator. Skipped reviews are not adjudicated.
+**Exclusions:** `INVALID_CANDIDATE_DATA` (fixture stand-ins, missing Oracle, lookup failures) are counted for inventory and excluded from the precision denominator. Skipped reviews are not adjudicated.
 
-**Not the same as:** Spellbook presence. `ABSENT_FROM_REFERENCE` is not a false positive; `NOVEL` requires human upgrade from absence.
+**Distinct from:** Spellbook presence. `ABSENT_FROM_REFERENCE` is a reference label; `NOVEL` requires human upgrade from absence.
 
 ## Gold-pool vs Spellbook
 
@@ -81,14 +79,14 @@ Current frozen counts: [`STATUS.md`](STATUS.md).
 
 ## Loop Adjudication Review (LAR)
 
-LAR is a **diagnostic evaluation process** with an explicit **promotion mechanism** — not a single accuracy score.
+LAR is a **diagnostic evaluation process** with an explicit **promotion mechanism**. Keep its signals distinct from a single accuracy score.
 
 | Plane | Location | Authority |
 | ----- | -------- | --------- |
 | Execution | `data/eval/lar/runs/` (gitignored) | Ephemeral; safe to delete |
 | Knowledge | `eval/adjudications/`, `eval/calibration/`, `tests/`, `docs/`, `eval/baseline/`, `eval/reviews/promoted/` | Committed; PR-reviewed |
 
-**Primary success metric:** information gain (new/changed cases, tests, docs, baselines) — not headline agreement rate on unchanged inventory.
+**Primary success metric:** information gain (new/changed cases, tests, docs, baselines). Headline agreement rate on unchanged inventory is secondary.
 
 ### Taxonomy calibration coverage
 
@@ -96,20 +94,20 @@ LAR is a **diagnostic evaluation process** with an explicit **promotion mechanis
 
 ### Blind adjudication (LAR v2 Tier B)
 
-Pair reviewers produce `proposed_class` **before** frozen labels are revealed. Outcomes include `agree_high_confidence`, `disagree`, `taxonomy_ambiguous`, etc. — not only boolean agreement.
+Pair reviewers produce `proposed_class` **before** frozen labels are revealed. Outcomes include `agree_high_confidence`, `disagree`, `taxonomy_ambiguous`, etc.
 
 ### Known-family vs held-out-family evidence
 
 - **C1:** gold_core mechanic families — strong regression signal.
 - **C2:** held-out Oracle cases excluded from implementation curriculum — generalization signal (small initially).
 
-Do not describe C1 success as broad generalization.
+Treat C1 success as regression evidence for known families.
 
 ### Live diagnostic vs certified baseline
 
-During development, live metrics under `data/eval/` may reflect post-fix behavior while `eval/baseline/` remains the last **certified** snapshot until roadmap re-freeze. Do not conflate them in prose.
+During development, live metrics under `data/eval/` may reflect post-fix behavior while `eval/baseline/` remains the last **certified** snapshot until roadmap re-freeze. Cite which plane you mean.
 
-### No aggregate LAR score
+### Separate LAR signals
 
 Keep distinct: compiler coverage, reference eligibility/recall, adjudicated precision, taxonomy coverage, blind-label agreement, counterfactual performance, held-out-family performance, and knowledge promotion counts.
 

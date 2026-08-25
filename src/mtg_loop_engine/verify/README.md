@@ -4,7 +4,7 @@
 
 **The verifier is the acceptance boundary.**
 
-Witness-in / proof-out. No discovery logic here. Search may call this package; this package must never import or embed search.
+Witness-in / proof-out. Search proposes witnesses and may call this package; this package must never import or embed search.
 
 ## Role in pipeline
 
@@ -34,22 +34,24 @@ graph TB;
 - Check proof-specific recurrence (`LoopRelevantState`) and expected outputs
 - Hash proofs for stability tracking
 
-## Non-responsibilities
+## Boundaries
 
-- Candidate pair enumeration or action-space BFS (`search/`)
-- Gold pair labels
-- Human adjudication
-- **Participant / `strict_two_card` enforcement** — discovery applies that gate in `search.explore_pair`; this package judges physics/coverage/externals only (see `search/README.md`)
+| Concern | Owner |
+| --- | --- |
+| Candidate pair enumeration / action-space BFS | `search/` |
+| Gold pair labels | `corpus/` / eval |
+| Human adjudication | `eval/` |
+| Participant / `strict_two_card` enforcement | `search.explore_pair` (this package judges physics/coverage/externals) |
 
 ## Core invariants
 
-- Module contract: `"Witness-in / proof-out verifier (no search)."`
+- Module contract: witness-in / proof-out verifier
 - `PARTIAL_RELEVANT_TO_PROOF` or `card.relevant_unsupported()` → `UNSUPPORTED_SEMANTICS` (never `VERIFIED`)
 - `PARTIAL_IRRELEVANT_TO_PROOF` may still `VERIFIED` if abilities are otherwise supported
 - Non-empty `functional_external_requirements` → `EXTERNAL_FUNCTIONAL_PIECE_REQUIRED`
-- Nondeterministic witnesses rejected
+- Nondeterministic witnesses → typed rejection
 - `verify` package must not import `search` (`tests/unit/test_search_boundary.py`)
-- Does **not** enforce `strict_two_card` / unused participant IDs (intentional; search-only gate). Hand-authored bystander witnesses may still `VERIFIED`.
+- Participant gate is search-only; hand-authored bystander witnesses may still `VERIFIED`
 
 ## Main entry points
 
@@ -73,8 +75,8 @@ Always returns a `LoopProof` for ordinary verification attempts — typed reject
 
 ## Extension guide
 
-Add acceptance gates here when they are truth conditions (physics, coverage, externals). Do not pull exploration into this package. Participant enforcement for discovery lives in `search.explore_pair`; adding a verifier-side participant gate is an optional follow-up if hand-authored bystanders must also fail closed.
+Add acceptance gates here when they are truth conditions (physics, coverage, externals). Exploration stays in `search/`. Participant enforcement for discovery lives in `search.explore_pair`; a verifier-side participant gate is an optional follow-up if hand-authored bystanders must also fail closed.
 
 ## Bigger-picture relationship
 
-Verification may not speculate. Architecture: [`docs/ARCHITECTURE.md`](../../../docs/ARCHITECTURE.md).
+Verification checks a given witness. Architecture: [`docs/ARCHITECTURE.md`](../../../docs/ARCHITECTURE.md).

@@ -91,11 +91,11 @@ graph TB;
 
 ### `needs_rules_research`
 
-**Rule:** Reviewer is unsure. Prefer this over a confident wrong label.
+**Rule:** Reviewer is unsure. Prefer this when evidence is insufficient for a confident label.
 
 **Example:** Edge cases involving obscure replacement interactions.
 
-**Boundary vs `rules_or_semantics_false_positive`:** False positive means the modeled rules/semantics path is confidently wrong under current engine understanding. Needs rules research means insufficient evidence to choose — not a disguised rejection.
+**Boundary vs `rules_or_semantics_false_positive`:** False positive means the modeled rules/semantics path is confidently wrong under current engine understanding. Needs rules research means insufficient evidence to choose.
 
 **Counts toward precision:** no (treat as not yet resolved for precision claims).
 
@@ -115,13 +115,13 @@ Independent of adjudication class. Answers "how does this relate to Commander Sp
 
 **Rule:** The pair (or equivalent interaction) appears in the reference corpus used for this evaluation run.
 
-**Does not imply:** the engine proof is correct—still adjudicate class separately.
+**Still requires:** separate adjudication class — reference membership and proof correctness are independent.
 
 ### `absent_from_reference`
 
 **Rule:** The accepted discovery is not in the reference corpus.
 
-**Does not mean:** false positive. Spellbook is incomplete ground truth. Do not tighten joins solely to suppress these.
+**Implication:** Label as `ABSENT_FROM_REFERENCE`. Spellbook is incomplete ground truth; leave joins open unless a precision bug is proven.
 
 ### `novel`
 

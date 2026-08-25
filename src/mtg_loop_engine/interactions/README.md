@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Capability signatures and inverted-index neighborhoods that **propose** complementary two-card pairs before search. Joins do not decide whether a loop is true.
+Capability signatures and inverted-index neighborhoods that **propose** complementary two-card pairs before search. Truth stays in `verify/`.
 
 ## Role in pipeline
 
@@ -32,11 +32,13 @@ graph TB;
 - Drop cards with `relevant_unsupported()` at index construction.
 - Drop pairs with empty join reasons.
 
-## Non-responsibilities
+## Boundaries
 
-- Action-sequence search (`search/`)
-- Verification / acceptance (`verify/`)
-- Human adjudication (`eval/`)
+| Concern | Owner |
+| --- | --- |
+| Action-sequence search | `search/` |
+| Verification / acceptance | `verify/` |
+| Human adjudication | `eval/` |
 
 ## Core invariants
 
@@ -63,7 +65,7 @@ Misses surface as eval stage `candidate_join_miss`, not as verifier statuses. In
 
 ## Extension guide
 
-Add capability flags and `join_reasons` cases when new IR families need neighborhood discovery. Do **not** tighten joins solely to hide `ABSENT_FROM_REFERENCE` extras (M5 policy).
+Add capability flags and `join_reasons` cases when new IR families need neighborhood discovery. Label `ABSENT_FROM_REFERENCE` extras; leave joins open unless a precision bug is proven (M5 policy).
 
 ## Bigger-picture relationship
 

@@ -5,13 +5,13 @@ alwaysApply: true
 
 # Test quality
 
-This project treats tests as **executable epistemic contracts**, not line-coverage theater. Pair with [`tests/README.md`](../../tests/README.md) and [`CONTRIBUTING.md`](../../CONTRIBUTING.md). Pytest mechanics live in `pyproject.toml` `[tool.pytest.ini_options]`.
+This project treats tests as **executable epistemic contracts**. Pair with [`tests/README.md`](../../tests/README.md) and [`CONTRIBUTING.md`](../../CONTRIBUTING.md). Pytest mechanics live in `pyproject.toml` `[tool.pytest.ini_options]`.
 
 ## Critical functionality (must be CI-covered)
 
 When behavior changes, add or update tests in the suite that owns that contract:
 
-| Critical path | Prefer |
+| Critical path | Suite |
 | --- | --- |
 | Verifier accepts / rejects | `tests/gold_core/`, `tests/hard_negatives/`, relevant `unit/` |
 | Compiler / patterns | `tests/semantic/` |
@@ -22,7 +22,7 @@ When behavior changes, add or update tests in the suite that owns that contract:
 
 Green CI is merge-OK only if this table’s row for the PR is exercised — see `ci-merge-gate.mdc`.
 
-## Good tests
+## Contract tests
 
 - Assert **outcomes**: `VerificationStatus`, typed rejection reasons, rediscovery counts, coverage enums, proof hashes, join reasons.
 - Prefer **one clear contract** per test (or parametrize over corpus cases).
@@ -42,9 +42,9 @@ Green CI is merge-OK only if this table’s row for the PR is exercised — see 
 
 CI enforces a **90% line-coverage floor** on measured `mtg_loop_engine` code (`--cov-fail-under=90` in `pyproject.toml`).
 
-That floor is a **backstop**, not a substitute for the suites above. Still ban vacuous and mock-only tests.
+That floor is a **backstop**, not a substitute for the suites above. Raise coverage with real contract tests.
 
-Intentionally omitted from the %-gate (see `[tool.coverage.run] omit`): CLI entrypoint, Streamlit workbench, and network snapshot download helpers. Do not widen that omit list to green CI — raise coverage with real contract tests instead.
+Intentionally omitted from the %-gate (see `[tool.coverage.run] omit`): CLI entrypoint, Streamlit workbench, and network snapshot download helpers. Do not widen that omit list to green CI — raise coverage with real contract tests.
 
 ## Authority
 

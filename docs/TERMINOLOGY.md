@@ -22,23 +22,23 @@ graph LR;
 
 ### Loop
 
-A **repeatable sequence of actions** under modeled rules such that a proof-specific projection of state (`LoopRelevantState`) recurs and stated outputs / consequences hold. The product does **not** use a boolean “infinite” flag; loops are typed (for example arbitrary-repeatable vs resource-bounded) with output type, consequence, and delta per iteration.
+A **repeatable sequence of actions** under modeled rules such that a proof-specific projection of state (`LoopRelevantState`) recurs and stated outputs / consequences hold. Loops are typed (for example arbitrary-repeatable vs resource-bounded) with output type, consequence, and delta per iteration.
 
 ### Witness (`LoopWitness`)
 
-The **input contract** to the verifier: essential cards, card semantics, initial state, optional setup actions, loop actions, relevant-state projection, expected outputs, assumptions, and coverage. Search (or a human author) builds witnesses; the verifier does not search inside itself.
+The **input contract** to the verifier: essential cards, card semantics, initial state, optional setup actions, loop actions, relevant-state projection, expected outputs, assumptions, and coverage. Search (or a human author) builds witnesses; the verifier checks the given witness.
 
 ### Proof (`LoopProof`)
 
-The **output contract** of verification: versions, executed (or recorded) actions, recurrence result, output deltas, status (`VERIFIED` or a typed rejection), rejection reason when applicable, semantic coverage, and a `proof_hash`. A proof is auditable evidence about a witness—not a Spellbook listing.
+The **output contract** of verification: versions, executed (or recorded) actions, recurrence result, output deltas, status (`VERIFIED` or a typed rejection), rejection reason when applicable, semantic coverage, and a `proof_hash`. A proof is auditable evidence about a witness.
 
 ### Recurrence
 
-Success of the proof-specific **`LoopRelevantState`** after the loop body: each dimension compared with `EXACT`, `MINIMUM`, or `MAXIMUM` as declared. Global game-state equality is not required—only the dependency set the proof claims.
+Success of the proof-specific **`LoopRelevantState`** after the loop body: each dimension compared with `EXACT`, `MINIMUM`, or `MAXIMUM` as declared. Recurrence is over the dependency set the proof claims.
 
 ### Candidate
 
-An **accepted discovery queued for review**: a pair (or witness) that search + verifier already treated as machine-accepted, packaged with join reasons, prerequisite analysis, reference status, and explanation for adjudication. Candidates are not yet human-validated product claims.
+An **accepted discovery queued for review**: a pair (or witness) that search + verifier already treated as machine-accepted, packaged with join reasons, prerequisite analysis, reference status, and explanation for adjudication. Product claims about validity still require human adjudication.
 
 ---
 
@@ -50,15 +50,15 @@ A card that is treated as a **functional piece** of the interaction (typically t
 
 ### Generic prerequisite
 
-A setup assumption that is **fungible fodder or ambient setup** (for example generic mana, a disposable creature to sacrifice) and does **not** count as a third functional combo piece. Valid discoveries may still be labeled with generic prerequisites when those assumptions are justified.
+A setup assumption that is **fungible fodder or ambient setup** (for example generic mana, a disposable creature to sacrifice). It stays outside the two essential functional pieces. Valid discoveries may still be labeled with generic prerequisites when those assumptions are justified.
 
 ### Functional external requirement
 
-A requirement for an **additional non-generic functional piece** outside the two essential cards (another specific permanent, an opponent choice that amounts to a missing piece, etc.). Such interactions are **not** strict two-card.
+A requirement for an **additional non-generic functional piece** outside the two essential cards (another specific permanent, an opponent choice that amounts to a missing piece, etc.). Such interactions are labeled `FUNCTIONAL_EXTERNAL_REQUIREMENT` rather than strict two-card.
 
 ### Strict two-card
 
-Exactly **two essential functional pieces** participate; generics may appear; **no** functional external requirements. Derived from participation / prerequisite analysis—not from “the search asked for two names” alone.
+Exactly **two essential functional pieces** participate; generics may appear; functional external requirements are absent. Derived from participation / prerequisite analysis (search asking for two names is necessary but not sufficient).
 
 ---
 
@@ -66,11 +66,11 @@ Exactly **two essential functional pieces** participate; generics may appear; **
 
 ### Verified
 
-`VerificationStatus.VERIFIED`: the executor accepted the witness under modeled rules and recurrence. See the root README for what this does **not** claim (full Comprehensive Rules, human novelty, reference membership, casual “infinite”).
+`VerificationStatus.VERIFIED`: the executor accepted the witness under modeled rules and recurrence. Claim limits (full Comprehensive Rules, human novelty, reference membership, casual “infinite”): [root README](../README.md) and [PHILOSOPHY.md](PHILOSOPHY.md).
 
 ### Unsupported
 
-Semantics or rules needed for the claim are **not modeled**. Common surfaces: unmatched Oracle fragments, `UNSUPPORTED_SEMANTICS` / `UNSUPPORTED_RULE` rejection statuses, or assumption kind `unsupported`. Prefer this over inventing behavior.
+Semantics or rules needed for the claim are outside the modeled surface. Common surfaces: unmatched Oracle fragments, `UNSUPPORTED_SEMANTICS` / `UNSUPPORTED_RULE` rejection statuses, or assumption kind `unsupported`. Prefer this outcome over inventing behavior.
 
 ---
 
@@ -86,7 +86,7 @@ Some clauses unmatched, but callers marked those gaps as **irrelevant to the pro
 
 ### PARTIAL_RELEVANT_TO_PROOF
 
-Unmatched fragments are treated as **proof-relevant**. **Fail-closed:** must never emit `VERIFIED`. Default when real Oracle text outruns the pattern library.
+Unmatched fragments are treated as **proof-relevant**. **Fail-closed:** typed rejection (never `VERIFIED`). Default when real Oracle text outruns the pattern library.
 
 ---
 
@@ -94,15 +94,15 @@ Unmatched fragments are treated as **proof-relevant**. **Fail-closed:** must nev
 
 ### Reference recovery
 
-Measuring whether known conventional two-card reference entries (for example Spellbook-shaped rows) are **rediscovered** by compile → join → search → verify. Scoring uses pair labels only for evaluation—not inside blind discovery.
+Measuring whether known conventional two-card reference entries (for example Spellbook-shaped rows) are **rediscovered** by compile → join → search → verify. Pair labels score evaluation; blind discovery uses compiled capabilities and joins only.
 
 ### Eligible
 
-A reference row that is **in scope for recall**: semantics compile completely enough to be supported, and other eligibility gates pass. Recall is defined **only** over eligible / supported entries. If eligible is zero, recall is undefined or reported as null—not “0% of all Spellbook.”
+A reference row that is **in scope for recall**: semantics compile completely enough to be supported, and other eligibility gates pass. Recall is defined **only** over eligible / supported entries. If eligible is zero, recall is undefined or reported as null.
 
 ### Absent from reference (`ABSENT_FROM_REFERENCE`)
 
-An accepted discovery **not found** in the reference corpus. Not a false positive by itself; not `NOVEL` until adjudicated.
+An accepted discovery **not found** in the reference corpus. Remains `ABSENT_FROM_REFERENCE` until human adjudication upgrades it to `NOVEL`.
 
 ### Novel (`NOVEL`)
 
@@ -114,11 +114,11 @@ Human classification of a candidate into the adjudication vocabulary (valid stri
 
 ### Hard negative
 
-A curated witness expected to **fail** verification with a specific typed rejection. Used to lock fail-closed behavior (M1 contract).
+A curated witness expected to produce a specific typed rejection. Used to lock fail-closed behavior (M1 contract).
 
 ### Baseline
 
-A **frozen** evaluation summary checked into `eval/baseline/` (for example gold-pool precision distribution, Spellbook recovery counts). Narrative docs link baselines; they do not restate volatile figures as headlines.
+A **frozen** evaluation summary checked into `eval/baseline/` (for example gold-pool precision distribution, Spellbook recovery counts). Narrative docs link baselines; cite the files for figures.
 
 ### Precision
 
@@ -126,7 +126,7 @@ Among **adjudicated** candidates in the precision denominator (excluding classes
 
 ### Recall
 
-Among **eligible** reference entries, the share rediscovered. Not computed over unsupported / ineligible rows.
+Among **eligible** reference entries, the share rediscovered. Unsupported / ineligible rows stay outside the denominator.
 
 ---
 

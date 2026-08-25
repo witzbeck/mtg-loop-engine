@@ -29,7 +29,7 @@ graph TB;
   evalPkg --> evalArt[repoRootEval];
 ```
 
-**North star:** Oracle text → semantics → blind discovery → rules proof. Discovery may speculate; verification may not. Optimize verified precision over recall.
+**North star:** Oracle text → semantics → blind discovery → rules proof. Search may speculate; verification checks a given witness. Optimize verified precision over recall.
 
 ## Dependency direction (normative)
 
@@ -38,14 +38,14 @@ graph TB;
 | `search → verify` | **Required** | Search proposes; verifier accepts or rejects. Explorer injects `Verifier` as the acceptance oracle. |
 | `verify → search` | **Prohibited** | Verifier is witness-in / proof-out only. Enforced by `tests/unit/test_search_boundary.py`. |
 | `interactions → search` | Allowed | Joins propose pairs; search explores sequences. |
-| `search → interactions` | Avoid | Search consumes `CandidatePair`; it does not own join logic. |
+| `search → interactions` | Owned elsewhere | Joins live in `interactions`; search consumes `CandidatePair`. |
 | `semantics → {interactions, rules, state, proofs, verify}` | Allowed | IR is the shared language. |
-| `{verify, search} → semantics` | Read-only | Consume compiled IR; do not compile inside verify. |
+| `{verify, search} → semantics` | Read-only | Consume compiled IR; compile stays in `semantics`. |
 | `corpus → {verify, search, eval}` | Allowed | Fixtures and shared builders. |
-| `search → corpus.builders` | Allowed | Shared witness shape (`bf`, `two_card`); **not** gold pair keys. |
+| `search → corpus.builders` | Allowed | Shared witness shape (`bf`, `two_card`); gold pair keys stay off the discovery path. |
 | `eval → {search, verify, corpus, benchmark}` | Allowed | Research / measurement layer sits above the engine. |
-| `search → eval.classify` | **Acknowledged cycle** | Explorer stamps classification via `analyze_prerequisites`. Prefer extracting classify into a neutral module later; do not invert so verify depends on eval. |
-| `benchmark → corpus` | **Prohibited / unused** | Spellbook extract does not feed gold authorship. |
+| `search → eval.classify` | **Acknowledged cycle** | Explorer stamps classification via `analyze_prerequisites`. Prefer extracting classify into a neutral module later; keep verify independent of eval. |
+| `benchmark → corpus` | Unused | Spellbook extract stays off gold authorship. |
 
 ```mermaid
 graph LR;
@@ -67,18 +67,18 @@ graph LR;
   benchmark --> eval;
 ```
 
-Solid arrows are intended production dependencies. The dashed `search → eval` edge is the classification stamp used when building discovered witnesses; it must never become a path for eval to influence verifier acceptance logic.
+Solid arrows are intended production dependencies. The dashed `search → eval` edge is the classification stamp used when building discovered witnesses; verifier acceptance stays independent of eval.
 
 ## Layer responsibilities (one line each)
 
 | Package | Contract |
 | --- | --- |
-| `cards` | Ingest Scryfall Oracle snapshots; no semantics. |
+| `cards` | Ingest Scryfall Oracle snapshots; semantics stay in `semantics`. |
 | `semantics` | Oracle language → deterministic IR + coverage. |
 | `semantics/patterns` | Ordered deterministic clause matchers. |
 | `interactions` | Capability joins → candidate pairs (propose only). |
-| `search` | Bounded exploration → witness candidates. **Does not decide truth.** |
-| `verify` | **Acceptance boundary.** Witness → proof. No discovery. |
+| `search` | Bounded exploration → witness candidates. Acceptance stays in `verify` (+ search participant gate). |
+| `verify` | **Acceptance boundary.** Witness → proof. Exploration stays in `search`. |
 | `rules` | Modeled executor for costs/effects/triggers. |
 | `state` | Minimal `GameState` for recurrence paths. |
 | `proofs` | Shared pydantic contracts (`LoopWitness`, `LoopProof`, …). |
@@ -104,7 +104,7 @@ Solid arrows are intended production dependencies. The dashed `search → eval` 
 | --- | --- | --- |
 | `COMPLETE` | All fragments matched | May `VERIFIED` |
 | `PARTIAL_IRRELEVANT_TO_PROOF` | Gaps marked irrelevant | May `VERIFIED` if otherwise sound |
-| `PARTIAL_RELEVANT_TO_PROOF` | Proof-relevant gaps (default for unmatched) | **Never** `VERIFIED` → `UNSUPPORTED_SEMANTICS` |
+| `PARTIAL_RELEVANT_TO_PROOF` | Proof-relevant gaps (default for unmatched) | Typed rejection → `UNSUPPORTED_SEMANTICS` |
 
 Fail-closed also fires when any card’s `relevant_unsupported()` is true. Discovery often leaves witness-level `semantic_coverage` at its default; per-card IR coverage remains the load-bearing gate.
 
@@ -113,7 +113,7 @@ Fail-closed also fires when any card’s `relevant_unsupported()` is true. Disco
 | Instrument | Question | Spellbook absence |
 | --- | --- | --- |
 | Reference recovery | Among eligible/supported reference rows, how many rediscover? | N/A (denominator is eligible only) |
-| Human-adjudicated precision | Of accepted real-card discoveries, how many are valid? | `ABSENT_FROM_REFERENCE`, **not** a false positive |
+| Human-adjudicated precision | Of accepted real-card discoveries, how many are valid? | `ABSENT_FROM_REFERENCE` (label; adjudicate class separately) |
 
 Frozen numbers: `eval/baseline/*.json` (prefer over prose). See [`EVALUATION.md`](EVALUATION.md).
 
@@ -153,4 +153,4 @@ graph TB;
 | `tests/semantic` | Compiler coverage + compile→verify seam |
 | `tests/discovery` | Blind recall + compiled Oracle→discovery→verify seam |
 | `tests/eval` | Classify detection, recovery sample, precision exclusions |
-| `tests/unit/test_search_boundary` | `verify` must not import `search` |
+| `tests/unit/test_search_boundary` | `verify` imports stay free of `search` |

@@ -64,8 +64,10 @@ graph TB;
 - Generated/validated status summaries linked from `ROADMAP.md`
 - Runbooks and ADRs that outlive any one chat or plan file
 
-## What does not belong here
+## Boundaries
 
-- Engine implementation (code under `src/`)
-- Volatile metrics duplicated outside `STATUS.md` / `eval/baseline/`
-- Package-local contracts that belong in package `README.md` files
+| Concern | Owner |
+| --- | --- |
+| Engine implementation | `src/` |
+| Volatile metrics | `STATUS.md` / `eval/baseline/` |
+| Package-local contracts | package `README.md` files |

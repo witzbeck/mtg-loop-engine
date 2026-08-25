@@ -40,8 +40,8 @@ def render_generated_section(gold: dict, spellbook: dict) -> str:
         BEGIN,
         "## Frozen M4 baselines (generated)",
         "",
-        "Validated from `eval/baseline/*.json`. Do not edit this section by hand; "
-        "run `scripts/render_status.py`.",
+        "Validated from `eval/baseline/*.json`. Regenerate this section with "
+        "`scripts/render_status.py` (hand edits drift from baselines).",
         "",
         "### Gold-pool extras (`m4_gold_pool_summary.json`)",
         "",

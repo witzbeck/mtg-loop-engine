@@ -1,8 +1,8 @@
 # Contributing
 
-How humans and agents contribute to this repository. **`CONTRIBUTING.md` and [`AGENTS.md`](AGENTS.md) are authoritative.** Files under `.cursor/rules/` are Cursor adapters (shortcuts for the IDE); they must not contradict these docs. On conflict, follow this file and `AGENTS.md`.
+How humans and agents contribute to this repository. **`CONTRIBUTING.md` and [`AGENTS.md`](AGENTS.md) are authoritative.** Files under `.cursor/rules/` are Cursor adapters (shortcuts for the IDE); on conflict, follow this file and `AGENTS.md`.
 
-In-repository docs are canonical. Do not require `~/.cursor/plans/...` (or any home-directory plan) as part of setup or review.
+In-repository docs are canonical. Home-directory plans under `~/.cursor/plans/` are ephemeral session notes.
 
 ## Environment setup
 
@@ -20,11 +20,11 @@ uv sync --group eval
 uv run --group eval mtg-loop-engine adjudicate-workbench
 ```
 
-See the root [`README.md`](README.md) for the full CLI quick-start list. Keep Oracle bulk JSON and local snapshots under `data/` (gitignored); never commit them.
+See the root [`README.md`](README.md) for the full CLI quick-start list. Keep Oracle bulk JSON and local snapshots under gitignored `data/`.
 
 ## Feature-branch policy
 
-- All non-trivial work lands on a `feature/<slug>` branch (never commit non-trivial changes directly to `main`).
+- All non-trivial work lands on a `feature/<slug>` branch (commit non-trivial changes off `main`).
 - Keep `main` mergeable: CI green before merge.
 - Default merge strategy is squash (see `.cursor/rules/merge-strategy.mdc`); say why in the PR if you need otherwise.
 - Cursor adapter only: [`.cursor/rules/feature-branches.mdc`](.cursor/rules/feature-branches.mdc) — this file remains authoritative.
@@ -49,14 +49,13 @@ Green CI authorizes merge only when critical path behavior is exercised by what 
 - Behavior changes need tests in the same change (regression tests preferred when fixing adjudicated or gold failures).
 - Do not weaken assertions or broaden modeled rules solely to pass existing tests — see [`AGENTS.md`](AGENTS.md).
 - Critical path for a PR must be covered by the CI suite before treating green CI as merge OK (see **CI merge gate** above).
-- Prefer epistemic contract tests (status, typed rejection, rediscovery, coverage, hashes) over coverage-padding or mock-only tests. Details: [`tests/README.md`](tests/README.md), [`.cursor/rules/test-quality.mdc`](.cursor/rules/test-quality.mdc).
-- Pytest enforces `--cov-fail-under=90` on measured library code (CLI/UI/network ingest omitted — see `pyproject.toml`). The floor is a backstop; do not pad or widen omits to pass it.
+- Contract tests and coverage floor: [`tests/README.md`](tests/README.md), [`.cursor/rules/test-quality.mdc`](.cursor/rules/test-quality.mdc), product rails in [`AGENTS.md`](AGENTS.md).
 
 ## Documentation expectations
 
 - Update package / folder `README.md` files when the local operating contract changes.
 - Update [`ROADMAP.md`](ROADMAP.md) at milestone exit (and when next-milestone goals shift).
-- Record durable product decisions as ADRs under [`docs/decisions/`](docs/decisions/); do not bury them only in chat or ephemeral plans.
+- Record durable product decisions as ADRs under [`docs/decisions/`](docs/decisions/).
 - Agents: complete the preflight in [`AGENTS.md`](AGENTS.md) before coding.
 
 ## Baseline-update expectations
@@ -65,22 +64,22 @@ Green CI authorizes merge only when critical path behavior is exercised by what 
 - If your change affects gold-pool adjudication distribution, Spellbook recovery eligibility, or other recorded metrics:
   - Regenerate summaries via the project’s eval CLIs / scripts (see `eval/` package docs).
   - Update committed baseline JSON when the new numbers are intentionally frozen.
-  - Refresh any STATUS / evaluation prose that cites those numbers — **never** paste stale percentages from memory.
-- If metrics are unchanged, do not churn baseline files.
+  - Refresh any STATUS / evaluation prose that cites those numbers from the baseline files.
+- If metrics are unchanged, leave baseline files alone.
 
 ## Pull request expectations
 
-- Use the GitHub PR template checkboxes; do not check items you did not verify.
+- Use the GitHub PR template checkboxes; check only items you verified.
 - Prefer small, reviewable PRs scoped to one milestone concern (or one explicit M4 follow-through item).
 - Call out architecture-contract impact and any ADR touches in the PR body.
-- No Spellbook pairing leakage into discovery; no LLM semantics on the `VERIFIED` path.
+- Product rails: [`AGENTS.md`](AGENTS.md) Hard boundaries (blind discovery, deterministic `VERIFIED` path).
 
 ## Milestone-impact checklist
 
 Before merge, confirm:
 
 1. **Milestone fit** — Work belongs to the active roadmap item (or an explicit follow-through listed in `ROADMAP.md`).
-2. **Frozen decisions** — No silent reinterpretation of the frozen product table or Accepted ADRs.
+2. **Frozen decisions** — Align with the frozen product table and Accepted ADRs; escalate conflicts rather than reinterpreting them in the PR.
 3. **Deferred scope** — No scaffolding for explicitly deferred architecture.
 4. **Tests** — Relevant unit / discovery / eval / gold tests updated or added.
 5. **Docs** — Package READMEs, ADR, and/or `ROADMAP.md` updated when contracts or milestones change.

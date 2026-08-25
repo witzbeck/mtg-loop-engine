@@ -51,7 +51,7 @@ graph TB;
 
 ### `strict_two_card` nuance
 
-Builders’ `two_card()` sets `strict_two_card=len(functional)==0` with authored essential count. Discovery stamps `strict_two_card` from **participation** via `analyze_prerequisites`. Do not assume the two definitions are identical.
+Builders’ `two_card()` sets `strict_two_card=len(functional)==0` with authored essential count. Discovery stamps `strict_two_card` from **participation** via `analyze_prerequisites`. Treat the two definitions as related but distinct.
 
 ## Main entry points
 

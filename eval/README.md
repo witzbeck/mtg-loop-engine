@@ -2,9 +2,9 @@
 
 ## Purpose
 
-Committed M4 **evaluation knowledge**: fixtures, observed adjudications, taxonomy calibration, frozen baselines, and exceptional promoted review evidence — not ordinary LAR execution output.
+Committed M4 **evaluation knowledge**: fixtures, observed adjudications, taxonomy calibration, frozen baselines, and exceptional promoted review evidence.
 
-Working DuckDB files stay gitignored under `data/eval/`. Library code lives in `src/mtg_loop_engine/eval/`.
+Ordinary LAR execution stays under gitignored `data/eval/lar/runs/`. Working DuckDB files stay under `data/eval/`. Library code lives in `src/mtg_loop_engine/eval/`.
 
 ## Role in pipeline
 
@@ -41,29 +41,31 @@ graph TB;
 - Keep committed evaluation artifacts reviewable and CI-stable.
 - Separate **reference recovery** baselines from **human-adjudicated precision** baselines.
 - Separate **observed adjudications** from **calibration** cases.
-- Keep ephemeral LAR runs under gitignored `data/eval/lar/runs/` — not here.
+- Keep ephemeral LAR runs under gitignored `data/eval/lar/runs/`.
 
-### Measurement split (do not conflate)
+### Measurement split
 
 | Instrument | Question | Spellbook absence |
 | --- | --- | --- |
 | Reference recovery | Eligible/supported rediscovery | N/A (eligible denominator) |
-| Adjudicated precision | Valid among real-card accepted discoveries | `ABSENT_FROM_REFERENCE` ≠ false positive |
+| Adjudicated precision | Valid among real-card accepted discoveries | `ABSENT_FROM_REFERENCE` (label; adjudicate class separately) |
 
 Prefer numbers in `baseline/*.json` over narrative elsewhere.
 
-## Non-responsibilities
+## Boundaries
 
-- Scryfall Oracle bulk JSON
-- Full Spellbook snapshots (`data/spellbook/`)
-- Engine implementation
-- M7 explorer
+| Concern | Owner |
+| --- | --- |
+| Scryfall Oracle bulk JSON | gitignored `data/` |
+| Full Spellbook snapshots | `data/spellbook/` |
+| Engine implementation | `src/mtg_loop_engine/` |
+| M7 explorer | Deferred (`ROADMAP.md`) |
 
 ## Core invariants
 
-- Fixture pairs are not precision positives (`INVALID_CANDIDATE_DATA`).
-- Baselines are distribution records, not join-tuning targets.
-- CI must pass using fixtures without network downloads.
+- Fixture pairs are inventory (`INVALID_CANDIDATE_DATA`), not precision positives.
+- Baselines are distribution records for STATUS and regression, not join-tuning targets.
+- CI uses fixtures with network-free runs.
 
 ## Main entry points
 
@@ -84,7 +86,7 @@ Tests fail if sample recovery or extras↔adjudication coverage regresses. STATU
 
 ## Extension guide
 
-Regenerate baselines deliberately (see `baseline/README.md`). Update adjudications when re-reviewing extras; do not silently rewrite classes to improve precision.
+Regenerate baselines deliberately (see `baseline/README.md`). When re-reviewing extras, update adjudications with the new human judgment.
 
 ## Bigger-picture relationship
 

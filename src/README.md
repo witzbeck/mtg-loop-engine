@@ -21,14 +21,19 @@ Repo layout → **THIS** → installed `mtg_loop_engine` library (and CLI entryp
 - Hold the only installable library code for the engine.
 - Preserve `src` layout so editable installs and packaging stay predictable.
 
-## Non-responsibilities
+## Boundaries
 
-- Tests (`tests/`), committed eval metadata (`eval/`), gitignored snapshots (`data/`), or operator docs (`docs/`).
+| Concern | Owner |
+| --- | --- |
+| Tests | `tests/` |
+| Committed eval metadata | `eval/` |
+| Gitignored snapshots | `data/` |
+| Operator docs | `docs/` |
 
 ## Core invariants
 
-- No engine logic outside `mtg_loop_engine/`.
-- No Oracle bulk JSON committed under this tree.
+- Engine logic lives under `mtg_loop_engine/`.
+- Oracle bulk JSON stays under gitignored `data/`.
 
 ## Main entry points
 
@@ -49,7 +54,7 @@ Exercised indirectly by the full pytest suite importing the installed package.
 
 ## Extension guide
 
-Add new library modules under `mtg_loop_engine/<package>/` with a local `README.md` operating contract. Do not place ad-hoc scripts here (use `scripts/` or CLI subcommands).
+Add new library modules under `mtg_loop_engine/<package>/` with a local `README.md` operating contract. Ad-hoc scripts belong in `scripts/` or as CLI subcommands.
 
 ## Bigger-picture relationship
 

@@ -25,7 +25,7 @@ uv run python scripts/render_status.py --check
 <!-- BEGIN:GENERATED_FROM_BASELINES -->
 ## Frozen M4 baselines (generated)
 
-Validated from `eval/baseline/*.json`. Do not edit this section by hand; run `scripts/render_status.py`.
+Validated from `eval/baseline/*.json`. Regenerate this section with `scripts/render_status.py` (hand edits drift from baselines).
 
 ### Gold-pool extras (`m4_gold_pool_summary.json`)
 

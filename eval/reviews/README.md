@@ -2,9 +2,9 @@
 
 ## Purpose
 
-LAR **process contract** and **exceptional promoted evidence** — not a graveyard of every run.
+LAR **process contract** and **exceptional promoted evidence**.
 
-Normal Loop Adjudication Review (LAR) execution is **ephemeral** under gitignored `data/eval/lar/runs/`. Only findings that earn durable epistemic status through review are committed here (`promoted/`) or routed to sibling `eval/` trees.
+Normal Loop Adjudication Review (LAR) execution is **ephemeral** under gitignored `data/eval/lar/runs/`. Findings that earn durable epistemic status land in `promoted/` or sibling `eval/` trees through human-reviewed promotion.
 
 ## Two planes
 
@@ -30,11 +30,14 @@ graph TB;
 | `promoted/<evidence_id>/` | Compact exceptional evidence packages only |
 | This README | Lifecycle + promotion contract |
 
-## What does not belong here
+## Boundaries
 
-- Routine run directories (`eval/reviews/<timestamp>/` is **deprecated**)
-- Raw subagent transcripts or phase JSON dumps from ordinary runs
-- Frozen baselines (`../baseline/`) or observed adjudications (`../adjudications/`)
+| Concern | Owner |
+| --- | --- |
+| Routine / timestamped run trees | Deprecated under this folder; use `data/eval/lar/runs/` |
+| Raw subagent transcripts from ordinary runs | `data/eval/lar/runs/<run_id>/raw/` |
+| Frozen baselines | `../baseline/` |
+| Observed adjudications | `../adjudications/` |
 
 ## Normal run location
 
@@ -51,7 +54,7 @@ data/eval/lar/runs/<run_id>/
   raw/
 ```
 
-Safe to delete locally; recreated by evaluation. **Never authoritative.**
+Safe to delete locally; recreated by evaluation. Ephemeral — not a STATUS authority.
 
 ## Exceptional promotion
 
@@ -81,6 +84,6 @@ Authoritative models: `mtg_loop_engine.eval.lar_contracts`. Examples in `_templa
 
 ## Notes
 
-- Use `suspected_layer` / `diagnostic_layer` in synthesis — not definitive architecture ownership from disagreement alone.
-- Report **information gain**, not a composite LAR score.
+- Use `suspected_layer` / `diagnostic_layer` in synthesis — disagreement alone does not assign architecture ownership.
+- Report **information gain**; keep LAR signals separate (see [`docs/EVALUATION.md`](../../docs/EVALUATION.md)).
 - Parallel same-model reviewers are throughput, not statistical independence.

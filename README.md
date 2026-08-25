@@ -4,23 +4,21 @@
 
 MTG Loop Engine is an explainable interaction-discovery system for Magic: The Gathering. It compiles Oracle card text into deterministic semantic actions, searches for two-card repeatable loops, verifies candidates against a modeled rules surface, and emits structured proofs a human can audit.
 
-Discovery may speculate. Verification may not.
+Search may speculate. Verification may not.
 
 ## Why does it exist?
 
-Known-combo databases answer “is this pair already catalogued?” This project asks a harder question: can we **automatically discover** two-card loops from Oracle text and **prove** that a proposed sequence is repeatable under modeled rules?
+The project asks: can we **automatically discover** two-card loops from Oracle text and **prove** that a proposed sequence is repeatable under modeled rules?
 
-Commander Spellbook and similar corpora are reference material for evaluation and recovery metrics—not the product. The engine’s job is blind discovery plus conservative verification, with humans in the loop when the machine’s claim matters.
+Commander Spellbook and similar corpora are reference material for evaluation and recovery metrics. The product is blind discovery plus conservative verification, with humans in the loop when the machine’s claim matters. Detail: [docs/PHILOSOPHY.md](docs/PHILOSOPHY.md).
 
 ## Core philosophy
 
-- **Discovery may speculate. Verification may not.** Search can propose; only the witness-in / proof-out verifier can accept.
+- **Search proposes; verify decides.** Only the witness-in / proof-out verifier accepts.
 - **Precision-first.** Prefer fewer trustworthy `VERIFIED` results over broad, untrusted recall.
-- **Human adjudication is part of the system.** Machine acceptance is not the final word on whether a discovery is a valid strict two-card interaction.
-- **Loop model, not boolean “infinite.”** Outcomes are typed: loop type × output × consequence × delta—not a binary infinite flag.
-- **False confidence is worse than an unsupported result.** Fail closed when semantics or rules coverage is incomplete in a proof-relevant way.
-
-See [docs/PHILOSOPHY.md](docs/PHILOSOPHY.md) for the fuller argument.
+- **Human adjudication is part of the system.** Machine acceptance is an input to product claims about valid strict two-card interactions, not the final word.
+- **Typed loops.** Outcomes are loop type × output × consequence × delta.
+- **Fail closed.** Incomplete proof-relevant semantics or rules coverage yield typed rejection, not `VERIFIED`.
 
 ## What does VERIFIED mean? / not mean
 
@@ -34,7 +32,7 @@ See [docs/PHILOSOPHY.md](docs/PHILOSOPHY.md) for the fuller argument.
 - Spellbook (or any reference corpus) lists the pair.
 - The interaction is “infinite” in the casual sense—only that the modeled loop recurs under the stated projection and outputs.
 
-Unsupported or partial proof-relevant semantics never earn `VERIFIED`.
+Unsupported or partial proof-relevant semantics never earn `VERIFIED`. Limits of that claim are also spelled out in [docs/TERMINOLOGY.md](docs/TERMINOLOGY.md) and [docs/PHILOSOPHY.md](docs/PHILOSOPHY.md).
 
 ## How it works
 
@@ -125,12 +123,12 @@ CLI details: [docs/CLI.md](docs/CLI.md).
 | [`eval/`](eval/README.md) | Committed fixtures, adjudications, baselines |
 | [`tests/`](tests/README.md) | Pytest suites |
 | [`docs/`](docs/README.md) | Narrative and operating docs |
-| [`data/`](data/README.md) | Gitignored local snapshots (never commit Oracle bulk) |
+| [`data/`](data/README.md) | Gitignored local snapshots (Oracle bulk stays gitignored) |
 | [`scripts/`](scripts/README.md) | Helper scripts |
 
 ## How to contribute
 
-Start with [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md) (agent / contributor operating notes). Align work with [ROADMAP.md](ROADMAP.md), browse [docs/](docs/README.md), and record durable product choices under [docs/decisions/](docs/decisions/).
+Start with [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md). Align work with [ROADMAP.md](ROADMAP.md), browse [docs/](docs/README.md), and record durable product choices under [docs/decisions/](docs/decisions/).
 
 ## Project boundaries
 
@@ -140,13 +138,13 @@ Start with [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md) (agent 
 - A deckbuilder, pricing tool, collection manager, or ManaBox integration
 - A full Comprehensive Rules engine or SMT/Z3 solver
 - An LLM-authored semantics path to `VERIFIED`
-- A deployed public UI or FastAPI/Postgres explorer (M7 is deferred)
+- A deployed / public UI (local explorer is M7 later; public deploy stays deferred)
 
 Three-card discovery and performance-optimization passes are also explicitly out of scope for now—see ROADMAP deferred list.
 
 ## Source-of-truth hierarchy
 
-When sources disagree, use the artifact that answers that kind of question—do not guess.
+When sources disagree, use the artifact that answers that kind of question.
 
 | Question type | Authoritative source |
 | --- | --- |
@@ -154,7 +152,7 @@ When sources disagree, use the artifact that answers that kind of question—do 
 | What does the implementation actually enforce? | Schemas, tests, golden proofs, engine code under `src/` |
 | What has been measured? | [`eval/baseline/`](eval/baseline/) (summarized in [`docs/STATUS.md`](docs/STATUS.md)); prose numbers are summaries only |
 | What milestone is complete vs gated? | [`ROADMAP.md`](ROADMAP.md) |
-| How do I learn the system? | This README, package READMEs, [`docs/`](docs/README.md)—must not silently override the contracts above |
+| How do I learn the system? | This README, package READMEs, [`docs/`](docs/README.md)—learning docs follow the contracts above |
 
 If an agent finds disagreement across layers, reconcile it in the same change or document it as an unresolved defect.
 
@@ -162,4 +160,4 @@ Glossary: [docs/TERMINOLOGY.md](docs/TERMINOLOGY.md).
 
 ## AI–human flourishing
 
-The useful system is a partnership: the machine proposes candidates and proves what it can under explicit models; humans adjudicate borderline cases, improve taxonomy and tests, and keep false confidence out of the corpus. Each loop of propose → prove → adjudicate → harden semantics should make both sides sharper—more precise automation, clearer human judgment—not a handoff that replaces either. That principle is spelled out in [docs/PHILOSOPHY.md](docs/PHILOSOPHY.md).
+The machine proposes candidates and proves what it can under explicit models; humans adjudicate borderline cases, improve taxonomy and tests, and keep false confidence out of the corpus. Each loop of propose → prove → adjudicate → harden semantics should make both sides sharper. Detail: [docs/PHILOSOPHY.md](docs/PHILOSOPHY.md).

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Frozen M4 metric snapshots. These files are the quantitative source of truth for reported recovery and gold-pool precision — not aspirational targets for join tuning.
+Frozen M4 metric snapshots. These files are the quantitative source of truth for reported recovery and gold-pool precision (certified STATUS inputs).
 
 ## Role in pipeline
 
@@ -25,7 +25,7 @@ graph TB;
 
 | File | Frozen meaning (current) |
 | --- | --- |
-| `m4_gold_pool_summary.json` | **Pre-gate freeze:** 24 extras; 8 real / 16 fixture; precision **0.375** (3 valid / 8 real); 5 duplicates. Live discovery after participant enforcement yields fewer extras (see `GOLD_EXTRA_ADJUDICATIONS`); do not treat this file as current until ROADMAP item 5 re-freeze. |
+| `m4_gold_pool_summary.json` | **Pre-gate freeze:** 24 extras; 8 real / 16 fixture; precision **0.375** (3 valid / 8 real); 5 duplicates. Live discovery after participant enforcement yields fewer extras (see `GOLD_EXTRA_ADJUDICATIONS`); treat as historical until ROADMAP item 5 re-freeze. |
 | `m4_spellbook_recovery_summary.json` | 99 selected; **0 eligible**; all `compiler_unsupported`; recall null |
 
 ## Responsibilities
@@ -33,17 +33,19 @@ graph TB;
 - Record post-adjudication / post-recovery distributions for regression and status rendering.
 - Make denominator choices explicit in `notes` fields.
 
-## Non-responsibilities
+## Boundaries
 
-- Raw discovery payloads (see `../adjudications/`)
-- Live DuckDB working sets (`data/eval/`)
-- Automatically rewriting on every CI run (CI only **checks** STATUS vs these files)
+| Concern | Owner |
+| --- | --- |
+| Raw discovery payloads | `../adjudications/` |
+| Live DuckDB working sets | `data/eval/` |
+| STATUS regeneration | `scripts/render_status.py` (CI only **checks**) |
 
 ## Core invariants
 
 - Precision is over real-card pairs only; fixtures excluded.
-- Spellbook recall is only over eligible/supported entries; absence is not a false positive.
-- Joins were not tightened to chase the gold-pool distribution (see summary notes).
+- Spellbook recall is only over eligible/supported entries; absence → `ABSENT_FROM_REFERENCE`.
+- Joins were left open relative to the gold-pool distribution (see summary notes).
 
 ## When regenerated
 
@@ -53,7 +55,7 @@ graph TB;
 | New Spellbook reference recovery after compiler/search changes | Rewrite `m4_spellbook_recovery_summary.json` with updated counts/examples |
 | CI | Does **not** regenerate; runs `render_status.py --check` |
 
-Do not regenerate casually to “green” STATUS — update docs and review the metric change.
+Regenerate when metrics intentionally change; update docs in the same review.
 
 ## Main entry points
 

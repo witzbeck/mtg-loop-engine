@@ -4,7 +4,7 @@
 
 M4 research instrumentation: prerequisite analysis, Spellbook **reference recovery**, human-adjudicated **precision**, persistence, and the Streamlit workbench.
 
-This package measures the engine. It is not the M7 explorer.
+This package measures the engine. Explorer UI is M7 (`ROADMAP.md`). Denominators: [`docs/EVALUATION.md`](../../../docs/EVALUATION.md).
 
 ## Role in pipeline
 
@@ -42,22 +42,23 @@ graph TB;
 | Prerequisite analysis | `classify.py` | Participation / assumptions / `strict_two_card` **detection** |
 | Persistence / UX | `store.py`, `workbench.py`, `narrate.py`, `glossary.py`, `explain.py` | Reviewer workflow |
 
-### Spellbook absence ≠ false positive
+### Spellbook absence
 
-Accepted discoveries missing from Spellbook are `ABSENT_FROM_REFERENCE` (or similar reference status). They are **not** counted as false positives. `NOVEL` requires human adjudication (M5). See [`docs/EVALUATION.md`](../../../docs/EVALUATION.md).
+Accepted discoveries missing from Spellbook are `ABSENT_FROM_REFERENCE` (or similar reference status). `NOVEL` requires human adjudication (M5). See [`docs/EVALUATION.md`](../../../docs/EVALUATION.md).
 
 ### Detection vs enforcement
 
-`analyze_prerequisites` detects unused searched cards and sets `strict_two_card`. **Search enforces** that flag in `explore_pair` (accept only `VERIFIED` + `strict_two_card`). This package still owns detection and measurement; it does not own the acceptance gate.
+`analyze_prerequisites` detects unused searched cards and sets `strict_two_card`. **Search enforces** that flag in `explore_pair` (accept only `VERIFIED` + `strict_two_card`). This package owns detection and measurement; the acceptance gate lives in search.
 
-## Non-responsibilities
+## Boundaries
 
-- FastAPI / Postgres / public explorer (M7)
-- LLM parsing
-- Tightening joins to chase unlabeled extras
-- Verifier-side participant rejection (optional follow-up; discovery already filters)
-
-Committed baseline *files* live under repo-root `eval/baseline/`. This package **does** write/read them (e.g. `gold_extras.persist_gold_pool_extras` → `m4_gold_pool_summary.json`); the artifact tree is the committed home, not a separate owner.
+| Concern | Owner |
+| --- | --- |
+| FastAPI / Postgres / public explorer | M7 (`ROADMAP.md`) |
+| LLM parsing | Out of scope on `VERIFIED` path |
+| Join policy for unlabeled extras | Leave open unless precision bug proven |
+| Verifier-side participant rejection | Optional follow-up; discovery already filters |
+| Committed baseline *files* | repo-root `eval/baseline/` (this package writes/reads them) |
 
 LAR v2 contracts (`lar_contracts.py`, `lar_calibration.py`) support ephemeral runs under `data/eval/lar/runs/` and durable calibration loading from `eval/calibration/`.
 
@@ -97,7 +98,7 @@ Committed outputs land in repo-root `eval/` (fixtures, adjudications, baselines)
 ## Extension guide
 
 1. Change denominators only with docs + baseline updates.
-2. Keep workbench educational; do not hide adjudication classes.
+2. Keep workbench educational; surface adjudication classes clearly.
 3. Participant enforcement belongs in search/verify — update classify tests when it lands.
 
 ## Bigger-picture relationship

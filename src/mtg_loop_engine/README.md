@@ -45,17 +45,19 @@ graph TB;
 - Keep discovery speculative and verification conservative.
 - Expose CLI orchestration without embedding business logic in `cli.py` beyond wiring.
 
-## Non-responsibilities
+## Boundaries
 
-- FastAPI / Postgres / public explorer (M7)
-- LLM-authored semantics on any path to `VERIFIED`
-- Committed Oracle bulk JSON
+| Concern | Owner |
+| --- | --- |
+| FastAPI / Postgres / public explorer | M7 (`ROADMAP.md`) |
+| Semantics on the `VERIFIED` path | Deterministic compiler / modeled executor |
+| Oracle bulk JSON | gitignored `data/` |
 
 ## Core invariants
 
 - **`search → verify` allowed; `verify → search` forbidden.**
-- Fail-closed: `PARTIAL_RELEVANT_TO_PROOF` never yields `VERIFIED`.
-- Pair labels must not enter the discovery path.
+- Fail-closed: `PARTIAL_RELEVANT_TO_PROOF` → typed rejection.
+- Blind discovery uses compiled capabilities and joins only.
 - Discovery acceptance requires `strict_two_card` (search participant gate). See `search/README.md` and [`docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md).
 
 ## Main entry points
@@ -83,7 +85,7 @@ Full suite under `tests/` — gold positives, hard negatives, compiled seam, dis
 ## Extension guide
 
 1. Add deterministic patterns before expanding search heuristics.
-2. Keep new acceptance gates in `verify` or as explicit search pre-filters — never hide truth decisions inside joins alone.
+2. Keep new acceptance gates in `verify` or as explicit search pre-filters; joins propose, they do not accept.
 3. Update the package README here and the touched subpackage README in the same change.
 
 ## Bigger-picture relationship

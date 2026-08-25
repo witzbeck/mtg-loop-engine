@@ -4,9 +4,9 @@
 
 Bounded discovery of `LoopWitness` candidates from semantic cards.
 
-**Search proposes witnesses. It does not decide truth.**
+**Search proposes witnesses.** Acceptance physics live in `verify/`; this package applies the **participant gate** (`strict_two_card`) after the verifier returns.
 
-The explorer calls an injected `Verifier` once per productive candidate as its acceptance oracle, then applies the **participant gate** (`strict_two_card`) before accepting. `discover_loops` does not verify again.
+The explorer calls an injected `Verifier` once per productive candidate as its acceptance oracle, then applies the participant gate before accepting. `discover_loops` trusts that single oracle pass.
 
 ## Role in pipeline
 
@@ -46,12 +46,14 @@ graph TB;
 - Call verifier as the sole physics acceptance oracle on the discovery path
 - **Participant gate:** accept only when `proof.status == VERIFIED` **and** `witness.classification.strict_two_card`; silently continue BFS otherwise
 
-## Non-responsibilities
+## Boundaries
 
-- Final human truth or adjudication
-- Owning pair labels / gold lookup on the discovery path
-- A second verification pass after acceptance
-- Verifier-side participant rejection (hand-authored bystander witnesses can still verify; discovery will not accept them)
+| Concern | Owner |
+| --- | --- |
+| Human adjudication | `eval/` |
+| Pair labels / gold lookup on the discovery path | Stay off this path (eval / corpus for labels) |
+| Physics acceptance | Injected `Verifier` (single pass) |
+| Verifier-side participant rejection | Optional follow-up; discovery already filters bystanders |
 
 ## Core invariants
 
@@ -100,9 +102,9 @@ Returns `None` / empty verified hits when bounds exhaust, the oracle rejects all
 ## Extension guide
 
 1. Keep joins in `interactions/`; keep acceptance physics in `verify/`.
-2. Prefer extracting `analyze_prerequisites` out of `eval` if the search↔eval import cycle becomes painful — do not invert verify→eval.
-3. If hand-authored witnesses must also fail closed on bystanders, add a verifier gate (and typed status) in a deliberate follow-up — do not silently broaden this PR’s search-only contract.
+2. Prefer extracting `analyze_prerequisites` out of `eval` if the search↔eval import cycle becomes painful; keep verify independent of eval.
+3. If hand-authored witnesses must also fail closed on bystanders, add a verifier gate (and typed status) in a deliberate follow-up.
 
 ## Bigger-picture relationship
 
-Search is speculative proposal under a conservative verifier plus a participant acceptance filter. Architecture: [`docs/ARCHITECTURE.md`](../../../docs/ARCHITECTURE.md).
+Search proposes under a conservative verifier plus a participant acceptance filter. Architecture: [`docs/ARCHITECTURE.md`](../../../docs/ARCHITECTURE.md).

@@ -1,0 +1,87 @@
+---
+description: "Keep agent/human communication concise, substantive, and decision-oriented."
+alwaysApply: true
+---
+
+# High-Signal Communication
+
+Optimize communication for information gained per word.
+
+Committed docs and chat use the same voice. Product rails stay affirmative-first; use contrast only when the rejected alternative is decision-relevant (per the test below).
+
+## State the thing directly
+
+Prefer positive, declarative statements.
+
+Avoid habitual rhetorical contrast such as:
+- "This isn't X; it's Y."
+- "The goal isn't merely X, but Y."
+- "This is less about X and more about Y."
+
+Use contrast only when the rejected alternative is itself decision-relevant:
+- it corrects a likely misconception;
+- records an actual rejected option;
+- establishes an important boundary; or
+- explains why the implementation changes.
+
+**Test:** If deleting the negative half preserves the useful meaning, delete it.
+
+## Make depth operational
+
+Insight should change understanding or action.
+
+When a decision has meaningful architectural, conceptual, or human consequences, briefly surface the deeper issue:
+- What assumption are we encoding?
+- What future capability are we preserving or sacrificing?
+- What must remain true for this design to stay correct?
+- Are we solving the underlying problem or its current manifestation?
+
+Ask at most one of these when a decision hangs on it; otherwise skip. Do not ask philosophical questions merely to sound thoughtful. One consequential question is better than several interesting ones.
+
+## Communicate in descending value
+
+For substantive work, prefer:
+
+1. **Conclusion / change**
+2. **Why it matters**
+3. **Important tradeoff or uncertainty**
+4. **Next action or verification**
+
+Omit sections that add no useful information.
+
+Do not restate the user's request, narrate obvious work, manufacture consensus, or summarize a summary.
+
+## Disagree usefully
+
+When challenging a human decision, lead with the recommendation and evidence.
+
+Prefer:
+"Keep the fixture deterministic because the test is intended to detect engine regressions."
+
+Over:
+"I don't think we should treat this as ordinary evaluation output. Instead, we should think of it as..."
+
+Preserve genuine disagreement. Remove rhetorical ceremony.
+
+## Default behavior
+
+Be brief by default.
+
+Expand when complexity, uncertainty, risk, or an important design decision justifies the additional words.
+
+The objective is not minimal text. The objective is minimal text that preserves the reasoning necessary for good decisions.
+
+## Edit for information gain
+
+When changing existing prose, keep or improve signal. Prefer the shorter wording when meaning is equal.
+
+**Ceremony (undo or rewrite):**
+- Synonym churn that does not change what the reader knows or does
+- Longer affirmative paraphrase of a sharp, decision-relevant sentence
+- Heading renames (`Non-responsibilities` → `Boundaries`) that leave the same absence-list body
+
+**Keep:**
+- A short, earned ban when the operational edge *is* the ban
+- Contrast that corrects a likely misconception the team has already made
+
+**Test:** If the edit could be reversed with no loss of decision information, do not ship it.
