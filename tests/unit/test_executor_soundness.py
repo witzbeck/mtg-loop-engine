@@ -553,6 +553,51 @@ def test_die_to_graveyard_still_queues_dies():
     assert any(t["ability_id"] == "ba-drain" for t in state.pending_triggers)
 
 
+def test_sac_noncreature_artifact_does_not_bump_death():
+    """events.death / OutputType.DEATH are creature-scoped; artifact GY still moves."""
+    state, ex = _board(
+        PermanentSpec(
+            object_id="fodder",
+            oracle_id="oracle:sol-ring",
+            name="Sol Ring",
+            is_artifact=True,
+        ),
+        PermanentSpec(
+            object_id="artist",
+            oracle_id=BLOOD_ARTIST.oracle_id,
+            name=BLOOD_ARTIST.name,
+            is_creature=True,
+            power=0,
+            toughness=1,
+        ),
+        semantics={BLOOD_ARTIST.oracle_id: BLOOD_ARTIST},
+    )
+    sac_before = state.event_counters.get("sacrifice", 0)
+    ex.sacrifice(state, state.permanents["fodder"])
+    assert state.permanents["fodder"].zone == Zone.GRAVEYARD
+    assert state.event_counters.get("sacrifice", 0) == sac_before + 1
+    assert state.event_counters.get("death", 0) == 0
+    # DIES queued but Blood Artist filter="creature" skips noncreatures.
+    assert not any(t["ability_id"] == "ba-drain" for t in state.pending_triggers)
+
+
+def test_sac_creature_bumps_death():
+    state, ex = _board(
+        PermanentSpec(
+            object_id="beast",
+            oracle_id="oracle:beast",
+            name="Beast",
+            is_creature=True,
+            power=1,
+            toughness=1,
+        ),
+    )
+    ex.sacrifice(state, state.permanents["beast"])
+    assert state.permanents["beast"].zone == Zone.GRAVEYARD
+    assert state.event_counters.get("death", 0) == 1
+    assert state.event_counters.get("sacrifice", 0) == 1
+
+
 # --- Summoning sickness on tap mana abilities ---
 
 

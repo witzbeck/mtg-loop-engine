@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from mtg_loop_engine.semantics.enums import (
     ComparisonOp,
@@ -17,6 +17,7 @@ from mtg_loop_engine.semantics.enums import (
     Zone,
 )
 from mtg_loop_engine.semantics.ir import CardSemantics, ManaAmount
+from mtg_loop_engine.state.paths import STATE_PATH_GRAMMAR, is_valid_state_path
 
 
 class Prerequisite(BaseModel):
@@ -40,11 +41,24 @@ class Classification(BaseModel):
 
 
 class StateDimension(BaseModel):
-    """One dimension of proof-specific LoopRelevantState."""
+    """One dimension of proof-specific LoopRelevantState.
+
+    ``path`` must match the grammar documented in ``state.paths`` /
+    ``GameState.get_path`` (fail closed at construction).
+    """
 
     path: str
     op: ComparisonOp
     value: Any
+
+    @field_validator("path")
+    @classmethod
+    def _path_must_match_grammar(cls, path: str) -> str:
+        if not is_valid_state_path(path):
+            raise ValueError(
+                f"invalid state path {path!r}; allowed grammar:\n{STATE_PATH_GRAMMAR}"
+            )
+        return path
 
 
 class LoopRelevantState(BaseModel):

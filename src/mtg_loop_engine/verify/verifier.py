@@ -22,6 +22,7 @@ from mtg_loop_engine.semantics.enums import (
     VerificationStatus,
 )
 from mtg_loop_engine.state.game import GameState
+from mtg_loop_engine.state.paths import state_path_error
 from mtg_loop_engine.verify.mandatory_recurrence import effective_relevant_state
 
 
@@ -187,6 +188,15 @@ class Verifier:
                 VerificationStatus.EXTERNAL_FUNCTIONAL_PIECE_REQUIRED,
                 "essential_card_count exceeds max_essential_cards",
             )
+
+        # Fail-closed path grammar (defense in depth vs model_construct / stale JSON).
+        for dim in witness.relevant_state.dimensions:
+            err_detail = state_path_error(dim.path)
+            if err_detail is not None:
+                return reject(
+                    VerificationStatus.STATE_NOT_RECURRENT,
+                    err_detail,
+                )
 
         semantics = {c.oracle_id: c for c in witness.card_semantics}
         executor = Executor(semantics)

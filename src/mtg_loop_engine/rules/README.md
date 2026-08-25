@@ -35,6 +35,7 @@ graph TB;
 - Explicit sacrifice / host-tap target revalidation (BF, controller, creature/token selectors); invalid explicit objects → `ILLEGAL_TARGET`.
 - Exact pending-trigger match when `actor` / `ability_id` are supplied (no silent idx-0 fallback).
 - Exile-on-death replacements suppress death events and `DIES` triggers (CR 700.4); sacrifice events still fire.
+- ``events.death`` / `OutputType.DEATH` bump only for **creature** BF→GY moves; noncreature sacrifices still move zone, fire `SACRIFICED`, and queue `DIES` (filters apply). CR "dies" remains BF→GY for any permanent.
 - Summoning sickness blocks `{T}` / `TapCost` even on mana abilities (CR 302.6); haste not modeled.
 - State-based actions after each successful `run_step`: creatures you control die on toughness ≤ 0 or lethal `damage_marked` (CR 704.5f/g); cascades bounded.
 - Undying seed (`seed_grant_undying`) and synthetic `__undying_return__` trigger: return with +1/+1 iff zero p1p1 at death (CR 702.92a/c); no card-ability lookup.

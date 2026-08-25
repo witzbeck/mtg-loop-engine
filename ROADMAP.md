@@ -67,7 +67,7 @@ Exit criteria: **precision correctness** + **minimum real-Oracle eligibility** (
 | Gate | Evidence |
 |------|----------|
 | Participant enforcement | `explore_pair` requires `VERIFIED` + `strict_two_card`; Basalt bystander regressions in `tests/eval/test_classify_store.py` |
-| Gold-pool precision | `eval/baseline/m4_gold_pool_summary.json` — precision **null** (0 Oracle-eligible pairs; ADR 0007) |
+| Gold-pool precision | `eval/baseline/m4_gold_pool_summary.json` — precision **1.0** (1 eligible extra: Alarm+Gond) |
 | ≥1 eligible Spellbook pair | `eval/baseline/m4_spellbook_recovery_summary.json` — **eligible=1** / **rediscovered=1** (Gravecrawler + Phyrexian Altar) |
 | Baselines + STATUS | `scripts/render_status.py --check`; [`docs/STATUS.md`](docs/STATUS.md) |
 
@@ -111,7 +111,7 @@ Blind discovery among real **COMPLETE**-compiled Oracle cards from Spellbook nam
    (`core_saffi_champion`, `core_mikaeus_triskelion`) staged in
    `corpus.gold_extended.oracle_gaps` until delayed triggers / undying+SBA land.
    Keep **line coverage floor at 92%** until percentages measure faithful
-   claims (optional next: path-grammar fail-closed, noncreature death cleanup).
+   claims. Path-grammar fail-closed + creature-scoped ``events.death`` ✓.
 
    **Wave 3 physics slice (undying + SBA + self-ping):** ✓ executor primitives
    landed (`damage_marked`, `apply_state_based_actions`, `seed_grant_undying`,
