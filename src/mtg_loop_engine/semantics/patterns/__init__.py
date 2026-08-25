@@ -873,7 +873,9 @@ def pat_etb_with_counters_irrelevant(text: str, name: str) -> Ability | None:
 def pat_grant_lifelink_activated(text: str, name: str) -> Ability | None:
     """Heliod: {cost}: Another target creature gains lifelink until end of turn.
 
-    Modeled as proof-irrelevant activation text; explore uses seed_grant_lifelink.
+    Modeled as proof-irrelevant activation text. ``seed_grant_lifelink`` is a
+    physics stand-in only — quarantined from ORACLE_EXACT product VERIFIED
+    (paid Heliod activation required for product witnesses).
     """
     m = re.match(
         r"^(?:\{[^}]+\})+: Another target creature gains lifelink "

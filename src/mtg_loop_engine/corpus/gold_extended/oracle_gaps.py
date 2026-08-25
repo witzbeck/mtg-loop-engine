@@ -49,6 +49,21 @@ def oracle_gap_catalog() -> list[OracleGap]:
                 "Mikaeus grant/anthem compile + gold witness."
             ),
         ),
+        OracleGap(
+            proposed_gold_id="core_heliod_ballista",
+            left_name="Heliod, Sun-Crowned",
+            right_name="Walking Ballista",
+            blockers=(
+                "printed 0/0 Ballista + SBA-safe starting counters (≥2) not used by discovery seed",
+                "Heliod lifelink must be a paid {1}{W} activation, not seed_grant_lifelink",
+                "seed_grant_lifelink is quarantined from Oracle product VERIFIED",
+            ),
+            notes=(
+                "Audited ORACLE_EXACT fixtures retained for curriculum. "
+                "Do not re-promote until two-counter 0/0 start, SBA timing, and paid Heliod "
+                "activation verify without seed_grant_lifelink."
+            ),
+        ),
     ]
 
 

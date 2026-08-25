@@ -9,7 +9,11 @@ from mtg_loop_engine.corpus.physics_fixtures.hard_negatives import (
 def test_oracle_gap_catalog_lists_wave3_blockers():
     gaps = oracle_gap_catalog()
     ids = {g.proposed_gold_id for g in gaps}
-    assert ids == {"core_saffi_champion", "core_mikaeus_triskelion"}
+    assert ids == {
+        "core_saffi_champion",
+        "core_mikaeus_triskelion",
+        "core_heliod_ballista",
+    }
     for g in gaps:
         assert g.blockers
 

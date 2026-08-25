@@ -24,7 +24,7 @@ graph TB;
 
 ## Outputs
 
-- Parametrized pytest pass/fail (currently **8** Oracle positives)
+- Parametrized pytest pass/fail (currently **7** Oracle positives)
 
 ## Responsibilities
 

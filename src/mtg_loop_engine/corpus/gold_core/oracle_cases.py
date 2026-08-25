@@ -147,14 +147,6 @@ def all_gold_core() -> list[LoopWitness]:
             expected_claim_consequence=Consequence.ACCUMULATES,
             max_depth=10,
         ),
-        _promote(
-            gold_id="core_heliod_ballista",
-            left_id="oracle:heliod-sun-crowned",
-            right_id="oracle:walking-ballista",
-            expected_net_state=NetStateDelta(life_you=1, life_opponent=-1),
-            expected_claim_consequence=Consequence.LETHAL,
-            max_depth=10,
-        ),
     ]
     return cases
 
