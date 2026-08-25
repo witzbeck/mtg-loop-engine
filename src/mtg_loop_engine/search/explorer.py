@@ -266,7 +266,11 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
 
 
 def derive_relevant_state(
-    spec: InitialStateSpec, before: GameState
+    spec: InitialStateSpec,
+    before: GameState,
+    *,
+    loop_actions: list[ActionStep] | None = None,
+    cards: list[CardSemantics] | None = None,
 ) -> LoopRelevantState:
     dims: list[StateDimension] = []
     for perm in spec.permanents:
@@ -297,6 +301,40 @@ def derive_relevant_state(
                     value=qty,
                 )
             )
+    # Once-per-turn abilities used in the loop must recur as unused (EXACT False).
+    if loop_actions and cards:
+        by_oracle = {c.oracle_id: c for c in cards}
+        seen_once: set[tuple[str, str]] = set()
+        for step in loop_actions:
+            if step.op != "activate" or not step.actor or not step.ability_id:
+                continue
+            key = (step.actor, step.ability_id)
+            if key in seen_once:
+                continue
+            live = before.permanents.get(step.actor)
+            if live is None:
+                continue
+            card = by_oracle.get(live.oracle_id)
+            if card is None:
+                continue
+            for ab in card.abilities:
+                if (
+                    isinstance(ab, ActivatedAbility)
+                    and ab.ability_id == step.ability_id
+                    and ab.once_per_turn
+                ):
+                    seen_once.add(key)
+                    dims.append(
+                        StateDimension(
+                            path=(
+                                f"permanents.{step.actor}"
+                                f".once_per_turn_used.{step.ability_id}"
+                            ),
+                            op=ComparisonOp.EXACT,
+                            value=step.ability_id in live.once_per_turn_used,
+                        )
+                    )
+                    break
     if any(p.is_token for p in spec.permanents):
         dims.append(
             StateDimension(
@@ -369,7 +407,9 @@ def build_witness(
         card_semantics=[a, b],
         initial_state=spec,
         loop_actions=loop_actions,
-        relevant_state=derive_relevant_state(spec, before),
+        relevant_state=derive_relevant_state(
+            spec, before, loop_actions=loop_actions, cards=[a, b]
+        ),
         expected_outputs=derive_outputs(before, after),
         assumptions=["discovered_without_pair_labels"],
         prerequisites=generic,
