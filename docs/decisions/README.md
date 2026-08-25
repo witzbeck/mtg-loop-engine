@@ -8,7 +8,7 @@ Durable, in-repo record of frozen product and architecture decisions for the MTG
 
 ```mermaid
 graph TB;
-  roadmap[ROADMAP frozen table] --> adrSeed[ADR 0001-0006];
+  roadmap[ROADMAP frozen table] --> adrSeed[ADR 0001-0007];
   adrSeed --> agents[AGENTS.md];
   adrSeed --> contrib[CONTRIBUTING.md];
   adrSeed --> code[Packages and tests];
@@ -36,6 +36,7 @@ graph TB;
 | [0004](0004-reference-recovery-vs-adjudicated-precision.md) | Reference recovery vs adjudicated precision | Accepted |
 | [0005](0005-human-adjudication-and-novel-labeling.md) | Human adjudication and `NOVEL` labeling | Accepted |
 | [0006](0006-milestone-and-deferred-scope-policy.md) | Milestone and deferred-scope policy | Accepted |
+| [0007](0007-corpus-provenance-physics-vs-oracle.md) | Corpus provenance: physics fixtures vs Oracle truth | Accepted |
 
 ## Notes
 
