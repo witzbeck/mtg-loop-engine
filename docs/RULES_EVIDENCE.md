@@ -83,5 +83,6 @@ does not require a full CR dive — still cite Oracle for new `ORACLE_EXACT` car
 - Human labels: [`ADJUDICATION.md`](ADJUDICATION.md)
 - Determinism / fail-closed: [`decisions/0003-deterministic-semantics-and-fail-closed.md`](decisions/0003-deterministic-semantics-and-fail-closed.md)
 - Provenance: [`decisions/0007-corpus-provenance-physics-vs-oracle.md`](decisions/0007-corpus-provenance-physics-vs-oracle.md)
+- Identity vs state construction: [`decisions/0010-oracle-identity-vs-state-construction.md`](decisions/0010-oracle-identity-vs-state-construction.md)
 - Agent contract: [`../AGENTS.md`](../AGENTS.md)
 - Skill wrapper: [`.agents/skills/rules-evidence/`](../.agents/skills/rules-evidence/)
