@@ -15,6 +15,7 @@ from mtg_loop_engine.eval.store import (
     DEFAULT_DB,
     DEFAULT_JSONL,
     AdjudicationStore,
+    DuckDBLockError,
 )
 from mtg_loop_engine.eval.reference_absent import DEFAULT_ABSENT_JSONL
 
@@ -340,6 +341,17 @@ def _render_study_tab(st) -> None:
 # Main render
 # ---------------------------------------------------------------------------
 
+def _get_store(db_path: str) -> AdjudicationStore:
+    """One DuckDB connection per Streamlit process (reruns must not reopen the file)."""
+    import streamlit as st
+
+    @st.cache_resource
+    def _cached(path: str) -> AdjudicationStore:
+        return AdjudicationStore(Path(path))
+
+    return _cached(db_path)
+
+
 def render(
     *,
     db_path: Path | None = None,
@@ -347,17 +359,27 @@ def render(
 ) -> None:
     import streamlit as st
 
-    store = AdjudicationStore(db_path or DEFAULT_DB)
-    jsonl = jsonl_path or DEFAULT_JSONL
-    _ensure_loaded(store, jsonl)
-
     st.set_page_config(
         page_title="MTG Loop Engine — adjudication workbench",
         page_icon=":material/loop:",
         layout="wide",
     )
     st.title(":material/loop: MTG Loop Engine — adjudication workbench")
-    st.caption("M4 research instrument. Not the M7 explorer.")
+    st.caption("M4 research instrument. Not the M7 explorer. One workbench process at a time.")
+
+    path = db_path or DEFAULT_DB
+    try:
+        store = _get_store(str(path))
+    except DuckDBLockError as exc:
+        st.error(str(exc))
+        st.info(
+            "Typical cause: multiple `uv run … adjudicate-workbench` sessions. "
+            "Leave a single instance running."
+        )
+        return
+
+    jsonl = jsonl_path or DEFAULT_JSONL
+    _ensure_loaded(store, jsonl)
 
     # Sidebar: filters + tutorial panels
     corpus = st.sidebar.selectbox(
@@ -404,7 +426,6 @@ def render(
                 "`uv run python scripts/spellbook_absent_discovery.py --persist-workbench`.",
                 icon=":material/info:",
             )
-            store.close()
             return
 
         candidate, existing = queue[st.session_state.idx]
@@ -439,8 +460,6 @@ def render(
         _render_adjudication_controls(
             st, store, candidate, existing, queue, review_filter, jsonl
         )
-
-    store.close()
 
 
 if __name__ == "__main__":

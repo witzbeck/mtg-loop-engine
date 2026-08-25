@@ -91,14 +91,14 @@ Blind discovery among real **COMPLETE**-compiled Oracle cards from Spellbook nam
 ### Remaining
 
 0. **Corpus / evaluation integrity (campaign; ahead of 95% and broad M5 recall)** ◐ —
-   ADR [0007](docs/decisions/0007-corpus-provenance-physics-vs-oracle.md) (**Accepted**):
-   `Provenance` taxonomy; Synthetic Cost Reducer; audited `ORACLE_EXACT` subset;
-   frozen divergent quarantine; `is_precision_eligible_ids` / physics vs Oracle pools.
+   ADR [0007](docs/decisions/0007-corpus-provenance-physics-vs-oracle.md) (**Accepted**;
+   trust-boundary impl landed). `Provenance` + audited `ORACLE_EXACT` subset + frozen
+   divergent quarantine + `is_precision_eligible_ids` / physics vs Oracle pools.
    Inventory:
    [`docs/decisions/reviews/corpus-provenance-inventory.md`](docs/decisions/reviews/corpus-provenance-inventory.md).
-   Follow-ons (separate slices): verifier-owned mandatory recurrence dimensions; stronger
-   claim/`proof_hash` binding. **Keep line coverage floor at 92%** until this campaign
-   lands enough that percentages measure faithful claims.
+   **Next in this campaign:** verifier-owned mandatory recurrence dimensions; then
+   stronger claim/`proof_hash` binding. **Keep line coverage floor at 92%** until the
+   campaign lands enough that percentages measure faithful claims.
 
 1. **Absent-discovery path** ✓ — `eval/reference_absent.py` + `scripts/spellbook_absent_discovery.py`.
 2. **Grow COMPLETE pool** — prefer **self-starting** two-card physics (path **a**): patterns that can close without an external seeded event. Curriculum order: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDIDATES.md).
