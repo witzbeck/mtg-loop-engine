@@ -41,6 +41,7 @@ graph TB;
 
 - Bounded legal-action BFS (`explorer.explore_pair`)
 - Seed generic creature / Zombie tokens when abilities need sac fodder or cast-from-GY Zombie gates (`default_initial_state`)
+- Seed a generic creature **aura host** when an activated ability uses `TapCost(source_self=False)` and neither essential is a creature (Presence of Gond + Intruder Alarm class); otherwise tap the partner creature
 - Orchestrate pool → pairs → explorer (`discover.discover_loops`)
 - Reuse `corpus.builders` (`bf`, `two_card`) so witness shape matches gold
 - Prune via `reusable_fingerprint` (`pruning.py`)
