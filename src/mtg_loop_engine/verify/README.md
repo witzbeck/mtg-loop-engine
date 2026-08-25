@@ -34,6 +34,9 @@ graph TB;
 - Execute setup + loop via `rules.Executor`
 - Check proof-specific recurrence (`LoopRelevantState`) plus **mandatory**
   dimensions (ADR 0008: once-per-turn usage, pending trigger count)
+- Derive `claim_consequence` from net state + gross outputs; reject when
+  `expected_claim_consequence` disagrees (`ACCUMULATES` / `REPEATABLE_EVENT` /
+  `LETHAL`)
 - Hash proofs for stability tracking
 
 ## Boundaries
@@ -76,6 +79,7 @@ Always returns a `LoopProof` for ordinary verification attempts — typed reject
 - `tests/semantic/test_compile_verify.py` — compile → verify
 - `tests/unit/test_search_boundary.py` — layering
 - `tests/unit/test_state_path_grammar.py` — path grammar fail-closed
+- `tests/unit/test_claim_consequence.py` — derived claim consequence contracts
 - `tests/golden_proofs/` — proof artifact contracts
 
 ## Extension guide

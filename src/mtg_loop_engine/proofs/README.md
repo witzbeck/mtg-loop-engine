@@ -32,6 +32,8 @@ graph TB;
 - Define the epistemic wire format between discovery, verification, and evaluation.
 - Provide `normalize_proof` for stable golden comparison.
 - Provide claim-bound `proof_hash` construction (`claim.py`, ADR 0009).
+- Derive claim consequence from net state (`consequence.py`): `ACCUMULATES` /
+  `REPEATABLE_EVENT` / `LETHAL` — labels are checked, not copied.
 - Fail-closed `StateDimension.path` grammar (must match `state.paths` / `GameState.get_path`).
 
 ## Non-responsibilities
@@ -50,6 +52,7 @@ graph TB;
 ## Main entry points
 
 - `models.py`: `LoopWitness`, `LoopProof`, `Classification`, `ActionStep`, …
+- `consequence.py`: `derive_claim_consequence`, mismatch gate for claim labels
 - `claim.py`: `build_claim_payload`, `claim_proof_hash` / `proof_hash`
 - `normalize.py`: `normalize_proof`
 

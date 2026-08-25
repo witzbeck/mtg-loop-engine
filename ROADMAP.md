@@ -106,6 +106,9 @@ Blind discovery among real **COMPLETE**-compiled Oracle cards from Spellbook nam
    `discover-physics` cover the moved suite.
    **Net-state gate:** ✓ additive `events` / `net_state` / `claim_consequence`
    (proof schema **0.3.0**); gross counters alone do not justify `ACCUMULATES`.
+   **Claim consequence derivation:** ✓ verifier derives `ACCUMULATES` /
+   `REPEATABLE_EVENT` / `LETHAL` from net state + gross outputs under recurrence;
+   mismatches with `expected_claim_consequence` → `NOT_A_LOOP`.
    **Waves 1–2:** ✓ seven Oracle gold positives
    (`core_guard_gond` … `core_rosie_scurry`) as **frozen witness artifacts**
    (independent of search; `all_gold_core` loads JSON only). `core_heliod_ballista`
