@@ -40,6 +40,7 @@ graph TB;
 ## Responsibilities
 
 - Bounded legal-action BFS (`explorer.explore_pair`)
+- Seed generic creature / Zombie tokens when abilities need sac fodder or cast-from-GY Zombie gates (`default_initial_state`)
 - Orchestrate pool → pairs → explorer (`discover.discover_loops`)
 - Reuse `corpus.builders` (`bf`, `two_card`) so witness shape matches gold
 - Prune via `reusable_fingerprint` (`pruning.py`)

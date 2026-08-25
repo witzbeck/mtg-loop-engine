@@ -482,6 +482,29 @@ def _proof_irrelevant(text: str) -> ProofIrrelevantStatic:
     )
 
 
+def pat_cast_from_gy_if_zombie(text: str, name: str) -> Ability | None:
+    """Gravecrawler-shaped: cast from GY while controlling a Zombie.
+
+    Modeled as an activated GY→battlefield return. Mana cost is {B} for this
+    curriculum family (Gravecrawler CMC); broaden deliberately with tests later.
+    """
+    m = re.match(
+        r"^You may cast (?:this card|~|"
+        + re.escape(name)
+        + r") from your graveyard as long as you control a Zombie\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("cast-gy-zombie", text),
+        costs=[ManaCost(amount=ManaAmount(black=1))],
+        effects=[ReturnToBattlefieldEffect()],
+        requires_zombie=True,
+    )
+
+
 def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
     """Match Oracle clauses that do not participate in modeled loop proofs."""
     clause = text.strip().rstrip(".")
@@ -550,6 +573,7 @@ PATTERNS: list[Pattern] = [
     Pattern("sac_creature_outlet", pat_sac_creature_outlet),
     Pattern("sac_self", pat_sac_self),
     Pattern("return_from_gy", pat_return_from_gy),
+    Pattern("cast_from_gy_if_zombie", pat_cast_from_gy_if_zombie),
     Pattern("dies_return_self", pat_dies_return_self),
     Pattern("dies_lose_life", pat_dies_lose_life),
     Pattern("etb_damage", pat_etb_damage),

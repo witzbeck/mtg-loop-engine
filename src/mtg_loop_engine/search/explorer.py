@@ -26,6 +26,7 @@ from mtg_loop_engine.search.pruning import reusable_fingerprint
 from mtg_loop_engine.semantics.enums import (
     ComparisonOp,
     OutputType,
+    SemanticCoverage,
     VerificationStatus,
     Zone,
 )
@@ -58,6 +59,15 @@ OUTPUT_EVENT_KEYS = {
 }
 
 
+ZOMBIE_SEED_ORACLE_ID = "token:zombie-seed"
+
+
+def _needs_zombie_gate(card: CardSemantics) -> bool:
+    return any(
+        isinstance(ab, ActivatedAbility) and ab.requires_zombie for ab in card.abilities
+    )
+
+
 def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpec:
     """Place both cards on the battlefield with generic fodder/counters as needed."""
     ordered = sorted([a, b], key=lambda c: c.oracle_id)
@@ -79,7 +89,22 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
                 toughness=1 if is_creature else None,
             )
         )
-    if any(extract_capabilities(c).needs_token_fodder() for c in ordered):
+    need_token = any(extract_capabilities(c).needs_token_fodder() for c in ordered)
+    need_zombie = any(_needs_zombie_gate(c) for c in ordered)
+    # One generic Zombie token covers cast-from-GY gates and sac fodder when both apply.
+    if need_zombie:
+        permanents.append(
+            bf(
+                "seed",
+                ZOMBIE_SEED_ORACLE_ID,
+                "Zombie",
+                is_creature=True,
+                is_token=True,
+                power=1,
+                toughness=1,
+            )
+        )
+    elif need_token:
         permanents.append(
             bf(
                 "seed",
@@ -338,6 +363,14 @@ def explore_pair(
     check = verifier or Verifier()
     spec = default_initial_state(a, b)
     semantics = {a.oracle_id: a, b.oracle_id: b}
+    if any(p.oracle_id == ZOMBIE_SEED_ORACLE_ID for p in spec.permanents):
+        semantics[ZOMBIE_SEED_ORACLE_ID] = CardSemantics(
+            oracle_id=ZOMBIE_SEED_ORACLE_ID,
+            name="Zombie",
+            types=["Creature", "Zombie"],
+            abilities=[],
+            coverage=SemanticCoverage.COMPLETE,
+        )
     executor = Executor(semantics)
     start = GameState.from_spec(spec)
     queue: deque[tuple[GameState, list[ActionStep]]] = deque([(start, [])])

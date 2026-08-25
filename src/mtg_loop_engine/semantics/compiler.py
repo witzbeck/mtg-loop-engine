@@ -76,6 +76,36 @@ def compile_oracle_text(
     abilities = []
     unsupported: list[str] = []
 
+    # Empty Oracle must not silently count as COMPLETE (common for unresolved DFCs).
+    if not (oracle_text or "").strip():
+        unsupported = ["(empty oracle text)"]
+        coverage = (
+            SemanticCoverage.PARTIAL_RELEVANT_TO_PROOF
+            if treat_unsupported_as_relevant
+            else SemanticCoverage.PARTIAL_IRRELEVANT_TO_PROOF
+        )
+        semantics = CardSemantics(
+            oracle_id=oracle_id,
+            name=name,
+            types=types or [],
+            abilities=[],
+            unsupported_fragments=unsupported,
+            coverage=coverage,
+        )
+        return CompileReport(
+            oracle_id=oracle_id,
+            name=name,
+            fragments=[
+                FragmentResult(
+                    text="(empty oracle text)",
+                    supported=False,
+                    note="missing oracle text",
+                )
+            ],
+            semantics=semantics,
+            coverage=coverage,
+        )
+
     for clause in split_oracle_abilities(oracle_text):
         matched = try_match(clause, name)
         if matched is None:

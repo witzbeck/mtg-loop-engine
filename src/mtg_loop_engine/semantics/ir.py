@@ -147,6 +147,8 @@ class ActivatedAbility(BaseModel):
     is_mana_ability: bool = False
     once_per_turn: bool = False
     supported: bool = True
+    # Cast-from-GY style gates (Gravecrawler): need a Zombie on battlefield.
+    requires_zombie: bool = False
 
 
 class TriggeredAbility(BaseModel):

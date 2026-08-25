@@ -20,6 +20,19 @@ def types_from_line(type_line: str | None) -> list[str]:
     return [t.strip() for t in left.replace("—", " ").split() if t.strip()]
 
 
+def oracle_text_from_card(card: dict[str, Any]) -> str:
+    """Prefer top-level Oracle text; otherwise join DFC face texts."""
+    text = str(card.get("oracle_text") or "").strip()
+    if text:
+        return text
+    parts: list[str] = []
+    for face in card.get("card_faces") or []:
+        face_text = str(face.get("oracle_text") or "").strip()
+        if face_text:
+            parts.append(face_text)
+    return "\n\n".join(parts)
+
+
 def _chunks(items: list[str], size: int) -> list[list[str]]:
     return [items[i : i + size] for i in range(0, len(items), size)]
 
@@ -52,7 +65,7 @@ def fetch_named_semantics(
             for card in body.get("data") or []:
                 name = str(card.get("name") or "")
                 oracle_id = str(card.get("oracle_id") or card.get("id") or name)
-                text = card.get("oracle_text") or ""
+                text = oracle_text_from_card(card)
                 types = types_from_line(card.get("type_line"))
                 compiled = compile_card(oracle_id, name, text, types)
                 out[name.casefold()] = compiled
