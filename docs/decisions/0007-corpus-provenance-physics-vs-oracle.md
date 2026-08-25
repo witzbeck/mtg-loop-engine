@@ -84,10 +84,8 @@ verification must mean something; precision must not be optimized against a soft
 
 ## Non-decisions (follow-on)
 
-- Verifier-owned mandatory recurrence dimensions (once-per-turn, pending triggers)
-  — separate ADR / implementation slice; search must continue to call shared logic
-  without `verify` importing `search`.
-- Stronger claim/`proof_hash` binding — separate ADR; version proof schema.
+- Verifier-owned mandatory recurrence dimensions — landed as ADR 0008.
+- Stronger claim/`proof_hash` binding — landed as ADR 0009.
 - Full Scryfall bulk in CI — out of scope; audited subset only.
 
 ## Consequences
