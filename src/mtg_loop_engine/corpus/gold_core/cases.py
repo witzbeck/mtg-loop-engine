@@ -1150,6 +1150,64 @@ def hard_negatives() -> list[LoopWitness]:
         )
     )
 
+    # Rest in Peace suppresses DIES (CR 700.4); drain trigger never queues.
+    negs.append(
+        witness(
+            id="neg_rip_suppresses_dies",
+            classification=two_card(
+                essential=_refs(BLOOD_ARTIST, PHYREXIAN_ALTAR),
+                generic=[Prerequisite(kind="board", description="one token")],
+            ),
+            essential_cards=_refs(BLOOD_ARTIST, PHYREXIAN_ALTAR),
+            card_semantics=[BLOOD_ARTIST, PHYREXIAN_ALTAR, REST_IN_PEACE],
+            initial_state=InitialStateSpec(
+                permanents=[
+                    bf(
+                        "p_artist",
+                        BLOOD_ARTIST.oracle_id,
+                        BLOOD_ARTIST.name,
+                        is_creature=True,
+                        power=0,
+                        toughness=1,
+                    ),
+                    bf(
+                        "p_altar",
+                        PHYREXIAN_ALTAR.oracle_id,
+                        PHYREXIAN_ALTAR.name,
+                        is_artifact=True,
+                    ),
+                    bf("p_rip", REST_IN_PEACE.oracle_id, REST_IN_PEACE.name),
+                    bf(
+                        "fodder",
+                        "token:fodder",
+                        "Fodder",
+                        is_creature=True,
+                        is_token=True,
+                        power=1,
+                        toughness=1,
+                    ),
+                ]
+            ),
+            loop_actions=[
+                ActionStep(
+                    op="activate",
+                    actor="p_altar",
+                    ability_id="altar-sac",
+                    target="fodder",
+                ),
+                ActionStep(
+                    op="resolve_trigger",
+                    actor="p_artist",
+                    ability_id="ba-drain",
+                ),
+            ],
+            relevant_state=LoopRelevantState(dimensions=[]),
+            expected_outputs=[out(OutputType.LIFE_LOSS, 1)],
+            expected_status=VerificationStatus.ILLEGAL_ACTION,
+            tier="hard_negative",
+        )
+    )
+
     # Opponent cooperation
     negs.append(
         witness(
