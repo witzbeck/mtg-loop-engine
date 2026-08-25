@@ -25,6 +25,7 @@ from mtg_loop_engine.semantics.ir import (
     ReturnToBattlefieldEffect,
     SacrificeCost,
     TapCost,
+    TapEffect,
     TriggeredAbility,
     UntapEffect,
 )
@@ -104,6 +105,41 @@ def pat_mana_untap_self(text: str, name: str) -> Ability | None:
         ability_id=_ability_id("mana-untap", text),
         costs=[ManaCost(amount=_parse_mana_braces(m.group(1)))],
         effects=[UntapEffect(target="self")],
+    )
+
+
+def pat_mana_untap_enchanted(text: str, name: str) -> Ability | None:
+    """Freed / Pemmin's class: pay mana to untap the enchanted creature.
+
+    Attachment is not modeled; explorer treats this as untap target_permanent
+    (combo player chooses the host), same as gold ETB-untap targeting.
+    """
+    m = re.match(
+        r"^((?:\{[^}]+\})+): Untap enchanted creature\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("mana-untap-enchanted", text),
+        costs=[ManaCost(amount=_parse_mana_braces(m.group(1)))],
+        effects=[UntapEffect(target="target_permanent")],
+    )
+
+
+def pat_mana_tap_enchanted(text: str, name: str) -> Ability | None:
+    m = re.match(
+        r"^((?:\{[^}]+\})+): Tap enchanted creature\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("mana-tap-enchanted", text),
+        costs=[ManaCost(amount=_parse_mana_braces(m.group(1)))],
+        effects=[TapEffect(target="target_permanent")],
     )
 
 
@@ -557,6 +593,23 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
     if re.match(r"^Activate only as a sorcery\.?$", clause, re.IGNORECASE):
         return _proof_irrelevant(clause)
 
+    # Enchanted-creature keyword/pump riders (Pemmin's Aura class): not modeled
+    # loop physics; keep them out of legal_steps so they do not drain mana.
+    if re.match(
+        r"^(?:\{[^}]+\})+: Enchanted creature gains .+ until end of turn\.?"
+        r"(?:\s*\([^)]*\))?\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^(?:\{[^}]+\})+: Enchanted creature gets .+ until end of turn\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
     return None
 
 
@@ -566,6 +619,8 @@ PATTERNS: list[Pattern] = [
     Pattern("tap_sac_token_make_two", pat_tap_sac_token_make_two),
     Pattern("tap_create_token", pat_tap_create_token),
     Pattern("tap_add_mana", pat_tap_add_mana),
+    Pattern("mana_untap_enchanted", pat_mana_untap_enchanted),
+    Pattern("mana_tap_enchanted", pat_mana_tap_enchanted),
     Pattern("mana_untap_self", pat_mana_untap_self),
     Pattern("cost_reduction", pat_cost_reduction),
     Pattern("etb_untap_target", pat_etb_untap_target),
