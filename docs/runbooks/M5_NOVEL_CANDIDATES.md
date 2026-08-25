@@ -29,13 +29,42 @@ graph TB;
 
 ### 2. Grow COMPLETE coverage
 
-Prefer highest-pressure unsupported fragments from:
+**Goal:** enlarge the pool of Spellbook-named cards that compile `COMPLETE`, so blind discovery can surface `ABSENT_FROM_REFERENCE` candidates. Do **not** optimize for Spellbook pair recall as the primary M5 metric.
+
+#### Metrics (each curriculum PR)
+
+1. `# COMPLETE` among Spellbook names (`spellbook_absent_discovery.py` / priority script)
+2. `absent_from_reference` count from absent discovery
+3. Pair `eligible` / `rediscovered` from `spellbook_compiler_priority.py` (secondary)
 
 ```bash
 uv run python scripts/spellbook_compiler_priority.py
+uv run python scripts/spellbook_absent_discovery.py
 ```
 
-Expand patterns deliberately with tests/docs (AGENTS.md deliberate coverage growth).
+#### What scales
+
+| Lever | Use when | Effect |
+| ----- | -------- | ------ |
+| Proof-irrelevant statics / riders | Clause does not drive modeled loop physics | Unlocks `COMPLETE` without new executor rules |
+| Parameterized activated patterns | Same shape, many mana/effect variants | One pattern → many cards |
+
+**Do not chase** the heuristic `other` family (majority of tags). Prefer concrete fragment counts.
+
+**Defer early:** copy-on-ETB, extra combat, blink/exile-return, soulbond, imprint/copy — high rules cost, low reuse.
+
+#### Curriculum order
+
+1. **Aura channel** ✓ — `{C}: tap/untap enchanted creature` + irrelevant enchanted riders (Freed / Pemmin’s). Live delta: COMPLETE **17→19**.
+2. **Generic activated artifacts** — `{N}: untap this` / Staff of Domination ability suite
+3. **Global ETB untap** — Intruder Alarm shape
+4. **Life-drain family** — only after linked gain/drain semantics are deliberate
+
+Each slice: real-Oracle curriculum fixtures → RED/GREEN tests → remeasure → ship. Expand patterns deliberately with tests/docs (`AGENTS.md`).
+
+#### Rules-evidence rails
+
+Before a curriculum slice needs **new modeled physics** (executor primitives, not just patterns), land the supporting rails listed under ROADMAP M5 remaining #2: `AGENTS.md` principle, thin Cursor rule + skill, and `docs/RULES_EVIDENCE.md`. Memory may hypothesize; Oracle / CR / rulings decide; Spellbook stays discovery-only.
 
 ### 3. Adjudicate absences
 

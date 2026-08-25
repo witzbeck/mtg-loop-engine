@@ -53,4 +53,27 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         ),
         notes="Mana sink {1}{B} does not close with a single any-color from Altar alone.",
     ),
+    "Freed from the Real": RealOracleCurriculum(
+        name="Freed from the Real",
+        types=["Enchantment", "Aura"],
+        oracle_text=(
+            "Enchant creature\n"
+            "{U}: Tap enchanted creature.\n"
+            "{U}: Untap enchanted creature."
+        ),
+        notes="M5 aura-channel slice: tap/untap enchanted as target_permanent.",
+    ),
+    "Pemmin's Aura": RealOracleCurriculum(
+        name="Pemmin's Aura",
+        types=["Enchantment", "Aura"],
+        oracle_text=(
+            "Enchant creature\n"
+            "{U}: Untap enchanted creature.\n"
+            "{U}: Enchanted creature gains flying until end of turn.\n"
+            "{U}: Enchanted creature gains shroud until end of turn. "
+            "(It can't be the target of spells or abilities.)\n"
+            "{1}: Enchanted creature gets +1/-1 or -1/+1 until end of turn."
+        ),
+        notes="Untap is modeled; keyword/pump riders are proof-irrelevant.",
+    ),
 }

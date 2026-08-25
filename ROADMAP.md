@@ -90,8 +90,17 @@ Blind discovery among real **COMPLETE**-compiled Oracle cards from Spellbook nam
 
 ### Remaining
 
-1. **Absent-discovery path** — `eval/reference_absent.py` + `scripts/spellbook_absent_discovery.py`.
-2. **Grow COMPLETE pool** — continue deterministic compiler curriculum from priority-report fragments.
+1. **Absent-discovery path** ✓ — `eval/reference_absent.py` + `scripts/spellbook_absent_discovery.py`.
+2. **Grow COMPLETE pool** — curriculum order in [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDIDATES.md); **aura channel (slice 1)** in progress via Freed / Pemmin’s patterns.
+   - **Rules-evidence rails (supporting; land before widening modeled physics):** cheap epistemic adapters so coverage growth stays deliberate (ADR 0003). Not an M5 exit gate; not CR ingest or executor expansion.
+
+   | Piece | Why |
+   | ----- | --- |
+   | Principle in [`AGENTS.md`](AGENTS.md): memory proposes; sources decide | Blocks “I remember → patch Executor”; same epistemology as search/verify |
+   | Thin Cursor rule (~20–40 lines) scoped to `rules` / `semantics` / `verify` / `tests` / `eval` | Adapter that routes agents to the skill; not a rulebook corpus |
+   | Thin agent skill: how to investigate a rules question | Workflow + citation format (LAR-skill pattern); progressive load only when needed |
+   | `docs/RULES_EVIDENCE.md` (to add) | Authority roles: Oracle vs Comprehensive Rules vs rulings vs Spellbook — codifies ADJUDICATION / PHILOSOPHY |
+
 3. **Workbench adjudication** — review absences; promote `NOVEL` only with human records.
 4. **Optional baseline** — freeze an absent-discovery summary only when intentionally certified.
 
@@ -99,7 +108,7 @@ Playbook: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDID
 
 ### First local probe (not a baseline)
 
-~17 COMPLETE cards on the 50-page sample → **1** verified pair (Gravecrawler + Phyrexian Altar) **in** Spellbook; `absent=0`. Coverage growth is the bottleneck for absent candidates.
+Post–aura-channel slice: **19** COMPLETE cards on the 50-page sample → **3** verified in-reference pairs (incl. Freed/Pemmin’s + Gyre Engineer); `absent=0`. Coverage growth remains the bottleneck for absent candidates.
 
 ---
 
