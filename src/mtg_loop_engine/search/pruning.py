@@ -34,6 +34,7 @@ def reusable_fingerprint(state: GameState) -> tuple:
         state.mana.green,
         state.mana.colorless,
         state.mana.generic,
+        state.mana.any_color,
     )
     triggers = tuple(
         (t.get("ability_id"), t.get("source_id")) for t in state.pending_triggers

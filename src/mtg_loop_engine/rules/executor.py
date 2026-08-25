@@ -80,7 +80,8 @@ class Executor:
         return None
 
     def pay_mana(self, state: GameState, amount: ManaAmount) -> ExecError | None:
-        # Simplified: generic can be paid by colorless or any colored; colors exact.
+        # Colors exact, then any_color may cover remaining colored needs.
+        # Generic paid from colorless, then colored, then any_color.
         pool = state.mana
         need = amount.model_copy(deep=True)
 
@@ -93,11 +94,23 @@ class Executor:
 
         for color in ("white", "blue", "black", "red", "green", "colorless"):
             n = getattr(need, color)
-            if n and not take(color, n):
-                return ExecError(VerificationStatus.MANA_RESTRICTION, f"need {color} {n}")
+            if not n:
+                continue
+            avail = getattr(pool, color)
+            use = min(avail, n)
+            if use:
+                setattr(pool, color, avail - use)
+                setattr(need, color, n - use)
+            remaining = getattr(need, color)
+            if remaining:
+                if pool.any_color < remaining:
+                    return ExecError(
+                        VerificationStatus.MANA_RESTRICTION, f"need {color} {n}"
+                    )
+                pool.any_color -= remaining
+                setattr(need, color, 0)
 
         generic = need.generic
-        # Pay generic from colorless first, then colored.
         while generic > 0 and pool.colorless > 0:
             pool.colorless -= 1
             generic -= 1
@@ -105,6 +118,9 @@ class Executor:
             while generic > 0 and getattr(pool, color) > 0:
                 setattr(pool, color, getattr(pool, color) - 1)
                 generic -= 1
+        while generic > 0 and pool.any_color > 0:
+            pool.any_color -= 1
+            generic -= 1
         if generic > 0:
             return ExecError(
                 VerificationStatus.RESOURCE_DEFICIT, f"cannot pay generic {need.generic}"
@@ -128,13 +144,21 @@ class Executor:
         self, state: GameState, source: Permanent, effect, target_id: str | None
     ) -> ExecError | None:
         if isinstance(effect, AddManaEffect):
-            for color in ("white", "blue", "black", "red", "green", "colorless", "generic"):
+            for color in (
+                "white",
+                "blue",
+                "black",
+                "red",
+                "green",
+                "colorless",
+                "generic",
+                "any_color",
+            ):
                 setattr(
                     state.mana,
                     color,
                     getattr(state.mana, color) + getattr(effect.amount, color),
                 )
-            # Track colorless+generic as mana output proxy
             state.bump("mana", effect.amount.total())
             return None
 

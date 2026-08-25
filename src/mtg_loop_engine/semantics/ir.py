@@ -17,6 +17,8 @@ class ManaAmount(BaseModel):
     green: int = 0
     colorless: int = 0
     generic: int = 0
+    # "Add one mana of any color" — spendable as W/U/B/R/G when paying.
+    any_color: int = 0
 
     def total(self) -> int:
         return (
@@ -27,6 +29,7 @@ class ManaAmount(BaseModel):
             + self.green
             + self.colorless
             + self.generic
+            + self.any_color
         )
 
 
