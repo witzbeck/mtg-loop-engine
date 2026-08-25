@@ -18,6 +18,7 @@ from mtg_loop_engine.semantics.ir import (
     ManaAmount,
     SacrificeCost,
     TapCost,
+    TapEffect,
 )
 from mtg_loop_engine.state.game import GameState
 
@@ -603,3 +604,66 @@ def test_nonsick_tap_mana_ability_succeeds():
     assert err is None
     assert state.mana.green == 1
     assert state.permanents["joiner"].tapped is True
+
+
+# --- TapEffect apply (compile→execute seam) ---
+
+
+def _tap_effect_card() -> CardSemantics:
+    return CardSemantics(
+        oracle_id="oracle:tapper",
+        name="Tapper",
+        types=["Creature"],
+        abilities=[
+            ActivatedAbility(
+                ability_id="do-tap",
+                costs=[],
+                effects=[TapEffect(target="target_permanent")],
+            )
+        ],
+    )
+
+
+def test_tap_effect_taps_explicit_target():
+    card = _tap_effect_card()
+    state, ex = _board(
+        PermanentSpec(
+            object_id="src",
+            oracle_id=card.oracle_id,
+            name=card.name,
+            is_creature=True,
+        ),
+        PermanentSpec(
+            object_id="host",
+            oracle_id="oracle:host",
+            name="Host",
+            is_creature=True,
+        ),
+        semantics={card.oracle_id: card},
+    )
+    err = ex.activate(
+        state,
+        ActionStep(op="activate", actor="src", ability_id="do-tap", target="host"),
+    )
+    assert err is None
+    assert state.permanents["host"].tapped is True
+    assert state.event_counters.get("tap", 0) >= 1
+
+
+def test_tap_effect_missing_target_is_illegal_target():
+    card = _tap_effect_card()
+    state, ex = _board(
+        PermanentSpec(
+            object_id="src",
+            oracle_id=card.oracle_id,
+            name=card.name,
+            is_creature=True,
+        ),
+        semantics={card.oracle_id: card},
+    )
+    err = ex.activate(
+        state,
+        ActionStep(op="activate", actor="src", ability_id="do-tap"),
+    )
+    assert err is not None
+    assert err.status == VerificationStatus.ILLEGAL_TARGET

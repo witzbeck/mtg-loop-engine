@@ -77,6 +77,18 @@ When behavior changes, add or update tests in the suite that owns that contract:
 
 Green CI is merge-OK only if this table’s row for the PR is exercised — see **CI merge gate** in [`CONTRIBUTING.md`](../CONTRIBUTING.md).
 
+### Test placement
+
+For a verifier/rules soundness bug, use the **lowest useful layer plus the highest claim-bearing layer** — do not mechanically triplicate every case.
+
+| Layer | Answers | Examples |
+| --- | --- | --- |
+| **Unit** | Did the primitive rule execute correctly? | Invalid sacrifice target rejected; sickness blocks `{T}`; RIP suppresses `DIES`; exact trigger lookup |
+| **Hard negative / verifier** | Can a crafted witness exploit the primitive and still earn `VERIFIED`? | Exact typed `VerificationStatus` on adversarial witnesses |
+| **Discovery** | Could search rediscover this false interaction? | Once-per-turn Alarm reject; pruning / recurrence state that changes machine acceptance |
+
+Add a layer only when it protects a **distinct** contract. Prefer the test that could catch a false `VERIFIED` when two options cover the same lines.
+
 ### Good tests
 
 - Assert **outcomes**: `VerificationStatus`, typed rejection reasons, rediscovery counts, coverage enums, proof hashes, join reasons.
