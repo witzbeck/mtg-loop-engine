@@ -167,6 +167,7 @@ Post–slice 6 + host-recurrence fix: **31** COMPLETE; **5** verified; **5** in-
 | Choice ownership | Combo player favorable; opponent adversarial; cooperation → `OPPONENT_COOPERATION_REQUIRED` |
 | Two-card definition | Exactly two essential functional pieces; generic fodder OK; functional external is not strict |
 | Verifier contract | Witness-in / proof-out; search never inside verifier |
+| Mandatory recurrence | Verifier merges once-per-turn + pending-trigger dims (ADR 0008); witnesses cannot omit them to soft-pass |
 | Fail-closed coverage | `PARTIAL_RELEVANT_TO_PROOF` → never `VERIFIED` |
 | Determinism | V1 deterministic-only; nondeterministic → typed rejection |
 | LLM ban | No LLM on the `VERIFIED` path, indefinitely |
