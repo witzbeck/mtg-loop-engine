@@ -61,6 +61,10 @@ OUTPUT_EVENT_KEYS = {
 
 
 ZOMBIE_SEED_ORACLE_ID = "token:zombie-seed"
+# Setup permanent for host-tap auras (Presence of Gond class). Not a loop-created
+# token: must appear in LoopRelevantState so host tapped EXACT is checked.
+AURA_HOST_OBJECT_ID = "aura-host"
+AURA_HOST_ORACLE_ID = "setup:aura-host"
 
 
 def _needs_zombie_gate(card: CardSemantics) -> bool:
@@ -128,14 +132,15 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
             )
         )
     # Presence of Gond class: tap a host creature (prefer partner; else seed).
+    # Seed as a non-token setup permanent so derive_relevant_state tracks tapped.
     if need_tap_host and not has_creature:
         permanents.append(
             bf(
-                "aura-host",
-                "token:aura-host",
+                AURA_HOST_OBJECT_ID,
+                AURA_HOST_ORACLE_ID,
                 "Aura Host",
                 is_creature=True,
-                is_token=True,
+                is_token=False,
                 power=1,
                 toughness=1,
             )
@@ -343,6 +348,13 @@ def build_witness(
             Prerequisite(
                 kind="board",
                 description="creature token fodder (identity irrelevant)",
+            )
+        )
+    if any(p.object_id == AURA_HOST_OBJECT_ID for p in spec.permanents):
+        generic.append(
+            Prerequisite(
+                kind="board",
+                description="generic creature host for aura tap cost (identity irrelevant)",
             )
         )
     refs = [
