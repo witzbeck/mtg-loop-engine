@@ -60,8 +60,8 @@ Package wiring: [src/mtg_loop_engine/README.md](src/mtg_loop_engine/README.md). 
 | M1 Verifier | ✓ Complete |
 | M2 Compiler | ✓ Complete |
 | M3 Blind discovery | ✓ Complete |
-| M4 Evaluation | ◐ In progress |
-| M5 Novel candidates | ○ Not started |
+| M4 Evaluation | ✓ Complete |
+| M5 Novel candidates | ◐ In progress |
 | M6 Incremental scans | ○ Not started |
 | M7 Explorer | ○ Not started |
 

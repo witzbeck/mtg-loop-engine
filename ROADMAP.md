@@ -23,7 +23,7 @@ graph TB;
   M6 --> M7[M7 Explorer];
 ```
 
-**Active milestone:** M4 — Evaluation ◐ **IN PROGRESS**
+**Active milestone:** M5 — Novel candidates ◐ **IN PROGRESS**
 
 Quantitative snapshot (baselines): [`docs/STATUS.md`](docs/STATUS.md). Keep volatile counts out of this file.
 
@@ -60,65 +60,46 @@ Quantitative snapshot (baselines): [`docs/STATUS.md`](docs/STATUS.md). Keep vola
 - Explorer is the single acceptance oracle; `discover_loops` does not re-verify.
 - `corpus.builders` shared between gold fixtures and discovery so witness shapes stay comparable.
 
----
+### M4 — Evaluation ✓
 
-## M4 — Evaluation ◐ IN PROGRESS
+Exit criteria: **precision correctness** + **minimum real-Oracle eligibility** (not broad Spellbook recall).
 
-M4 is **not** complete because evaluation infrastructure exists. Exit requires precision correctness closure and minimum real-Oracle eligibility.
+| Gate | Evidence |
+|------|----------|
+| Participant enforcement | `explore_pair` requires `VERIFIED` + `strict_two_card`; Basalt bystander regressions in `tests/eval/test_classify_store.py` |
+| Gold-pool precision | `eval/baseline/m4_gold_pool_summary.json` — precision **1.0** (3/3 real) |
+| ≥1 eligible Spellbook pair | `eval/baseline/m4_spellbook_recovery_summary.json` — **eligible=1** / **rediscovered=1** (Gravecrawler + Phyrexian Altar) |
+| Baselines + STATUS | `scripts/render_status.py --check`; [`docs/STATUS.md`](docs/STATUS.md) |
 
-### Completed (instrumentation)
+Also shipped: M3.5 seam, eval schema/workbench, CI, real-Oracle curriculum start (irrelevant statics, zone recursion, any-color, cast-from-GY). **Compiler curriculum continues under M5** as coverage growth.
 
-- **M3.5 seam gate:** Oracle fixtures → compiler → blind discovery → verifier (10/10 still).
-- Evaluation / adjudication schema (`AdjudicationClass`, `ReferenceStatus`, prerequisite analysis).
-- DuckDB + JSONL persistence; local Streamlit adjudication workbench.
-- Frozen baselines under `eval/baseline/` (authoritative measured counts — see [`docs/STATUS.md`](docs/STATUS.md)).
-- GitHub Actions CI (`uv run pytest` + docs/status checks).
-
-### Completed (precision follow-through)
-
-1. **Participant enforcement** — `explore_pair` accepts only `VERIFIED` + `strict_two_card`; bystander-verified sequences are skipped (search-only gate; silent continue).
-2. **Regress real duplicate cases** — five adjudicated real-card Basalt bystander pairs locked in `tests/eval/test_classify_store.py`.
-
-### Remaining before M5
-
-3. **Deterministic real-Oracle compiler expansion** — continue curriculum from unsupported Spellbook/Oracle fragments (most of the 1196-pair sample is still `compiler_unsupported`).
-4. **≥1 eligible Spellbook pair** ✓ — live Scryfall **Gravecrawler + Phyrexian Altar** rediscovered on the conventional sample (`eval/baseline/m4_spellbook_recovery_summary.json`).
-5. **Re-run and freeze** truthful post-fix baselines ✓ — gold extras + Spellbook recovery frozen; STATUS via `scripts/render_status.py`.
-6. **Reconcile docs/status** ✓ — with this freeze.
-
-**Next:** M4 precision/coverage exit review, then M5 if gates hold.
-
-Playbook: [`docs/runbooks/M4_FOLLOW_THROUGH.md`](docs/runbooks/M4_FOLLOW_THROUGH.md).
-
-### Next engineering plan
-
-```mermaid
-graph TB;
-  participant[Participant gate shipped]
-    --> patterns[Real Oracle deterministic compiler curriculum];
-  patterns
-    --> eligible[Achieve real Spellbook eligibility];
-  eligible
-    --> baseline[Re-run and freeze M4 baseline];
-  baseline
-    --> m4exit[M4 precision/coverage review];
-  m4exit
-    --> m5[M5 reference-absent candidate discovery];
-```
-
-Start M5 after M4 correctness and eligibility gates pass.
+Historical playbook: [`docs/runbooks/M4_FOLLOW_THROUGH.md`](docs/runbooks/M4_FOLLOW_THROUGH.md).
 
 ---
 
-## M5 — Novel candidate adjudication
+## M5 — Novel candidate adjudication ◐ IN PROGRESS
 
-Once M4 correctness and eligibility gates are in:
+Blind discovery among real **COMPLETE**-compiled Oracle cards from Spellbook name sets. Absence is a label; humans own `NOVEL`.
 
-- Run discovery on real compiled Oracle cards from Spellbook entries.
-- Accepted pairs not in Spellbook start as `ABSENT_FROM_REFERENCE`.
-- Human adjudication upgrades to `NOVEL` only after review.
-- Report `NOVEL` separately from precision denominator.
-- Label `ABSENT_FROM_REFERENCE` results; leave joins open unless a precision bug is proven.
+### Goals
+
+- Discover among COMPLETE cards compiled from local Scryfall for Spellbook names.
+- In Spellbook → `IN_REFERENCE`; not in Spellbook → `ABSENT_FROM_REFERENCE` (never auto-`NOVEL`).
+- Human adjudication upgrades absence → `NOVEL` only (ADR 0005); report `NOVEL` outside the precision denominator.
+- Leave joins open unless a precision bug is proven (ADR 0004).
+
+### Remaining
+
+1. **Absent-discovery path** — `eval/reference_absent.py` + `scripts/spellbook_absent_discovery.py`.
+2. **Grow COMPLETE pool** — continue deterministic compiler curriculum from priority-report fragments.
+3. **Workbench adjudication** — review absences; promote `NOVEL` only with human records.
+4. **Optional baseline** — freeze an absent-discovery summary only when intentionally certified.
+
+Playbook: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDIDATES.md).
+
+### First local probe (not a baseline)
+
+~17 COMPLETE cards on the 50-page sample → **1** verified pair (Gravecrawler + Phyrexian Altar) **in** Spellbook; `absent=0`. Coverage growth is the bottleneck for absent candidates.
 
 ---
 

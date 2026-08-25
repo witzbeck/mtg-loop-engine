@@ -63,4 +63,4 @@ Notes from baseline: Recall is defined only over eligible/supported entries. Mea
 - **3 real pairs** were adjudicated: all `valid_strict_two_card` → precision **1.0**.
 - Spellbook conventional recovery (50-page local sample): **1 eligible / 1 rediscovered** (Gravecrawler + Phyrexian Altar); most pairs remain `compiler_unsupported`.
 
-See [`EVALUATION.md`](EVALUATION.md) for denominators and [`runbooks/M4_FOLLOW_THROUGH.md`](runbooks/M4_FOLLOW_THROUGH.md) for remaining M4 exit review before M5.
+See [`EVALUATION.md`](EVALUATION.md) for denominators. Active milestone is **M5** ([`runbooks/M5_NOVEL_CANDIDATES.md`](runbooks/M5_NOVEL_CANDIDATES.md)); M4 exit evidence is in [`ROADMAP.md`](../ROADMAP.md).

@@ -53,9 +53,10 @@ uv run python scripts/render_status.py
 uv run python scripts/render_status.py --check
 ```
 
-### 6. M4 exit → M5
+### 6. M4 exit → M5 ✓
 
-Review adjudicated precision and eligibility against roadmap exit criteria. Only then begin M5 reference-absent / novel candidate work. Compiler curriculum (step 3) continues as coverage work inside or after that review.
+Exit review passed: precision **1.0** on real gold extras, Spellbook **eligible≥1** / **rediscovered=1**, baselines frozen. Active milestone is **M5** — see [`M5_NOVEL_CANDIDATES.md`](M5_NOVEL_CANDIDATES.md). Compiler curriculum (step 3) continues there as coverage growth.
+
 
 ## Commands that matter here
 

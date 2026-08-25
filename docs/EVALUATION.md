@@ -10,7 +10,7 @@ Evaluation answers several different questions. Collapsing them into a single ac
 | -------- | --------- |
 | What was measured | `eval/baseline/*` (see [`STATUS.md`](STATUS.md)) |
 | How labels are assigned | [`ADJUDICATION.md`](ADJUDICATION.md) |
-| What still gates M5 | [`ROADMAP.md`](../ROADMAP.md), [`runbooks/M4_FOLLOW_THROUGH.md`](runbooks/M4_FOLLOW_THROUGH.md) |
+| What still gates the active milestone | [`ROADMAP.md`](../ROADMAP.md), [`runbooks/M5_NOVEL_CANDIDATES.md`](runbooks/M5_NOVEL_CANDIDATES.md) |
 
 ## Denominators
 

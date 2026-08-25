@@ -6,7 +6,7 @@ Ordered engineering playbooks for milestone follow-through. Narratives and gates
 
 ## What belongs here
 
-- Milestone follow-through sequences (e.g. M4 correctness and coverage closure)
+- Milestone follow-through sequences (M4 historical; **M5** active — novel / absent candidates)
 - Operator checklists that point at CLI commands and baseline refresh steps
 
 ## What does not belong here
