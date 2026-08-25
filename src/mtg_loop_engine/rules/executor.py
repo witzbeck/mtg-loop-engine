@@ -187,6 +187,17 @@ class Executor:
                     )
                     state.bump("mana", qty)
                 return None
+            if effect.equal_to_source_p1p1_counters:
+                qty = max(int(source.counters.get("p1p1", 0)), 0)
+                if qty > 0:
+                    color = effect.equal_to_source_p1p1_counters
+                    setattr(
+                        state.mana,
+                        color,
+                        getattr(state.mana, color) + qty,
+                    )
+                    state.bump("mana", qty)
+                return None
             for color in (
                 "white",
                 "blue",

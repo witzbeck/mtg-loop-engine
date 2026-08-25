@@ -61,8 +61,9 @@ uv run python scripts/spellbook_absent_discovery.py
 4. **Life-drain family** ✓ — Vito / Bond / Exquisite (+ Conqueror); `GAIN_LIFE` / `OPPONENT_LOSE_LIFE` triggers.
 5. **Path a / slice 5 (self-starters)** ✓ — power-tap mana; ETB damage (Impact / Purphoros / Alliance); ETB untap-self; anthem/devotion/lifelink-reminder irrelevant.
 6. **Path a / slice 6 (token auras)** ✓ — Presence of Gond host-tap; Enchant false-COMPLETE fix; Aphetto/Morph. First `absent_from_reference > 0` on live probe (later cleared by host-recurrence fix: aura host is a non-token setup permanent so tap enters `D`).
-7. **Path a (continue):** further self-starting COMPLETE unlocks; adjudicate absences. Taxonomy: `finite_interaction_misclassified_as_loop` + optional `failure_reasons` for finite vs bystander labels.
-8. **Path b (Wave 1):** generic life-gain seed for `GAIN_LIFE` trigger cards — required for Bond/Blood gold; disclose on witness.
+7. **Path a / slice 7 (life-untap / counter-mana)** ✓ — Famished Paladin; Village Bell-Ringer; Gyre Sage; Pestermite. Remeasure COMPLETE / absent on each PR.
+8. **Path a (continue):** further self-starting COMPLETE unlocks; adjudicate absences. Taxonomy: `finite_interaction_misclassified_as_loop` + optional `failure_reasons` for finite vs bystander labels.
+9. **Path b (Wave 1):** generic life-gain seed for `GAIN_LIFE` trigger cards — required for Bond/Blood gold; disclose on witness.
 
 #### Life-drain bootstrap (policy)
 

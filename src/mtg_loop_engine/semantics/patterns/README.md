@@ -43,6 +43,7 @@ graph TB;
 - Miss ⇒ unsupported fragment ⇒ fail-closed relevant coverage at compile time (default).
 - **Proof-irrelevant statics** (keywords, Enchant/Equip lines, cast-restriction riders) compile as supported no-ops so they do not block Spellbook eligibility when loop mechanics are modeled.
 - Patterns must not claim support the executor cannot run.
+- Counter-scaled tap mana (`equal_to_source_p1p1_counters`) requires the executor to read `p1p1` on the source; explorer seeds four counters for that capability (Staff-class untap cycle).
 
 ## Main entry points
 

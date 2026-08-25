@@ -75,6 +75,10 @@ class AddManaEffect(BaseModel):
     equal_to_source_power: Literal[
         None, "green", "any_color", "colorless"
     ] = None
+    # Gyre Sage class: "{T}: Add {G} for each +1/+1 counter on this creature."
+    equal_to_source_p1p1_counters: Literal[
+        None, "green", "any_color", "colorless"
+    ] = None
 
 
 class UntapEffect(BaseModel):

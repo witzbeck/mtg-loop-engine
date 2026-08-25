@@ -127,6 +127,7 @@ Blind discovery among real **COMPLETE**-compiled Oracle cards from Spellbook nam
    - **Path a (active):** unlock more COMPLETE cards whose abilities can initiate and close a two-card loop from the default board (tap-for-mana engines, ETB untap/damage/life, etc.).
      - **Slice 5 (self-starters)** ✓ — power-tap mana (Viridian Joiner); ETB damage (Impact Tremors / Purphoros / Alliance); ETB untap-self (Midnight Guard); anthem/devotion/lifelink-reminder as proof-irrelevant.
      - **Slice 6 (token auras + false-COMPLETE fix)** ✓ — Presence of Gond host-tap tokens; narrow Enchant irrelevant so Splinter Twin/Bear Umbra fail closed; Aphetto/Morph.
+     - **Slice 7 (life-untap / self-ETB untap-all / counter-mana)** ✓ — Famished Paladin; Village Bell-Ringer; Gyre Sage (`equal_to_source_p1p1_counters` + 4-counter seed); Pestermite (may tap-or-untap → untap).
    - **Path b (Wave 1 widen for Bond/Blood):** explicit generic life-gain seed when a
      searched card has `GAIN_LIFE` triggers (ADR 0002 fodder-style). Documented on the
      witness; not a silent invented trigger. Required for Sanguine Bond + Exquisite Blood
@@ -140,7 +141,7 @@ Playbook: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDID
 
 ### First local probe (not a baseline)
 
-Post–slice 6 + host-recurrence fix: **31** COMPLETE; **5** verified; **5** in-reference; **`absent_from_reference=0`**. Gond + Tremors / Warleader / Basalt no longer verify (host tap in `LoopRelevantState`); Guard/Alarm + Gond remain in-reference. Path **b** widened for Bond/Blood gold promotion (explicit life-gain seed).
+Post–slice 7: remeasure with `spellbook_absent_discovery.py` / `spellbook_compiler_priority.py` on each curriculum PR. Path **b** remains widened for Bond/Blood gold (explicit life-gain seed).
 
 ---
 

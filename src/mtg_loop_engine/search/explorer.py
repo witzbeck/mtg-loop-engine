@@ -99,7 +99,14 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
     for i, card in enumerate(ordered):
         types = {t.lower() for t in card.types}
         caps = extract_capabilities(card)
-        counters = {"p1p1": 1} if caps.removes_p1p1() else {}
+        # Counter-mana engines need enough p1p1 to pay Staff-class untap:
+        # {3} untap creature + {1} untap Staff in the same cycle.
+        if caps.needs_p1p1_mana_seed():
+            counters = {"p1p1": 4}
+        elif caps.removes_p1p1():
+            counters = {"p1p1": 1}
+        else:
+            counters = {}
         is_creature = "creature" in types
         permanents.append(
             bf(
