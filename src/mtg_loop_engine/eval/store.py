@@ -46,11 +46,37 @@ CREATE TABLE IF NOT EXISTS adjudications (
 """
 
 
+class DuckDBLockError(RuntimeError):
+    """Raised when another process already holds the adjudications DuckDB file lock."""
+
+
+def _connect(db_path: Path) -> duckdb.DuckDBPyConnection:
+    try:
+        return duckdb.connect(str(db_path))
+    except duckdb.IOException as exc:
+        msg = str(exc)
+        if "Conflicting lock" in msg or "Could not set lock" in msg:
+            raise DuckDBLockError(
+                f"Could not open {db_path}: another process holds the DuckDB lock.\n"
+                f"Stop other `adjudicate-workbench` / Streamlit instances, then retry.\n"
+                f"({msg})"
+            ) from exc
+        raise
+
+
+def assert_db_unlocked(db_path: Path | None = None) -> None:
+    """Raise DuckDBLockError if another process holds the file lock."""
+    path = Path(db_path or DEFAULT_DB)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    con = _connect(path)
+    con.close()
+
+
 class AdjudicationStore:
     def __init__(self, db_path: Path | None = None):
         self.db_path = Path(db_path or DEFAULT_DB)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self.con = duckdb.connect(str(self.db_path))
+        self.con = _connect(self.db_path)
         self.con.execute(_SCHEMA)
         self._migrate()
 

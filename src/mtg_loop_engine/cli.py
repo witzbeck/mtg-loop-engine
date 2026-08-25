@@ -198,6 +198,14 @@ def cmd_adjudicate_workbench(_: argparse.Namespace) -> int:
     from pathlib import Path
     import subprocess
 
+    from mtg_loop_engine.eval.store import DEFAULT_DB, DuckDBLockError, assert_db_unlocked
+
+    try:
+        assert_db_unlocked(DEFAULT_DB)
+    except DuckDBLockError as exc:
+        print(exc, file=sys.stderr)
+        return 1
+
     app = Path(__file__).resolve().parent / "eval" / "workbench.py"
     return subprocess.call([sys.executable, "-m", "streamlit", "run", str(app)])
 

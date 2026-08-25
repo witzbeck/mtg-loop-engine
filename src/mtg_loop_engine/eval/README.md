@@ -66,10 +66,13 @@ LAR v2 contracts (`lar_contracts.py`, `lar_calibration.py`) support ephemeral ru
 
 ## Core invariants
 
-- Precision denominator excludes skipped and `INVALID_CANDIDATE_DATA` (fixture pairs).
+- Precision denominator is `ORACLE_EXACT`×`ORACLE_EXACT` only (ADR 0007); SYNTHETIC /
+  divergent pairs stay out of product precision.
 - Recovery recall is undefined / null when eligible count is 0.
-- Gold-extra persistence expects adjudications to cover **currently discovered** extras (10-row post-gate contract in tests). Frozen baseline JSON matches that post-M4-exit contract.
-
+- Gold-extra persistence expects adjudications to cover **currently discovered** extras
+  (count locked in `tests/eval/test_spellbook_eval.py`). Frozen baseline JSON matches.
+- Workbench: **one** `adjudicate-workbench` process at a time — DuckDB file lock; Streamlit
+  keeps a single cached connection per process.
 ## Main entry points
 
 | Module | Role |

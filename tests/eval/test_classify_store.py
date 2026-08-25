@@ -105,6 +105,49 @@ def test_store_roundtrip(tmp_path: Path):
     other.close()
 
 
+def test_second_open_while_locked_raises_duckdb_lock_error(tmp_path: Path):
+    """Cross-process lock (same-process DuckDB allows multiple connections)."""
+    import subprocess
+    import sys
+    import time
+
+    from mtg_loop_engine.eval.store import DuckDBLockError
+
+    path = tmp_path / "locked.duckdb"
+    ready = tmp_path / "ready"
+    holder = subprocess.Popen(
+        [
+            sys.executable,
+            "-c",
+            (
+                "import time\n"
+                "from pathlib import Path\n"
+                "from mtg_loop_engine.eval.store import AdjudicationStore\n"
+                f"s = AdjudicationStore(Path({str(path)!r}))\n"
+                f"Path({str(ready)!r}).write_text('1', encoding='utf-8')\n"
+                "time.sleep(60)\n"
+                "s.close()\n"
+            ),
+        ],
+        cwd=str(Path(__file__).resolve().parents[2]),
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    try:
+        deadline = time.time() + 10
+        while not ready.exists():
+            if holder.poll() is not None:
+                raise AssertionError("holder process exited before locking")
+            if time.time() > deadline:
+                raise AssertionError("timed out waiting for holder lock")
+            time.sleep(0.05)
+        with pytest.raises(DuckDBLockError, match="DuckDB lock"):
+            AdjudicationStore(path)
+    finally:
+        holder.terminate()
+        holder.wait(timeout=10)
+
+
 def test_queue_treats_skipped_as_reviewed(tmp_path: Path):
     from mtg_loop_engine.eval.explain import record_from_hit
     from mtg_loop_engine.eval.schema import ReferenceStatus
