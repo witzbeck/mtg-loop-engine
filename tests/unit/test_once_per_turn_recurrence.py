@@ -195,3 +195,115 @@ def test_hand_authored_once_loop_rejects_on_recurrence():
     )
     proof = Verifier().verify(witness)
     assert proof.status == VerificationStatus.STATE_NOT_RECURRENT
+
+
+def test_omitting_once_per_turn_dim_still_rejects():
+    """ADR 0008: verifier injects once-per-turn dims even when the witness omits them."""
+    witness = LoopWitness(
+        id="adv_once_omit_dim",
+        classification=Classification(
+            essential_card_count=2,
+            strict_two_card=True,
+            loop_type=LoopType.ARBITRARY_REPEATABLE,
+        ),
+        essential_cards=[
+            EssentialCardRef(
+                oracle_id=INTRUDER_ALARM.oracle_id, name=INTRUDER_ALARM.name
+            ),
+            EssentialCardRef(oracle_id=ONCE_TAPPER.oracle_id, name=ONCE_TAPPER.name),
+        ],
+        card_semantics=[INTRUDER_ALARM, ONCE_TAPPER],
+        initial_state=InitialStateSpec(
+            permanents=[
+                PermanentSpec(
+                    object_id="p_alarm",
+                    oracle_id=INTRUDER_ALARM.oracle_id,
+                    name=INTRUDER_ALARM.name,
+                ),
+                PermanentSpec(
+                    object_id="p_tapper",
+                    oracle_id=ONCE_TAPPER.oracle_id,
+                    name=ONCE_TAPPER.name,
+                    is_creature=True,
+                    power=1,
+                    toughness=1,
+                ),
+            ]
+        ),
+        loop_actions=[
+            ActionStep(op="activate", actor="p_tapper", ability_id="tap-make-token"),
+            ActionStep(
+                op="resolve_trigger",
+                actor="p_alarm",
+                ability_id="alarm-untap",
+                target="p_tapper",
+            ),
+        ],
+        # Deliberately omit once_per_turn_used — only tap recurrence declared.
+        relevant_state=LoopRelevantState(
+            dimensions=[
+                StateDimension(
+                    path="permanents.p_tapper.tapped",
+                    op=ComparisonOp.EXACT,
+                    value=False,
+                ),
+            ]
+        ),
+        expected_outputs=[OutputDelta(type=OutputType.TOKEN, delta_per_iteration=1)],
+    )
+    proof = Verifier().verify(witness)
+    assert proof.status == VerificationStatus.STATE_NOT_RECURRENT
+    assert any("once_per_turn_used" in d for d in proof.recurrence.details)
+
+
+def test_omitting_pending_trigger_count_still_rejects():
+    """Leaving a trigger pending must fail recurrence via mandatory pending_triggers.count."""
+    witness = LoopWitness(
+        id="adv_pending_omit",
+        classification=Classification(
+            essential_card_count=2,
+            strict_two_card=True,
+            loop_type=LoopType.ARBITRARY_REPEATABLE,
+        ),
+        essential_cards=[
+            EssentialCardRef(
+                oracle_id=INTRUDER_ALARM.oracle_id, name=INTRUDER_ALARM.name
+            ),
+            EssentialCardRef(oracle_id=TOKEN_TAPPER.oracle_id, name=TOKEN_TAPPER.name),
+        ],
+        card_semantics=[INTRUDER_ALARM, TOKEN_TAPPER],
+        initial_state=InitialStateSpec(
+            permanents=[
+                PermanentSpec(
+                    object_id="p_alarm",
+                    oracle_id=INTRUDER_ALARM.oracle_id,
+                    name=INTRUDER_ALARM.name,
+                ),
+                PermanentSpec(
+                    object_id="p_tapper",
+                    oracle_id=TOKEN_TAPPER.oracle_id,
+                    name=TOKEN_TAPPER.name,
+                    is_creature=True,
+                    power=1,
+                    toughness=1,
+                ),
+            ]
+        ),
+        # Activate only — ETB trigger stays pending; no resolve_trigger.
+        loop_actions=[
+            ActionStep(op="activate", actor="p_tapper", ability_id="tap-make-token"),
+        ],
+        relevant_state=LoopRelevantState(
+            dimensions=[
+                StateDimension(
+                    path="permanents.p_tapper.tapped",
+                    op=ComparisonOp.EXACT,
+                    value=True,
+                ),
+            ]
+        ),
+        expected_outputs=[OutputDelta(type=OutputType.TOKEN, delta_per_iteration=1)],
+    )
+    proof = Verifier().verify(witness)
+    assert proof.status == VerificationStatus.STATE_NOT_RECURRENT
+    assert any("pending_triggers.count" in d for d in proof.recurrence.details)
