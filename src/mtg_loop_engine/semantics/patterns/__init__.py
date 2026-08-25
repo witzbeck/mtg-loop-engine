@@ -468,6 +468,58 @@ def pat_dies_lose_life(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_gain_life_opponent_loses_that_much(text: str, name: str) -> Ability | None:
+    """Vito / Sanguine Bond: whenever you gain life, opponent loses that much."""
+    m = re.match(
+        r"^Whenever you gain life, "
+        r"(?:target opponent|each opponent) loses that much life\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("gain-life-drain", text),
+        event=TriggerEvent.GAIN_LIFE,
+        filter="any",
+        effects=[LoseLifeEffect(who="opponent", amount_from_trigger=True)],
+    )
+
+
+def pat_gain_life_opponent_loses_fixed(text: str, name: str) -> Ability | None:
+    m = re.match(
+        r"^Whenever you gain life, each opponent loses (\d+) life\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("gain-life-drain-fixed", text),
+        event=TriggerEvent.GAIN_LIFE,
+        filter="any",
+        effects=[LoseLifeEffect(amount=int(m.group(1)), who="opponent")],
+    )
+
+
+def pat_opponent_lose_life_you_gain_that_much(text: str, name: str) -> Ability | None:
+    """Exquisite Blood / Bloodthirsty Conqueror."""
+    m = re.match(
+        r"^Whenever an opponent loses life, you gain that much life\.?"
+        r"(?:\s*\([^)]*\))?\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("loss-to-gain", text),
+        event=TriggerEvent.OPPONENT_LOSE_LIFE,
+        filter="any",
+        effects=[GainLifeEffect(amount_from_trigger=True)],
+    )
+
+
 def pat_etb_damage(text: str, name: str) -> Ability | None:
     m = re.match(
         r"^Whenever a creature enters(?: the battlefield)?(?: under your control)?, "
@@ -668,7 +720,7 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
     if lowered in _KEYWORD_ABILITIES:
         return _proof_irrelevant(clause)
 
-    words = [part.strip().lower() for part in clause.split() if part.strip()]
+    words = [part.strip().lower().rstrip(",.") for part in clause.split() if part.strip()]
     if words and all(word in _KEYWORD_ABILITIES for word in words):
         return _proof_irrelevant(clause)
 
@@ -679,6 +731,48 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
         return _proof_irrelevant(clause)
 
     if re.match(r"^Equip (?:\{[^}]+\})+(?: \([^)]+\))?$", clause, re.IGNORECASE):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^Flash(?: \([^)]+\))?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^Devoid(?: \([^)]+\))?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^This land enters(?: the battlefield)? tapped\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^Evolve(?: \([^)]+\))?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^As this enchantment enters(?: the battlefield)?, choose a creature type\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^(?:\{[^}]+\})+: Creatures you control gain .+ until end of turn\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
         return _proof_irrelevant(clause)
 
     if re.match(
@@ -769,6 +863,9 @@ PATTERNS: list[Pattern] = [
     Pattern("cast_from_gy_if_zombie", pat_cast_from_gy_if_zombie),
     Pattern("dies_return_self", pat_dies_return_self),
     Pattern("dies_lose_life", pat_dies_lose_life),
+    Pattern("gain_life_opponent_loses_that_much", pat_gain_life_opponent_loses_that_much),
+    Pattern("gain_life_opponent_loses_fixed", pat_gain_life_opponent_loses_fixed),
+    Pattern("opponent_lose_life_you_gain_that_much", pat_opponent_lose_life_you_gain_that_much),
     Pattern("etb_damage", pat_etb_damage),
     Pattern("etb_gain_life", pat_etb_gain_life),
     Pattern("remove_counter_damage", pat_remove_counter_damage),

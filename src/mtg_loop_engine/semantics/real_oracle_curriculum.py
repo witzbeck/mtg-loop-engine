@@ -107,4 +107,22 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         ),
         notes="Live Scryfall: untap-all on ETB; static is proof-irrelevant.",
     ),
+    "Sanguine Bond": RealOracleCurriculum(
+        name="Sanguine Bond",
+        types=["Enchantment"],
+        oracle_text="Whenever you gain life, target opponent loses that much life.",
+    ),
+    "Exquisite Blood": RealOracleCurriculum(
+        name="Exquisite Blood",
+        types=["Enchantment"],
+        oracle_text="Whenever an opponent loses life, you gain that much life.",
+    ),
+    "Vito, Thorn of the Dusk Rose": RealOracleCurriculum(
+        name="Vito, Thorn of the Dusk Rose",
+        types=["Creature", "Vampire", "Cleric"],
+        oracle_text=(
+            "Whenever you gain life, target opponent loses that much life.\n"
+            "{3}{B}{B}: Creatures you control gain lifelink until end of turn."
+        ),
+    ),
 }
