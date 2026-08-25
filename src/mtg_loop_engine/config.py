@@ -17,5 +17,5 @@ class EngineConfig(BaseModel):
     spellbook_require_repeatable_feature: bool = True
     rules_version: str = "2026-08-07"
     semantic_schema_version: str = "0.1.0"
-    proof_schema_version: str = "0.1.0"
+    proof_schema_version: str = "0.2.0"
     engine_version: str = "0.1.0"

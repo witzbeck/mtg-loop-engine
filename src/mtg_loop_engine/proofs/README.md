@@ -31,6 +31,7 @@ graph TB;
 
 - Define the epistemic wire format between discovery, verification, and evaluation.
 - Provide `normalize_proof` for stable golden comparison.
+- Provide claim-bound `proof_hash` construction (`claim.py`, ADR 0009).
 
 ## Non-responsibilities
 
@@ -47,6 +48,7 @@ graph TB;
 ## Main entry points
 
 - `models.py`: `LoopWitness`, `LoopProof`, `Classification`, `ActionStep`, …
+- `claim.py`: `build_claim_payload`, `claim_proof_hash` / `proof_hash`
 - `normalize.py`: `normalize_proof`
 
 ## Data contracts

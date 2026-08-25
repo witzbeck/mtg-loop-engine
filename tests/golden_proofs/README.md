@@ -35,7 +35,7 @@ graph TB;
 ## Core invariants
 
 - Normalization is deterministic.
-- Proof hash changes are deliberate contract changes.
+- Proof hash is a claim hash (ADR 0009); changes are deliberate schema/version events.
 
 ## Main entry points
 

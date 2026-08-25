@@ -56,7 +56,8 @@ graph TB;
 
 ## Main entry points
 
-- `verifier.py`: `Verifier`, `Verifier.verify`, `check_recurrence`, `check_outputs`, `proof_hash`
+- `verifier.py`: `Verifier`, `Verifier.verify`, `check_recurrence`, `check_outputs`
+  (claim hash via `proofs.claim.claim_proof_hash`)
 - `mandatory_recurrence.py`: `effective_relevant_state`, once-per-turn / pending helpers
 
 ## Data contracts
