@@ -13,6 +13,7 @@ from mtg_loop_engine.semantics.ir import (
     ContinuousCostReduction,
     CreateTokenEffect,
     DealDamageEffect,
+    DrawEffect,
     GainLifeEffect,
     LoseLifeEffect,
     ManaCost,
@@ -96,6 +97,8 @@ def _effects(effects: list, caps: CardCapabilities) -> None:
             caps.produces.add("life_gain")
         elif isinstance(effect, LoseLifeEffect):
             caps.produces.add("life_loss")
+        elif isinstance(effect, DrawEffect):
+            caps.produces.add("draw")
         elif isinstance(effect, ReturnToBattlefieldEffect):
             caps.produces.add("etb")
 

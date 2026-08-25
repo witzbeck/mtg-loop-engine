@@ -14,6 +14,7 @@ from mtg_loop_engine.semantics.ir import (
     ContinuousCostReduction,
     CreateTokenEffect,
     DealDamageEffect,
+    DrawEffect,
     GainLifeEffect,
     LoseLifeEffect,
     ManaAmount,
@@ -163,6 +164,15 @@ class Executor:
             return None
 
         if isinstance(effect, UntapEffect):
+            if effect.target == "all_creatures":
+                n = 0
+                for perm in state.permanents.values():
+                    if perm.zone == Zone.BATTLEFIELD and perm.is_creature:
+                        perm.tapped = False
+                        n += 1
+                if n:
+                    state.bump("untap", n)
+                return None
             tid = source.object_id if effect.target == "self" else target_id
             if not tid or tid not in state.permanents:
                 return ExecError(VerificationStatus.ILLEGAL_TARGET, "untap target missing")
@@ -237,6 +247,10 @@ class Executor:
         if isinstance(effect, GainLifeEffect):
             state.life_you += effect.amount
             state.bump("life_gain", effect.amount)
+            return None
+
+        if isinstance(effect, DrawEffect):
+            state.bump("draw", effect.amount)
             return None
 
         if isinstance(effect, LoseLifeEffect):

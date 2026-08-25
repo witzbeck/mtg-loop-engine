@@ -56,8 +56,8 @@ uv run python scripts/spellbook_absent_discovery.py
 #### Curriculum order
 
 1. **Aura channel** ✓ — `{C}: tap/untap enchanted creature` + irrelevant enchanted riders (Freed / Pemmin’s). Live delta: COMPLETE **17→19**.
-2. **Generic activated artifacts** — `{N}: untap this` / Staff of Domination ability suite
-3. **Global ETB untap** — Intruder Alarm shape
+2. **Generic activated artifacts** ✓ — Staff of Domination suite, `this artifact` untap, doesn't-untap statics, draw effect.
+3. **Global ETB untap** ✓ — Intruder Alarm live wording (`untap all creatures`).
 4. **Life-drain family** — only after linked gain/drain semantics are deliberate
 
 Each slice: real-Oracle curriculum fixtures → RED/GREEN tests → remeasure → ship. Expand patterns deliberately with tests/docs (`AGENTS.md`).

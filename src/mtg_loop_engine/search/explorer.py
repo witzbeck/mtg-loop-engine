@@ -56,6 +56,7 @@ OUTPUT_EVENT_KEYS = {
     "life_loss": OutputType.LIFE_LOSS,
     "death": OutputType.DEATH,
     "sacrifice": OutputType.SACRIFICE,
+    "draw": OutputType.DRAW,
 }
 
 

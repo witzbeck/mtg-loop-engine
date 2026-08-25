@@ -15,6 +15,7 @@ from mtg_loop_engine.semantics.ir import (
     ContinuousCostReduction,
     CreateTokenEffect,
     DealDamageEffect,
+    DrawEffect,
     GainLifeEffect,
     LoseLifeEffect,
     ManaAmount,
@@ -71,6 +72,22 @@ def _ability_id(prefix: str, text: str) -> str:
     return f"{prefix}-{slug}" if slug else prefix
 
 
+def _parse_activation_costs(cost_blob: str) -> list | None:
+    """Parse '{2}, {T}' / '{T}' / '{3}' style activation cost prefixes."""
+    parts = [p.strip() for p in cost_blob.split(",") if p.strip()]
+    if not parts:
+        return None
+    costs: list = []
+    for part in parts:
+        if re.fullmatch(r"\{T\}", part, flags=re.IGNORECASE):
+            costs.append(TapCost())
+        elif re.fullmatch(r"(?:\{[^}]+\})+", part):
+            costs.append(ManaCost(amount=_parse_mana_braces(part)))
+        else:
+            return None
+    return costs
+
+
 def pat_tap_add_mana(text: str, name: str) -> Ability | None:
     # {T}: Add {C}{C}{C}. / {T}: Add {B}.
     m = re.match(
@@ -79,7 +96,21 @@ def pat_tap_add_mana(text: str, name: str) -> Ability | None:
         re.IGNORECASE,
     )
     if not m:
-        return None
+        # {T}: Add one mana of any color.
+        m_any = re.match(
+            r"^\{T\}: Add one mana of any color(?: to your mana pool)?\.?$",
+            text,
+            re.IGNORECASE,
+        )
+        if not m_any:
+            return None
+        return ActivatedAbility(
+            ability_id=_ability_id("tap-mana-any", text),
+            costs=[TapCost()],
+            effects=[AddManaEffect(amount=ManaAmount(any_color=1))],
+            is_mana_ability=True,
+            uses_stack=False,
+        )
     amount = _parse_mana_braces(m.group(1))
     return ActivatedAbility(
         ability_id=_ability_id("tap-mana", text),
@@ -91,9 +122,9 @@ def pat_tap_add_mana(text: str, name: str) -> Ability | None:
 
 
 def pat_mana_untap_self(text: str, name: str) -> Ability | None:
-    # {3}: Untap Basalt Monolith. / {3}: Untap this permanent.
+    # {3}: Untap Basalt Monolith. / {1}: Untap this artifact.
     m = re.match(
-        r"^((?:\{[^}]+\})+): Untap (?:this permanent|~|"
+        r"^((?:\{[^}]+\})+): Untap (?:this (?:permanent|artifact|creature)|~|"
         + re.escape(name)
         + r")\.?$",
         text,
@@ -143,6 +174,79 @@ def pat_mana_tap_enchanted(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_mana_tap_gain_life(text: str, name: str) -> Ability | None:
+    m = re.match(
+        r"^((?:\{[^}]+\}(?:,\s*)?)+): You gain (\d+) life\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    costs = _parse_activation_costs(m.group(1).rstrip(", "))
+    if not costs:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("tap-gain-life", text),
+        costs=costs,
+        effects=[GainLifeEffect(amount=int(m.group(2)))],
+    )
+
+
+def pat_mana_tap_untap_target(text: str, name: str) -> Ability | None:
+    m = re.match(
+        r"^((?:\{[^}]+\}(?:,\s*)?)+): Untap target creature\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    costs = _parse_activation_costs(m.group(1).rstrip(", "))
+    if not costs:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("tap-untap-target", text),
+        costs=costs,
+        effects=[UntapEffect(target="target_permanent")],
+    )
+
+
+def pat_mana_tap_tap_target(text: str, name: str) -> Ability | None:
+    m = re.match(
+        r"^((?:\{[^}]+\}(?:,\s*)?)+): Tap target creature\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    costs = _parse_activation_costs(m.group(1).rstrip(", "))
+    if not costs:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("tap-tap-target", text),
+        costs=costs,
+        effects=[TapEffect(target="target_permanent")],
+    )
+
+
+def pat_mana_tap_draw(text: str, name: str) -> Ability | None:
+    m = re.match(
+        r"^((?:\{[^}]+\}(?:,\s*)?)+): Draw (?:a card|(\d+) cards?)\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    costs = _parse_activation_costs(m.group(1).rstrip(", "))
+    if not costs:
+        return None
+    amount = int(m.group(2)) if m.group(2) else 1
+    return ActivatedAbility(
+        ability_id=_ability_id("tap-draw", text),
+        costs=costs,
+        effects=[DrawEffect(amount=amount)],
+    )
+
+
 def pat_cost_reduction(text: str, name: str) -> Ability | None:
     m = re.match(
         r"^Activated abilities (?:of creatures )?you control cost \{(\d+)\} less to activate\.?$",
@@ -171,13 +275,26 @@ def pat_etb_untap_target(text: str, name: str) -> Ability | None:
         text,
         re.IGNORECASE,
     )
-    if not m:
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("etb-untap", text),
+            event=TriggerEvent.ENTER_BATTLEFIELD,
+            filter="creature",
+            effects=[UntapEffect(target="target_permanent")],
+        )
+    # Intruder Alarm (current Oracle): Whenever a creature enters, untap all creatures.
+    m_all = re.match(
+        r"^Whenever a creature enters(?: the battlefield)?, untap all creatures\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m_all:
         return None
     return TriggeredAbility(
-        ability_id=_ability_id("etb-untap", text),
+        ability_id=_ability_id("etb-untap-all", text),
         event=TriggerEvent.ENTER_BATTLEFIELD,
         filter="creature",
-        effects=[UntapEffect(target="target_permanent")],
+        effects=[UntapEffect(target="all_creatures")],
     )
 
 
@@ -593,6 +710,23 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
     if re.match(r"^Activate only as a sorcery\.?$", clause, re.IGNORECASE):
         return _proof_irrelevant(clause)
 
+    if re.match(
+        r"^This (?:artifact|creature|permanent) doesn't untap during your untap step\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^Creatures don't untap during their controllers' untap steps\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(r"^You have no maximum hand size\.?$", clause, re.IGNORECASE):
+        return _proof_irrelevant(clause)
+
     # Enchanted-creature keyword/pump riders (Pemmin's Aura class): not modeled
     # loop physics; keep them out of legal_steps so they do not drain mana.
     if re.match(
@@ -621,6 +755,10 @@ PATTERNS: list[Pattern] = [
     Pattern("tap_add_mana", pat_tap_add_mana),
     Pattern("mana_untap_enchanted", pat_mana_untap_enchanted),
     Pattern("mana_tap_enchanted", pat_mana_tap_enchanted),
+    Pattern("mana_tap_gain_life", pat_mana_tap_gain_life),
+    Pattern("mana_tap_untap_target", pat_mana_tap_untap_target),
+    Pattern("mana_tap_tap_target", pat_mana_tap_tap_target),
+    Pattern("mana_tap_draw", pat_mana_tap_draw),
     Pattern("mana_untap_self", pat_mana_untap_self),
     Pattern("cost_reduction", pat_cost_reduction),
     Pattern("etb_untap_target", pat_etb_untap_target),

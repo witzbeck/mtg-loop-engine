@@ -61,7 +61,7 @@ class AddManaEffect(BaseModel):
 
 class UntapEffect(BaseModel):
     kind: Literal["untap"] = "untap"
-    target: Literal["self", "target_permanent"] = "self"
+    target: Literal["self", "target_permanent", "all_creatures"] = "self"
 
 
 class TapEffect(BaseModel):
@@ -110,6 +110,11 @@ class GainLifeEffect(BaseModel):
     amount: int = 1
 
 
+class DrawEffect(BaseModel):
+    kind: Literal["draw"] = "draw"
+    amount: int = 1
+
+
 class LoseLifeEffect(BaseModel):
     kind: Literal["lose_life"] = "lose_life"
     amount: int = 1
@@ -132,6 +137,7 @@ Effect = Annotated[
     | ReturnToBattlefieldEffect
     | DealDamageEffect
     | GainLifeEffect
+    | DrawEffect
     | LoseLifeEffect
     | MoveToZoneEffect,
     Field(discriminator="kind"),
