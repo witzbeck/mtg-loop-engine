@@ -92,6 +92,18 @@ class Consequence(StrEnum):
     OTHER = "other"
 
 
+class ManaScaleKind(StrEnum):
+    """Tap-mana amount scales with a board statistic (M5 slice 9)."""
+
+    CONTROLLED_CREATURES = "controlled_creatures"
+    CONTROLLED_ELF = "controlled_elf"
+    BATTLEFIELD_ELF = "battlefield_elf"
+    CONTROLLED_DEFENDERS = "controlled_defenders"
+    CONTROLLED_ENCHANTMENTS = "controlled_enchantments"
+    DEVOTION_GREEN = "devotion_green"
+    VIVID_PERMANENT_COLORS = "vivid_permanent_colors"
+
+
 class TriggerEvent(StrEnum):
     ENTER_BATTLEFIELD = "enter_battlefield"
     LEAVE_BATTLEFIELD = "leave_battlefield"

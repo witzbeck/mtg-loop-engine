@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from mtg_loop_engine.proofs.models import ActionStep
-from mtg_loop_engine.semantics.enums import TriggerEvent, VerificationStatus, Zone
+from mtg_loop_engine.semantics.enums import ManaScaleKind, TriggerEvent, VerificationStatus, Zone
 from mtg_loop_engine.semantics.ir import (
     ActivatedAbility,
     AddCounterCost,
@@ -23,6 +23,7 @@ from mtg_loop_engine.semantics.ir import (
     ManaCost,
     MillEffect,
     MoveToZoneEffect,
+    ProofIrrelevantStatic,
     RemoveCounterEffect,
     ReplacementExileInsteadOfGraveyard,
     ReplacementReduceM1M1Counters,
@@ -34,6 +35,118 @@ from mtg_loop_engine.semantics.ir import (
     UntapEffect,
 )
 from mtg_loop_engine.state.game import GameState, Permanent
+
+
+def _semantics_for(
+    semantics: dict[str, CardSemantics], perm: Permanent
+) -> CardSemantics | None:
+    return semantics.get(perm.oracle_id)
+
+
+def _is_elf(sem: CardSemantics) -> bool:
+    return any("elf" in t.casefold() for t in sem.types)
+
+
+def _has_defender(sem: CardSemantics) -> bool:
+    for ab in sem.abilities:
+        if isinstance(ab, ProofIrrelevantStatic) and ab.clause.casefold().strip() == "defender":
+            return True
+    return False
+
+
+def _controlled_permanents(state: GameState, controller: str = "you") -> list[Permanent]:
+    return [
+        p
+        for p in state.permanents.values()
+        if p.zone == Zone.BATTLEFIELD and p.controller == controller
+    ]
+
+
+def _colors_among_controlled(
+    state: GameState,
+    semantics: dict[str, CardSemantics],
+    controller: str = "you",
+) -> set[str]:
+    colors: set[str] = set()
+    for perm in _controlled_permanents(state, controller):
+        sem = _semantics_for(semantics, perm)
+        if sem is None:
+            continue
+        for ab in sem.abilities:
+            if not isinstance(ab, ActivatedAbility):
+                continue
+            for cost in ab.costs:
+                if not isinstance(cost, ManaCost):
+                    continue
+                for color in ("white", "blue", "black", "red", "green"):
+                    if getattr(cost.amount, color) > 0:
+                        colors.add(color)
+    return colors
+
+
+def _devotion_green(
+    state: GameState,
+    semantics: dict[str, CardSemantics],
+    controller: str = "you",
+) -> int:
+    total = 0
+    for perm in _controlled_permanents(state, controller):
+        sem = _semantics_for(semantics, perm)
+        if sem is None:
+            continue
+        for ab in sem.abilities:
+            if not isinstance(ab, ActivatedAbility):
+                continue
+            for cost in ab.costs:
+                if isinstance(cost, ManaCost):
+                    total += cost.amount.green
+    return total
+
+
+def _scaled_mana_quantity(
+    effect: AddManaEffect,
+    state: GameState,
+    source: Permanent,
+    semantics: dict[str, CardSemantics],
+) -> int:
+    scale = effect.mana_scale
+    if scale is None:
+        return 0
+    if scale is ManaScaleKind.CONTROLLED_CREATURES:
+        return sum(1 for p in _controlled_permanents(state) if p.is_creature)
+    if scale is ManaScaleKind.CONTROLLED_ELF:
+        return sum(
+            1
+            for p in _controlled_permanents(state)
+            if p.is_creature and (sem := _semantics_for(semantics, p)) and _is_elf(sem)
+        )
+    if scale is ManaScaleKind.BATTLEFIELD_ELF:
+        return sum(
+            1
+            for p in state.permanents.values()
+            if p.zone == Zone.BATTLEFIELD
+            and p.is_creature
+            and (sem := _semantics_for(semantics, p))
+            and _is_elf(sem)
+        )
+    if scale is ManaScaleKind.CONTROLLED_DEFENDERS:
+        return sum(
+            1
+            for p in _controlled_permanents(state)
+            if p.is_creature and (sem := _semantics_for(semantics, p)) and _has_defender(sem)
+        )
+    if scale is ManaScaleKind.CONTROLLED_ENCHANTMENTS:
+        return sum(
+            1
+            for p in _controlled_permanents(state)
+            if (sem := _semantics_for(semantics, p))
+            and any(t.casefold() == "enchantment" for t in sem.types)
+        )
+    if scale is ManaScaleKind.DEVOTION_GREEN:
+        return _devotion_green(state, semantics)
+    if scale is ManaScaleKind.VIVID_PERMANENT_COLORS:
+        return len(_colors_among_controlled(state, semantics))
+    return 0
 
 
 @dataclass
@@ -193,6 +306,31 @@ class Executor:
                 qty = max(int(source.counters.get("p1p1", 0)), 0)
                 if qty > 0:
                     color = effect.equal_to_source_p1p1_counters
+                    setattr(
+                        state.mana,
+                        color,
+                        getattr(state.mana, color) + qty,
+                    )
+                    state.bump("mana", qty)
+                return None
+            if effect.mana_scale is not None:
+                if effect.mana_scale is ManaScaleKind.VIVID_PERMANENT_COLORS:
+                    colors = _colors_among_controlled(state, self.semantics)
+                    for color in colors:
+                        setattr(
+                            state.mana,
+                            color,
+                            getattr(state.mana, color) + 1,
+                        )
+                    if colors:
+                        state.bump("mana", len(colors))
+                    return None
+                qty = max(
+                    _scaled_mana_quantity(effect, state, source, self.semantics),
+                    0,
+                )
+                if qty > 0:
+                    color = effect.scale_color
                     setattr(
                         state.mana,
                         color,

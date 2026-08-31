@@ -175,6 +175,67 @@ def pat_tap_add_mana(text: str, name: str) -> Ability | None:
             is_mana_ability=True,
             uses_stack=False,
         )
+    # M5 slice 9 — scaled tap mana (path-a).
+    from mtg_loop_engine.semantics.enums import ManaScaleKind
+
+    scaled_patterns: tuple[tuple[str, ManaScaleKind, str], ...] = (
+        (
+            r"^\{T\}: Add \{G\} for each creature you control\.?$",
+            ManaScaleKind.CONTROLLED_CREATURES,
+            "green",
+        ),
+        (
+            r"^\{T\}: Add \{G\} for each Elf on the battlefield\.?$",
+            ManaScaleKind.BATTLEFIELD_ELF,
+            "green",
+        ),
+        (
+            r"^\{T\}: Add \{G\} for each Elf you control\.?$",
+            ManaScaleKind.CONTROLLED_ELF,
+            "green",
+        ),
+        (
+            r"^\{T\}: Add \{G\} for each creature you control with defender\.?$",
+            ManaScaleKind.CONTROLLED_DEFENDERS,
+            "green",
+        ),
+        (
+            r"^\{T\}: Add X mana of any one color, where X is the number of "
+            r"enchantments you control\.?$",
+            ManaScaleKind.CONTROLLED_ENCHANTMENTS,
+            "any_color",
+        ),
+        (
+            r"^\{T\}: Add X mana in any combination of colors, where X is the "
+            r"number of creatures you control with defender\.?$",
+            ManaScaleKind.CONTROLLED_DEFENDERS,
+            "any_color",
+        ),
+        (
+            r"^\{T\}: Add an amount of \{G\} equal to your devotion to green\."
+            r"(?: \(Each \{G\} in the mana costs of permanents you control counts "
+            r"toward your devotion to green\.\))?\.?$",
+            ManaScaleKind.DEVOTION_GREEN,
+            "green",
+        ),
+        (
+            r"^Vivid — \{T\}: For each color among permanents you control, "
+            r"add one mana of that color\.?$",
+            ManaScaleKind.VIVID_PERMANENT_COLORS,
+            "green",
+        ),
+    )
+    for pattern, scale, color in scaled_patterns:
+        if re.match(pattern, text, re.IGNORECASE):
+            return ActivatedAbility(
+                ability_id=_ability_id(f"tap-mana-scale-{scale.value}", text),
+                costs=[TapCost()],
+                effects=[
+                    AddManaEffect(mana_scale=scale, scale_color=color)  # type: ignore[arg-type]
+                ],
+                is_mana_ability=True,
+                uses_stack=False,
+            )
     return None
 
 
@@ -1300,6 +1361,13 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
     ):
         return _proof_irrelevant(clause)
 
+    if re.match(
+        r"^Other Elf creatures you control get [+-]\d+/[+-]\d+\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
     # Fateful hour / conditional life anthem (Thraben Doomsayer).
     if re.match(
         r"^(?:[A-Z][a-z]+(?: [a-z]+)? — )?"
@@ -1314,6 +1382,14 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
     if re.match(
         r"^Indestructible(?:\s+As long as your devotion to \w+ is less than \w+, "
         r".+ isn't a creature)?\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^\(Each \{G\} in the mana costs of permanents you control counts "
+        r"toward your devotion to green\.\)$",
         clause,
         re.IGNORECASE,
     ):

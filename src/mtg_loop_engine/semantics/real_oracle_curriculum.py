@@ -263,4 +263,73 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         ),
         notes="Combo-favorable: ETB may tap-or-untap modeled as untap target.",
     ),
+    # Path a — slice 9: scaled tap-mana (frontier P0 cluster).
+    "Bloom Tender": RealOracleCurriculum(
+        name="Bloom Tender",
+        types=["Creature", "Elf", "Druid"],
+        oracle_text=(
+            "Vivid — {T}: For each color among permanents you control, "
+            "add one mana of that color."
+        ),
+        notes="Vivid multi-color tap mana; pairs with untappers (frontier P0).",
+    ),
+    "Sanctum Weaver": RealOracleCurriculum(
+        name="Sanctum Weaver",
+        types=["Creature", "Dryad", "Druid"],
+        oracle_text=(
+            "{T}: Add X mana of any one color, where X is the number of "
+            "enchantments you control."
+        ),
+        notes="Enchantment-count scaled mana (frontier P0).",
+    ),
+    "Axebane Guardian": RealOracleCurriculum(
+        name="Axebane Guardian",
+        types=["Creature", "Human", "Shaman"],
+        oracle_text=(
+            "Defender\n"
+            "{T}: Add X mana in any combination of colors, where X is the "
+            "number of creatures you control with defender."
+        ),
+        notes="Defender-count any-color mana.",
+    ),
+    "Circle of Dreams Druid": RealOracleCurriculum(
+        name="Circle of Dreams Druid",
+        types=["Creature", "Human", "Druid"],
+        oracle_text="{T}: Add {G} for each creature you control.",
+        notes="Creature-count green mana (frontier P0).",
+    ),
+    "Priest of Titania": RealOracleCurriculum(
+        name="Priest of Titania",
+        types=["Creature", "Elf", "Druid"],
+        oracle_text="{T}: Add {G} for each Elf on the battlefield.",
+        notes="Battlefield Elf count (frontier P0).",
+    ),
+    "Overgrown Battlement": RealOracleCurriculum(
+        name="Overgrown Battlement",
+        types=["Creature", "Wall"],
+        oracle_text=(
+            "Defender\n"
+            "{T}: Add {G} for each creature you control with defender."
+        ),
+        notes="Defender-count green mana.",
+    ),
+    "Karametra's Acolyte": RealOracleCurriculum(
+        name="Karametra's Acolyte",
+        types=["Creature", "Human", "Druid"],
+        oracle_text=(
+            "{T}: Add an amount of {G} equal to your devotion to green. "
+            "(Each {G} in the mana costs of permanents you control counts "
+            "toward your devotion to green.)"
+        ),
+        notes="Devotion-scaled green; reminder clause is separate.",
+    ),
+    "Elvish Archdruid": RealOracleCurriculum(
+        name="Elvish Archdruid",
+        types=["Creature", "Elf", "Druid"],
+        oracle_text=(
+            "Other Elf creatures you control get +1/+1.\n"
+            "{T}: Add {G} for each Elf you control."
+        ),
+        notes="Elf-count green; anthem proof-irrelevant.",
+    ),
 }

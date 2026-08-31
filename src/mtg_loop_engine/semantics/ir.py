@@ -6,7 +6,12 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
-from mtg_loop_engine.semantics.enums import SemanticCoverage, TriggerEvent, Zone
+from mtg_loop_engine.semantics.enums import (
+    ManaScaleKind,
+    SemanticCoverage,
+    TriggerEvent,
+    Zone,
+)
 
 
 class ManaAmount(BaseModel):
@@ -79,6 +84,9 @@ class AddManaEffect(BaseModel):
     equal_to_source_p1p1_counters: Literal[
         None, "green", "any_color", "colorless"
     ] = None
+    # Scaled tap mana (Circle / Priest / Bloom Tender class).
+    mana_scale: ManaScaleKind | None = None
+    scale_color: Literal["green", "any_color", "colorless"] = "green"
 
 
 class UntapEffect(BaseModel):

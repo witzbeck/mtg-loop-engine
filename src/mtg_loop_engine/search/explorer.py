@@ -84,6 +84,62 @@ ZOMBIE_SEED_ORACLE_ID = "token:zombie-seed"
 AURA_HOST_OBJECT_ID = "aura-host"
 AURA_HOST_ORACLE_ID = "setup:aura-host"
 
+CREATURE_MANA_SEED_ORACLE_ID = "scaled-mana:creature-seed"
+ELF_MANA_SEED_ORACLE_ID = "scaled-mana:elf-seed"
+DEFENDER_MANA_SEED_ORACLE_ID = "scaled-mana:defender-seed"
+
+_SCALED_MANA_SEED_COUNT = 3
+
+
+def _scaled_mana_seed_semantics() -> dict[str, CardSemantics]:
+    from mtg_loop_engine.semantics.ir import ProofIrrelevantStatic
+
+    return {
+        CREATURE_MANA_SEED_ORACLE_ID: CardSemantics(
+            oracle_id=CREATURE_MANA_SEED_ORACLE_ID,
+            name="Seed Creature",
+            types=["Creature"],
+            abilities=[],
+            coverage=SemanticCoverage.COMPLETE,
+        ),
+        ELF_MANA_SEED_ORACLE_ID: CardSemantics(
+            oracle_id=ELF_MANA_SEED_ORACLE_ID,
+            name="Seed Elf",
+            types=["Creature", "Elf"],
+            abilities=[],
+            coverage=SemanticCoverage.COMPLETE,
+        ),
+        DEFENDER_MANA_SEED_ORACLE_ID: CardSemantics(
+            oracle_id=DEFENDER_MANA_SEED_ORACLE_ID,
+            name="Seed Defender",
+            types=["Creature"],
+            abilities=[
+                ProofIrrelevantStatic(
+                    ability_id="seed-defender-static",
+                    clause="Defender",
+                )
+            ],
+            coverage=SemanticCoverage.COMPLETE,
+        ),
+    }
+
+
+def _inject_seed_semantics(
+    spec: InitialStateSpec, semantics: dict[str, CardSemantics]
+) -> None:
+    seeds = _scaled_mana_seed_semantics()
+    for perm in spec.permanents:
+        if perm.oracle_id in seeds and perm.oracle_id not in semantics:
+            semantics[perm.oracle_id] = seeds[perm.oracle_id]
+    if any(p.oracle_id == ZOMBIE_SEED_ORACLE_ID for p in spec.permanents):
+        semantics[ZOMBIE_SEED_ORACLE_ID] = CardSemantics(
+            oracle_id=ZOMBIE_SEED_ORACLE_ID,
+            name="Zombie",
+            types=["Creature", "Zombie"],
+            abilities=[],
+            coverage=SemanticCoverage.COMPLETE,
+        )
+
 
 def _needs_zombie_gate(card: CardSemantics) -> bool:
     return any(
@@ -215,6 +271,43 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
                 toughness=1,
             )
         )
+    pair_caps = [extract_capabilities(c) for c in ordered]
+    if any(c.needs_creature_count_mana_seed() for c in pair_caps):
+        for i in range(_SCALED_MANA_SEED_COUNT):
+            permanents.append(
+                bf(
+                    f"scaled_creature_{i}",
+                    CREATURE_MANA_SEED_ORACLE_ID,
+                    "Seed Creature",
+                    is_creature=True,
+                    power=1,
+                    toughness=1,
+                )
+            )
+    if any(c.needs_elf_count_mana_seed() for c in pair_caps):
+        for i in range(_SCALED_MANA_SEED_COUNT):
+            permanents.append(
+                bf(
+                    f"scaled_elf_{i}",
+                    ELF_MANA_SEED_ORACLE_ID,
+                    "Seed Elf",
+                    is_creature=True,
+                    power=1,
+                    toughness=1,
+                )
+            )
+    if any(c.needs_defender_count_mana_seed() for c in pair_caps):
+        for i in range(_SCALED_MANA_SEED_COUNT):
+            permanents.append(
+                bf(
+                    f"scaled_defender_{i}",
+                    DEFENDER_MANA_SEED_ORACLE_ID,
+                    "Seed Defender",
+                    is_creature=True,
+                    power=0,
+                    toughness=4,
+                )
+            )
     mana = ManaAmount()
     for card in ordered:
         seed = _mana_for_grant_lifelink(card)
@@ -672,14 +765,7 @@ def explore_pair(
     check = verifier or Verifier()
     spec = default_initial_state(a, b)
     semantics = {a.oracle_id: a, b.oracle_id: b}
-    if any(p.oracle_id == ZOMBIE_SEED_ORACLE_ID for p in spec.permanents):
-        semantics[ZOMBIE_SEED_ORACLE_ID] = CardSemantics(
-            oracle_id=ZOMBIE_SEED_ORACLE_ID,
-            name="Zombie",
-            types=["Creature", "Zombie"],
-            abilities=[],
-            coverage=SemanticCoverage.COMPLETE,
-        )
+    _inject_seed_semantics(spec, semantics)
     executor = Executor(semantics)
     start = GameState.from_spec(spec)
     setup_actions: list[ActionStep] = []
