@@ -163,8 +163,9 @@ measure frontier → smallest reusable gap → discover → adjudicate → contr
    - **Slice 5 (self-starters)** ✓ — power-tap mana (Viridian Joiner); ETB damage (Impact / Purphoros / Alliance); ETB untap-self (Midnight Guard); anthem/devotion/lifelink-reminder as proof-irrelevant.
    - **Slice 6 (token auras + false-COMPLETE fix)** ✓ — Presence of Gond host-tap tokens; narrow Enchant irrelevant so Splinter Twin/Bear Umbra fail closed; Aphetto/Morph.
    - **Slice 7 (life-untap / self-ETB untap-all / counter-mana)** ✓ — Famished Paladin; Village Bell-Ringer; Gyre Sage (`equal_to_source_p1p1_counters` + 4-counter seed); Pestermite (may tap-or-untap → untap).
-   - **Slice 8 (mill / graveyard feedback)** ✓ — Mindcrank (`OPPONENT_LOSE_LIFE` → mill); Bloodchief Ascension (`Enchantments you control have …` graveyard drain); `CARD_TO_OPPONENT_GRAVEYARD` trigger + Path-b `seed_lose_life` (sized to partner drain); `core_bloodchief_mindcrank` frozen. Local absent-discovery probe (2026-08-31): **46** COMPLETE Spellbook-named cards, **25** verified/in_reference, **0** `absent_from_reference` — pair not in Spellbook reference rows, so no workbench seed from absence path.
-   - **Slice 9+** ○ — choose from live frontier P0/P1; cite compact pair-unlock evidence in the curriculum PR.
+   - **Slice 8 (mill / graveyard feedback)** ✓ — Mindcrank + Bloodchief Ascension; Path-b′ `seed_lose_life`; `core_bloodchief_mindcrank` frozen.
+   - **Slice 9 (scaled tap-mana)** ✓ — Bloom Tender / Sanctum Weaver / Circle of Dreams Druid / Priest of Titania / Axebane / Overgrown / Karametra / Archdruid; `ManaScaleKind` + explorer seeds.
+   - **Slice 10+** ○ — choose from live frontier P0/P1; cite compact pair-unlock evidence in the curriculum PR.
    - **Path b (Bond/Blood)** ✓ — explicit generic life-gain seed; `core_bond_blood` frozen; disclosed on witness.
    - **Path b (Mindcrank / Bloodchief)** ✓ — explicit generic opponent life-loss seed (`seed_lose_life`, drain-sized); disclosed on witness.
    - **Rules-evidence rails** ✓ — [`docs/RULES_EVIDENCE.md`](docs/RULES_EVIDENCE.md), [`AGENTS.md`](AGENTS.md), [`.cursor/rules/rules-evidence.mdc`](.cursor/rules/rules-evidence.mdc), [`.agents/skills/rules-evidence/`](.agents/skills/rules-evidence/).
@@ -176,7 +177,7 @@ Playbook: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDID
 
 ### First local probe (not a baseline)
 
-After M5.1: run `spellbook_compiler_priority.py` (frontier) + `spellbook_absent_discovery.py` before choosing Slice 8. Remeasure on each curriculum PR.
+After each curriculum slice: run `spellbook_compiler_priority.py` (frontier) + `spellbook_absent_discovery.py` before choosing the next Slice 9+ gap. Remeasure on each curriculum PR.
 
 ---
 

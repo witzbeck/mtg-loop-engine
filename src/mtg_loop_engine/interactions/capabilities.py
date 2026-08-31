@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-from mtg_loop_engine.semantics.enums import TriggerEvent
+from mtg_loop_engine.semantics.enums import ManaScaleKind, TriggerEvent
 from mtg_loop_engine.semantics.ir import (
     ActivatedAbility,
     AddCounterCost,
@@ -46,6 +46,15 @@ class CardCapabilities(BaseModel):
     def needs_p1p1_mana_seed(self) -> bool:
         """Tap-for-mana scales with +1/+1 counters (Gyre Sage class)."""
         return "mana_from_p1p1" in self.produces
+
+    def needs_creature_count_mana_seed(self) -> bool:
+        return "mana_scale_creature" in self.produces
+
+    def needs_elf_count_mana_seed(self) -> bool:
+        return "mana_scale_elf" in self.produces
+
+    def needs_defender_count_mana_seed(self) -> bool:
+        return "mana_scale_defender" in self.produces
 
 
 def extract_capabilities(card: CardSemantics) -> CardCapabilities:
@@ -101,6 +110,15 @@ def _effects(effects: list, caps: CardCapabilities) -> None:
             caps.produces.add("mana")
             if effect.equal_to_source_p1p1_counters:
                 caps.produces.add("mana_from_p1p1")
+            if effect.mana_scale is ManaScaleKind.CONTROLLED_CREATURES:
+                caps.produces.add("mana_scale_creature")
+            elif effect.mana_scale in {
+                ManaScaleKind.CONTROLLED_ELF,
+                ManaScaleKind.BATTLEFIELD_ELF,
+            }:
+                caps.produces.add("mana_scale_elf")
+            elif effect.mana_scale is ManaScaleKind.CONTROLLED_DEFENDERS:
+                caps.produces.add("mana_scale_defender")
         elif isinstance(effect, UntapEffect):
             caps.produces.add("untap")
         elif isinstance(effect, CreateTokenEffect):
