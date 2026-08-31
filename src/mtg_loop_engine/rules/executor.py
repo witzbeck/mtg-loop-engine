@@ -21,6 +21,7 @@ from mtg_loop_engine.semantics.ir import (
     LoseLifeEffect,
     ManaAmount,
     ManaCost,
+    MillEffect,
     MoveToZoneEffect,
     RemoveCounterEffect,
     ReplacementExileInsteadOfGraveyard,
@@ -404,6 +405,25 @@ class Executor:
             state.bump("life_loss", qty)
             return None
 
+        if isinstance(effect, MillEffect):
+            qty = effect.amount
+            if qty <= 0:
+                return ExecError(VerificationStatus.ILLEGAL_ACTION, "mill amount")
+            if effect.who == "opponent":
+                state.bump("mill", qty)
+                for _ in range(qty):
+                    self._queue_triggers(
+                        state,
+                        TriggerEvent.CARD_TO_OPPONENT_GRAVEYARD,
+                        source,
+                    )
+            else:
+                return ExecError(
+                    VerificationStatus.UNSUPPORTED_SEMANTICS,
+                    "self-mill not modeled",
+                )
+            return None
+
         if isinstance(effect, MoveToZoneEffect):
             source.zone = effect.zone
             return None
@@ -592,6 +612,20 @@ class Executor:
             if "zombie" in perm.name.casefold():
                 return True
         return False
+
+    def _graveyard_drain_seed_amount(self) -> int:
+        """Path-b seed sizing: match partner fixed graveyard drain when present."""
+        qty = 1
+        for card in self.semantics.values():
+            for ab in card.abilities:
+                if (
+                    isinstance(ab, TriggeredAbility)
+                    and ab.event == TriggerEvent.CARD_TO_OPPONENT_GRAVEYARD
+                ):
+                    for effect in ab.effects:
+                        if isinstance(effect, LoseLifeEffect) and effect.amount:
+                            qty = max(qty, effect.amount)
+        return qty
 
     def activate(
         self, state: GameState, step: ActionStep
@@ -830,6 +864,21 @@ class Executor:
                     "seed_gain_life needs actor with GAIN_LIFE triggers",
                 )
             self._queue_triggers(state, TriggerEvent.GAIN_LIFE, source, amount=qty)
+            return None
+        if op == "seed_lose_life":
+            # Path-b generic opponent life-loss seed (Mindcrank / Bloodchief class).
+            qty = self._graveyard_drain_seed_amount()
+            state.life_opponent -= qty
+            state.bump("life_loss", qty)
+            source = state.permanents.get(step.actor) if step.actor else None
+            if source is None:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_ACTION,
+                    "seed_lose_life needs actor with OPPONENT_LOSE_LIFE triggers",
+                )
+            self._queue_triggers(
+                state, TriggerEvent.OPPONENT_LOSE_LIFE, source, amount=qty
+            )
             return None
         if op == "seed_create_token":
             # Generic token-create seed for CREATE_TOKEN feedback loops (Rosie class).

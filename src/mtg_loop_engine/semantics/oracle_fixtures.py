@@ -347,6 +347,27 @@ GOLD_ORACLE_FIXTURES: dict[str, OracleFixture] = {
         power=0,
         toughness=0,
     ),
+    "oracle:bloodchief-ascension": OracleFixture(
+        oracle_id="oracle:bloodchief-ascension",
+        name="Bloodchief Ascension",
+        types=["Enchantment"],
+        type_line="Enchantment",
+        oracle_text=(
+            "At the beginning of each end step, if an opponent lost 2 or more life "
+            "this turn, you may put a quest counter on Bloodchief Ascension.\n"
+            'Enchantments you control have "Whenever a card is put into an opponent\'s '
+            'graveyard from anywhere, that player loses 2 life."'
+        ),
+        provenance=Provenance.ORACLE_EXACT,
+    ),
+    "oracle:mindcrank": OracleFixture(
+        oracle_id="oracle:mindcrank",
+        name="Mindcrank",
+        types=["Artifact"],
+        type_line="Artifact",
+        oracle_text="Whenever an opponent loses life, that player mills a card.",
+        provenance=Provenance.ORACLE_EXACT,
+    ),
 }
 
 

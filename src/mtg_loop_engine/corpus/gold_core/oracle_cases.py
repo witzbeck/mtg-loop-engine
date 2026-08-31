@@ -27,6 +27,7 @@ _GOLD_IDS: tuple[str, ...] = (
     "core_druid_vizier",
     "core_rosie_scurry",
     "core_heliod_ballista",
+    "core_bloodchief_mindcrank",
 )
 
 _REQUIRED_ASSUMPTIONS = frozenset(
@@ -77,7 +78,7 @@ def _load_artifact(gold_id: str) -> LoopWitness:
 
 
 def all_gold_core() -> list[LoopWitness]:
-    """Return frozen Oracle-exact gold positives (eight product pairs)."""
+    """Return frozen Oracle-exact gold positives (nine product pairs)."""
     return [_load_artifact(gold_id) for gold_id in _GOLD_IDS]
 
 

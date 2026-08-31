@@ -26,7 +26,7 @@ graph TB;
 
 ## Outputs
 
-- `all_gold_core()` — currently **8** Oracle positives (Heliod/Ballista re-promoted)
+- `all_gold_core()` — currently **9** Oracle positives (Heliod/Ballista re-promoted)
 - `hard_negatives()` — currently **8** Oracle counterfactuals
 
 ## Core invariants

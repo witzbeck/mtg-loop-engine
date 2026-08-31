@@ -52,6 +52,8 @@ KNOWN_EXACT = {
     "oracle:scurry-oak",
     "oracle:heliod-sun-crowned",
     "oracle:walking-ballista",
+    "oracle:bloodchief-ascension",
+    "oracle:mindcrank",
 }
 
 KNOWN_DIVERGENT = {

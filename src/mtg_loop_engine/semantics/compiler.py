@@ -34,6 +34,7 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
         r"Whenever |When |At the beginning |If |You may cast |"
         r"As long as |"
         r"Abilities you |"
+        r"Enchantments you |"
         r"Enchanted |Enchant |Equip |Flashback |Kicker |"
         r"Sacrifice |Remove a |"
         r"Activated abilities |"

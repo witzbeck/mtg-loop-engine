@@ -22,6 +22,7 @@ from mtg_loop_engine.semantics.ir import (
     LoseLifeEffect,
     ManaAmount,
     ManaCost,
+    MillEffect,
     RemoveCounterEffect,
     ReplacementExileInsteadOfGraveyard,
     ReplacementReduceM1M1Counters,
@@ -743,6 +744,54 @@ def pat_opponent_lose_life_you_gain_that_much(text: str, name: str) -> Ability |
     )
 
 
+def pat_opponent_lose_life_mill(text: str, name: str) -> Ability | None:
+    """Mindcrank class: opponent loses life → mill."""
+    m = re.match(
+        r"^Whenever an opponent loses life, "
+        r"(?:that player )?mills? (?:a |one )?card\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("loss-to-mill", text),
+        event=TriggerEvent.OPPONENT_LOSE_LIFE,
+        filter="any",
+        effects=[MillEffect(amount=1, who="opponent")],
+    )
+
+
+def pat_card_to_opponent_gy_lose_life(text: str, name: str) -> Ability | None:
+    """Bloodchief Ascension granted trigger."""
+    m = re.match(
+        r"^Whenever a card is put into an opponent's graveyard from anywhere, "
+        r"that player loses (\d+) life\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("gy-drain", text),
+        event=TriggerEvent.CARD_TO_OPPONENT_GRAVEYARD,
+        filter="any",
+        effects=[LoseLifeEffect(amount=int(m.group(1)), who="opponent")],
+    )
+
+
+def pat_enchantments_have_graveyard_drain(text: str, name: str) -> Ability | None:
+    """Static grant: enchantments you control have graveyard-drain trigger."""
+    m = re.match(
+        r'^Enchantments you control have "(?P<inner>[^"]+)"\.?$',
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return pat_card_to_opponent_gy_lose_life(m.group("inner"), name)
+
+
 def pat_etb_damage(text: str, name: str) -> Ability | None:
     """Creature ETB → fixed damage to opponent (Impact Tremors / Purphoros class)."""
     # Optional ability word ("Alliance — ") and trailing reminder text.
@@ -1145,6 +1194,13 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
     if re.match(r"^Companion\b", clause, re.IGNORECASE):
         return _proof_irrelevant(clause)
 
+    if re.match(
+        r"^At the beginning of each end step\b",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
     # Temporary "can't block" grant (Zirda activated effect as static leftover — skip activated).
     if re.match(
         r"^Target creature can't block this turn\.?$",
@@ -1369,6 +1425,9 @@ PATTERNS: list[Pattern] = [
     Pattern("gain_life_opponent_loses_that_much", pat_gain_life_opponent_loses_that_much),
     Pattern("gain_life_opponent_loses_fixed", pat_gain_life_opponent_loses_fixed),
     Pattern("opponent_lose_life_you_gain_that_much", pat_opponent_lose_life_you_gain_that_much),
+    Pattern("opponent_lose_life_mill", pat_opponent_lose_life_mill),
+    Pattern("card_to_opponent_gy_lose_life", pat_card_to_opponent_gy_lose_life),
+    Pattern("enchantments_have_graveyard_drain", pat_enchantments_have_graveyard_drain),
     Pattern("etb_damage", pat_etb_damage),
     Pattern("etb_gain_life", pat_etb_gain_life),
     Pattern("gain_life_put_p1p1_target", pat_gain_life_put_p1p1_target),

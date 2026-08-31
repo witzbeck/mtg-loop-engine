@@ -53,7 +53,7 @@ graph TB;
 
 ## Core invariants
 
-- `gold_core` positives are `ORACLE_EXACT`×`ORACLE_EXACT` only (currently **8**)
+- `gold_core` positives are `ORACLE_EXACT`×`ORACLE_EXACT` only (currently **9**)
 - Oracle hard negatives accompany promotions (currently **8**)
 - Physics suite retains historical synthetic/divergent regressions (**10** positives, **10** hard negatives)
 - `gold_extended_catalog` curriculum stubs (**15**) are authored in `physics_fixtures` and re-exported

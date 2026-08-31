@@ -47,6 +47,7 @@ def test_all_gold_core_does_not_call_explore_pair(monkeypatch):
         "core_druid_vizier",
         "core_rosie_scurry",
         "core_heliod_ballista",
+        "core_bloodchief_mindcrank",
     }
     for w in witnesses:
         assert "oracle_exact_gold" in w.assumptions
@@ -68,5 +69,6 @@ def test_frozen_witness_files_exist():
         "core_druid_vizier",
         "core_rosie_scurry",
         "core_heliod_ballista",
+        "core_bloodchief_mindcrank",
     ):
         assert (root / f"{gold_id}.json").is_file()

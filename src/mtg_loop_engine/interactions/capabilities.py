@@ -18,6 +18,7 @@ from mtg_loop_engine.semantics.ir import (
     GainLifeEffect,
     LoseLifeEffect,
     ManaCost,
+    MillEffect,
     RemoveCounterEffect,
     ReplacementReduceM1M1Counters,
     ReturnToBattlefieldEffect,
@@ -114,6 +115,8 @@ def _effects(effects: list, caps: CardCapabilities) -> None:
             caps.produces.add("life_gain")
         elif isinstance(effect, LoseLifeEffect):
             caps.produces.add("life_loss")
+        elif isinstance(effect, MillEffect):
+            caps.produces.add("mill")
         elif isinstance(effect, DrawEffect):
             caps.produces.add("draw")
         elif isinstance(effect, ReturnToBattlefieldEffect):
@@ -150,4 +153,6 @@ def join_reasons(left: CardCapabilities, right: CardCapabilities) -> list[str]:
         reasons.append("life_to_drain")
     if "life_loss" in left.produces and "opponent_lose_life" in right.triggers_on:
         reasons.append("loss_to_gain")
+    if "mill" in left.produces and "card_to_opponent_graveyard" in right.triggers_on:
+        reasons.append("mill_to_graveyard")
     return reasons
