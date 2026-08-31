@@ -1,0 +1,14 @@
+{
+  "oracle_id": "oracle:bloodchief-ascension",
+  "name": "Bloodchief Ascension",
+  "oracle_text": "At the beginning of each end step, if an opponent lost 2 or more life this turn, you may put a quest counter on Bloodchief Ascension.\nEnchantments you control have \"Whenever a card is put into an opponent's graveyard from anywhere, that player loses 2 life.\"",
+  "types": [
+    "Enchantment"
+  ],
+  "type_line": "Enchantment",
+  "audit": {
+    "audited_at": "2026-08-31",
+    "source": "manual_oracle_audit",
+    "notes": "M5 mill/graveyard feedback slice; end-step quest counter proof-irrelevant."
+  }
+}

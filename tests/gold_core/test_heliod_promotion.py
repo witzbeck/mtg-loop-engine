@@ -30,7 +30,7 @@ def _compile(oracle_id: str):
 def test_heliod_ballista_in_gold_core():
     ids = {w.id for w in all_gold_core()}
     assert "core_heliod_ballista" in ids
-    assert len(ids) == 8
+    assert len(ids) == 9
 
 
 def test_heliod_ballista_absent_from_oracle_gaps():

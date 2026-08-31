@@ -127,6 +127,23 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         types=["Enchantment"],
         oracle_text="Whenever an opponent loses life, you gain that much life.",
     ),
+    "Bloodchief Ascension": RealOracleCurriculum(
+        name="Bloodchief Ascension",
+        types=["Enchantment"],
+        oracle_text=(
+            "At the beginning of each end step, if an opponent lost 2 or more life "
+            "this turn, you may put a quest counter on Bloodchief Ascension.\n"
+            'Enchantments you control have "Whenever a card is put into an opponent\'s '
+            'graveyard from anywhere, that player loses 2 life."'
+        ),
+        notes="Granted graveyard-drain static; quest counter proof-irrelevant.",
+    ),
+    "Mindcrank": RealOracleCurriculum(
+        name="Mindcrank",
+        types=["Artifact"],
+        oracle_text="Whenever an opponent loses life, that player mills a card.",
+        notes="Loss-to-mill feedback with Bloodchief Ascension.",
+    ),
     "Vito, Thorn of the Dusk Rose": RealOracleCurriculum(
         name="Vito, Thorn of the Dusk Rose",
         types=["Creature", "Vampire", "Cleric"],

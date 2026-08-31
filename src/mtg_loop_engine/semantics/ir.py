@@ -146,6 +146,12 @@ class LoseLifeEffect(BaseModel):
     amount_from_trigger: bool = False
 
 
+class MillEffect(BaseModel):
+    kind: Literal["mill"] = "mill"
+    amount: int = 1
+    who: Literal["opponent", "you"] = "opponent"
+
+
 class MoveToZoneEffect(BaseModel):
     kind: Literal["move_to_zone"] = "move_to_zone"
     zone: Zone
@@ -174,6 +180,7 @@ Effect = Annotated[
     | GainLifeEffect
     | DrawEffect
     | LoseLifeEffect
+    | MillEffect
     | MoveToZoneEffect
     | GrantLifelinkEffect,
     Field(discriminator="kind"),

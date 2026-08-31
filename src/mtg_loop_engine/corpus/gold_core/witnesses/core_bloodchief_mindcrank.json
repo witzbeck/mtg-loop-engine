@@ -1,0 +1,219 @@
+{
+  "artifact_schema_version": 1,
+  "assumptions": [
+    "intrinsic: Bloodchief Ascension begins on the battlefield",
+    "intrinsic: Mindcrank begins on the battlefield",
+    "oracle_exact_gold",
+    "compiled_from_audited_fixture"
+  ],
+  "classification": {
+    "essential_card_count": 2,
+    "functional_external_requirements": [],
+    "generic_prerequisites": [
+      {
+        "description": "generic opponent life-loss seed to start OPPONENT_LOSE_LIFE triggers (identity irrelevant)",
+        "details": {},
+        "kind": "board"
+      }
+    ],
+    "loop_type": "arbitrary_repeatable",
+    "strict_two_card": true
+  },
+  "deterministic": true,
+  "essential_cards": [
+    {
+      "name": "Bloodchief Ascension",
+      "oracle_id": "oracle:bloodchief-ascension",
+      "role": null
+    },
+    {
+      "name": "Mindcrank",
+      "oracle_id": "oracle:mindcrank",
+      "role": null
+    }
+  ],
+  "expected_claim_consequence": "lethal",
+  "expected_net_state": {
+    "creature_tokens": 0,
+    "life_opponent": -2,
+    "life_you": 0,
+    "mana": {
+      "any_color": 0,
+      "black": 0,
+      "blue": 0,
+      "colorless": 0,
+      "generic": 0,
+      "green": 0,
+      "red": 0,
+      "white": 0
+    },
+    "plus_one_counters": 0
+  },
+  "expected_outputs": [
+    {
+      "consequence": "accumulates",
+      "delta_per_iteration": 2,
+      "repeatable": true,
+      "type": "life_loss"
+    },
+    {
+      "consequence": "accumulates",
+      "delta_per_iteration": 1,
+      "repeatable": true,
+      "type": "mill"
+    }
+  ],
+  "id": "core_bloodchief_mindcrank",
+  "initial_state": {
+    "event_counters": {},
+    "life_opponent": 40,
+    "life_you": 40,
+    "mana": {
+      "any_color": 0,
+      "black": 0,
+      "blue": 0,
+      "colorless": 0,
+      "generic": 0,
+      "green": 0,
+      "red": 0,
+      "white": 0
+    },
+    "permanents": [
+      {
+        "controller": "you",
+        "counters": {},
+        "damage_marked": 0,
+        "is_artifact": false,
+        "is_creature": false,
+        "is_token": false,
+        "name": "Bloodchief Ascension",
+        "object_id": "c0",
+        "oracle_id": "oracle:bloodchief-ascension",
+        "power": null,
+        "summoning_sick": false,
+        "tapped": false,
+        "toughness": null,
+        "undying": false,
+        "zone": "battlefield"
+      },
+      {
+        "controller": "you",
+        "counters": {},
+        "damage_marked": 0,
+        "is_artifact": true,
+        "is_creature": false,
+        "is_token": false,
+        "name": "Mindcrank",
+        "object_id": "c1",
+        "oracle_id": "oracle:mindcrank",
+        "power": null,
+        "summoning_sick": false,
+        "tapped": false,
+        "toughness": null,
+        "undying": false,
+        "zone": "battlefield"
+      }
+    ]
+  },
+  "loop_actions": [
+    {
+      "ability_id": "loss-to-mill-whenever-an-opponent-loses-life-that-pla",
+      "actor": "c1",
+      "choose_may": null,
+      "note": null,
+      "op": "resolve_trigger",
+      "target": null
+    },
+    {
+      "ability_id": "gy-drain-whenever-a-card-is-put-into-an-opponent-",
+      "actor": "c0",
+      "choose_may": null,
+      "note": null,
+      "op": "resolve_trigger",
+      "target": null
+    }
+  ],
+  "prerequisites": [
+    {
+      "description": "generic opponent life-loss seed to start OPPONENT_LOSE_LIFE triggers (identity irrelevant)",
+      "details": {},
+      "kind": "board"
+    }
+  ],
+  "relevant_state": {
+    "dimensions": [
+      {
+        "op": "exact",
+        "path": "permanents.c0.zone",
+        "value": "battlefield"
+      },
+      {
+        "op": "exact",
+        "path": "permanents.c0.tapped",
+        "value": false
+      },
+      {
+        "op": "exact",
+        "path": "permanents.c1.zone",
+        "value": "battlefield"
+      },
+      {
+        "op": "exact",
+        "path": "permanents.c1.tapped",
+        "value": false
+      },
+      {
+        "op": "exact",
+        "path": "pending_triggers.count",
+        "value": 1
+      },
+      {
+        "op": "minimum",
+        "path": "mana.white",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.blue",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.black",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.red",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.green",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.colorless",
+        "value": 0
+      },
+      {
+        "op": "minimum",
+        "path": "mana.any_color",
+        "value": 0
+      }
+    ]
+  },
+  "semantic_coverage": "complete",
+  "setup_actions": [
+    {
+      "ability_id": null,
+      "actor": "c1",
+      "choose_may": null,
+      "note": "generic opponent life-loss seed (Path b)",
+      "op": "seed_lose_life",
+      "target": null
+    }
+  ],
+  "tier": "gold_core"
+}

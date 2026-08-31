@@ -93,6 +93,10 @@ class InteractionIndex:
             out |= self.by_triggers["opponent_lose_life"]
         if "opponent_lose_life" in cap.triggers_on:
             out |= self.by_produces["life_loss"]
+        if "mill" in cap.produces:
+            out |= self.by_triggers["card_to_opponent_graveyard"]
+        if "card_to_opponent_graveyard" in cap.triggers_on:
+            out |= self.by_produces["mill"]
         out.discard(oid)
         return out
 

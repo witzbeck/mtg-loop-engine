@@ -71,6 +71,7 @@ OUTPUT_EVENT_KEYS = {
     "damage": OutputType.DAMAGE,
     "life_gain": OutputType.LIFE_GAIN,
     "life_loss": OutputType.LIFE_LOSS,
+    "mill": OutputType.MILL,
     "death": OutputType.DEATH,
     "sacrifice": OutputType.SACRIFICE,
     "draw": OutputType.DRAW,
@@ -494,6 +495,18 @@ def _needs_life_gain_seed(card: CardSemantics) -> bool:
     )
 
 
+def _needs_opponent_lose_life_seed(card: CardSemantics) -> bool:
+    """Path-b mill feedback seed (Mindcrank / Bloodchief class)."""
+    from mtg_loop_engine.semantics.ir import MillEffect
+
+    return any(
+        isinstance(ab, TriggeredAbility)
+        and ab.event == TriggerEvent.OPPONENT_LOSE_LIFE
+        and any(isinstance(e, MillEffect) for e in ab.effects)
+        for ab in card.abilities
+    )
+
+
 def _needs_token_create_seed(card: CardSemantics) -> bool:
     return any(
         isinstance(ab, TriggeredAbility) and ab.event == TriggerEvent.CREATE_TOKEN
@@ -544,6 +557,16 @@ def build_witness(
                 description=(
                     "generic life-gain seed to start GAIN_LIFE triggers "
                     "(identity irrelevant)"
+                ),
+            )
+        )
+    if any(s.op == "seed_lose_life" for s in setup):
+        generic.append(
+            Prerequisite(
+                kind="board",
+                description=(
+                    "generic opponent life-loss seed to start OPPONENT_LOSE_LIFE "
+                    "triggers (identity irrelevant)"
                 ),
             )
         )
@@ -676,6 +699,22 @@ def explore_pair(
             err = executor.run_step(start, seed)
             if err is None:
                 setup_actions = [seed]
+    if _needs_opponent_lose_life_seed(a) or _needs_opponent_lose_life_seed(b):
+        seed_actor = None
+        for perm in sorted(start.permanents.values(), key=lambda p: p.object_id):
+            card = semantics.get(perm.oracle_id)
+            if card is not None and _needs_opponent_lose_life_seed(card):
+                seed_actor = perm.object_id
+                break
+        if seed_actor is not None:
+            seed = ActionStep(
+                op="seed_lose_life",
+                actor=seed_actor,
+                note="generic opponent life-loss seed (Path b)",
+            )
+            err = executor.run_step(start, seed)
+            if err is None:
+                setup_actions = [*setup_actions, seed]
     if _needs_token_create_seed(a) or _needs_token_create_seed(b):
         seed_actor = None
         for perm in sorted(start.permanents.values(), key=lambda p: p.object_id):

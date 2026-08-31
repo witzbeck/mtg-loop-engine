@@ -90,8 +90,10 @@ uv run python scripts/spellbook_absent_discovery.py
 5. **Path a / slice 5 (self-starters)** ✓ — power-tap mana; ETB damage (Impact / Purphoros / Alliance); ETB untap-self; anthem/devotion/lifelink-reminder irrelevant.
 6. **Path a / slice 6 (token auras)** ✓ — Presence of Gond host-tap; Enchant false-COMPLETE fix; Aphetto/Morph.
 7. **Path a / slice 7 (life-untap / counter-mana)** ✓ — Famished Paladin; Village Bell-Ringer; Gyre Sage; Pestermite.
-8. **Frontier-driven slices (M5.2):** pick from live P0/P1; ritual below. Path **a** preference remains.
-9. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+8. **Mill / graveyard feedback (slice 8)** ✓ — Mindcrank + Bloodchief Ascension; `MillEffect`, `CARD_TO_OPPONENT_GRAVEYARD`, Path-b `seed_lose_life`; `core_bloodchief_mindcrank` gold witness. **Probe (2026-08-31):** `spellbook_absent_discovery.py` → 46 COMPLETE / 25 in_reference / 0 absent; pair absent from Spellbook reference JSONL (no `ABSENT_FROM_REFERENCE` workflow). `discover-gold` → **9/9** Oracle gold pairs rediscovered.
+9. **Frontier-driven slices (M5.2):** pick from live P0/P1; ritual below. Path **a** preference remains.
+10. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+11. **Path b (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 
@@ -108,6 +110,7 @@ uv run python scripts/spellbook_absent_discovery.py
 | ---- | ------- | ------ |
 | **a** | Prefer cards/patterns that start their own loop from default BF setup | **Active** |
 | **b** | Seed generic life-gain when a searched essential has `GAIN_LIFE` triggers | **Widened for Bond/Blood** — explicit seed, disclosed on witness |
+| **b′** | Seed generic opponent life-loss when partner has `OPPONENT_LOSE_LIFE` → mill | **Widened for Mindcrank / Bloodchief** — `seed_lose_life`, drain-sized, disclosed |
 
 Expand patterns deliberately with tests/docs (`AGENTS.md`).
 

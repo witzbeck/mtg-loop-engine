@@ -1,0 +1,14 @@
+{
+  "oracle_id": "oracle:mindcrank",
+  "name": "Mindcrank",
+  "oracle_text": "Whenever an opponent loses life, that player mills a card.",
+  "types": [
+    "Artifact"
+  ],
+  "type_line": "Artifact",
+  "audit": {
+    "audited_at": "2026-08-31",
+    "source": "manual_oracle_audit",
+    "notes": "M5 mill/graveyard feedback slice; Scryfall oracle wording."
+  }
+}

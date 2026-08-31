@@ -137,8 +137,8 @@ measure frontier → smallest reusable gap → discover → adjudicate → contr
    **Claim consequence derivation:** ✓ verifier derives `ACCUMULATES` /
    `REPEATABLE_EVENT` / `LETHAL` from net state + gross outputs under recurrence;
    mismatches with `expected_claim_consequence` → `NOT_A_LOOP`.
-   **Waves 1–2:** ✓ eight Oracle gold positives
-   (`core_guard_gond` … `core_rosie_scurry`, `core_heliod_ballista`) as **frozen witness artifacts**
+   **Waves 1–2:** ✓ nine Oracle gold positives
+   (`core_guard_gond` … `core_rosie_scurry`, `core_heliod_ballista`, `core_bloodchief_mindcrank`) as **frozen witness artifacts**
    (independent of search; `all_gold_core` loads JSON only). Heliod/Ballista re-promoted with
    printed 0/0 Ballista (≥2 p1p1), paid `{1}{W}` grant-lifelink setup, and
    `seed_grant_lifelink` still quarantined from Oracle product VERIFIED.
@@ -163,8 +163,10 @@ measure frontier → smallest reusable gap → discover → adjudicate → contr
    - **Slice 5 (self-starters)** ✓ — power-tap mana (Viridian Joiner); ETB damage (Impact / Purphoros / Alliance); ETB untap-self (Midnight Guard); anthem/devotion/lifelink-reminder as proof-irrelevant.
    - **Slice 6 (token auras + false-COMPLETE fix)** ✓ — Presence of Gond host-tap tokens; narrow Enchant irrelevant so Splinter Twin/Bear Umbra fail closed; Aphetto/Morph.
    - **Slice 7 (life-untap / self-ETB untap-all / counter-mana)** ✓ — Famished Paladin; Village Bell-Ringer; Gyre Sage (`equal_to_source_p1p1_counters` + 4-counter seed); Pestermite (may tap-or-untap → untap).
-   - **Slice 8+** ○ — choose from live frontier P0/P1; cite compact pair-unlock evidence in the curriculum PR.
+   - **Slice 8 (mill / graveyard feedback)** ✓ — Mindcrank (`OPPONENT_LOSE_LIFE` → mill); Bloodchief Ascension (`Enchantments you control have …` graveyard drain); `CARD_TO_OPPONENT_GRAVEYARD` trigger + Path-b `seed_lose_life` (sized to partner drain); `core_bloodchief_mindcrank` frozen. Local absent-discovery probe (2026-08-31): **46** COMPLETE Spellbook-named cards, **25** verified/in_reference, **0** `absent_from_reference` — pair not in Spellbook reference rows, so no workbench seed from absence path.
+   - **Slice 9+** ○ — choose from live frontier P0/P1; cite compact pair-unlock evidence in the curriculum PR.
    - **Path b (Bond/Blood)** ✓ — explicit generic life-gain seed; `core_bond_blood` frozen; disclosed on witness.
+   - **Path b (Mindcrank / Bloodchief)** ✓ — explicit generic opponent life-loss seed (`seed_lose_life`, drain-sized); disclosed on witness.
    - **Rules-evidence rails** ✓ — [`docs/RULES_EVIDENCE.md`](docs/RULES_EVIDENCE.md), [`AGENTS.md`](AGENTS.md), [`.cursor/rules/rules-evidence.mdc`](.cursor/rules/rules-evidence.mdc), [`.agents/skills/rules-evidence/`](.agents/skills/rules-evidence/).
 
 3. **Workbench adjudication (M5.3)** — after every meaningful curriculum/physics PR: persist absences; promote `NOVEL` only with human records; false `VERIFIED` → regressions.

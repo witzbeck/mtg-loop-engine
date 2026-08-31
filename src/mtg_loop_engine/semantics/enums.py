@@ -103,6 +103,7 @@ class TriggerEvent(StrEnum):
     CREATE_TOKEN = "create_token"
     GAIN_LIFE = "gain_life"
     OPPONENT_LOSE_LIFE = "opponent_lose_life"
+    CARD_TO_OPPONENT_GRAVEYARD = "card_to_opponent_graveyard"
 
 
 class ChoiceController(StrEnum):

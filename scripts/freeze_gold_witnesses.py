@@ -119,6 +119,14 @@ CASES: list[dict] = [
         "expected_claim_consequence": Consequence.LETHAL,
         "max_depth": 10,
     },
+    {
+        "gold_id": "core_bloodchief_mindcrank",
+        "left_id": "oracle:bloodchief-ascension",
+        "right_id": "oracle:mindcrank",
+        "expected_net_state": NetStateDelta(life_opponent=-2),
+        "expected_claim_consequence": Consequence.LETHAL,
+        "max_depth": 8,
+    },
 ]
 
 
