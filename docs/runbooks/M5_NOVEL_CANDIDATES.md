@@ -129,6 +129,18 @@ Trigger after every meaningful curriculum/physics PR (COMPLETE growth, new verif
 3. Sidebar corpus → `spellbook_absent`, review state → `unreviewed`.
 4. Apply [`docs/ADJUDICATION.md`](../ADJUDICATION.md). Upgrade `ABSENT_FROM_REFERENCE` → `NOVEL` only with a human record. Keep `NOVEL` out of the precision denominator.
 
+**DuckDB lock:** if Streamlit workbench is already running, stop it (Ctrl+C in that terminal — closing the browser tab is not enough) before `--persist-workbench`, or persist to a scratch `--db` path and re-run without `--db` after restart so the main store upserts.
+
+#### Current queue (post–slice 10, local 2026-09-01)
+
+| Pair | Join reasons | Notes |
+| --- | --- | --- |
+| Axebane Guardian + Pemmin's Aura | tap_untap, mana_pay | Defender-count any-color mana + aura untap channel |
+| Axebane Guardian + Umbral Mantle | tap_untap, mana_pay | Defender mana + `{3}{Q}` equipment untap |
+| Overgrown Battlement + Umbral Mantle | mana_pay, tap_untap | Defender green mana + `{3}{Q}` equipment untap |
+
+Probe at seed time: **55** COMPLETE · **41** verified · **38** in_reference · **3** absent.
+
 Absences are curriculum: finite / bystander / illegal activation failures feed the next frontier pass and should become regressions at the lowest useful layer.
 
 ### 4. Optional metric freeze / M5.4 exit
