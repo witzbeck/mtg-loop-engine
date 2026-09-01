@@ -1,0 +1,22 @@
+---
+description: Thin wiring and documentation rules for the mtg-loop-engine Click CLI.
+globs:
+  - src/mtg_loop_engine/cli/**
+  - docs/CLI.md
+---
+
+# CLI development
+
+**Authority:** [`docs/CLI.md`](../../docs/CLI.md). Agent workflow: [`.agents/skills/click-cli/SKILL.md`](../../.agents/skills/click-cli/SKILL.md).
+
+| Rule | Meaning |
+|------|---------|
+| Thin wiring | Commands call library APIs; extract fat logic to packages before adding flags |
+| Flat commands | New leaves register on the root Click group unless roadmap widens scope |
+| Exit-code contract | Gate commands documented in `docs/CLI.md`; fail closed |
+| Same-PR docs | Command names, flags, defaults, exit codes synced across CLI.md and README surfaces |
+| No Rich/Typer | Click only in default `[project.dependencies]` |
+| Tests | CliRunner wiring for new/changed commands; domain contracts stay in gold/discovery/eval suites |
+| Coverage | Keep `cli/` omitted from the 92% gate; wiring tests are the contract |
+
+Scripts under `scripts/` stay argparse unless individually promoted per `docs/CLI.md`.
