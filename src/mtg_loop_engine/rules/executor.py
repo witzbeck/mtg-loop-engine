@@ -27,6 +27,7 @@ from mtg_loop_engine.semantics.ir import (
     ProofIrrelevantStatic,
     RemoveCounterEffect,
     ReplacementExileInsteadOfGraveyard,
+    ReplacementMultiplyTapMana,
     ReplacementReduceM1M1Counters,
     ReturnToBattlefieldEffect,
     SacrificeCost,
@@ -213,6 +214,25 @@ class Executor:
                     reduce_by = max(reduce_by, ab.reduce_by)
         return max(0, quantity - reduce_by)
 
+    def tap_mana_multiplier(self, state: GameState) -> int:
+        """Product of active tap-mana multipliers (Mana Reflection / Nyxbloom class)."""
+        mult = 1
+        for perm in state.permanents.values():
+            if perm.zone != Zone.BATTLEFIELD or perm.controller != "you":
+                continue
+            card = self.semantics.get(perm.oracle_id)
+            if not card:
+                continue
+            for ab in card.abilities:
+                if isinstance(ab, ReplacementMultiplyTapMana):
+                    mult *= ab.multiplier
+        return mult
+
+    def _effective_tap_mana_qty(self, state: GameState, source: Permanent, qty: int) -> int:
+        if qty <= 0 or not source.tapped:
+            return qty
+        return qty * self.tap_mana_multiplier(state)
+
     def find_ability(
         self, oracle_id: str, ability_id: str
     ) -> ActivatedAbility | TriggeredAbility | None:
@@ -292,8 +312,11 @@ class Executor:
         trigger_amount: int | None = None,
     ) -> ExecError | None:
         if isinstance(effect, AddManaEffect):
+            mult = self.tap_mana_multiplier(state) if source.tapped else 1
             if effect.equal_to_source_power:
-                qty = max(int(source.power or 0), 0)
+                qty = self._effective_tap_mana_qty(
+                    state, source, max(int(source.power or 0), 0)
+                )
                 if qty > 0:
                     color = effect.equal_to_source_power
                     setattr(
@@ -304,7 +327,11 @@ class Executor:
                     state.bump("mana", qty)
                 return None
             if effect.equal_to_source_p1p1_counters:
-                qty = max(int(source.counters.get("p1p1", 0)), 0)
+                qty = self._effective_tap_mana_qty(
+                    state,
+                    source,
+                    max(int(source.counters.get("p1p1", 0)), 0),
+                )
                 if qty > 0:
                     color = effect.equal_to_source_p1p1_counters
                     setattr(
@@ -321,14 +348,18 @@ class Executor:
                         setattr(
                             state.mana,
                             color,
-                            getattr(state.mana, color) + 1,
+                            getattr(state.mana, color) + mult,
                         )
                     if colors:
-                        state.bump("mana", len(colors))
+                        state.bump("mana", len(colors) * mult)
                     return None
-                qty = max(
-                    _scaled_mana_quantity(effect, state, source, self.semantics),
-                    0,
+                qty = self._effective_tap_mana_qty(
+                    state,
+                    source,
+                    max(
+                        _scaled_mana_quantity(effect, state, source, self.semantics),
+                        0,
+                    ),
                 )
                 if qty > 0:
                     color = effect.scale_color
@@ -339,6 +370,7 @@ class Executor:
                     )
                     state.bump("mana", qty)
                 return None
+            added = 0
             for color in (
                 "white",
                 "blue",
@@ -349,12 +381,16 @@ class Executor:
                 "generic",
                 "any_color",
             ):
-                setattr(
-                    state.mana,
-                    color,
-                    getattr(state.mana, color) + getattr(effect.amount, color),
-                )
-            state.bump("mana", effect.amount.total())
+                delta = getattr(effect.amount, color) * mult
+                if delta:
+                    setattr(
+                        state.mana,
+                        color,
+                        getattr(state.mana, color) + delta,
+                    )
+                    added += delta
+            if added:
+                state.bump("mana", added)
             return None
 
         if isinstance(effect, UntapEffect):

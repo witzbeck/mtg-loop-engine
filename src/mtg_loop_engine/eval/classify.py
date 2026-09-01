@@ -9,10 +9,13 @@ from mtg_loop_engine.eval.schema import (
 )
 from mtg_loop_engine.proofs.models import LoopWitness
 from mtg_loop_engine.semantics.ir import (
+    AddCounterCost,
+    AddManaEffect,
     ContinuousCostReduction,
     ManaCost,
+    ReplacementMultiplyTapMana,
     ReplacementReduceM1M1Counters,
-    AddCounterCost,
+    TapCost,
 )
 
 # Must match `AURA_HOST_OBJECT_ID` in search.explorer (avoid import cycle).
@@ -61,6 +64,32 @@ def _loop_pays_m1m1_counter(witness: LoopWitness) -> bool:
                     "-1/-1",
                 }:
                     return True
+    return False
+
+
+def _loop_taps_for_mana(witness: LoopWitness) -> bool:
+    by_oracle = {card.oracle_id: card for card in witness.card_semantics}
+    perms = {p.object_id: p for p in witness.initial_state.permanents}
+    for step in witness.loop_actions:
+        if step.op != "activate" or not step.actor:
+            continue
+        perm = perms.get(step.actor)
+        if perm is None:
+            continue
+        card = by_oracle.get(perm.oracle_id)
+        if card is None:
+            continue
+        for ability in card.abilities:
+            if getattr(ability, "ability_id", None) != step.ability_id:
+                continue
+            if getattr(ability, "is_mana_ability", False):
+                return True
+            costs = getattr(ability, "costs", [])
+            effects = getattr(ability, "effects", [])
+            if any(isinstance(c, TapCost) for c in costs) and any(
+                isinstance(e, AddManaEffect) for e in effects
+            ):
+                return True
     return False
 
 
@@ -143,6 +172,14 @@ def analyze_prerequisites(witness: LoopWitness) -> PrerequisiteAnalysis:
                 used.add(card.oracle_id)
                 notes.append(
                     f"{card.name} participates via -1/-1 counter put replacement"
+                )
+
+    if _loop_taps_for_mana(witness):
+        for card in witness.card_semantics:
+            if any(isinstance(ab, ReplacementMultiplyTapMana) for ab in card.abilities):
+                used.add(card.oracle_id)
+                notes.append(
+                    f"{card.name} participates via tap-mana multiplier replacement"
                 )
 
     unused = [oid for oid in pair_ids if oid not in used]

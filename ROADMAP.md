@@ -166,7 +166,8 @@ measure frontier → smallest reusable gap → discover → adjudicate → contr
    - **Slice 8 (mill / graveyard feedback)** ✓ — Mindcrank + Bloodchief Ascension; Path-b′ `seed_lose_life`; `core_bloodchief_mindcrank` frozen.
    - **Slice 9 (scaled tap-mana)** ✓ — Bloom Tender / Sanctum Weaver / Circle of Dreams Druid / Priest of Titania / Axebane / Overgrown / Karametra / Archdruid; `ManaScaleKind` + explorer seeds.
    - **Slice 10 (equipment {Q})** ✓ — Umbral Mantle equipped-creature `{3}{Q}` grant; `UntapSymbolCost` + host activation in explorer; frontier P1 (**8** pair unlocks vs Mana Reflection **4**).
-   - **Slice 11+** ○ — choose from live frontier P0/P1; cite compact pair-unlock evidence in the curriculum PR.
+   - **Slice 11 (tap-mana multiplier)** ✓ — Mana Reflection / Nyxbloom Ancient `ReplacementMultiplyTapMana`; frontier P1 (**4** pairs each vs Power Artifact **2**).
+   - **Slice 12+** ○ — choose from live frontier P0/P1; cite compact pair-unlock evidence in the curriculum PR.
    - **Path b (Bond/Blood)** ✓ — explicit generic life-gain seed; `core_bond_blood` frozen; disclosed on witness.
    - **Path b (Mindcrank / Bloodchief)** ✓ — explicit generic opponent life-loss seed (`seed_lose_life`, drain-sized); disclosed on witness.
    - **Rules-evidence rails** ✓ — [`docs/RULES_EVIDENCE.md`](docs/RULES_EVIDENCE.md), [`AGENTS.md`](AGENTS.md), [`.cursor/rules/rules-evidence.mdc`](.cursor/rules/rules-evidence.mdc), [`.agents/skills/rules-evidence/`](.agents/skills/rules-evidence/).
@@ -178,7 +179,7 @@ Playbook: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDID
 
 ### First local probe (not a baseline)
 
-After each curriculum slice: run `spellbook_compiler_priority.py` (frontier) + `spellbook_absent_discovery.py` before choosing the next Slice 11+ gap. Remeasure on each curriculum PR.
+After each curriculum slice: run `spellbook_compiler_priority.py` (frontier) + `spellbook_absent_discovery.py` before choosing the next Slice 12+ gap. Remeasure on each curriculum PR.
 
 ---
 

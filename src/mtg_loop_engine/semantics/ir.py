@@ -258,6 +258,15 @@ class ReplacementReduceM1M1Counters(BaseModel):
     supported: bool = True
 
 
+class ReplacementMultiplyTapMana(BaseModel):
+    """Mana Reflection / Nyxbloom class: multiply mana from tapping permanents."""
+
+    kind: Literal["replacement_multiply_tap_mana"] = "replacement_multiply_tap_mana"
+    ability_id: str
+    multiplier: Literal[2, 3] = 2
+    supported: bool = True
+
+
 class ProofIrrelevantStatic(BaseModel):
     """Oracle text intentionally modeled as supported but non-participating in loop proofs."""
 
@@ -273,6 +282,7 @@ Ability = Annotated[
     | ContinuousCostReduction
     | ReplacementExileInsteadOfGraveyard
     | ReplacementReduceM1M1Counters
+    | ReplacementMultiplyTapMana
     | ProofIrrelevantStatic,
     Field(discriminator="kind"),
 ]
