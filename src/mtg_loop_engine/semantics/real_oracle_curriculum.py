@@ -342,4 +342,21 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         ),
         notes="Frontier P1 slice 10: {Q} untap-symbol cost + host activation; pairs with tap-mana dorks.",
     ),
+    "Mana Reflection": RealOracleCurriculum(
+        name="Mana Reflection",
+        types=["Enchantment"],
+        oracle_text=(
+            "If you tap a permanent for mana, it produces twice as much of that mana instead."
+        ),
+        notes="Frontier P1 slice 11: 2× tap-mana replacement.",
+    ),
+    "Nyxbloom Ancient": RealOracleCurriculum(
+        name="Nyxbloom Ancient",
+        types=["Enchantment", "Creature"],
+        oracle_text=(
+            "Trample\n"
+            "If you tap a permanent for mana, it produces three times as much of that mana instead."
+        ),
+        notes="Frontier P1 slice 11: 3× tap-mana replacement; Trample proof-irrelevant.",
+    ),
 }

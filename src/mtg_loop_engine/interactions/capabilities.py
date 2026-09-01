@@ -20,6 +20,7 @@ from mtg_loop_engine.semantics.ir import (
     ManaCost,
     MillEffect,
     RemoveCounterEffect,
+    ReplacementMultiplyTapMana,
     ReplacementReduceM1M1Counters,
     ReturnToBattlefieldEffect,
     SacrificeCost,
@@ -68,6 +69,9 @@ def extract_capabilities(card: CardSemantics) -> CardCapabilities:
             continue
         if isinstance(ab, ReplacementReduceM1M1Counters):
             caps.modifies.add("m1m1_put")
+            continue
+        if isinstance(ab, ReplacementMultiplyTapMana):
+            caps.modifies.add("multiply_tap_mana")
             continue
         if isinstance(ab, TriggeredAbility):
             caps.triggers_on.add(ab.event.value)

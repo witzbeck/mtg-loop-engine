@@ -25,6 +25,7 @@ from mtg_loop_engine.semantics.ir import (
     MillEffect,
     RemoveCounterEffect,
     ReplacementExileInsteadOfGraveyard,
+    ReplacementMultiplyTapMana,
     ReplacementReduceM1M1Counters,
     ProofIrrelevantStatic,
     ReturnToBattlefieldEffect,
@@ -441,6 +442,23 @@ def pat_put_m1m1_untap_self(text: str, name: str) -> Ability | None:
         ability_id=_ability_id("m1m1-untap", text),
         costs=[AddCounterCost(counter_type="m1m1", quantity=1)],
         effects=[UntapEffect(target="self")],
+    )
+
+
+def pat_replacement_multiply_tap_mana(text: str, name: str) -> Ability | None:
+    """Mana Reflection / Nyxbloom: tap-for-mana produces 2× or 3×."""
+    m = re.match(
+        r"^If you tap a permanent for mana, it produces (twice|three times) "
+        r"as much of that mana instead\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    multiplier = 2 if m.group(1).casefold() == "twice" else 3
+    return ReplacementMultiplyTapMana(
+        ability_id=_ability_id("multiply-tap-mana", text),
+        multiplier=multiplier,
     )
 
 
@@ -1508,6 +1526,7 @@ PATTERNS: list[Pattern] = [
     Pattern("zirda_cost_reduction", pat_zirda_cost_reduction),
     Pattern("cant_block_this_turn", pat_cant_block_this_turn),
     Pattern("put_m1m1_untap_self", pat_put_m1m1_untap_self),
+    Pattern("replacement_multiply_tap_mana", pat_replacement_multiply_tap_mana),
     Pattern("vizier_m1m1_replacement", pat_vizier_m1m1_replacement),
     Pattern("etb_create_food", pat_etb_create_food),
     Pattern("create_token_put_p1p1_other", pat_create_token_put_p1p1_other),

@@ -57,6 +57,25 @@ def test_basalt_grounds_is_strict_via_cost_reduction():
     }
 
 
+def test_basalt_mana_reflection_is_strict_via_tap_multiplier():
+    from mtg_loop_engine.semantics.compiler import compile_oracle_text
+    from mtg_loop_engine.semantics.real_oracle_curriculum import REAL_ORACLE_CURRICULUM
+
+    row = REAL_ORACLE_CURRICULUM["Mana Reflection"]
+    reflection = compile_oracle_text(
+        oracle_id="oracle:mana-reflection",
+        name=row.name,
+        oracle_text=row.oracle_text,
+        types=row.types,
+    ).semantics
+    found = explore_pair(BASALT, reflection)
+    assert found is not None
+    analysis = analyze_prerequisites(found.witness)
+    assert analysis.strict_two_card is True
+    assert found.witness.classification.strict_two_card is True
+    assert set(analysis.used_oracle_ids) == {BASALT.oracle_id, reflection.oracle_id}
+
+
 def test_store_roundtrip(tmp_path: Path):
     from mtg_loop_engine.eval.explain import record_from_hit
     from mtg_loop_engine.eval.schema import AdjudicationFailureReason, ReferenceStatus
