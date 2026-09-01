@@ -5,7 +5,7 @@ Entry point: `uv run mtg-loop-engine` (`mtg_loop_engine.cli`).
 | Command | Milestone | Purpose | Expected output |
 | ------- | --------- | ------- | --------------- |
 | `verify-gold` | M5 | Run Oracle-exact `gold_core` positives and Oracle hard negatives | Per-witness status + proof hash; exit `0` if all match (Wave 0: empty gold is success) |
-| `verify-physics` | M5 | Run synthetic/divergent physics fixtures + physics hard negatives | Same shape as verify-gold for the physics suite |
+| `verify-physics` | M5 | Run synthetic/divergent physics fixtures + physics hard negatives | Same shape as verify-gold for the physics suite; also prints first 3 `gold_extended` witnesses (informational) |
 | `fetch-scryfall` | M0 | Download Scryfall Oracle Cards bulk snapshot into gitignored `data/` | JSON manifest (paths, hashes); creates local snapshot dirs |
 | `fetch-spellbook` | M0 | Download Commander Spellbook sample pages into gitignored `data/` | JSON manifest; `--pages` controls how many API pages (default 2) |
 | `compile-coverage` | M2 | Report deterministic compiler coverage on gold Oracle fixtures | Per-card fragment counts; JSON summary with `fragment_coverage`; exit `0` only if coverage is `1.0` on gold fixtures |
@@ -19,11 +19,99 @@ Entry point: `uv run mtg-loop-engine` (`mtg_loop_engine.cli`).
 
 | Command | Flag | Meaning |
 | ------- | ---- | ------- |
-| `fetch-spellbook` | `--pages N` | Max Spellbook API pages to fetch |
+| `fetch-spellbook` | `--pages N` | Max Spellbook API pages to fetch (default 2) |
 | `eval-spellbook` | `--variants PATH` | JSONL of variants (default `eval/fixtures/spellbook_conventional_sample.jsonl`) |
 | `eval-spellbook` | `--fetch-oracle` | Resolve missing names via Scryfall collection API, then compile |
 | `eval-spellbook` | `--out PATH` | Write `RecoveryReport` JSON to path |
 | *(all)* | `--version` | Print package version |
+| *(all)* | `-h`, `--help` | Show help (root or per-command) |
+
+## Exit codes
+
+| Command | Exit `0` | Exit `1` |
+| ------- | -------- | -------- |
+| `verify-gold` | All witnesses match expected status | Any mismatch |
+| `verify-physics` | All physics fixtures match | Any mismatch |
+| `fetch-scryfall` | Always | — |
+| `fetch-spellbook` | Always | — |
+| `compile-coverage` | `fragment_coverage == 1.0` on gold fixtures | Coverage below 1.0 |
+| `discover-gold` | All Oracle gold pairs rediscovered | Missing pairs |
+| `discover-physics` | All physics pairs rediscovered | Missing pairs |
+| `eval-gold-extras` | Always | — |
+| `eval-spellbook` | Variants path exists and eval completes | Missing variants path (stderr guidance) |
+| `adjudicate-workbench` | Streamlit subprocess exits 0 | DuckDB locked (stderr) or subprocess non-zero |
+
+## Getting started (cookbook)
+
+### First-time engine smoke
+
+```bash
+uv sync
+uv run mtg-loop-engine fetch-scryfall          # optional: local Oracle bulk for M5 scripts
+uv run mtg-loop-engine compile-coverage        # gate: fragment_coverage must be 1.0
+uv run mtg-loop-engine verify-gold
+uv run mtg-loop-engine discover-physics        # physics suite regression
+```
+
+### M4 evaluation loop
+
+```bash
+uv run mtg-loop-engine eval-spellbook \
+  --variants eval/fixtures/spellbook_conventional_sample.jsonl
+uv run --group eval mtg-loop-engine adjudicate-workbench
+# Stop workbench with Ctrl+C in the same terminal (DuckDB lock)
+uv run mtg-loop-engine eval-gold-extras
+```
+
+### M5 absent discovery (scripts; requires local Scryfall snapshot)
+
+```bash
+uv run mtg-loop-engine fetch-scryfall
+uv run mtg-loop-engine fetch-spellbook --pages 3
+uv run python scripts/spellbook_compiler_priority.py
+uv run python scripts/spellbook_absent_discovery.py --persist-workbench
+uv run --group eval mtg-loop-engine adjudicate-workbench
+```
+
+See [`runbooks/M5_NOVEL_CANDIDATES.md`](runbooks/M5_NOVEL_CANDIDATES.md).
+
+## Help discovery
+
+```bash
+uv run mtg-loop-engine --help                  # all commands
+uv run mtg-loop-engine verify-gold --help      # one command
+uv run mtg-loop-engine --version
+```
+
+Click generates grouped option lists and long help from command docstrings.
+
+## Shell completion
+
+Completion requires an **installed entry point** (not `python -m`). After `uv sync`, `uv run mtg-loop-engine` works for commands; tab completion needs the console script on your PATH (e.g. `uv pip install -e .` or activate the project venv).
+
+**Bash** (add to `~/.bashrc`):
+
+```bash
+eval "$(_MTG_LOOP_ENGINE_COMPLETE=bash_source mtg-loop-engine)"
+```
+
+**Zsh** (add to `~/.zshrc`):
+
+```bash
+eval "$(_MTG_LOOP_ENGINE_COMPLETE=zsh_source mtg-loop-engine)"
+```
+
+**Fish** (save to `~/.config/fish/completions/mtg-loop-engine.fish`):
+
+```fish
+_MTG_LOOP_ENGINE_COMPLETE=fish_source mtg-loop-engine | source
+```
+
+To avoid eval-on-every-shell startup, generate a static script once:
+
+```bash
+_MTG_LOOP_ENGINE_COMPLETE=bash_source mtg-loop-engine > mtg-loop-engine-complete.bash
+```
 
 ## Related docs helpers
 
@@ -32,95 +120,67 @@ Entry point: `uv run mtg-loop-engine` (`mtg_loop_engine.cli`).
 | `uv run python scripts/render_status.py` | Refresh generated section of [`STATUS.md`](STATUS.md) from frozen baselines |
 | `uv run python scripts/render_status.py --check` | Exit non-zero if `STATUS.md` is out of sync |
 | `uv run python scripts/check_docs.py` | README / link / governance file checks |
-| `uv run python scripts/spellbook_compiler_priority.py` | Live M5.1 frontier + recovery diagnostic: rank compiler gaps by COMPLETE / both-COMPLETE pair unlock (local Spellbook + Scryfall) |
+| `uv run python scripts/freeze_gold_witnesses.py` | Re-freeze Oracle gold witness JSON (reviewed; `--check` for drift) |
+| `uv run python scripts/spellbook_compiler_priority.py` | M5.1 frontier: rank compiler gaps by pair unlock (local Spellbook + Scryfall) |
+| `uv run python scripts/spellbook_absent_discovery.py` | M5 blind discovery among COMPLETE Spellbook cards; `--persist-workbench` for DuckDB |
 
-See [`runbooks/M4_FOLLOW_THROUGH.md`](runbooks/M4_FOLLOW_THROUGH.md) for the post-docs engineering sequence these commands support. Details: [`scripts/README.md`](../scripts/README.md).
+Key script flags: `--variants`, `--scryfall-dir`, `--out` / `--out-json` / `--out-md`, `--max-depth`, `--persist-workbench`, `--frontier-only`, `--db`. Details: [`scripts/README.md`](../scripts/README.md).
+
+See [`runbooks/M4_FOLLOW_THROUGH.md`](runbooks/M4_FOLLOW_THROUGH.md) for the post-M4 engineering sequence.
 
 ---
 
 ## Architecture
 
-The product CLI is **thin wiring** over library APIs under `src/mtg_loop_engine/`. Handlers import packages, print structured output, and return exit codes. Business logic (verify, compile, discover, eval) stays in packages — see [`src/mtg_loop_engine/README.md`](../src/mtg_loop_engine/README.md).
+The product CLI is **thin Click wiring** over library APIs under `src/mtg_loop_engine/cli/`. Commands import packages, emit structured output, and exit with gate codes. Business logic stays in packages — see [`src/mtg_loop_engine/README.md`](../src/mtg_loop_engine/README.md).
 
-Today the surface is eight flat subcommands (stdlib `argparse` in `cli.py`), with only a handful of flags beyond `--version`. CI runs pytest plus [`scripts/`](../scripts/README.md) hygiene helpers; it does not invoke `mtg-loop-engine`. `cli.py` is omitted from the coverage gate by design.
+Ten flat subcommands on a root Click group. CI runs pytest plus [`scripts/`](../scripts/README.md) hygiene helpers (stdlib `argparse`); it does not invoke `mtg-loop-engine`. The `cli/` package is omitted from the coverage gate by design.
 
-Click may appear in `uv.lock` via the **eval** optional group (Streamlit / Uvicorn). That is a transitive lockfile entry. Default install remains `duckdb`, `httpx`, and `pydantic` only.
+Default install dependencies: `click`, `duckdb`, `httpx`, `pydantic`. Streamlit (eval group) may pull additional packages transitively; product CLI does not depend on Rich or Typer.
 
 ```mermaid
 graph TB;
-  op[Operator] --> prodCli[mtg-loop-engine argparse];
+  op[Operator] --> prodCli[mtg-loop-engine Click];
   prodCli --> lib[Library packages];
   scripts[scripts argparse] --> ci[CI hygiene];
   scripts -.->|selective promotion later| prodCli;
-  evalExtra[eval group Streamlit] -.->|transitive Click| lock[uv.lock];
-  lock -.->|not default install| prodCli;
+  evalExtra[eval group Streamlit] -.->|optional| prodCli;
 ```
 
 ### Compatibility contracts
 
-Any future framework change must preserve the operator-facing surface:
+Operator-facing surface is stable across the Click migration:
 
 - Documented command names, flags, and defaults in this file and the root README
-- Gate exit codes: `verify-gold`, `compile-coverage`, `discover-gold` → `0` / `1`
+- Gate exit codes in the table above
 - `eval-spellbook` missing variants path → stderr guidance + exit `1`
-- Mixed human-line + JSON stdout shapes as documented above
+- Mixed human-line + JSON stdout shapes as documented
 - Blind discovery and deterministic `VERIFIED` path (see [`AGENTS.md`](../AGENTS.md))
 
 ---
 
 ## Framework choice
 
-**Verdict:** keep stdlib `argparse` until viability triggers fire. Click is a later upgrade path when those triggers are met. Typer is disqualified for the default product CLI under the current dependency bar (Rich). This is stack / operator-surface guidance — not an ADR-class epistemic freeze (see [`decisions/`](decisions/)).
+**Verdict:** product CLI uses **Click** (no Rich). [`scripts/`](../scripts/README.md) helpers stay on stdlib `argparse`. Typer is disqualified under the default dependency bar. Stack guidance lives here — not an ADR-class epistemic freeze.
 
-| Option | Fit today | Cost | Notes |
-| ------ | --------- | ---- | ----- |
-| Keep argparse | Best | Zero | Matches eight flat leaves and wiring-only |
-| argparse `parents=` | When shared flags appear | Zero | Prefer before any new framework |
-| Click (no Rich) | When triggers fire | First-class dep + docs blast | Preferred future upgrade if needed |
-| Typer | Poor | Rich + shellingham + vendored Click | Disqualified under current default-dep bar |
+| Layer | Framework | Notes |
+| ----- | --------- | ----- |
+| `mtg-loop-engine` | Click ≥8.1, &lt;9 | First-class pin in `[project.dependencies]` |
+| `scripts/*.py` | argparse | CI / checkout hygiene; promote individually when criteria hold |
+| Eval workbench | Streamlit | Launched via `adjudicate-workbench`; optional `[dependency-groups] eval` |
 
-Lockfile presence of Click is not a free product dependency. Adopting it requires a first-class pin in `[project.dependencies]`, CI/runtime expansion, and updates across every doc that encodes command strings.
+### Adding commands
 
-### Viability triggers
+1. Add handler in `src/mtg_loop_engine/cli/commands/<family>.py` and register on the root group.
+2. Update this file (command table, flags, exit codes).
+3. Add `CliRunner` wiring tests in `tests/unit/test_cli_wiring.py`.
+4. Sync root README smoke block and owning package README if domain-specific.
 
-Re-open a framework upgrade when **two or more** of these are true, or **one** is an explicit human product requirement:
+Agent workflow: [`.agents/skills/click-cli/`](../.agents/skills/click-cli/). Cursor rule: [`.cursor/rules/cli-development.mdc`](../.cursor/rules/cli-development.mdc).
 
-1. ≥12 leaf commands in ≥3 named groups (nested `eval` / `fetch` / `scan`), not eight flat names
-2. The same option set copied onto ≥3 commands and argparse `parents=` is getting painful
-3. Documented shell completion for non-dev operators (README / runbook)
-4. Product CLI becomes a CI merge-gate surface **and** the tree has grown past a thin dispatcher
-5. Parser + dispatch wiring (not domain handlers) exceeds ~400 lines with a real option graph
+### Future nesting
 
-**Out of scope as triggers:** lockfile presence of Click; prettier `--help`; fat handlers such as `compile-coverage` (extract library code instead); M6 / M7 existing on the roadmap alone.
-
-Until triggers fire: stay on argparse. If shared flags appear first, use **argparse parents in the same PR as those flags**. If Click later wins, prefer **Click without Rich**.
-
-### Roadmap fit
-
-Advisory sequencing only — not an exit criterion for any milestone in [`ROADMAP.md`](../ROADMAP.md).
-
-| Milestone | CLI framework work? | Rationale |
-| --------- | ------------------- | --------- |
-| **M4** (active) | Stay on argparse | Competes with compiler curriculum, Spellbook eligibility, baseline freeze. ADR 0006 milestone discipline. |
-| **M5** Novel candidates | Stay on argparse (default) | Likely extends existing eval / discovery commands; still flat recipes. Use parents if shared flags appear. |
-| **M6** Incremental scans | **Best first window** | Snapshot-diff re-runs and shared path / config flags can introduce a small command cluster. Upgrade **only if viability triggers fire** while building that surface. |
-| **M7** Explorer | Web UI (FastAPI or equivalent) | At most a thin `serve` leaf; the explorer milestone is not a CLI-framework project. |
-
-**Recommended sequencing for a future upgrade PR:**
-
-1. Finish M4 exit gates.
-2. Grow operator commands for the real need (typically M6 orchestration) on argparse first, or with argparse parents if flags are shared.
-3. If triggers are met, open a **behavior-preserving** Click migration PR (separate from domain work), with wiring tests and full sync of this file plus README / runbook surfaces.
-4. Prefer **Click without Rich** unless default-dep policy explicitly accepts Rich.
-
-### Migration constraints (if / when — Click)
-
-1. Pin Click in `[project.dependencies]`; do not hitchhike Streamlit's transitive Click.
-2. Preserve command names, flags, exit codes, and stdout / stderr contracts above.
-3. Promote scripts on their own criteria (below), separately from the framework PR when needed.
-4. Add wiring tests only (exit codes, JSON keys, stderr). Domain contracts stay in gold / discovery / eval suites; do not un-omit `cli.py` solely to manufacture coverage %.
-5. Rename or nest only with aliases that preserve documented strings; add Rich / Typer / completion only when that is the requirement.
-6. Same-PR updates for every doc that encodes command strings.
+Flat commands are intentional today. If M6 introduces nested `scan` / `eval` / `diag` groups, add aliases so documented flat names keep working.
 
 ---
 
@@ -147,15 +207,9 @@ Keep under `scripts/` when **any** of these dominate:
 
 | Script | Promote? | When / how | Notes |
 | ------ | -------- | ---------- | ----- |
-| `spellbook_compiler_priority.py` | **Strongest candidate** | After M4 eligibility work stabilizes, or early M5 / M6 when compiler-gap diagnostics are recurring; ideally as `compiler-priority` (or under a future `diag` / `eval` group) | Already overlaps `eval-spellbook` / compiler curriculum. Extract analysis to a library module first; CLI becomes thin. An argparse leaf is fine. |
-| `render_status.py` | **Optional / weak** | Only if the product CLI becomes the single operator entry *and* CI is willing to call `mtg-loop-engine status --check` (or similar) | Pure docs / baseline hygiene. Fine forever as a script. Promotion is ergonomics, not architecture. |
-| `check_docs.py` | **Least appropriate** | Prefer stay in `scripts/` indefinitely | Checkout-layout / README / link hygiene; odd fit for an installable package console script. CI should keep invoking `python scripts/check_docs.py`. |
-
-### Roadmap coupling
-
-- Script promotion is **orthogonal** to a Click upgrade. Promote `spellbook_compiler_priority` as an argparse leaf (after library extract) when the operator need is real.
-- If Click lands at M6 because of nested `scan` / `eval` / `diag` groups, that is a natural moment to place a promoted diagnostic under a group — still only if the promotion criteria are met.
-- Promote scripts for operator need, not to justify Click.
+| `spellbook_compiler_priority.py` | **Strongest candidate** | After M4 eligibility work stabilizes, or early M5 / M6 when compiler-gap diagnostics are recurring; ideally as `compiler-priority` (or under a future `diag` / `eval` group) | Extract analysis to a library module first; CLI becomes thin Click leaf |
+| `render_status.py` | **Optional / weak** | Only if the product CLI becomes the single operator entry *and* CI is willing to call `mtg-loop-engine status --check` (or similar) | Pure docs / baseline hygiene. Fine forever as a script |
+| `check_docs.py` | **Least appropriate** | Prefer stay in `scripts/` indefinitely | Checkout-layout / README / link hygiene |
 
 ### If promoting (future constraints)
 
@@ -163,15 +217,3 @@ Keep under `scripts/` when **any** of these dominate:
 2. Preserve script invocation as a thin shim or document deprecation aliases so CI / runbooks stay continuous mid-cutover.
 3. Update `scripts/README.md`, this file, and the CI workflow in the same change.
 4. Keep network-free invariants for anything CI still calls.
-
----
-
-## Out of scope until triggers fire
-
-| Topic | Revisit when |
-| ----- | ------------ |
-| Click or Typer on the product CLI | Viability triggers above (or explicit human requirement) |
-| Blanket merge of all `scripts/` into the product CLI | Individual promotion criteria |
-| Promoting `check_docs.py` for a single entrypoint | Product identity changes |
-| Treating M7 as a CLI-framework project | Explorer needs a thin `serve` leaf only |
-| Numbered ADR whose only decision is “we chose argparse” | Stack choice stays advisory here |
