@@ -9,6 +9,7 @@ from mtg_loop_engine.semantics.enums import ManaScaleKind, TriggerEvent, Verific
 from mtg_loop_engine.semantics.ir import (
     ActivatedAbility,
     AddCounterCost,
+    UntapSymbolCost,
     AddCounterEffect,
     AddManaEffect,
     CardSemantics,
@@ -848,6 +849,32 @@ class Executor:
                     key = cost.counter_type
                     perm.counters[key] = perm.counters.get(key, 0) + qty
                     state.bump("counter", qty)
+            elif isinstance(cost, UntapSymbolCost):
+                untap_perm = perm
+                if not cost.source_self:
+                    if not step.target:
+                        return ExecError(
+                            VerificationStatus.ILLEGAL_ACTION,
+                            "untap symbol cost needs host",
+                        )
+                    untap_perm = state.permanents.get(step.target)
+                    if untap_perm is None:
+                        return ExecError(
+                            VerificationStatus.ILLEGAL_ACTION, "untap host missing"
+                        )
+                    if not untap_perm.is_creature:
+                        return ExecError(
+                            VerificationStatus.ILLEGAL_ACTION,
+                            "untap symbol host must be creature",
+                        )
+                if not untap_perm.tapped:
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_ACTION,
+                        "must be tapped to pay untap symbol",
+                    )
+                untap_perm.tapped = False
+                if not cost.source_self:
+                    step = step.model_copy(update={"target": None})
             elif isinstance(cost, SacrificeCost):
                 if cost.selector == "self":
                     if not self.matches_sacrifice_selector(perm, "self"):

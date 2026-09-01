@@ -46,6 +46,7 @@ from mtg_loop_engine.semantics.ir import (
     SacrificeCost,
     TapCost,
     TriggeredAbility,
+    UntapSymbolCost,
 )
 from mtg_loop_engine.semantics.oracle_fixtures import GOLD_ORACLE_FIXTURES
 from mtg_loop_engine.state.game import GameState
@@ -147,10 +148,14 @@ def _needs_zombie_gate(card: CardSemantics) -> bool:
     )
 
 
-def _needs_tap_host(card: CardSemantics) -> bool:
+def _needs_creature_host(card: CardSemantics) -> bool:
     return any(
         isinstance(ab, ActivatedAbility)
-        and any(isinstance(c, TapCost) and not c.source_self for c in ab.costs)
+        and any(
+            (isinstance(c, TapCost) and not c.source_self)
+            or (isinstance(c, UntapSymbolCost) and not c.source_self)
+            for c in ab.costs
+        )
         for ab in card.abilities
     )
 
@@ -230,7 +235,7 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
         )
     need_token = any(extract_capabilities(c).needs_token_fodder() for c in ordered)
     need_zombie = any(_needs_zombie_gate(c) for c in ordered)
-    need_tap_host = any(_needs_tap_host(c) for c in ordered)
+    need_creature_host = any(_needs_creature_host(c) for c in ordered)
     has_creature = any(p.is_creature for p in permanents)
     # One generic Zombie token covers cast-from-GY gates and sac fodder when both apply.
     if need_zombie:
@@ -259,7 +264,7 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
         )
     # Presence of Gond class: tap a host creature (prefer partner; else seed).
     # Seed as a non-token setup permanent so derive_relevant_state tracks tapped.
-    if need_tap_host and not has_creature:
+    if need_creature_host and not has_creature:
         permanents.append(
             bf(
                 AURA_HOST_OBJECT_ID,
@@ -351,6 +356,12 @@ def _any_target_damage(ability: ActivatedAbility) -> bool:
 def _tap_cost_needs_host(ability: ActivatedAbility) -> bool:
     return any(isinstance(c, TapCost) and not c.source_self for c in ability.costs)
 
+def _untap_symbol_cost_needs_host(ability: ActivatedAbility) -> bool:
+    return any(
+        isinstance(c, UntapSymbolCost) and not c.source_self for c in ability.costs
+    )
+
+
 def _sac_selector(ability: ActivatedAbility) -> str | None:
     for cost in ability.costs:
         if isinstance(cost, SacrificeCost) and cost.selector != "self":
@@ -437,6 +448,7 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
             selector = _sac_selector(ab)
             need_effect_target = _effect_needs_permanent_target(ab)
             need_tap_host = _tap_cost_needs_host(ab)
+            need_untap_host = _untap_symbol_cost_needs_host(ab)
             any_target_dmg = _any_target_damage(ab)
             if selector:
                 targets = _fodder_ids(state, selector)
@@ -448,6 +460,16 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
                     and p.controller == "you"
                     and p.is_creature
                     and not p.tapped
+                    and p.object_id != perm.object_id
+                ]
+            elif need_untap_host:
+                targets = [
+                    p.object_id
+                    for p in state.permanents.values()
+                    if p.zone == Zone.BATTLEFIELD
+                    and p.controller == "you"
+                    and p.is_creature
+                    and p.tapped
                     and p.object_id != perm.object_id
                 ]
             elif any_target_dmg:
@@ -704,12 +726,17 @@ def build_witness(
         EssentialCardRef(oracle_id=a.oracle_id, name=a.name),
         EssentialCardRef(oracle_id=b.oracle_id, name=b.name),
     ]
+    semantics_for_witness: dict[str, CardSemantics] = {
+        a.oracle_id: a,
+        b.oracle_id: b,
+    }
+    _inject_seed_semantics(spec, semantics_for_witness)
     pair_id = "__".join(sorted([a.oracle_id, b.oracle_id]))
     witness = LoopWitness(
         id=f"discover_{pair_id}",
         classification=two_card(essential=refs, generic=generic),
         essential_cards=refs,
-        card_semantics=[a, b],
+        card_semantics=list(semantics_for_witness.values()),
         initial_state=spec,
         setup_actions=setup,
         loop_actions=loop_actions,

@@ -91,10 +91,11 @@ uv run python scripts/spellbook_absent_discovery.py
 6. **Path a / slice 6 (token auras)** ✓ — Presence of Gond host-tap; Enchant false-COMPLETE fix; Aphetto/Morph.
 7. **Path a / slice 7 (life-untap / counter-mana)** ✓ — Famished Paladin; Village Bell-Ringer; Gyre Sage; Pestermite.
 8. **Mill / graveyard feedback (slice 8)** ✓ — Mindcrank + Bloodchief Ascension; Path-b′ `seed_lose_life`; `core_bloodchief_mindcrank` gold witness. **Probe (2026-08-31):** 46 COMPLETE / 25 in_reference / 0 absent.
-9. **Scaled tap-mana (slice 9)** ✓ — `ManaScaleKind` + scaled `pat_tap_add_mana`; explorer creature/elf/defender seeds; frontier P0 cluster (Bloom Tender, Sanctum Weaver, Circle of Dreams Druid, …).
-10. **Frontier-driven slices (M5.2):** pick from live P0/P1; ritual below. Path **a** preference remains.
-11. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-12. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+9. **Scaled tap-mana (slice 9)** ✓ — `ManaScaleKind` + scaled `pat_tap_add_mana`; explorer creature/elf/defender seeds; frontier P0 cluster (Bloom Tender, Sanctum Weaver, Circle of Dreams Druid, …). **Probe (post–slice 9):** 54 COMPLETE / 30 in_reference / 0 absent.
+10. **Equipment {Q} (slice 10)** ✓ — Umbral Mantle `UntapSymbolCost` + `pat_equipped_untap_pump`; host-tapped target in explorer; frontier P1 (**8** pair unlocks vs Mana Reflection **4**).
+11. **Frontier-driven slices (M5.2):** pick from live P0/P1; ritual below. Path **a** preference remains.
+12. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+13. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 

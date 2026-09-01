@@ -332,4 +332,14 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         ),
         notes="Elf-count green; anthem proof-irrelevant.",
     ),
+    "Umbral Mantle": RealOracleCurriculum(
+        name="Umbral Mantle",
+        types=["Artifact", "Equipment"],
+        oracle_text=(
+            'Equipped creature has "{3}, {Q}: This creature gets +2/+2 until end of turn." '
+            "({Q} is the untap symbol.)\n"
+            "Equip {0}"
+        ),
+        notes="Frontier P1 slice 10: {Q} untap-symbol cost + host activation; pairs with tap-mana dorks.",
+    ),
 }

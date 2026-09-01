@@ -33,6 +33,7 @@ from mtg_loop_engine.semantics.ir import (
     TapEffect,
     TriggeredAbility,
     UntapEffect,
+    UntapSymbolCost,
 )
 
 PatternFn = Callable[[str, str], Ability | None]
@@ -573,6 +574,26 @@ def pat_tap_create_token(text: str, name: str) -> Ability | None:
                 name=token_name, power=power, toughness=toughness, quantity=1
             )
         ],
+    )
+
+
+def pat_equipped_untap_pump(text: str, name: str) -> Ability | None:
+    """Umbral Mantle class: equipped creature pays {3}{Q}; +2/+2 is proof-irrelevant."""
+    m = re.match(
+        r'^Equipped creature has "\{3\}, \{Q\}: This creature gets \+2/\+2 until end of turn\."'
+        r"(?: \(\{Q\} is the untap symbol\.\))?\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("equipped-untap-pump", text),
+        costs=[
+            ManaCost(amount=ManaAmount(generic=3)),
+            UntapSymbolCost(source_self=False),
+        ],
+        effects=[],
     )
 
 
@@ -1472,6 +1493,7 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
 PATTERNS: list[Pattern] = [
     Pattern("tap_create_token_untap", pat_tap_create_token_untap),
     Pattern("tap_sac_token_make_two", pat_tap_sac_token_make_two),
+    Pattern("equipped_untap_pump", pat_equipped_untap_pump),
     Pattern("enchanted_tap_create_token", pat_enchanted_tap_create_token),
     Pattern("tap_create_token", pat_tap_create_token),
     Pattern("tap_add_mana", pat_tap_add_mana),
