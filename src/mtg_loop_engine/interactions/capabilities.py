@@ -26,6 +26,7 @@ from mtg_loop_engine.semantics.ir import (
     TapCost,
     TriggeredAbility,
     UntapEffect,
+    UntapSymbolCost,
 )
 
 
@@ -95,6 +96,8 @@ def extract_capabilities(card: CardSemantics) -> CardCapabilities:
                     "-1/-1",
                 }:
                     caps.requires.add("m1m1_put")
+                elif isinstance(cost, UntapSymbolCost):
+                    caps.produces.add("untap")
             for effect in ab.effects:
                 if isinstance(effect, RemoveCounterEffect):
                     caps.requires.add("remove_counter")

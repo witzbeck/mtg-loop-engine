@@ -66,8 +66,16 @@ class AddCounterCost(BaseModel):
     target: Literal["self"] = "self"
 
 
+class UntapSymbolCost(BaseModel):
+    """Pay {Q} by untapping the activating permanent or equipped host."""
+
+    kind: Literal["untap_symbol"] = "untap_symbol"
+    # When False, untap ``step.target`` (equipped/enchanted host) instead of actor.
+    source_self: bool = True
+
+
 Cost = Annotated[
-    TapCost | ManaCost | SacrificeCost | AddCounterCost,
+    TapCost | ManaCost | SacrificeCost | AddCounterCost | UntapSymbolCost,
     Field(discriminator="kind"),
 ]
 
