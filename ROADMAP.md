@@ -171,7 +171,7 @@ measure frontier → smallest reusable gap → discover → adjudicate → contr
    - **Path b (Mindcrank / Bloodchief)** ✓ — explicit generic opponent life-loss seed (`seed_lose_life`, drain-sized); disclosed on witness.
    - **Rules-evidence rails** ✓ — [`docs/RULES_EVIDENCE.md`](docs/RULES_EVIDENCE.md), [`AGENTS.md`](AGENTS.md), [`.cursor/rules/rules-evidence.mdc`](.cursor/rules/rules-evidence.mdc), [`.agents/skills/rules-evidence/`](.agents/skills/rules-evidence/).
 
-3. **Workbench adjudication (M5.3)** — after every meaningful curriculum/physics PR: persist absences; promote `NOVEL` only with human records; false `VERIFIED` → regressions.
+3. **Workbench adjudication (M5.3)** ◐ — first seed **post–slice 10** (2026-09-01): **3** `ABSENT_FROM_REFERENCE` candidates exported to gitignored `data/eval/spellbook_absent.jsonl` (Axebane Guardian + Pemmin's Aura; Axebane + Umbral Mantle; Overgrown Battlement + Umbral Mantle). Run `--persist-workbench` after each curriculum PR; human review in workbench (`spellbook_absent` corpus); `NOVEL` only with record.
 4. **Optional baseline / M5.4 exit** — freeze an absent-discovery summary only when intentionally certifying; then apply the M5 exit gate above.
 
 Playbook: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDIDATES.md).
