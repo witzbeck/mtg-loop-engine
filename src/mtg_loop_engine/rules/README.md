@@ -43,6 +43,8 @@ graph TB;
   `ORACLE_EXACT` witnesses (verifier quarantines). Product Heliod uses `GrantLifelinkEffect`
   from a paid `{1}{W}` activation.
 - `DealDamageEffect` `any_target`: opponent life when `step.target` is `None`/`opponent`; mark damage on a BF creature id (self-ping legal when `target == actor`).
+- `ReplacementAmplifyP1P1Counters` (Kami / Hardened Scales): +1/+1 puts become that many plus one; creature vs permanent scope; multiple sources stack.
+- Power-scaled tap mana (`equal_to_source_power`) uses `Permanent.effective_power()` (printed ± counters).
 
 ## Non-responsibilities
 

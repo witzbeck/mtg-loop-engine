@@ -20,6 +20,7 @@ from mtg_loop_engine.semantics.ir import (
     ManaCost,
     MillEffect,
     RemoveCounterEffect,
+    ReplacementAmplifyP1P1Counters,
     ReplacementMultiplyTapMana,
     ReplacementReduceM1M1Counters,
     ReturnToBattlefieldEffect,
@@ -46,8 +47,8 @@ class CardCapabilities(BaseModel):
         return "remove_counter" in self.requires
 
     def needs_p1p1_mana_seed(self) -> bool:
-        """Tap-for-mana scales with +1/+1 counters (Gyre Sage class)."""
-        return "mana_from_p1p1" in self.produces
+        """Seed +1/+1 so counter-scaled or power-scaled mana can pay Staff-class untap."""
+        return "mana_from_p1p1" in self.produces or "mana_from_power" in self.produces
 
     def needs_creature_count_mana_seed(self) -> bool:
         return "mana_scale_creature" in self.produces
@@ -69,6 +70,9 @@ def extract_capabilities(card: CardSemantics) -> CardCapabilities:
             continue
         if isinstance(ab, ReplacementReduceM1M1Counters):
             caps.modifies.add("m1m1_put")
+            continue
+        if isinstance(ab, ReplacementAmplifyP1P1Counters):
+            caps.modifies.add("amplify_p1p1")
             continue
         if isinstance(ab, ReplacementMultiplyTapMana):
             caps.modifies.add("multiply_tap_mana")
@@ -117,6 +121,8 @@ def _effects(effects: list, caps: CardCapabilities) -> None:
             caps.produces.add("mana")
             if effect.equal_to_source_p1p1_counters:
                 caps.produces.add("mana_from_p1p1")
+            if effect.equal_to_source_power:
+                caps.produces.add("mana_from_power")
             if effect.mana_scale is ManaScaleKind.CONTROLLED_CREATURES:
                 caps.produces.add("mana_scale_creature")
             elif effect.mana_scale in {

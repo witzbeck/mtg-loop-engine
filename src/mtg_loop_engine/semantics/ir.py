@@ -258,6 +258,18 @@ class ReplacementReduceM1M1Counters(BaseModel):
     supported: bool = True
 
 
+class ReplacementAmplifyP1P1Counters(BaseModel):
+    """Kami / Hardened Scales: +1/+1 puts become that many plus one."""
+
+    kind: Literal["replacement_amplify_p1p1"] = "replacement_amplify_p1p1"
+    ability_id: str
+    plus: int = 1
+    applies_to: Literal["permanents_you_control", "creatures_you_control"] = (
+        "permanents_you_control"
+    )
+    supported: bool = True
+
+
 class ReplacementMultiplyTapMana(BaseModel):
     """Mana Reflection / Nyxbloom class: multiply mana from tapping permanents."""
 
@@ -282,6 +294,7 @@ Ability = Annotated[
     | ContinuousCostReduction
     | ReplacementExileInsteadOfGraveyard
     | ReplacementReduceM1M1Counters
+    | ReplacementAmplifyP1P1Counters
     | ReplacementMultiplyTapMana
     | ProofIrrelevantStatic,
     Field(discriminator="kind"),

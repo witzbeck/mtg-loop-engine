@@ -31,6 +31,16 @@ class Permanent:
     damage_marked: int = 0
     once_per_turn_used: set[str] = field(default_factory=set)
 
+    def effective_power(self) -> int | None:
+        """Power after +1/+1 and -1/-1 counters. None if no printed power."""
+        if self.power is None:
+            return None
+        return (
+            self.power
+            + self.counters.get("p1p1", 0)
+            - self.counters.get("m1m1", 0)
+        )
+
     def effective_toughness(self) -> int | None:
         """Toughness after +1/+1 and -1/-1 counters. None if no printed toughness."""
         if self.toughness is None:

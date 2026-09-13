@@ -359,4 +359,17 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         ),
         notes="Frontier P1 slice 11: 3× tap-mana replacement; Trample proof-irrelevant.",
     ),
+    "Kami of Whispered Hopes": RealOracleCurriculum(
+        name="Kami of Whispered Hopes",
+        types=["Creature", "Spirit"],
+        oracle_text=(
+            "If one or more +1/+1 counters would be put on a permanent you control, "
+            "that many plus one +1/+1 counters are put on that permanent instead.\n"
+            "{T}: Add X mana of any one color, where X is this creature's power."
+        ),
+        notes=(
+            "Frontier P0 slice 12: +1/+1 put amplify + power-scaled any-color mana "
+            "(4 pair unlocks vs Storm Herd 5 one-shot / Wirewood Channeler 2)."
+        ),
+    ),
 }

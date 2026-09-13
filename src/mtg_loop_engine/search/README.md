@@ -49,7 +49,7 @@ graph TB;
   paid activation (Path b mana prerequisite — not a free grant)
 - When audited printed P/T is present on the fixture, `default_initial_state` uses it;
   `removes_p1p1` + toughness 0 → start with **2** p1p1 counters (SBA-safe)
-- Seed **four** `p1p1` counters on cards whose mana ability scales with +1/+1 counters (Gyre Sage class), so counter-mana engines can pay Staff-class untap cycles (`{3}` untap creature + `{1}` untap Staff)
+- Seed **four** `p1p1` counters on cards whose mana ability scales with +1/+1 counters (Gyre Sage) **or** with power (Kami / Viridian Joiner class via effective power), so Staff-class untap cycles clear (`{3}` untap creature + `{1}` untap Staff)
 - For remove-counter `any_target` damage, emit activate steps with `target="opponent"` first (Heliod path); self (`actor`) is also legal for undying self-ping
 - Seed a generic creature **aura host** (non-token setup permanent) when an activated ability uses `TapCost(source_self=False)` and neither essential is a creature (Presence of Gond + Intruder Alarm class); otherwise tap the partner creature. Host tap is tracked in `LoopRelevantState` so recurrence fails closed when the host stays tapped.
 - When loop actions activate a `once_per_turn` ability, `derive_relevant_state`

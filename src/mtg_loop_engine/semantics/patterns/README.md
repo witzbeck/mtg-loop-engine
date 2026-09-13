@@ -44,6 +44,8 @@ graph TB;
 - **Proof-irrelevant statics** (keywords, Enchant/Equip lines, cast-restriction riders) compile as supported no-ops so they do not block Spellbook eligibility when loop mechanics are modeled.
 - Patterns must not claim support the executor cannot run.
 - Counter-scaled tap mana (`equal_to_source_p1p1_counters`) requires the executor to read `p1p1` on the source; explorer seeds four counters for that capability (Staff-class untap cycle).
+- Power-scaled tap mana (`equal_to_source_power`) uses effective power; explorer seeds four `p1p1` when `mana_from_power` so Staff-class untap cycles clear `{3}` (Kami class).
+- `amplify_p1p1_replacement` — Kami (permanent) / Hardened Scales (creature) “that many plus one”.
 - Board-scaled tap mana (`mana_scale` / `ManaScaleKind`) counts creatures, elves, defenders, enchantments, devotion, or vivid colors; explorer may seed generic creature/elf/defender permanents when the scale needs mass (Staff-class untap cycle).
 
 ## Main entry points

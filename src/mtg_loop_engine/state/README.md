@@ -37,6 +37,7 @@ graph TB;
 - Path `permanents.<id>.once_per_turn_used.<ability_id>` → boolean (whether that ability id is marked used this turn).
 - Path `pending_triggers.count` → length of the pending trigger queue (ADR 0008 mandatory).
 - `Permanent.effective_toughness()` → toughness + p1p1 − m1m1 (None if no printed toughness).
+- `Permanent.effective_power()` → power + p1p1 − m1m1 (None if no printed power).
 
 ## Non-responsibilities
 
