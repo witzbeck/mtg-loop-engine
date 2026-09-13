@@ -505,6 +505,7 @@ name = "mtg-loop-engine"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "click" },
     { name = "duckdb" },
     { name = "httpx" },
     { name = "pydantic" },
@@ -521,6 +522,7 @@ eval = [
 
 [package.metadata]
 requires-dist = [
+    { name = "click", specifier = ">=8.1,<9" },
     { name = "duckdb", specifier = ">=1.5.5" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "pydantic", specifier = ">=2.13.4" },

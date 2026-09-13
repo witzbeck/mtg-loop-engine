@@ -5,6 +5,7 @@ description = "Explainable two-card MTG loop discovery: compile, verify, and pro
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "click>=8.1,<9",
     "duckdb>=1.5.5",
     "httpx>=0.28.1",
     "pydantic>=2.13.4",
@@ -57,7 +58,7 @@ source = ["mtg_loop_engine"]
 # Branch coverage is reported in a separate CI step (no fail-under) so the
 # line floor stays a pure line gate — see .github/workflows/ci.yml.
 omit = [
-    "*/mtg_loop_engine/cli.py",
+    "*/mtg_loop_engine/cli/*",
     "*/mtg_loop_engine/eval/workbench.py",
     "*/mtg_loop_engine/cards/ingest.py",
     "*/mtg_loop_engine/benchmark/spellbook.py",

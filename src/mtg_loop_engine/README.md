@@ -32,7 +32,7 @@ graph TB;
 - Scryfall Oracle snapshots (`cards`)
 - Authored gold IR / witnesses (`corpus`)
 - Spellbook reference extracts (`benchmark`, gitignored under `data/`)
-- Operator commands via `cli.py`
+- Operator commands via `cli/` (Click)
 
 ## Outputs
 
@@ -43,7 +43,7 @@ graph TB;
 
 - Own the M0–M4 engine surface as importable modules.
 - Keep discovery speculative and verification conservative.
-- Expose CLI orchestration without embedding business logic in `cli.py` beyond wiring.
+- Expose CLI orchestration without embedding business logic in `cli/` beyond wiring.
 
 ## Boundaries
 
@@ -65,7 +65,7 @@ graph TB;
 | Module | Role |
 | --- | --- |
 | `__init__.py` | Package version |
-| `cli.py` | Operator commands (`verify-gold`, `discover-gold`, `eval-*`, `fetch-*`, …) |
+| `cli/` | Operator commands (`verify-gold`, `discover-gold`, `eval-*`, `fetch-*`, …) — Click wiring |
 | `config.py` | `EngineConfig` knobs |
 
 Subpackages: `cards`, `semantics`, `interactions`, `search`, `verify`, `rules`, `state`, `proofs`, `corpus`, `benchmark`, `eval`.
