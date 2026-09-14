@@ -37,6 +37,7 @@ graph TB;
 - Exile-on-death replacements suppress death events and `DIES` triggers (CR 700.4); sacrifice events still fire.
 - Creature `DIES` queues carry subject `effective_toughness()` as trigger `amount` when > 0 (South Wind Avatar class).
 - `MoveToZoneEffect` `controlled_creature` → hand (ETB bounce); target must be a controlled BF creature.
+- BF tapped→untapped via `_untap_permanent` queues `TriggerEvent.UNTAP` (Mesmeric Orb); self-mill bumps `events.mill` only.
 - Summoning sickness blocks `{T}` / `TapCost` even on mana abilities (CR 302.6); haste not modeled.
 - State-based actions after each successful `run_step`: creatures you control die on toughness ≤ 0 or lethal `damage_marked` (CR 704.5f/g); cascades bounded.
 - Undying seed (`seed_grant_undying`) and synthetic `__undying_return__` trigger: return with +1/+1 iff zero p1p1 at death (CR 702.92a/c); no card-ability lookup.

@@ -446,6 +446,25 @@ def pat_power_artifact_cost_reduction(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_untap_mill_controller(text: str, name: str) -> Ability | None:
+    """Mesmeric Orb: whenever a permanent becomes untapped, its controller mills."""
+    m = re.match(
+        r"^Whenever a permanent becomes untapped, "
+        r"that permanent's controller mills (?:a card|(\d+) cards?)\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    amount = int(m.group(1)) if m.group(1) else 1
+    return TriggeredAbility(
+        ability_id=_ability_id("untap-mill", text),
+        event=TriggerEvent.UNTAP,
+        filter="any",
+        effects=[MillEffect(amount=amount, who="you")],
+    )
+
+
 def pat_put_m1m1_untap_self(text: str, name: str) -> Ability | None:
     m = re.match(
         r"^Put a -1/-1 counter on (?:this creature|~|"
@@ -1735,6 +1754,7 @@ PATTERNS: list[Pattern] = [
     Pattern("cost_reduction", pat_cost_reduction),
     Pattern("zirda_cost_reduction", pat_zirda_cost_reduction),
     Pattern("power_artifact_cost_reduction", pat_power_artifact_cost_reduction),
+    Pattern("untap_mill_controller", pat_untap_mill_controller),
     Pattern("cant_block_this_turn", pat_cant_block_this_turn),
     Pattern("put_m1m1_untap_self", pat_put_m1m1_untap_self),
     Pattern("replacement_multiply_tap_mana", pat_replacement_multiply_tap_mana),

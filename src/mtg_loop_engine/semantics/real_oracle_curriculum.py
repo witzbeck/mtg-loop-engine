@@ -496,4 +496,13 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         ),
         notes="Frontier P1 slice 22: enchanted-artifact activate −{2} (floor 1).",
     ),
+    "Mesmeric Orb": RealOracleCurriculum(
+        name="Mesmeric Orb",
+        types=["Artifact"],
+        oracle_text=(
+            "Whenever a permanent becomes untapped, that permanent's controller "
+            "mills a card."
+        ),
+        notes="Frontier P1 slice 23: UNTAP → self-mill (Basalt / Aphetto pairs).",
+    ),
 }

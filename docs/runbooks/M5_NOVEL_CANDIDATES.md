@@ -104,7 +104,8 @@ uv run python scripts/spellbook_absent_discovery.py
 19. **ETB bounce (slices 19–20)** ✓ — Shrieking Drake / Whitemane Lion; bounce to hand. Rediscovery waits on cast-from-hand.
 20. **Green ETB counters (slice 21)** ✓ — Ivy Lane Denizen; creature `colors` + `other_controlled_green`.
 21. **Enchanted-artifact cost reduction (slice 22)** ✓ — Power Artifact −{2} activate (floor 1).
-22. **Frontier-driven slices (M5.2):** pick from live P0/P1; ritual below. Path **a** preference remains.
+22. **Untap→mill (slice 23)** ✓ — Mesmeric Orb; permanent untap mills controller.
+23. **Frontier-driven slices (M5.2):** pick from live P0/P1; ritual below. Path **a** preference remains.
 18. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
 19. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
@@ -142,7 +143,7 @@ Trigger after every meaningful curriculum/physics PR (COMPLETE growth, new verif
 
 **DuckDB lock:** if Streamlit workbench is already running, stop it (Ctrl+C in that terminal — closing the browser tab is not enough) before `--persist-workbench`, or persist to a scratch `--db` path and re-run without `--db` after restart so the main store upserts.
 
-#### Current queue (remeasured post–slice 22)
+#### Current queue (remeasured post–slice 23)
 
 | Pair | Join reasons | Adjudication | Notes |
 | --- | --- | --- | --- |
@@ -153,7 +154,7 @@ Trigger after every meaningful curriculum/physics PR (COMPLETE growth, new verif
 | Freed from the Real + Heronblade Elite | mana_pay, tap_untap | `valid_generic_prerequisite` | Power mana + aura untap (slice 16) |
 | Heronblade Elite + Pemmin's Aura | mana_pay, tap_untap | `valid_generic_prerequisite` | Power mana + aura untap (slice 16) |
 
-Probe (post–slice 22): **69** COMPLETE · **62** verified · **56** in_reference · **6** absent. Keep `ABSENT_FROM_REFERENCE` (not `NOVEL`).
+Probe (post–slice 23): **70** COMPLETE · **62** verified · **56** in_reference · **6** absent. Keep `ABSENT_FROM_REFERENCE` (not `NOVEL`).
 
 Absences are curriculum: finite / bystander / illegal activation failures feed the next frontier pass and should become regressions at the lowest useful layer.
 
