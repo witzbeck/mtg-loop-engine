@@ -438,4 +438,18 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
             "(2 pair unlocks vs Intruder Alarm / Ashnod-class; reject Storm Herd)."
         ),
     ),
+    "South Wind Avatar": RealOracleCurriculum(
+        name="South Wind Avatar",
+        types=["Creature", "Snake", "Spirit", "Avatar"],
+        oracle_text=(
+            "Deathtouch\n"
+            "Whenever another creature you control dies, you gain life equal "
+            "to its toughness.\n"
+            "Whenever you gain life, each opponent loses 1 life."
+        ),
+        notes=(
+            "Frontier P0 slice 18: dies→life=toughness + fixed drain on gain life "
+            "(2 unlocks vs Exquisite-class)."
+        ),
+    ),
 }

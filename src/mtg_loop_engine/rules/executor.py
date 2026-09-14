@@ -763,7 +763,13 @@ class Executor:
             return
         if permanent.is_creature:
             state.bump("death")
-        self._queue_triggers(state, TriggerEvent.DIES, permanent)
+        tough = permanent.effective_toughness()
+        self._queue_triggers(
+            state,
+            TriggerEvent.DIES,
+            permanent,
+            amount=tough if tough is not None and tough > 0 else None,
+        )
         permanent.zone = Zone.GRAVEYARD
         permanent.tapped = False
         if had_undying and had_p1p1 == 0:

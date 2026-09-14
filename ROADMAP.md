@@ -173,12 +173,13 @@ measure frontier → smallest reusable gap → discover → adjudicate → contr
    - **Slice 15 (ETB→each-creature counters)** ✓ — Cathars' Crusade controlled-creature ETB → each creature p1p1; frontier P0 (**2** unlocks vs Scurry Oak / Herd Baloth).
    - **Slice 16 (Human ETB + power mana)** ✓ — Heronblade Elite `other_controlled_human` → self p1p1 + power-scaled any-color; frontier P0 (**2** unlocks vs Staff / Mantle). Deferred Ivy Lane Denizen (green color filter not modeled yet).
    - **Slice 17 (mana-activated token create)** ✓ — Sliver Queen `{2}: create 1/1`; explorer seed token for Queen+Altar bootstrap; frontier P0 (**2** unlocks). Rejected Storm Herd; deferred Wirewood (slice-9 sibling).
-   - **Slice 18+** ○ — choose from live frontier P0/P1; cite compact pair-unlock evidence in the curriculum PR.
+   - **Slice 18 (dies→life=toughness)** ✓ — South Wind Avatar; DIES amount from subject toughness + existing fixed drain on GAIN_LIFE; frontier P0 (**2** unlocks vs Exquisite).
+   - **Slice 19+** ○ — choose from live frontier P0/P1; cite compact pair-unlock evidence in the curriculum PR.
    - **Path b (Bond/Blood)** ✓ — explicit generic life-gain seed; `core_bond_blood` frozen; disclosed on witness.
    - **Path b (Mindcrank / Bloodchief)** ✓ — explicit generic opponent life-loss seed (`seed_lose_life`, drain-sized); disclosed on witness.
    - **Rules-evidence rails** ✓ — [`docs/RULES_EVIDENCE.md`](docs/RULES_EVIDENCE.md), [`AGENTS.md`](AGENTS.md), [`.cursor/rules/rules-evidence.mdc`](.cursor/rules/rules-evidence.mdc), [`.agents/skills/rules-evidence/`](.agents/skills/rules-evidence/).
 
-3. **Workbench adjudication (M5.3)** ◐ — live queue after slice 17 remeasure (**64** COMPLETE · **58** verified · **52** in_reference · **6** absent): prior defender-mana / Heronblade aura / Sunbond pairs — all **`valid_generic_prerequisite`**, keep `ABSENT_FROM_REFERENCE` (not `NOVEL`). Run `--persist-workbench` after each curriculum PR.
+3. **Workbench adjudication (M5.3)** ◐ — live queue after slice 18 remeasure (**65** COMPLETE · **60** verified · **54** in_reference · **6** absent): prior defender-mana / Heronblade aura / Sunbond pairs — all **`valid_generic_prerequisite`**, keep `ABSENT_FROM_REFERENCE` (not `NOVEL`). Run `--persist-workbench` after each curriculum PR.
 4. **Optional baseline / M5.4 exit** — freeze an absent-discovery summary only when intentionally certifying; then apply the M5 exit gate above.
 
 Playbook: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDIDATES.md).

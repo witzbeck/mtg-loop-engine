@@ -847,6 +847,24 @@ def pat_dies_lose_life(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_dies_gain_life_equal_toughness(text: str, name: str) -> Ability | None:
+    """South Wind Avatar: another creature dies → gain life = its toughness."""
+    m = re.match(
+        r"^Whenever another creature you control dies, "
+        r"you gain life equal to its toughness\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("dies-gain-toughness", text),
+        event=TriggerEvent.DIES,
+        filter="other_controlled_creature",
+        effects=[GainLifeEffect(amount_from_trigger=True)],
+    )
+
+
 def pat_gain_life_opponent_loses_that_much(text: str, name: str) -> Ability | None:
     """Vito / Sanguine Bond: whenever you gain life, opponent loses that much."""
     m = re.match(
@@ -1669,6 +1687,7 @@ PATTERNS: list[Pattern] = [
     Pattern("cast_from_gy_if_zombie", pat_cast_from_gy_if_zombie),
     Pattern("dies_return_self", pat_dies_return_self),
     Pattern("dies_lose_life", pat_dies_lose_life),
+    Pattern("dies_gain_life_equal_toughness", pat_dies_gain_life_equal_toughness),
     Pattern("gain_life_opponent_loses_that_much", pat_gain_life_opponent_loses_that_much),
     Pattern("gain_life_opponent_loses_fixed", pat_gain_life_opponent_loses_fixed),
     Pattern("opponent_lose_life_you_gain_that_much", pat_opponent_lose_life_you_gain_that_much),
