@@ -46,6 +46,8 @@ graph TB;
 - `ReplacementAmplifyP1P1Counters` (Kami / Hardened Scales): +1/+1 puts become that many plus one; creature vs permanent scope; multiple sources stack.
 - Power-scaled tap mana (`equal_to_source_power`) uses `Permanent.effective_power()` (printed ± counters).
 - `AddCounterEffect.amount_from_trigger` + `target=enchanted_creature`: Sunbond / Light of Promise put that many +1/+1 on the host creature (explorer supplies the host target; no attachment graph yet).
+- `AddCounterEffect.target=each_controlled_creature`: Archangel / Cathars mass +1/+1 puts (per-creature `COUNTER_ADDED` triggers).
+- Trigger filters `controlled_creature` / `other_controlled_creature` / `other_controlled_human` for ETB subject gates.
 
 ## Non-responsibilities
 

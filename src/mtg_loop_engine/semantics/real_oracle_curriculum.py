@@ -395,4 +395,38 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         ),
         notes="Same granted trigger as Light of Promise (slice 13).",
     ),
+    "Archangel of Thune": RealOracleCurriculum(
+        name="Archangel of Thune",
+        types=["Creature", "Angel"],
+        oracle_text=(
+            "Flying\n"
+            "Lifelink (Damage dealt by this creature also causes you to gain "
+            "that much life.)\n"
+            "Whenever you gain life, put a +1/+1 counter on each creature you control."
+        ),
+        notes="Frontier P0 slice 14: GAIN_LIFE → each controlled creature p1p1.",
+    ),
+    "Cathars' Crusade": RealOracleCurriculum(
+        name="Cathars' Crusade",
+        types=["Enchantment"],
+        oracle_text=(
+            "Whenever a creature you control enters, put a +1/+1 counter on each "
+            "creature you control."
+        ),
+        notes="Frontier P0 slice 15: controlled-creature ETB → each creature p1p1.",
+    ),
+    "Heronblade Elite": RealOracleCurriculum(
+        name="Heronblade Elite",
+        types=["Creature", "Human", "Warrior"],
+        oracle_text=(
+            "Vigilance\n"
+            "Whenever another Human you control enters, put a +1/+1 counter on "
+            "this creature.\n"
+            "{T}: Add X mana of any one color, where X is this creature's power."
+        ),
+        notes=(
+            "Frontier P0 slice 16: Human ETB → self p1p1 + power-scaled any-color mana "
+            "(Staff / Mantle unlocks)."
+        ),
+    ),
 }

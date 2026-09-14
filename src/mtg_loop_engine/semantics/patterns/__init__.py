@@ -1000,6 +1000,75 @@ def pat_gain_life_put_p1p1_target(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_gain_life_put_p1p1_each_controlled(text: str, name: str) -> Ability | None:
+    """Archangel of Thune: Whenever you gain life, +1/+1 on each creature you control."""
+    m = re.match(
+        r"^Whenever you gain life, put a \+1/\+1 counter on each creature you control\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("gain-life-p1p1-each", text),
+        event=TriggerEvent.GAIN_LIFE,
+        filter="any",
+        effects=[
+            AddCounterEffect(
+                counter_type="p1p1",
+                quantity=1,
+                target="each_controlled_creature",
+            )
+        ],
+    )
+
+
+def pat_etb_put_p1p1_each_controlled(text: str, name: str) -> Ability | None:
+    """Cathars' Crusade: creature you control ETB → +1/+1 on each creature you control."""
+    m = re.match(
+        r"^Whenever a creature you control enters(?: the battlefield)?, "
+        r"put a \+1/\+1 counter on each creature you control\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("etb-p1p1-each", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="controlled_creature",
+        effects=[
+            AddCounterEffect(
+                counter_type="p1p1",
+                quantity=1,
+                target="each_controlled_creature",
+            )
+        ],
+    )
+
+
+def pat_etb_other_human_put_p1p1_self(text: str, name: str) -> Ability | None:
+    """Heronblade Elite: another Human you control ETB → +1/+1 on this creature."""
+    m = re.match(
+        r"^Whenever another Human you control enters(?: the battlefield)?, "
+        r"put a \+1/\+1 counter on (?:this creature|~|"
+        + re.escape(name)
+        + r")\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("etb-human-p1p1-self", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="other_controlled_human",
+        effects=[
+            AddCounterEffect(counter_type="p1p1", quantity=1, target="self")
+        ],
+    )
+
+
 def pat_gain_life_untap_self(text: str, name: str) -> Ability | None:
     """Famished Paladin: Whenever you gain life, untap this creature."""
     m = re.match(
@@ -1584,7 +1653,10 @@ PATTERNS: list[Pattern] = [
     Pattern("enchantments_have_graveyard_drain", pat_enchantments_have_graveyard_drain),
     Pattern("etb_damage", pat_etb_damage),
     Pattern("etb_gain_life", pat_etb_gain_life),
+    Pattern("gain_life_put_p1p1_each_controlled", pat_gain_life_put_p1p1_each_controlled),
     Pattern("gain_life_put_p1p1_target", pat_gain_life_put_p1p1_target),
+    Pattern("etb_put_p1p1_each_controlled", pat_etb_put_p1p1_each_controlled),
+    Pattern("etb_other_human_put_p1p1_self", pat_etb_other_human_put_p1p1_self),
     Pattern("gain_life_untap_self", pat_gain_life_untap_self),
     Pattern("mana_put_p1p1_self", pat_mana_put_p1p1_self),
     Pattern("etb_with_counters_irrelevant", pat_etb_with_counters_irrelevant),
