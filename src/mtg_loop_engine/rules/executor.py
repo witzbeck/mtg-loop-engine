@@ -466,6 +466,39 @@ class Executor:
             return None
 
         if isinstance(effect, AddCounterEffect):
+            if effect.target == "each_controlled_creature":
+                qty = effect.quantity
+                if effect.amount_from_trigger:
+                    if trigger_amount is None or trigger_amount <= 0:
+                        return ExecError(
+                            VerificationStatus.ILLEGAL_ACTION,
+                            "counter amount_from_trigger needs trigger amount",
+                        )
+                    qty = trigger_amount
+                hosts = [
+                    p
+                    for p in state.permanents.values()
+                    if p.zone == Zone.BATTLEFIELD
+                    and p.controller == "you"
+                    and p.is_creature
+                ]
+                for p in sorted(hosts, key=lambda x: x.object_id):
+                    put_qty = qty
+                    if effect.counter_type in {"m1m1", "-1/-1"}:
+                        put_qty = self.m1m1_put_quantity(state, put_qty)
+                    elif effect.counter_type in {"p1p1", "+1/+1"}:
+                        put_qty = self.p1p1_put_quantity(
+                            state, put_qty, permanent=p
+                        )
+                    if put_qty > 0:
+                        p.counters[effect.counter_type] = (
+                            p.counters.get(effect.counter_type, 0) + put_qty
+                        )
+                        state.bump("counter_added", put_qty)
+                        self._queue_triggers(
+                            state, TriggerEvent.COUNTER_ADDED, p, amount=put_qty
+                        )
+                return None
             if effect.target == "self":
                 tid = source.object_id
             elif effect.target == "enchanted_creature":
@@ -679,6 +712,27 @@ class Executor:
                     continue
                 if ab.filter == "creature" and not subject.is_creature:
                     continue
+                if ab.filter == "controlled_creature" and (
+                    not subject.is_creature or subject.controller != "you"
+                ):
+                    continue
+                if ab.filter == "other_controlled_creature" and (
+                    not subject.is_creature
+                    or subject.controller != "you"
+                    or subject.object_id == perm.object_id
+                ):
+                    continue
+                if ab.filter == "other_controlled_human":
+                    if (
+                        not subject.is_creature
+                        or subject.controller != "you"
+                        or subject.object_id == perm.object_id
+                    ):
+                        continue
+                    subj_card = self.semantics.get(subject.oracle_id)
+                    types = [t.casefold() for t in (subj_card.types if subj_card else [])]
+                    if "human" not in types:
+                        continue
                 if ab.filter == "token_creature" and not (
                     subject.is_token and subject.is_creature
                 ):

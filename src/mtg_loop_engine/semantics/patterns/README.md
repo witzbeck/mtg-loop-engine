@@ -48,6 +48,8 @@ graph TB;
 - `amplify_p1p1_replacement` — Kami (permanent) / Hardened Scales (creature) “that many plus one”.
 - Board-scaled tap mana (`mana_scale` / `ManaScaleKind`) counts creatures, elves, defenders, enchantments, devotion, or vivid colors; explorer may seed generic creature/elf/defender permanents when the scale needs mass (Staff-class untap cycle).
 - `enchanted_gain_life_put_that_many_p1p1` — Light of Promise / Sunbond; counters use `amount_from_trigger` on the enchanted host (`enchanted_creature` target).
+- `gain_life_put_p1p1_each_controlled` / `etb_put_p1p1_each_controlled` — Archangel / Cathars; `each_controlled_creature` mass puts.
+- `etb_other_human_put_p1p1_self` — Heronblade; Human subtype filter on ETB subject.
 
 ## Main entry points
 

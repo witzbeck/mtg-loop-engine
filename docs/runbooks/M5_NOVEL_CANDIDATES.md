@@ -96,9 +96,12 @@ uv run python scripts/spellbook_absent_discovery.py
 11. **Tap-mana multiplier (slice 11)** ✓ — `ReplacementMultiplyTapMana` (2× / 3×); Mana Reflection + Nyxbloom Ancient; frontier P1 (**4** pair unlocks each).
 12. **+1/+1 amplify (slice 12)** ✓ — Kami of Whispered Hopes `ReplacementAmplifyP1P1Counters` + power-scaled any-color mana; frontier P0 (**4** pair unlocks). Rejected Storm Herd (**5**, one-shot) and deferred Wirewood Channeler (**2**, elf any-color sibling).
 13. **Life→counter auras (slice 13)** ✓ — Light of Promise / Sunbond; granted `GAIN_LIFE` → that-many p1p1 on enchanted host; frontier P0 (**2** / **3** unlocks). Ballista rediscovery uses physics lifelink seed when the pair is not both gold `ORACLE_EXACT`.
-14. **Frontier-driven slices (M5.2):** pick from live P0/P1; ritual below. Path **a** preference remains.
-15. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-16. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+14. **Life→each-creature counters (slice 14)** ✓ — Archangel of Thune; `each_controlled_creature` p1p1 on `GAIN_LIFE`.
+15. **ETB→each-creature counters (slice 15)** ✓ — Cathars' Crusade; controlled-creature ETB → each creature p1p1.
+16. **Human ETB + power mana (slice 16)** ✓ — Heronblade Elite; `other_controlled_human` → self p1p1 + power tap. Deferred Ivy Lane (green color filter).
+17. **Frontier-driven slices (M5.2):** pick from live P0/P1; ritual below. Path **a** preference remains.
+18. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+19. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 
@@ -134,16 +137,18 @@ Trigger after every meaningful curriculum/physics PR (COMPLETE growth, new verif
 
 **DuckDB lock:** if Streamlit workbench is already running, stop it (Ctrl+C in that terminal — closing the browser tab is not enough) before `--persist-workbench`, or persist to a scratch `--db` path and re-run without `--db` after restart so the main store upserts.
 
-#### Current queue (remeasured post–slice 13; first seeded post–slice 10)
+#### Current queue (remeasured post–slices 14–16)
 
 | Pair | Join reasons | Adjudication | Notes |
 | --- | --- | --- | --- |
-| Axebane Guardian + Pemmin's Aura | tap_untap, mana_pay | `valid_generic_prerequisite` | Defender-count any-color mana + aura untap; 3× Seed Defender |
-| Axebane Guardian + Umbral Mantle | tap_untap, mana_pay | `valid_generic_prerequisite` | Defender mana + `{3}{Q}` equipment untap |
-| Overgrown Battlement + Umbral Mantle | mana_pay, tap_untap | `valid_generic_prerequisite` | Defender green mana + `{3}{Q}` equipment untap |
-| Sunbond + Triskelion | counter_reload | `valid_generic_prerequisite` | Life→counter aura + remove-counter damage; physics lifelink seed |
+| Axebane Guardian + Pemmin's Aura | tap_untap, mana_pay | `valid_generic_prerequisite` | Defender-count mana + aura untap |
+| Axebane Guardian + Umbral Mantle | tap_untap, mana_pay | `valid_generic_prerequisite` | Defender mana + `{3}{Q}` |
+| Overgrown Battlement + Umbral Mantle | mana_pay, tap_untap | `valid_generic_prerequisite` | Defender green mana + `{3}{Q}` |
+| Sunbond + Triskelion | counter_reload | `valid_generic_prerequisite` | Life→counter aura + remove-counter damage |
+| Freed from the Real + Heronblade Elite | mana_pay, tap_untap | `valid_generic_prerequisite` | Power mana + aura untap (slice 16) |
+| Heronblade Elite + Pemmin's Aura | mana_pay, tap_untap | `valid_generic_prerequisite` | Power mana + aura untap (slice 16) |
 
-Probe (post–slice 13 remeasure): **60** COMPLETE · **51** verified · **47** in_reference · **4** absent. Keep `ABSENT_FROM_REFERENCE` (not `NOVEL`) unless upgraded. Scaled-mana seeds must appear on `generic_prerequisites` (classify disclosure).
+Probe (post–slices 14–16): **63** COMPLETE · **57** verified · **51** in_reference · **6** absent. Keep `ABSENT_FROM_REFERENCE` (not `NOVEL`).
 
 Absences are curriculum: finite / bystander / illegal activation failures feed the next frontier pass and should become regressions at the lowest useful layer.
 

@@ -123,7 +123,11 @@ class AddCounterEffect(BaseModel):
     counter_type: str = "p1p1"
     quantity: int = 1
     target: Literal[
-        "self", "target_permanent", "target_other_creature", "enchanted_creature"
+        "self",
+        "target_permanent",
+        "target_other_creature",
+        "enchanted_creature",
+        "each_controlled_creature",
     ] = "self"
     # When True, use the pending trigger's recorded amount (Sunbond / Light of Promise).
     amount_from_trigger: bool = False
@@ -225,7 +229,15 @@ class TriggeredAbility(BaseModel):
     ability_id: str
     event: TriggerEvent
     # Optional filter: only tokens, only controlled creatures, etc.
-    filter: Literal["any", "creature", "token_creature", "self"] = "any"
+    filter: Literal[
+        "any",
+        "creature",
+        "token_creature",
+        "self",
+        "controlled_creature",
+        "other_controlled_creature",
+        "other_controlled_human",
+    ] = "any"
     effects: list[Effect] = Field(default_factory=list)
     intervening_if: str | None = None
     supported: bool = True
