@@ -53,6 +53,7 @@ graph TB;
 - For remove-counter `any_target` damage, emit activate steps with `target="opponent"` first (Heliod path); self (`actor`) is also legal for undying self-ping
 - Seed a generic creature **aura host** (non-token setup permanent) when an activated ability uses `TapCost(source_self=False)` and neither essential is a creature (Presence of Gond + Intruder Alarm class); otherwise tap the partner creature. Host tap is tracked in `LoopRelevantState` so recurrence fails closed when the host stays tapped.
 - Seed **three** board-scaled mana fodder permanents when a searched card’s tap-mana ability scales with controlled creatures, elves, or defenders (`scaled-mana:creature-seed` / `elf-seed` / `defender-seed`). These are generic prerequisites (identity irrelevant within the category); `analyze_prerequisites` discloses them — they do **not** alone clear `strict_two_card` (that flag is participant-only).
+- Seed one generic creature token when a mana-cost create-token activate pairs with a sac-for-mana outlet (Sliver Queen + Ashnod’s Altar); sac fodder prefers tokens over essentials.
 - When loop actions activate a `once_per_turn` ability, `derive_relevant_state`
   adds `permanents.<id>.once_per_turn_used.<ability_id>` as `EXACT` (helpers live in
   `verify.mandatory_recurrence`; the verifier re-applies them so omitting them from a

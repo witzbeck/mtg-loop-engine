@@ -50,6 +50,7 @@ graph TB;
 - `enchanted_gain_life_put_that_many_p1p1` — Light of Promise / Sunbond; counters use `amount_from_trigger` on the enchanted host (`enchanted_creature` target).
 - `gain_life_put_p1p1_each_controlled` / `etb_put_p1p1_each_controlled` — Archangel / Cathars; `each_controlled_creature` mass puts.
 - `etb_other_human_put_p1p1_self` — Heronblade; Human subtype filter on ETB subject.
+- `mana_create_token` — Sliver Queen `{N}: Create a P/T … token` (tap variant remains `tap_create_token`).
 
 ## Main entry points
 

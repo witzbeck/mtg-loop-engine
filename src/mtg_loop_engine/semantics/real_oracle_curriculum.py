@@ -429,4 +429,13 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
             "(Staff / Mantle unlocks)."
         ),
     ),
+    "Sliver Queen": RealOracleCurriculum(
+        name="Sliver Queen",
+        types=["Legendary", "Creature", "Sliver"],
+        oracle_text="{2}: Create a 1/1 colorless Sliver creature token.",
+        notes=(
+            "Frontier P0 slice 17: mana-activated token create "
+            "(2 pair unlocks vs Intruder Alarm / Ashnod-class; reject Storm Herd)."
+        ),
+    ),
 }

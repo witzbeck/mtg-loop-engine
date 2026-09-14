@@ -38,7 +38,9 @@ from mtg_loop_engine.semantics.provenance import provenance_of
 from mtg_loop_engine.semantics.ir import (
     ActivatedAbility,
     AddCounterEffect,
+    AddManaEffect,
     CardSemantics,
+    CreateTokenEffect,
     DealDamageEffect,
     GrantLifelinkEffect,
     ManaAmount,
@@ -234,6 +236,7 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
             )
         )
     need_token = any(extract_capabilities(c).needs_token_fodder() for c in ordered)
+    need_token = need_token or _needs_mana_create_token_sac_bootstrap(ordered)
     need_zombie = any(_needs_zombie_gate(c) for c in ordered)
     need_creature_host = any(_needs_creature_host(c) for c in ordered)
     has_creature = any(p.is_creature for p in permanents)
@@ -378,6 +381,8 @@ def _fodder_ids(state: GameState, selector: str) -> list[str]:
             ids.append(perm.object_id)
         elif selector == "creature_controlled" and perm.is_creature:
             ids.append(perm.object_id)
+    # Prefer tokens so sac outlets do not eat essential creatures first.
+    ids.sort(key=lambda oid: (not state.permanents[oid].is_token, oid))
     return ids
 
 
@@ -631,6 +636,27 @@ def _needs_token_create_seed(card: CardSemantics) -> bool:
         isinstance(ab, TriggeredAbility) and ab.event == TriggerEvent.CREATE_TOKEN
         for ab in card.abilities
     )
+
+
+def _needs_mana_create_token_sac_bootstrap(cards: list[CardSemantics]) -> bool:
+    """Sliver Queen + Altar: seed a token so sac→mana can pay the first create."""
+    has_mana_create = False
+    has_sac_mana = False
+    for card in cards:
+        for ab in card.abilities:
+            if not isinstance(ab, ActivatedAbility) or not ab.supported:
+                continue
+            costs = ab.costs
+            effects = ab.effects
+            if any(isinstance(c, ManaCost) for c in costs) and any(
+                isinstance(e, CreateTokenEffect) for e in effects
+            ):
+                has_mana_create = True
+            if any(isinstance(c, SacrificeCost) for c in costs) and any(
+                isinstance(e, AddManaEffect) for e in effects
+            ):
+                has_sac_mana = True
+    return has_mana_create and has_sac_mana
 
 
 def _needs_lifelink_grant_seed(card: CardSemantics) -> bool:
