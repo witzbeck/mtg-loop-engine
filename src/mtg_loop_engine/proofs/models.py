@@ -100,6 +100,7 @@ class PermanentSpec(BaseModel):
     toughness: int | None = None
     undying: bool = False
     damage_marked: int = 0
+    colors: list[str] = Field(default_factory=list)
 
 
 class InitialStateSpec(BaseModel):

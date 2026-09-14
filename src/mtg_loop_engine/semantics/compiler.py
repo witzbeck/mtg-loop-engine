@@ -71,6 +71,7 @@ def compile_oracle_text(
     name: str,
     oracle_text: str,
     types: list[str] | None = None,
+    colors: list[str] | None = None,
     treat_unsupported_as_relevant: bool = True,
 ) -> CompileReport:
     """Compile Oracle text into CardSemantics with explicit coverage.
@@ -95,6 +96,7 @@ def compile_oracle_text(
             oracle_id=oracle_id,
             name=name,
             types=types or [],
+            colors=list(colors or []),
             abilities=[],
             unsupported_fragments=unsupported,
             coverage=coverage,
@@ -147,6 +149,7 @@ def compile_oracle_text(
         oracle_id=oracle_id,
         name=name,
         types=types or [],
+        colors=list(colors or []),
         abilities=abilities,
         unsupported_fragments=unsupported,
         coverage=coverage,

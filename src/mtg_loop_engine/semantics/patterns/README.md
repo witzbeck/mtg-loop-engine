@@ -53,6 +53,7 @@ graph TB;
 - `mana_create_token` — Sliver Queen `{N}: Create a P/T … token` (tap variant remains `tap_create_token`).
 - `dies_gain_life_equal_toughness` — South Wind Avatar; DIES queue carries subject toughness as trigger amount.
 - `etb_bounce_controlled_creature` — Drake / Lion; bounce a controlled creature to hand.
+- `etb_other_green_put_p1p1_target` — Ivy Lane; green color filter on ETB subject.
 
 ## Main entry points
 

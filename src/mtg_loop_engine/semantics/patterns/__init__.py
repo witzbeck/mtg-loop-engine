@@ -1111,6 +1111,30 @@ def pat_etb_other_human_put_p1p1_self(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_etb_other_green_put_p1p1_target(text: str, name: str) -> Ability | None:
+    """Ivy Lane Denizen: another green creature ETB → +1/+1 on target creature."""
+    m = re.match(
+        r"^Whenever another green creature you control enters(?: the battlefield)?, "
+        r"put a \+1/\+1 counter on target creature\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("etb-green-p1p1-target", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="other_controlled_green",
+        effects=[
+            AddCounterEffect(
+                counter_type="p1p1",
+                quantity=1,
+                target="target_permanent",
+            )
+        ],
+    )
+
+
 def pat_gain_life_untap_self(text: str, name: str) -> Ability | None:
     """Famished Paladin: Whenever you gain life, untap this creature."""
     m = re.match(
@@ -1722,6 +1746,7 @@ PATTERNS: list[Pattern] = [
     Pattern("gain_life_put_p1p1_target", pat_gain_life_put_p1p1_target),
     Pattern("etb_put_p1p1_each_controlled", pat_etb_put_p1p1_each_controlled),
     Pattern("etb_other_human_put_p1p1_self", pat_etb_other_human_put_p1p1_self),
+    Pattern("etb_other_green_put_p1p1_target", pat_etb_other_green_put_p1p1_target),
     Pattern("gain_life_untap_self", pat_gain_life_untap_self),
     Pattern("mana_put_p1p1_self", pat_mana_put_p1p1_self),
     Pattern("etb_with_counters_irrelevant", pat_etb_with_counters_irrelevant),

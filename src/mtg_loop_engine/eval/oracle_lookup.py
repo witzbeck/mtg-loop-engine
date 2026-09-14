@@ -67,7 +67,8 @@ def fetch_named_semantics(
                 oracle_id = str(card.get("oracle_id") or card.get("id") or name)
                 text = oracle_text_from_card(card)
                 types = types_from_line(card.get("type_line"))
-                compiled = compile_card(oracle_id, name, text, types)
+                colors = [str(c) for c in (card.get("colors") or [])]
+                compiled = compile_card(oracle_id, name, text, types, colors=colors)
                 out[name.casefold()] = compiled
             time.sleep(pause_s)
     finally:

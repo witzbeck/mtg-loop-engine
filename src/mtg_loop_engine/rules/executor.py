@@ -756,6 +756,22 @@ class Executor:
                     types = [t.casefold() for t in (subj_card.types if subj_card else [])]
                     if "human" not in types:
                         continue
+                if ab.filter == "other_controlled_green":
+                    if (
+                        not subject.is_creature
+                        or subject.controller != "you"
+                        or subject.object_id == perm.object_id
+                    ):
+                        continue
+                    # Prefer permanent.colors; fall back to CardSemantics.colors.
+                    colors = {c.upper() for c in subject.colors}
+                    if not colors:
+                        subj_card = self.semantics.get(subject.oracle_id)
+                        colors = {
+                            c.upper() for c in (subj_card.colors if subj_card else [])
+                        }
+                    if "G" not in colors:
+                        continue
                 if ab.filter == "token_creature" and not (
                     subject.is_token and subject.is_creature
                 ):

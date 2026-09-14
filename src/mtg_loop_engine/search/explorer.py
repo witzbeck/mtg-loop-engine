@@ -233,6 +233,7 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
                 counters=counters,
                 power=power,
                 toughness=toughness,
+                colors=list(card.colors),
             )
         )
     need_token = any(extract_capabilities(c).needs_token_fodder() for c in ordered)
