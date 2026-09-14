@@ -24,6 +24,7 @@ from mtg_loop_engine.semantics.ir import (
     ManaCost,
     MillEffect,
     RemoveCounterEffect,
+    ReplacementAmplifyP1P1Counters,
     ReplacementExileInsteadOfGraveyard,
     ReplacementMultiplyTapMana,
     ReplacementReduceM1M1Counters,
@@ -476,21 +477,27 @@ def pat_vizier_m1m1_replacement(text: str, name: str) -> Ability | None:
         reduce_by=1,
     )
 
-    """Zirda: non-mana activated abilities cost {N} less; floor one mana."""
+
+def pat_amplify_p1p1_replacement(text: str, name: str) -> Ability | None:
+    """Kami (permanent) / Hardened Scales (creature): +1/+1 put amplify."""
     m = re.match(
-        r"^Abilities you activate that aren't mana abilities cost \{(\d+)\} less to activate\.?"
-        r"(?:\s+This effect can't reduce the mana (?:in that cost|an ability costs to activate) "
-        r"to less than one mana\.?)?$",
+        r"^If one or more \+1/\+1 counters would be put on a "
+        r"(permanent|creature) you control, that many plus one \+1/\+1 counters "
+        r"are put on that \1 instead\.?$",
         text,
         re.IGNORECASE,
     )
     if not m:
         return None
-    return ContinuousCostReduction(
-        ability_id=_ability_id("zirda-cost-reduce", text),
-        reduce_generic=int(m.group(1)),
-        exclude_mana_abilities=True,
-        min_mana_remaining=1,
+    applies = (
+        "creatures_you_control"
+        if m.group(1).casefold() == "creature"
+        else "permanents_you_control"
+    )
+    return ReplacementAmplifyP1P1Counters(
+        ability_id=_ability_id("amplify-p1p1", text),
+        plus=1,
+        applies_to=applies,  # type: ignore[arg-type]
     )
 
 
@@ -1528,6 +1535,7 @@ PATTERNS: list[Pattern] = [
     Pattern("put_m1m1_untap_self", pat_put_m1m1_untap_self),
     Pattern("replacement_multiply_tap_mana", pat_replacement_multiply_tap_mana),
     Pattern("vizier_m1m1_replacement", pat_vizier_m1m1_replacement),
+    Pattern("amplify_p1p1_replacement", pat_amplify_p1p1_replacement),
     Pattern("etb_create_food", pat_etb_create_food),
     Pattern("create_token_put_p1p1_other", pat_create_token_put_p1p1_other),
     Pattern("counters_put_may_create_token", pat_counters_put_may_create_token),

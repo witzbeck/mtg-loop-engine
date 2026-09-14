@@ -94,9 +94,10 @@ uv run python scripts/spellbook_absent_discovery.py
 9. **Scaled tap-mana (slice 9)** ✓ — `ManaScaleKind` + scaled `pat_tap_add_mana`; explorer creature/elf/defender seeds; frontier P0 cluster (Bloom Tender, Sanctum Weaver, Circle of Dreams Druid, …). **Probe (post–slice 9):** 54 COMPLETE / 30 in_reference / 0 absent.
 10. **Equipment {Q} (slice 10)** ✓ — Umbral Mantle `UntapSymbolCost` + `pat_equipped_untap_pump`; host-tapped target in explorer; frontier P1 (**8** pair unlocks vs Mana Reflection **4**).
 11. **Tap-mana multiplier (slice 11)** ✓ — `ReplacementMultiplyTapMana` (2× / 3×); Mana Reflection + Nyxbloom Ancient; frontier P1 (**4** pair unlocks each).
-12. **Frontier-driven slices (M5.2):** pick from live P0/P1; ritual below. Path **a** preference remains.
-13. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-14. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+12. **+1/+1 amplify (slice 12)** ✓ — Kami of Whispered Hopes `ReplacementAmplifyP1P1Counters` + power-scaled any-color mana; frontier P0 (**4** pair unlocks). Rejected Storm Herd (**5**, one-shot) and deferred Wirewood Channeler (**2**, elf any-color sibling).
+13. **Frontier-driven slices (M5.2):** pick from live P0/P1; ritual below. Path **a** preference remains.
+14. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+15. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 

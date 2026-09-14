@@ -26,6 +26,7 @@ from mtg_loop_engine.semantics.ir import (
     MoveToZoneEffect,
     ProofIrrelevantStatic,
     RemoveCounterEffect,
+    ReplacementAmplifyP1P1Counters,
     ReplacementExileInsteadOfGraveyard,
     ReplacementMultiplyTapMana,
     ReplacementReduceM1M1Counters,
@@ -214,6 +215,30 @@ class Executor:
                     reduce_by = max(reduce_by, ab.reduce_by)
         return max(0, quantity - reduce_by)
 
+    def p1p1_put_quantity(
+        self, state: GameState, quantity: int, *, permanent: Permanent
+    ) -> int:
+        """Apply Kami/Hardened Scales-style amplify to a would-be +1/+1 put."""
+        if permanent.controller != "you" or quantity <= 0:
+            return quantity
+        bonus = 0
+        for perm in state.permanents.values():
+            if perm.zone != Zone.BATTLEFIELD or perm.controller != "you":
+                continue
+            card = self.semantics.get(perm.oracle_id)
+            if not card:
+                continue
+            for ab in card.abilities:
+                if not isinstance(ab, ReplacementAmplifyP1P1Counters):
+                    continue
+                if (
+                    ab.applies_to == "creatures_you_control"
+                    and not permanent.is_creature
+                ):
+                    continue
+                bonus += ab.plus
+        return quantity + bonus
+
     def tap_mana_multiplier(self, state: GameState) -> int:
         """Product of active tap-mana multipliers (Mana Reflection / Nyxbloom class)."""
         mult = 1
@@ -314,8 +339,9 @@ class Executor:
         if isinstance(effect, AddManaEffect):
             mult = self.tap_mana_multiplier(state) if source.tapped else 1
             if effect.equal_to_source_power:
+                power = source.effective_power()
                 qty = self._effective_tap_mana_qty(
-                    state, source, max(int(source.power or 0), 0)
+                    state, source, max(int(power or 0), 0)
                 )
                 if qty > 0:
                     color = effect.equal_to_source_power
@@ -456,6 +482,8 @@ class Executor:
             qty = effect.quantity
             if effect.counter_type in {"m1m1", "-1/-1"}:
                 qty = self.m1m1_put_quantity(state, qty)
+            elif effect.counter_type in {"p1p1", "+1/+1"}:
+                qty = self.p1p1_put_quantity(state, qty, permanent=p)
             if qty > 0:
                 p.counters[effect.counter_type] = (
                     p.counters.get(effect.counter_type, 0) + qty
@@ -881,6 +909,8 @@ class Executor:
                 qty = cost.quantity
                 if cost.counter_type in {"m1m1", "-1/-1"}:
                     qty = self.m1m1_put_quantity(state, qty)
+                elif cost.counter_type in {"p1p1", "+1/+1"}:
+                    qty = self.p1p1_put_quantity(state, qty, permanent=perm)
                 if qty > 0:
                     key = cost.counter_type
                     perm.counters[key] = perm.counters.get(key, 0) + qty

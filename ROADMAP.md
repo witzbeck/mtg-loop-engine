@@ -167,7 +167,8 @@ measure frontier → smallest reusable gap → discover → adjudicate → contr
    - **Slice 9 (scaled tap-mana)** ✓ — Bloom Tender / Sanctum Weaver / Circle of Dreams Druid / Priest of Titania / Axebane / Overgrown / Karametra / Archdruid; `ManaScaleKind` + explorer seeds.
    - **Slice 10 (equipment {Q})** ✓ — Umbral Mantle equipped-creature `{3}{Q}` grant; `UntapSymbolCost` + host activation in explorer; frontier P1 (**8** pair unlocks vs Mana Reflection **4**).
    - **Slice 11 (tap-mana multiplier)** ✓ — Mana Reflection / Nyxbloom Ancient `ReplacementMultiplyTapMana`; frontier P1 (**4** pairs each vs Power Artifact **2**).
-   - **Slice 12+** ○ — choose from live frontier P0/P1; cite compact pair-unlock evidence in the curriculum PR.
+   - **Slice 12 (+1/+1 amplify + power mana)** ✓ — Kami of Whispered Hopes `ReplacementAmplifyP1P1Counters`; effective-power mana; frontier P0 (**4** pair unlocks; rejected Storm Herd **5** as one-shot sorcery / Wirewood Channeler **2** as smaller sibling).
+   - **Slice 13+** ○ — choose from live frontier P0/P1; cite compact pair-unlock evidence in the curriculum PR.
    - **Path b (Bond/Blood)** ✓ — explicit generic life-gain seed; `core_bond_blood` frozen; disclosed on witness.
    - **Path b (Mindcrank / Bloodchief)** ✓ — explicit generic opponent life-loss seed (`seed_lose_life`, drain-sized); disclosed on witness.
    - **Rules-evidence rails** ✓ — [`docs/RULES_EVIDENCE.md`](docs/RULES_EVIDENCE.md), [`AGENTS.md`](AGENTS.md), [`.cursor/rules/rules-evidence.mdc`](.cursor/rules/rules-evidence.mdc), [`.agents/skills/rules-evidence/`](.agents/skills/rules-evidence/).
