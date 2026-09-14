@@ -51,6 +51,7 @@ graph TB;
 - `gain_life_put_p1p1_each_controlled` / `etb_put_p1p1_each_controlled` — Archangel / Cathars; `each_controlled_creature` mass puts.
 - `etb_other_human_put_p1p1_self` — Heronblade; Human subtype filter on ETB subject.
 - `mana_create_token` — Sliver Queen `{N}: Create a P/T … token` (tap variant remains `tap_create_token`).
+- `dies_gain_life_equal_toughness` — South Wind Avatar; DIES queue carries subject toughness as trigger amount.
 
 ## Main entry points
 
