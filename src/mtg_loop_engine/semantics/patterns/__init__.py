@@ -651,6 +651,31 @@ def pat_enchanted_tap_create_token(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_enchanted_gain_life_put_that_many_p1p1(text: str, name: str) -> Ability | None:
+    """Light of Promise / Sunbond: enchanted creature gains life → that many p1p1."""
+    m = re.match(
+        r'^Enchanted creature has '
+        r'"Whenever you gain life, put that many \+1/\+1 counters on this creature\."\.?$',
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("enchanted-gain-life-p1p1", text),
+        event=TriggerEvent.GAIN_LIFE,
+        filter="any",
+        effects=[
+            AddCounterEffect(
+                counter_type="p1p1",
+                quantity=1,
+                target="enchanted_creature",
+                amount_from_trigger=True,
+            )
+        ],
+    )
+
+
 def pat_tap_create_token_untap(text: str, name: str) -> Ability | None:
     m = re.match(
         r"^\{T\}: Create (?:a|one)(?: (\d+)/(\d+))? (.+?) creature token\. Untap (~|this permanent|"
@@ -1520,6 +1545,10 @@ PATTERNS: list[Pattern] = [
     Pattern("tap_sac_token_make_two", pat_tap_sac_token_make_two),
     Pattern("equipped_untap_pump", pat_equipped_untap_pump),
     Pattern("enchanted_tap_create_token", pat_enchanted_tap_create_token),
+    Pattern(
+        "enchanted_gain_life_put_that_many_p1p1",
+        pat_enchanted_gain_life_put_that_many_p1p1,
+    ),
     Pattern("tap_create_token", pat_tap_create_token),
     Pattern("tap_add_mana", pat_tap_add_mana),
     Pattern("mana_untap_enchanted", pat_mana_untap_enchanted),

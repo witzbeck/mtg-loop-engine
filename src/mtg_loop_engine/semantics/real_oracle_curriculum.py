@@ -372,4 +372,27 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
             "(4 pair unlocks vs Storm Herd 5 one-shot / Wirewood Channeler 2)."
         ),
     ),
+    "Light of Promise": RealOracleCurriculum(
+        name="Light of Promise",
+        types=["Enchantment", "Aura"],
+        oracle_text=(
+            "Enchant creature\n"
+            'Enchanted creature has "Whenever you gain life, put that many '
+            '+1/+1 counters on this creature."'
+        ),
+        notes=(
+            "Frontier P0 slice 13: life→that-many p1p1 on enchanted host "
+            "(2 cards / 3 pair unlocks; Ballista / Triskelion)."
+        ),
+    ),
+    "Sunbond": RealOracleCurriculum(
+        name="Sunbond",
+        types=["Enchantment", "Aura"],
+        oracle_text=(
+            "Enchant creature\n"
+            'Enchanted creature has "Whenever you gain life, put that many '
+            '+1/+1 counters on this creature."'
+        ),
+        notes="Same granted trigger as Light of Promise (slice 13).",
+    ),
 }
