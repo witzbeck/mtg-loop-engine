@@ -412,6 +412,7 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
             )
             needs_target = False
             exclude_source = False
+            require_creature = False
             if ab is not None:
                 for effect in getattr(ab, "effects", []):
                     tgt = getattr(effect, "target", None)
@@ -419,17 +420,21 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
                         "target_permanent",
                         "target_other_creature",
                         "enchanted_creature",
+                        "controlled_creature",
                     }:
                         needs_target = True
                     if tgt in {"target_other_creature", "enchanted_creature"}:
                         exclude_source = True
+                        require_creature = True
+                    if tgt == "controlled_creature":
+                        require_creature = True
             if needs_target:
                 candidates = [
                     oid
                     for oid in tapped_first
                     if not exclude_source or oid != trig["source_id"]
                 ]
-                if exclude_source:
+                if require_creature:
                     candidates = [
                         oid
                         for oid in candidates

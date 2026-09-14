@@ -678,8 +678,31 @@ class Executor:
             return None
 
         if isinstance(effect, MoveToZoneEffect):
-            source.zone = effect.zone
-            return None
+            if effect.target == "self":
+                source.zone = effect.zone
+                return None
+            if effect.target == "controlled_creature":
+                if not target_id or target_id not in state.permanents:
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_TARGET, "bounce needs creature"
+                    )
+                bounced = state.permanents[target_id]
+                if (
+                    bounced.zone != Zone.BATTLEFIELD
+                    or bounced.controller != "you"
+                    or not bounced.is_creature
+                ):
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_TARGET,
+                        "bounce target must be a controlled creature",
+                    )
+                bounced.zone = effect.zone
+                bounced.tapped = False
+                return None
+            return ExecError(
+                VerificationStatus.UNSUPPORTED_SEMANTICS,
+                f"move_to_zone target {effect.target}",
+            )
 
         return ExecError(
             VerificationStatus.UNSUPPORTED_SEMANTICS, f"unknown effect {effect}"
