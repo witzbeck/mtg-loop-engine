@@ -95,9 +95,10 @@ uv run python scripts/spellbook_absent_discovery.py
 10. **Equipment {Q} (slice 10)** ✓ — Umbral Mantle `UntapSymbolCost` + `pat_equipped_untap_pump`; host-tapped target in explorer; frontier P1 (**8** pair unlocks vs Mana Reflection **4**).
 11. **Tap-mana multiplier (slice 11)** ✓ — `ReplacementMultiplyTapMana` (2× / 3×); Mana Reflection + Nyxbloom Ancient; frontier P1 (**4** pair unlocks each).
 12. **+1/+1 amplify (slice 12)** ✓ — Kami of Whispered Hopes `ReplacementAmplifyP1P1Counters` + power-scaled any-color mana; frontier P0 (**4** pair unlocks). Rejected Storm Herd (**5**, one-shot) and deferred Wirewood Channeler (**2**, elf any-color sibling).
-13. **Frontier-driven slices (M5.2):** pick from live P0/P1; ritual below. Path **a** preference remains.
-14. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-15. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+13. **Life→counter auras (slice 13)** ✓ — Light of Promise / Sunbond; granted `GAIN_LIFE` → that-many p1p1 on enchanted host; frontier P0 (**2** / **3** unlocks). Ballista rediscovery uses physics lifelink seed when the pair is not both gold `ORACLE_EXACT`.
+14. **Frontier-driven slices (M5.2):** pick from live P0/P1; ritual below. Path **a** preference remains.
+15. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+16. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 
@@ -133,15 +134,16 @@ Trigger after every meaningful curriculum/physics PR (COMPLETE growth, new verif
 
 **DuckDB lock:** if Streamlit workbench is already running, stop it (Ctrl+C in that terminal — closing the browser tab is not enough) before `--persist-workbench`, or persist to a scratch `--db` path and re-run without `--db` after restart so the main store upserts.
 
-#### Current queue (remeasured post–slices 11–12; first seeded post–slice 10)
+#### Current queue (remeasured post–slice 13; first seeded post–slice 10)
 
 | Pair | Join reasons | Adjudication | Notes |
 | --- | --- | --- | --- |
 | Axebane Guardian + Pemmin's Aura | tap_untap, mana_pay | `valid_generic_prerequisite` | Defender-count any-color mana + aura untap; 3× Seed Defender |
 | Axebane Guardian + Umbral Mantle | tap_untap, mana_pay | `valid_generic_prerequisite` | Defender mana + `{3}{Q}` equipment untap |
 | Overgrown Battlement + Umbral Mantle | mana_pay, tap_untap | `valid_generic_prerequisite` | Defender green mana + `{3}{Q}` equipment untap |
+| Sunbond + Triskelion | counter_reload | `valid_generic_prerequisite` | Life→counter aura + remove-counter damage; physics lifelink seed |
 
-Probe (post–slice 12 remeasure): **58** COMPLETE · **47** verified · **44** in_reference · **3** absent. Keep `ABSENT_FROM_REFERENCE` (not `NOVEL`). Scaled-mana seeds must appear on `generic_prerequisites` (classify disclosure).
+Probe (post–slice 13 remeasure): **60** COMPLETE · **51** verified · **47** in_reference · **4** absent. Keep `ABSENT_FROM_REFERENCE` (not `NOVEL`) unless upgraded. Scaled-mana seeds must appear on `generic_prerequisites` (classify disclosure).
 
 Absences are curriculum: finite / bystander / illegal activation failures feed the next frontier pass and should become regressions at the lowest useful layer.
 

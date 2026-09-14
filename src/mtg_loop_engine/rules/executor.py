@@ -468,6 +468,10 @@ class Executor:
         if isinstance(effect, AddCounterEffect):
             if effect.target == "self":
                 tid = source.object_id
+            elif effect.target == "enchanted_creature":
+                # Aura-granted "this creature" — host is the effect target (explorer
+                # supplies a controlled creature; no attachment graph yet).
+                tid = target_id
             else:
                 tid = target_id
             if not tid or tid not in state.permanents:
@@ -479,7 +483,20 @@ class Executor:
                         VerificationStatus.ILLEGAL_TARGET,
                         "counter target must be another creature",
                     )
+            if effect.target == "enchanted_creature":
+                if tid == source.object_id or not p.is_creature:
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_TARGET,
+                        "enchanted counter host must be a creature",
+                    )
             qty = effect.quantity
+            if effect.amount_from_trigger:
+                if trigger_amount is None or trigger_amount <= 0:
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_ACTION,
+                        "counter amount_from_trigger needs trigger amount",
+                    )
+                qty = trigger_amount
             if effect.counter_type in {"m1m1", "-1/-1"}:
                 qty = self.m1m1_put_quantity(state, qty)
             elif effect.counter_type in {"p1p1", "+1/+1"}:

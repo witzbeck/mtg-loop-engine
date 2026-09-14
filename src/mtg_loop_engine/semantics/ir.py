@@ -122,7 +122,11 @@ class AddCounterEffect(BaseModel):
     kind: Literal["add_counter"] = "add_counter"
     counter_type: str = "p1p1"
     quantity: int = 1
-    target: Literal["self", "target_permanent", "target_other_creature"] = "self"
+    target: Literal[
+        "self", "target_permanent", "target_other_creature", "enchanted_creature"
+    ] = "self"
+    # When True, use the pending trigger's recorded amount (Sunbond / Light of Promise).
+    amount_from_trigger: bool = False
 
 
 class RemoveCounterEffect(BaseModel):

@@ -47,6 +47,7 @@ graph TB;
 - Power-scaled tap mana (`equal_to_source_power`) uses effective power; explorer seeds four `p1p1` when `mana_from_power` so Staff-class untap cycles clear `{3}` (Kami class).
 - `amplify_p1p1_replacement` — Kami (permanent) / Hardened Scales (creature) “that many plus one”.
 - Board-scaled tap mana (`mana_scale` / `ManaScaleKind`) counts creatures, elves, defenders, enchantments, devotion, or vivid colors; explorer may seed generic creature/elf/defender permanents when the scale needs mass (Staff-class untap cycle).
+- `enchanted_gain_life_put_that_many_p1p1` — Light of Promise / Sunbond; counters use `amount_from_trigger` on the enchanted host (`enchanted_creature` target).
 
 ## Main entry points
 

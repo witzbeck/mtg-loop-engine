@@ -168,19 +168,20 @@ measure frontier → smallest reusable gap → discover → adjudicate → contr
    - **Slice 10 (equipment {Q})** ✓ — Umbral Mantle equipped-creature `{3}{Q}` grant; `UntapSymbolCost` + host activation in explorer; frontier P1 (**8** pair unlocks vs Mana Reflection **4**).
    - **Slice 11 (tap-mana multiplier)** ✓ — Mana Reflection / Nyxbloom Ancient `ReplacementMultiplyTapMana`; frontier P1 (**4** pairs each vs Power Artifact **2**).
    - **Slice 12 (+1/+1 amplify + power mana)** ✓ — Kami of Whispered Hopes `ReplacementAmplifyP1P1Counters`; effective-power mana; frontier P0 (**4** pair unlocks; rejected Storm Herd **5** as one-shot sorcery / Wirewood Channeler **2** as smaller sibling).
-   - **Slice 13+** ○ — choose from live frontier P0/P1; cite compact pair-unlock evidence in the curriculum PR.
+   - **Slice 13 (life→counter auras)** ✓ — Light of Promise / Sunbond granted `GAIN_LIFE` → that-many p1p1 on enchanted host (`amount_from_trigger` + `enchanted_creature` target); frontier P0 (**2** cards / **3** pair unlocks vs Ballista / Triskelion). Rejected Storm Herd (**5**, one-shot) and Wirewood Channeler (**2**, elf any-color sibling).
+   - **Slice 14+** ○ — choose from live frontier P0/P1; cite compact pair-unlock evidence in the curriculum PR.
    - **Path b (Bond/Blood)** ✓ — explicit generic life-gain seed; `core_bond_blood` frozen; disclosed on witness.
    - **Path b (Mindcrank / Bloodchief)** ✓ — explicit generic opponent life-loss seed (`seed_lose_life`, drain-sized); disclosed on witness.
    - **Rules-evidence rails** ✓ — [`docs/RULES_EVIDENCE.md`](docs/RULES_EVIDENCE.md), [`AGENTS.md`](AGENTS.md), [`.cursor/rules/rules-evidence.mdc`](.cursor/rules/rules-evidence.mdc), [`.agents/skills/rules-evidence/`](.agents/skills/rules-evidence/).
 
-3. **Workbench adjudication (M5.3)** ◐ — first seed **post–slice 10** (2026-09-01); live queue after slices 11–12 remeasure (**58** COMPLETE · **47** verified · **44** in_reference · **3** absent): Axebane Guardian + Pemmin's Aura; Axebane + Umbral Mantle; Overgrown Battlement + Umbral Mantle. Human class **`valid_generic_prerequisite`** (defender-count board fodder; keep `ABSENT_FROM_REFERENCE`, not `NOVEL`). Run `--persist-workbench` after each curriculum PR; review in workbench (`spellbook_absent`); `NOVEL` only with record.
+3. **Workbench adjudication (M5.3)** ◐ — first seed **post–slice 10** (2026-09-01); live queue after slice 13 remeasure (**60** COMPLETE · **51** verified · **47** in_reference · **4** absent): Axebane / Overgrown defender-mana pairs + **Sunbond + Triskelion** — all **`valid_generic_prerequisite`**, keep `ABSENT_FROM_REFERENCE` (not `NOVEL`). Run `--persist-workbench` after each curriculum PR; `NOVEL` only with record.
 4. **Optional baseline / M5.4 exit** — freeze an absent-discovery summary only when intentionally certifying; then apply the M5 exit gate above.
 
 Playbook: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDIDATES.md).
 
 ### First local probe (not a baseline)
 
-After each curriculum slice: run `spellbook_compiler_priority.py` (frontier) + `spellbook_absent_discovery.py` before choosing the next Slice 13+ gap. Remeasure on each curriculum PR.
+After each curriculum slice: run `spellbook_compiler_priority.py` (frontier) + `spellbook_absent_discovery.py` before choosing the next Slice 14+ gap. Remeasure on each curriculum PR.
 
 ---
 

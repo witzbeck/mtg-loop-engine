@@ -410,9 +410,13 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
             if ab is not None:
                 for effect in getattr(ab, "effects", []):
                     tgt = getattr(effect, "target", None)
-                    if tgt in {"target_permanent", "target_other_creature"}:
+                    if tgt in {
+                        "target_permanent",
+                        "target_other_creature",
+                        "enchanted_creature",
+                    }:
                         needs_target = True
-                    if tgt == "target_other_creature":
+                    if tgt in {"target_other_creature", "enchanted_creature"}:
                         exclude_source = True
             if needs_target:
                 candidates = [

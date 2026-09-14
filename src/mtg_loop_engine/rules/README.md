@@ -45,6 +45,7 @@ graph TB;
 - `DealDamageEffect` `any_target`: opponent life when `step.target` is `None`/`opponent`; mark damage on a BF creature id (self-ping legal when `target == actor`).
 - `ReplacementAmplifyP1P1Counters` (Kami / Hardened Scales): +1/+1 puts become that many plus one; creature vs permanent scope; multiple sources stack.
 - Power-scaled tap mana (`equal_to_source_power`) uses `Permanent.effective_power()` (printed ± counters).
+- `AddCounterEffect.amount_from_trigger` + `target=enchanted_creature`: Sunbond / Light of Promise put that many +1/+1 on the host creature (explorer supplies the host target; no attachment graph yet).
 
 ## Non-responsibilities
 
