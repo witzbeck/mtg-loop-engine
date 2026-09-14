@@ -602,6 +602,29 @@ def pat_tap_create_token(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_mana_create_token(text: str, name: str) -> Ability | None:
+    """Sliver Queen class: {N}: Create a P/T … creature token."""
+    m = re.match(
+        r"^\{(\d+)\}: Create (?:a|one)(?: (\d+)/(\d+))? (.+?) creature token\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    power = int(m.group(2) or 1)
+    toughness = int(m.group(3) or 1)
+    token_name = m.group(4).strip()
+    return ActivatedAbility(
+        ability_id=_ability_id("mana-token", text),
+        costs=[ManaCost(amount=ManaAmount(generic=int(m.group(1))))],
+        effects=[
+            CreateTokenEffect(
+                name=token_name, power=power, toughness=toughness, quantity=1
+            )
+        ],
+    )
+
+
 def pat_equipped_untap_pump(text: str, name: str) -> Ability | None:
     """Umbral Mantle class: equipped creature pays {3}{Q}; +2/+2 is proof-irrelevant."""
     m = re.match(
@@ -1619,6 +1642,7 @@ PATTERNS: list[Pattern] = [
         pat_enchanted_gain_life_put_that_many_p1p1,
     ),
     Pattern("tap_create_token", pat_tap_create_token),
+    Pattern("mana_create_token", pat_mana_create_token),
     Pattern("tap_add_mana", pat_tap_add_mana),
     Pattern("mana_untap_enchanted", pat_mana_untap_enchanted),
     Pattern("mana_tap_enchanted", pat_mana_tap_enchanted),
