@@ -452,4 +452,24 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
             "(2 unlocks vs Exquisite-class)."
         ),
     ),
+    "Shrieking Drake": RealOracleCurriculum(
+        name="Shrieking Drake",
+        types=["Creature", "Drake"],
+        oracle_text=(
+            "Flying\n"
+            "When this creature enters, return a creature you control to "
+            "its owner's hand."
+        ),
+        notes="Frontier P1 slices 19–20: ETB bounce controlled creature.",
+    ),
+    "Whitemane Lion": RealOracleCurriculum(
+        name="Whitemane Lion",
+        types=["Creature", "Cat"],
+        oracle_text=(
+            "Flash\n"
+            "When this creature enters, return a creature you control to "
+            "its owner's hand."
+        ),
+        notes="Same ETB bounce as Shrieking Drake (Flash irrelevant).",
+    ),
 }

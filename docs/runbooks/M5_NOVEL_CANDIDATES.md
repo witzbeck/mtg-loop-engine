@@ -101,7 +101,8 @@ uv run python scripts/spellbook_absent_discovery.py
 16. **Human ETB + power mana (slice 16)** ✓ — Heronblade Elite; `other_controlled_human` → self p1p1 + power tap. Deferred Ivy Lane (green color filter).
 17. **Mana-activated token create (slice 17)** ✓ — Sliver Queen `{2}: create token`; Queen+Ashnod seed-token bootstrap. Deferred Wirewood (near-duplicate of slice 9).
 18. **Dies→life=toughness (slice 18)** ✓ — South Wind Avatar; DIES amount from toughness + fixed drain on gain life.
-19. **Frontier-driven slices (M5.2):** pick from live P0/P1; ritual below. Path **a** preference remains.
+19. **ETB bounce (slices 19–20)** ✓ — Shrieking Drake / Whitemane Lion; bounce to hand. Rediscovery waits on cast-from-hand.
+20. **Frontier-driven slices (M5.2):** pick from live P0/P1; ritual below. Path **a** preference remains.
 18. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
 19. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
@@ -139,7 +140,7 @@ Trigger after every meaningful curriculum/physics PR (COMPLETE growth, new verif
 
 **DuckDB lock:** if Streamlit workbench is already running, stop it (Ctrl+C in that terminal — closing the browser tab is not enough) before `--persist-workbench`, or persist to a scratch `--db` path and re-run without `--db` after restart so the main store upserts.
 
-#### Current queue (remeasured post–slice 18)
+#### Current queue (remeasured post–slices 19–20)
 
 | Pair | Join reasons | Adjudication | Notes |
 | --- | --- | --- | --- |
@@ -150,7 +151,7 @@ Trigger after every meaningful curriculum/physics PR (COMPLETE growth, new verif
 | Freed from the Real + Heronblade Elite | mana_pay, tap_untap | `valid_generic_prerequisite` | Power mana + aura untap (slice 16) |
 | Heronblade Elite + Pemmin's Aura | mana_pay, tap_untap | `valid_generic_prerequisite` | Power mana + aura untap (slice 16) |
 
-Probe (post–slice 18): **65** COMPLETE · **60** verified · **54** in_reference · **6** absent. Keep `ABSENT_FROM_REFERENCE` (not `NOVEL`).
+Probe (post–slices 19–20): **67** COMPLETE · **60** verified · **54** in_reference · **6** absent. Keep `ABSENT_FROM_REFERENCE` (not `NOVEL`).
 
 Absences are curriculum: finite / bystander / illegal activation failures feed the next frontier pass and should become regressions at the lowest useful layer.
 

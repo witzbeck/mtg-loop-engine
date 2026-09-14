@@ -179,7 +179,8 @@ class MillEffect(BaseModel):
 class MoveToZoneEffect(BaseModel):
     kind: Literal["move_to_zone"] = "move_to_zone"
     zone: Zone
-    target: Literal["self"] = "self"
+    # controlled_creature: bounce a creature you control (ETB Lion/Drake class).
+    target: Literal["self", "controlled_creature"] = "self"
 
 
 class GrantLifelinkEffect(BaseModel):

@@ -6,7 +6,7 @@ import re
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from mtg_loop_engine.semantics.enums import TriggerEvent
+from mtg_loop_engine.semantics.enums import TriggerEvent, Zone
 from mtg_loop_engine.semantics.ir import (
     Ability,
     ActivatedAbility,
@@ -23,6 +23,7 @@ from mtg_loop_engine.semantics.ir import (
     ManaAmount,
     ManaCost,
     MillEffect,
+    MoveToZoneEffect,
     RemoveCounterEffect,
     ReplacementAmplifyP1P1Counters,
     ReplacementExileInsteadOfGraveyard,
@@ -1214,6 +1215,26 @@ def pat_remove_counter_damage(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_etb_bounce_controlled_creature(text: str, name: str) -> Ability | None:
+    """Shrieking Drake / Whitemane Lion: ETB return a controlled creature to hand."""
+    m = re.match(
+        r"^When (?:this creature|~|"
+        + re.escape(name)
+        + r") enters(?: the battlefield)?, "
+        r"return a creature you control to (?:its|their) owner's hand\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("etb-bounce", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="self",
+        effects=[MoveToZoneEffect(zone=Zone.HAND, target="controlled_creature")],
+    )
+
+
 def pat_etb_create_food(text: str, name: str) -> Ability | None:
     """Rosie ETB: When NAME enters, create a Food token."""
     short = name.split(" of ")[0].strip() if " of " in name else name
@@ -1677,6 +1698,7 @@ PATTERNS: list[Pattern] = [
     Pattern("vizier_m1m1_replacement", pat_vizier_m1m1_replacement),
     Pattern("amplify_p1p1_replacement", pat_amplify_p1p1_replacement),
     Pattern("etb_create_food", pat_etb_create_food),
+    Pattern("etb_bounce_controlled_creature", pat_etb_bounce_controlled_creature),
     Pattern("create_token_put_p1p1_other", pat_create_token_put_p1p1_other),
     Pattern("counters_put_may_create_token", pat_counters_put_may_create_token),
     Pattern("etb_untap_target", pat_etb_untap_target),
