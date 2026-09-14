@@ -58,12 +58,19 @@ def fixtures_by_name() -> dict[str, CardSemantics]:
     return out
 
 
-def compile_card(oracle_id: str, name: str, oracle_text: str, types: list[str]) -> CardSemantics:
+def compile_card(
+    oracle_id: str,
+    name: str,
+    oracle_text: str,
+    types: list[str],
+    colors: list[str] | None = None,
+) -> CardSemantics:
     return compile_oracle_text(
         oracle_id=oracle_id,
         name=name,
         oracle_text=oracle_text,
         types=types,
+        colors=colors,
     ).semantics
 
 

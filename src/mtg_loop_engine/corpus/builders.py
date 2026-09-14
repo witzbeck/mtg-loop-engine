@@ -106,6 +106,7 @@ def bf(
     summoning_sick: bool = False,
     power: int | None = None,
     toughness: int | None = None,
+    colors: list[str] | None = None,
 ) -> PermanentSpec:
     return PermanentSpec(
         object_id=object_id,
@@ -120,6 +121,7 @@ def bf(
         summoning_sick=summoning_sick,
         power=power,
         toughness=toughness,
+        colors=list(colors or []),
     )
 
 

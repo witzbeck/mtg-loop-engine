@@ -11,6 +11,7 @@ class RealOracleCurriculum:
     types: list[str]
     oracle_text: str
     notes: str = ""
+    colors: tuple[str, ...] = ()
 
 
 # Live wording from Scryfall oracle_cards bulk (local snapshot), except where noted.
@@ -471,5 +472,18 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
             "its owner's hand."
         ),
         notes="Same ETB bounce as Shrieking Drake (Flash irrelevant).",
+    ),
+    "Ivy Lane Denizen": RealOracleCurriculum(
+        name="Ivy Lane Denizen",
+        types=["Creature", "Elf", "Warrior"],
+        oracle_text=(
+            "Whenever another green creature you control enters, put a +1/+1 "
+            "counter on target creature."
+        ),
+        notes=(
+            "Frontier P0 slice 21: green color filter on ETB + target p1p1 "
+            "(2 unlocks; colors on Permanent/CardSemantics)."
+        ),
+        colors=("G",),
     ),
 }

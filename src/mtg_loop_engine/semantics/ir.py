@@ -238,6 +238,7 @@ class TriggeredAbility(BaseModel):
         "controlled_creature",
         "other_controlled_creature",
         "other_controlled_human",
+        "other_controlled_green",
     ] = "any"
     effects: list[Effect] = Field(default_factory=list)
     intervening_if: str | None = None
@@ -322,6 +323,8 @@ class CardSemantics(BaseModel):
     oracle_id: str
     name: str
     types: list[str] = Field(default_factory=list)
+    # Scryfall WUBRG color letters (e.g. ["G"]); empty = colorless.
+    colors: list[str] = Field(default_factory=list)
     abilities: list[Ability] = Field(default_factory=list)
     unsupported_fragments: list[str] = Field(default_factory=list)
     coverage: SemanticCoverage = SemanticCoverage.COMPLETE

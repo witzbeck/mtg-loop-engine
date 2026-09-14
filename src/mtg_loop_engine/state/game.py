@@ -30,6 +30,8 @@ class Permanent:
     undying: bool = False
     damage_marked: int = 0
     once_per_turn_used: set[str] = field(default_factory=set)
+    # Scryfall WUBRG letters; empty = colorless.
+    colors: list[str] = field(default_factory=list)
 
     def effective_power(self) -> int | None:
         """Power after +1/+1 and -1/-1 counters. None if no printed power."""
@@ -70,6 +72,7 @@ class Permanent:
             undying=self.undying,
             damage_marked=self.damage_marked,
             once_per_turn_used=set(self.once_per_turn_used),
+            colors=list(self.colors),
         )
 
 
@@ -102,6 +105,7 @@ class GameState:
                 toughness=p.toughness,
                 undying=p.undying,
                 damage_marked=p.damage_marked,
+                colors=list(p.colors),
             )
             for p in spec.permanents
         }
