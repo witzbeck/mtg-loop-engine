@@ -249,9 +249,10 @@ class ContinuousCostReduction(BaseModel):
     kind: Literal["continuous_cost_reduction"] = "continuous_cost_reduction"
     ability_id: str
     reduce_generic: int = 1
-    applies_to: Literal["activated_abilities_you_control"] = (
-        "activated_abilities_you_control"
-    )
+    applies_to: Literal[
+        "activated_abilities_you_control",
+        "enchanted_artifact_activated",
+    ] = "activated_abilities_you_control"
     # Zirda: ignore mana abilities; leave at least one mana in the cost.
     exclude_mana_abilities: bool = False
     min_mana_remaining: int = 0
