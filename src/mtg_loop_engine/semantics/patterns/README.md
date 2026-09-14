@@ -55,6 +55,7 @@ graph TB;
 - `etb_bounce_controlled_creature` — Drake / Lion; bounce a controlled creature to hand.
 - `etb_other_green_put_p1p1_target` — Ivy Lane; green color filter on ETB subject.
 - `power_artifact_cost_reduction` — enchanted artifact activate −{N} (floor 1).
+- `untap_mill_controller` — Mesmeric; UNTAP → self-mill.
 
 ## Main entry points
 

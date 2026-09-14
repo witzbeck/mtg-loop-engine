@@ -437,7 +437,12 @@ class Executor:
                 n = 0
                 for perm in state.permanents.values():
                     if perm.zone == Zone.BATTLEFIELD and perm.is_creature:
+                        was_tapped = perm.tapped
                         perm.tapped = False
+                        if was_tapped:
+                            self._queue_triggers(
+                                state, TriggerEvent.UNTAP, perm
+                            )
                         n += 1
                 if n:
                     state.bump("untap", n)
@@ -445,7 +450,7 @@ class Executor:
             tid = source.object_id if effect.target == "self" else target_id
             if not tid or tid not in state.permanents:
                 return ExecError(VerificationStatus.ILLEGAL_TARGET, "untap target missing")
-            state.permanents[tid].tapped = False
+            self._untap_permanent(state, state.permanents[tid])
             state.bump("untap")
             return None
 
@@ -684,10 +689,8 @@ class Executor:
                         source,
                     )
             else:
-                return ExecError(
-                    VerificationStatus.UNSUPPORTED_SEMANTICS,
-                    "self-mill not modeled",
-                )
+                # Self-mill: count only (no library model) — Mesmeric Orb class.
+                state.bump("mill", qty)
             return None
 
         if isinstance(effect, MoveToZoneEffect):
@@ -724,6 +727,14 @@ class Executor:
     def _on_etb(self, state: GameState, permanent: Permanent) -> None:
         state.bump("etb")
         self._queue_triggers(state, TriggerEvent.ENTER_BATTLEFIELD, permanent)
+
+    def _untap_permanent(self, state: GameState, permanent: Permanent) -> bool:
+        """BF tapped→untapped transition; queues UNTAP triggers. Returns True if changed."""
+        if permanent.zone != Zone.BATTLEFIELD or not permanent.tapped:
+            return False
+        permanent.tapped = False
+        self._queue_triggers(state, TriggerEvent.UNTAP, permanent)
+        return True
 
     def _queue_triggers(
         self,
@@ -1067,7 +1078,7 @@ class Executor:
                         VerificationStatus.ILLEGAL_ACTION,
                         "must be tapped to pay untap symbol",
                     )
-                untap_perm.tapped = False
+                self._untap_permanent(state, untap_perm)
                 if not cost.source_self:
                     step = step.model_copy(update={"target": None})
             elif isinstance(cost, SacrificeCost):
