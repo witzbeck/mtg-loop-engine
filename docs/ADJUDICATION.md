@@ -47,6 +47,10 @@ graph TB;
 
 **Boundary vs `unjustified_initial_state`:** Generic prerequisite assumes fodder the loop can reasonably obtain or that is explicitly modeled as intrinsic/generic setup. Unjustified initial state means the engine assumed board state the pair cannot establish under stated assumptions (e.g. five tokens when the loop only creates one per iteration).
 
+**Keyword-category board fodder (defender / elf / creature-count):** Explorer may seed three generic permanents so board-scaled tap-mana clears Staff-class untap math (`scaled-mana:*-seed`). Any substitute in that **category** works (any defenders for Axebane / Overgrown Battlement; any elves for Priest of Titania class; any creatures for Circle of Dreams Druid class). Prefer **`valid_generic_prerequisite`**. Use **`functional_external_requirement`** only when a *named* third card or unique ability is required (not “any defender”). Use **`unjustified_initial_state`** when the seeded **mass** exceeds what the pair can establish under stated assumptions (e.g. dozens of walls the loop never produces).
+
+**M5.3 examples (defender-count + untap):** Axebane Guardian + Pemmin's Aura; Axebane + Umbral Mantle; Overgrown Battlement + Umbral Mantle — net mana depends on other defenders; keep `ABSENT_FROM_REFERENCE` unless a human upgrades to `NOVEL`.
+
 **Counts toward precision:** yes (valid).
 
 ### `functional_external_requirement`
