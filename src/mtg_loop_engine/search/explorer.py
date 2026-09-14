@@ -664,6 +664,21 @@ def build_witness(
                 description="generic creature host for aura tap cost (identity irrelevant)",
             )
         )
+    scaled_seed_ids = {
+        CREATURE_MANA_SEED_ORACLE_ID,
+        ELF_MANA_SEED_ORACLE_ID,
+        DEFENDER_MANA_SEED_ORACLE_ID,
+    }
+    if any(p.oracle_id in scaled_seed_ids for p in spec.permanents):
+        generic.append(
+            Prerequisite(
+                kind="board",
+                description=(
+                    "generic board-scaled mana fodder "
+                    "(creature / elf / defender identity irrelevant)"
+                ),
+            )
+        )
     setup = setup_actions or []
     if any(s.op == "seed_gain_life" for s in setup):
         generic.append(

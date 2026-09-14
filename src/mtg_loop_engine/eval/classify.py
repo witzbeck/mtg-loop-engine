@@ -18,8 +18,19 @@ from mtg_loop_engine.semantics.ir import (
     TapCost,
 )
 
-# Must match `AURA_HOST_OBJECT_ID` in search.explorer (avoid import cycle).
+# Must match search.explorer seed ids (avoid import cycle with explorer → classify).
 _AURA_HOST_OBJECT_ID = "aura-host"
+_SCALED_MANA_SEED_LABELS: dict[str, str] = {
+    "scaled-mana:creature-seed": (
+        "seeded generic creature for board-scaled mana (identity irrelevant)"
+    ),
+    "scaled-mana:elf-seed": (
+        "seeded generic elf for board-scaled mana (identity irrelevant)"
+    ),
+    "scaled-mana:defender-seed": (
+        "seeded generic defender for board-scaled mana (identity irrelevant)"
+    ),
+}
 
 
 def _loop_pays_mana(witness: LoopWitness) -> bool:
@@ -129,6 +140,18 @@ def analyze_prerequisites(witness: LoopWitness) -> PrerequisiteAnalysis:
                 f"seeded generic aura host creature {perm.name!r} "
                 f"({perm.object_id})"
             )
+            assumptions.append(
+                StateAssumption(
+                    kind=AssumptionKind.GENERIC_PREREQUISITE,
+                    description=text,
+                    object_id=perm.object_id,
+                    oracle_id=perm.oracle_id,
+                )
+            )
+            generic.append(text)
+        elif perm.oracle_id in _SCALED_MANA_SEED_LABELS:
+            kind = _SCALED_MANA_SEED_LABELS[perm.oracle_id]
+            text = f"{kind} {perm.name!r} ({perm.object_id})"
             assumptions.append(
                 StateAssumption(
                     kind=AssumptionKind.GENERIC_PREREQUISITE,

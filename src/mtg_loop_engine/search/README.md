@@ -52,6 +52,7 @@ graph TB;
 - Seed **four** `p1p1` counters on cards whose mana ability scales with +1/+1 counters (Gyre Sage) **or** with power (Kami / Viridian Joiner class via effective power), so Staff-class untap cycles clear (`{3}` untap creature + `{1}` untap Staff)
 - For remove-counter `any_target` damage, emit activate steps with `target="opponent"` first (Heliod path); self (`actor`) is also legal for undying self-ping
 - Seed a generic creature **aura host** (non-token setup permanent) when an activated ability uses `TapCost(source_self=False)` and neither essential is a creature (Presence of Gond + Intruder Alarm class); otherwise tap the partner creature. Host tap is tracked in `LoopRelevantState` so recurrence fails closed when the host stays tapped.
+- Seed **three** board-scaled mana fodder permanents when a searched card’s tap-mana ability scales with controlled creatures, elves, or defenders (`scaled-mana:creature-seed` / `elf-seed` / `defender-seed`). These are generic prerequisites (identity irrelevant within the category); `analyze_prerequisites` discloses them — they do **not** alone clear `strict_two_card` (that flag is participant-only).
 - When loop actions activate a `once_per_turn` ability, `derive_relevant_state`
   adds `permanents.<id>.once_per_turn_used.<ability_id>` as `EXACT` (helpers live in
   `verify.mandatory_recurrence`; the verifier re-applies them so omitting them from a
@@ -103,7 +104,7 @@ CLI: `mtg-loop-engine discover-gold`.
 
 ## Data contracts
 
-Discovered witnesses carry `assumptions=["discovered_without_pair_labels", …]` and classification stamped from `analyze_prerequisites`. Accepted discoveries are always `strict_two_card=True` under current search policy. Pair keys from corpus are eval-only and must not be imported here.
+Discovered witnesses carry `assumptions=["discovered_without_pair_labels", …]` and classification stamped from `analyze_prerequisites`. Accepted discoveries are always `strict_two_card=True` under current search policy (both essentials participate; functional externals empty). They may still list `generic_prerequisites` (tokens, aura host, scaled-mana fodder, Path-b life seeds). Pair keys from corpus are eval-only and must not be imported here.
 
 ## Failure behavior
 

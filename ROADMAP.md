@@ -23,7 +23,7 @@ graph TB;
   M6 --> M7[M7 Explorer];
 ```
 
-**Active milestone:** M5 — Novel candidates ◐ **IN PROGRESS** (active stage: **M5.1 frontier analysis**)
+**Active milestone:** M5 — Novel candidates ◐ **IN PROGRESS** (active stage: **M5.2 curriculum + continuous M5.3**)
 
 Quantitative snapshot (baselines): [`docs/STATUS.md`](docs/STATUS.md). Keep volatile counts out of this file.
 
@@ -173,14 +173,14 @@ measure frontier → smallest reusable gap → discover → adjudicate → contr
    - **Path b (Mindcrank / Bloodchief)** ✓ — explicit generic opponent life-loss seed (`seed_lose_life`, drain-sized); disclosed on witness.
    - **Rules-evidence rails** ✓ — [`docs/RULES_EVIDENCE.md`](docs/RULES_EVIDENCE.md), [`AGENTS.md`](AGENTS.md), [`.cursor/rules/rules-evidence.mdc`](.cursor/rules/rules-evidence.mdc), [`.agents/skills/rules-evidence/`](.agents/skills/rules-evidence/).
 
-3. **Workbench adjudication (M5.3)** ◐ — first seed **post–slice 10** (2026-09-01): **3** `ABSENT_FROM_REFERENCE` candidates exported to gitignored `data/eval/spellbook_absent.jsonl` (Axebane Guardian + Pemmin's Aura; Axebane + Umbral Mantle; Overgrown Battlement + Umbral Mantle). Run `--persist-workbench` after each curriculum PR; human review in workbench (`spellbook_absent` corpus); `NOVEL` only with record.
+3. **Workbench adjudication (M5.3)** ◐ — first seed **post–slice 10** (2026-09-01); live queue after slices 11–12 remeasure (**58** COMPLETE · **47** verified · **44** in_reference · **3** absent): Axebane Guardian + Pemmin's Aura; Axebane + Umbral Mantle; Overgrown Battlement + Umbral Mantle. Human class **`valid_generic_prerequisite`** (defender-count board fodder; keep `ABSENT_FROM_REFERENCE`, not `NOVEL`). Run `--persist-workbench` after each curriculum PR; review in workbench (`spellbook_absent`); `NOVEL` only with record.
 4. **Optional baseline / M5.4 exit** — freeze an absent-discovery summary only when intentionally certifying; then apply the M5 exit gate above.
 
 Playbook: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDIDATES.md).
 
 ### First local probe (not a baseline)
 
-After each curriculum slice: run `spellbook_compiler_priority.py` (frontier) + `spellbook_absent_discovery.py` before choosing the next Slice 12+ gap. Remeasure on each curriculum PR.
+After each curriculum slice: run `spellbook_compiler_priority.py` (frontier) + `spellbook_absent_discovery.py` before choosing the next Slice 13+ gap. Remeasure on each curriculum PR.
 
 ---
 

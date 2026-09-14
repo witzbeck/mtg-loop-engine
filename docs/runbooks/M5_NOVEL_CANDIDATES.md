@@ -133,15 +133,15 @@ Trigger after every meaningful curriculum/physics PR (COMPLETE growth, new verif
 
 **DuckDB lock:** if Streamlit workbench is already running, stop it (Ctrl+C in that terminal — closing the browser tab is not enough) before `--persist-workbench`, or persist to a scratch `--db` path and re-run without `--db` after restart so the main store upserts.
 
-#### Current queue (post–slice 10, local 2026-09-01)
+#### Current queue (remeasured post–slices 11–12; first seeded post–slice 10)
 
-| Pair | Join reasons | Notes |
-| --- | --- | --- |
-| Axebane Guardian + Pemmin's Aura | tap_untap, mana_pay | Defender-count any-color mana + aura untap channel |
-| Axebane Guardian + Umbral Mantle | tap_untap, mana_pay | Defender mana + `{3}{Q}` equipment untap |
-| Overgrown Battlement + Umbral Mantle | mana_pay, tap_untap | Defender green mana + `{3}{Q}` equipment untap |
+| Pair | Join reasons | Adjudication | Notes |
+| --- | --- | --- | --- |
+| Axebane Guardian + Pemmin's Aura | tap_untap, mana_pay | `valid_generic_prerequisite` | Defender-count any-color mana + aura untap; 3× Seed Defender |
+| Axebane Guardian + Umbral Mantle | tap_untap, mana_pay | `valid_generic_prerequisite` | Defender mana + `{3}{Q}` equipment untap |
+| Overgrown Battlement + Umbral Mantle | mana_pay, tap_untap | `valid_generic_prerequisite` | Defender green mana + `{3}{Q}` equipment untap |
 
-Probe at seed time: **55** COMPLETE · **41** verified · **38** in_reference · **3** absent.
+Probe (post–slice 12 remeasure): **58** COMPLETE · **47** verified · **44** in_reference · **3** absent. Keep `ABSENT_FROM_REFERENCE` (not `NOVEL`). Scaled-mana seeds must appear on `generic_prerequisites` (classify disclosure).
 
 Absences are curriculum: finite / bystander / illegal activation failures feed the next frontier pass and should become regressions at the lowest useful layer.
 

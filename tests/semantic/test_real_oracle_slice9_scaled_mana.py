@@ -75,6 +75,32 @@ def test_circle_of_dreams_plus_staff_rediscovers():
     assert found.proof.status == VerificationStatus.VERIFIED
     names = {c.name for c in found.witness.essential_cards}
     assert names == {"Circle of Dreams Druid", "Staff of Domination"}
+    assert found.witness.classification.strict_two_card is True
+    assert found.witness.classification.generic_prerequisites
+    assert any(
+        "board-scaled mana" in p.description
+        or "scaled mana" in p.description
+        for p in found.witness.classification.generic_prerequisites
+    )
+
+
+def test_axebane_seeds_defenders_and_discloses_generic_prereq():
+    from mtg_loop_engine.eval.classify import analyze_prerequisites
+    from mtg_loop_engine.search.explorer import DEFENDER_MANA_SEED_ORACLE_ID
+
+    axebane = _compile("Axebane Guardian").semantics
+    staff = _compile("Staff of Domination").semantics
+    spec = default_initial_state(axebane, staff)
+    assert sum(1 for p in spec.permanents if p.oracle_id == DEFENDER_MANA_SEED_ORACLE_ID) == 3
+
+    found = explore_pair(axebane, staff, max_depth=8)
+    assert found is not None
+    assert found.proof.status == VerificationStatus.VERIFIED
+    assert found.witness.classification.strict_two_card is True
+    assert found.witness.classification.generic_prerequisites
+    analysis = analyze_prerequisites(found.witness)
+    assert any("defender" in g for g in analysis.generic_prerequisites)
+    assert analysis.strict_two_card is True
 
 
 def test_bloom_tender_plus_freed_compiles_both_complete():
