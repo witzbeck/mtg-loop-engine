@@ -141,7 +141,7 @@ Trigger after every meaningful curriculum/physics PR (COMPLETE growth, new verif
 | Axebane Guardian + Pemmin's Aura | tap_untap, mana_pay | `valid_generic_prerequisite` | Defender-count any-color mana + aura untap; 3× Seed Defender |
 | Axebane Guardian + Umbral Mantle | tap_untap, mana_pay | `valid_generic_prerequisite` | Defender mana + `{3}{Q}` equipment untap |
 | Overgrown Battlement + Umbral Mantle | mana_pay, tap_untap | `valid_generic_prerequisite` | Defender green mana + `{3}{Q}` equipment untap |
-| Sunbond + Triskelion | counter_reload | *unreviewed* | Slice 13 life→counter aura + remove-counter damage; may need physics lifelink seed |
+| Sunbond + Triskelion | counter_reload | `valid_generic_prerequisite` | Life→counter aura + remove-counter damage; physics lifelink seed |
 
 Probe (post–slice 13 remeasure): **60** COMPLETE · **51** verified · **47** in_reference · **4** absent. Keep `ABSENT_FROM_REFERENCE` (not `NOVEL`) unless upgraded. Scaled-mana seeds must appear on `generic_prerequisites` (classify disclosure).
 
