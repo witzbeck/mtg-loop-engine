@@ -165,7 +165,11 @@ class Executor:
         self.semantics = semantics  # keyed by oracle_id
 
     def cost_reduction(
-        self, state: GameState, *, ability: ActivatedAbility | None = None
+        self,
+        state: GameState,
+        *,
+        ability: ActivatedAbility | None = None,
+        actor: Permanent | None = None,
     ) -> tuple[int, int]:
         """Return (generic_reduction, min_mana_remaining floor)."""
         reduction = 0
@@ -185,6 +189,15 @@ class Executor:
                     and ability.is_mana_ability
                 ):
                     continue
+                if ab.applies_to == "enchanted_artifact_activated":
+                    # No attachment graph: reduce activations of other artifacts
+                    # you control (the enchanted host in two-card witnesses).
+                    if (
+                        actor is None
+                        or not actor.is_artifact
+                        or actor.object_id == perm.object_id
+                    ):
+                        continue
                 reduction += ab.reduce_generic
                 floor = max(floor, ab.min_mana_remaining)
         return reduction, floor
@@ -980,7 +993,7 @@ class Executor:
             return ExecError(VerificationStatus.ONCE_PER_TURN_LIMIT, ab.ability_id)
 
         # Costs
-        reduction, mana_floor = self.cost_reduction(state, ability=ab)
+        reduction, mana_floor = self.cost_reduction(state, ability=ab, actor=perm)
         for cost in ab.costs:
             if isinstance(cost, TapCost):
                 tap_perm = perm

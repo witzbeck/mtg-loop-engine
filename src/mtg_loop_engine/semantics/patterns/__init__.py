@@ -428,6 +428,24 @@ def pat_zirda_cost_reduction(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_power_artifact_cost_reduction(text: str, name: str) -> Ability | None:
+    """Power Artifact: enchanted artifact activated abilities cost {N} less; floor 1."""
+    m = re.match(
+        r"^Enchanted artifact's activated abilities cost \{(\d+)\} less to activate\.?"
+        r"(?:\s+This effect can't reduce the mana in that cost to less than one mana\.?)?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ContinuousCostReduction(
+        ability_id=_ability_id("power-artifact-reduce", text),
+        reduce_generic=int(m.group(1)),
+        applies_to="enchanted_artifact_activated",
+        min_mana_remaining=1,
+    )
+
+
 def pat_put_m1m1_untap_self(text: str, name: str) -> Ability | None:
     m = re.match(
         r"^Put a -1/-1 counter on (?:this creature|~|"
@@ -1716,6 +1734,7 @@ PATTERNS: list[Pattern] = [
     Pattern("mana_untap_self", pat_mana_untap_self),
     Pattern("cost_reduction", pat_cost_reduction),
     Pattern("zirda_cost_reduction", pat_zirda_cost_reduction),
+    Pattern("power_artifact_cost_reduction", pat_power_artifact_cost_reduction),
     Pattern("cant_block_this_turn", pat_cant_block_this_turn),
     Pattern("put_m1m1_untap_self", pat_put_m1m1_untap_self),
     Pattern("replacement_multiply_tap_mana", pat_replacement_multiply_tap_mana),

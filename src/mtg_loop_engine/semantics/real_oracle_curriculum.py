@@ -486,4 +486,14 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         ),
         colors=("G",),
     ),
+    "Power Artifact": RealOracleCurriculum(
+        name="Power Artifact",
+        types=["Enchantment", "Aura"],
+        oracle_text=(
+            "Enchant artifact\n"
+            "Enchanted artifact's activated abilities cost {2} less to activate. "
+            "This effect can't reduce the mana in that cost to less than one mana."
+        ),
+        notes="Frontier P1 slice 22: enchanted-artifact activate −{2} (floor 1).",
+    ),
 }
