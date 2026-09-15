@@ -173,7 +173,7 @@ Trigger after every meaningful curriculum/physics PR (COMPLETE growth, new verif
 
 **DuckDB lock:** if Streamlit workbench is already running, stop it (Ctrl+C in that terminal — closing the browser tab is not enough) before `--persist-workbench`, or persist to a scratch `--db` path and re-run without `--db` after restart so the main store upserts.
 
-#### Current queue (remeasured post–slices 24–25)
+#### Current queue (remeasured post–Wave 1 recovery dig)
 
 | Pair | Join reasons | Adjudication | Notes |
 | --- | --- | --- | --- |
@@ -184,7 +184,9 @@ Trigger after every meaningful curriculum/physics PR (COMPLETE growth, new verif
 | Freed from the Real + Heronblade Elite | mana_pay, tap_untap | `valid_generic_prerequisite` | Power mana + aura untap (slice 16) |
 | Heronblade Elite + Pemmin's Aura | mana_pay, tap_untap | `valid_generic_prerequisite` | Power mana + aura untap (slice 16) |
 
-Probe (post–slices 24–25): **73** COMPLETE · **62** verified · **56** in_reference · **6** absent. Keep `ABSENT_FROM_REFERENCE` (not `NOVEL`).
+Probe (post–Wave 1): **73** COMPLETE · **68** verified · **62** in_reference · **6** absent · eligible **84** / rediscovered **62** (was **56**; join_miss **16→10**). Keep `ABSENT_FROM_REFERENCE` (not `NOVEL`).
+
+**Wave 1 recovery note:** `join_reasons` for bounce/free-cast/grant existed, but `InteractionIndex._complement_ids` omitted those tags → Spellbook `join_miss`. Fix + Drake/Alarm mana-dork seeds + recovery `max_depth` 12.
 
 Absences are curriculum: finite / bystander / illegal activation failures feed the next frontier pass and should become regressions at the lowest useful layer.
 

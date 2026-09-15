@@ -200,7 +200,7 @@ measure frontier → smallest reusable gap → discover → adjudicate → contr
      card forces a **third** sibling filter (e.g. another Elf / white creature) or
      when colored/typed token ETB is required for unlock — not as a standalone epic.
 
-3. **Workbench adjudication (M5.3)** ◐ — live queue after slices 24–25 remeasure (**73** COMPLETE · **62** verified · **56** in_reference · **6** absent): prior defender-mana / Heronblade aura / Sunbond pairs — all **`valid_generic_prerequisite`**, keep `ABSENT_FROM_REFERENCE` (not `NOVEL`). Run `--persist-workbench` after each curriculum PR.
+3. **Workbench adjudication (M5.3)** ◐ — live queue after Wave 1 recovery dig (**73** COMPLETE · **68** verified · **62** in_reference · **6** absent · rediscovered **62**): prior defender-mana / Heronblade aura / Sunbond pairs — all **`valid_generic_prerequisite`**, keep `ABSENT_FROM_REFERENCE` (not `NOVEL`). Run `--persist-workbench` after each curriculum PR.
 4. **Optional baseline / M5.4 exit** — freeze an absent-discovery summary only when intentionally certifying; then apply the M5 exit gate above.
 
 Playbook: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDIDATES.md).
