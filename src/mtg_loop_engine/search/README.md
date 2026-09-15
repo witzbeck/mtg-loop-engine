@@ -56,6 +56,8 @@ graph TB;
 - Seed one generic creature token when a mana-cost create-token activate pairs with a sac-for-mana outlet (Sliver Queen + Ashnod’s Altar); sac fodder prefers tokens over essentials.
 - **Cast-from-hand:** emit `cast_from_hand` for creatures in hand; Aluren free-cast when partner has `FreeCastCreaturesByManaValue`. ETB-bounce creatures start in hand when paired with free cast.
 - **Instant grant tap-bounce:** `seed_grant_tap_bounce` onto a grant host; emit `activate_granted_tap_bounce`. With Intruder Alarm, seed mana dorks + a bounce creature in hand (generic prerequisites).
+- **Temur activated bounce:** with Village Bell-Ringer (self-ETB untap-all), seed mana dorks to pay `{1}{G}` + recast.
+- **Cloudstone type-share bounce:** with Aluren, seed a second Creature on BF (and cast seed in hand when the searched pair has no creature) so type-share bounce has a partner.
 - When loop actions activate a `once_per_turn` ability, `derive_relevant_state`
   adds `permanents.<id>.once_per_turn_used.<ability_id>` as `EXACT` (helpers live in
   `verify.mandatory_recurrence`; the verifier re-applies them so omitting them from a

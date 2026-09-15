@@ -56,6 +56,8 @@ graph TB;
 - `etb_bounce_controlled_creature_gw` — Fleetfoot; bounce green-or-white creature.
 - `etb_bounce_controlled_permanent` — Dream Stalker; bounce any controlled permanent.
 - `etb_bounce_controlled_nonland` — Ancestral Statue; bounce controlled nonland.
+- `activated_bounce_other_creature` — Temur; paid bounce another creature (indestructible rider matched, proof-irrelevant).
+- `etb_bounce_sharing_type` — Cloudstone; nonartifact ETB → bounce another sharing a permanent type.
 - `aluren_free_cast` — Aluren; creatures MV ≤ N without paying mana.
 - `instant_grant_tap_bounce` — Banishing Knack / Retraction Helix Instant grant.
 - `etb_other_green_put_p1p1_target` — Ivy Lane; green color filter on ETB subject.

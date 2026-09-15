@@ -107,9 +107,10 @@ uv run python scripts/spellbook_absent_discovery.py
 22. **Untap→mill (slice 23)** ✓ — Mesmeric Orb; permanent untap mills controller.
 23. **Cast-from-hand + Instant grant bounce (slices 24–25)** ✓ — `cast_from_hand` + Aluren free cast MV≤3 (Drake/Lion rediscovery); Banishing Knack / Retraction Helix Instant grant `{T}`: bounce nonland (Alarm rediscovery with mana-dork seeds). Wirewood deferred.
 24. **Bounce target variants (slices 26–28)** ✓ — Fleetfoot Panther (G/W), Dream Stalker (permanent), Ancestral Statue (controlled nonland).
-25. **Frontier-driven slices (M5.2 Slice 29+):** activated/cast bounce → Mana Echoes → Earthcraft → Wirewood. Path **a** preference remains. Ritual below.
-26. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-27. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+25. **Activated / type-share bounce (slices 29–30)** ✓ — Temur Sabertooth paid bounce-other (indestructible rider proof-irrelevant) + Bell-Ringer; Cloudstone Curio nonartifact ETB → bounce sharing a permanent type + Aluren. **Tidespout Tyrant deferred** (needs `TriggerEvent.CAST` + non-creature cast/rock path).
+26. **Frontier-driven slices (M5.2 Slice 31+):** Mana Echoes → Earthcraft → Wirewood. Path **a** preference remains. Ritual below.
+27. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+28. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 
