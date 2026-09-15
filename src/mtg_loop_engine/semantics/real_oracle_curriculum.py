@@ -626,4 +626,19 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{3}",
         mana_value=3,
     ),
+    "Mana Echoes": RealOracleCurriculum(
+        name="Mana Echoes",
+        types=["Enchantment"],
+        oracle_text=(
+            "Whenever a creature enters, you may add an amount of {C} equal to "
+            "the number of creatures you control that share a creature type with it."
+        ),
+        notes=(
+            "Slice 32: ETB → {C} × controlled sharing creature type; "
+            "Sliver Queen rediscovery with {2} mana seed for first create."
+        ),
+        colors=("R",),
+        mana_cost="{2}{R}{R}",
+        mana_value=4,
+    ),
 }

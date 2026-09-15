@@ -93,7 +93,7 @@ class Consequence(StrEnum):
 
 
 class ManaScaleKind(StrEnum):
-    """Tap-mana amount scales with a board statistic (M5 slice 9)."""
+    """Tap-mana / trigger-mana amount scales with a board statistic."""
 
     CONTROLLED_CREATURES = "controlled_creatures"
     CONTROLLED_ELF = "controlled_elf"
@@ -102,6 +102,8 @@ class ManaScaleKind(StrEnum):
     CONTROLLED_ENCHANTMENTS = "controlled_enchantments"
     DEVOTION_GREEN = "devotion_green"
     VIVID_PERMANENT_COLORS = "vivid_permanent_colors"
+    # Mana Echoes: count controlled creatures sharing a creature type with trigger subject.
+    CONTROLLED_SHARING_CREATURE_TYPE = "controlled_sharing_creature_type"
 
 
 class TriggerEvent(StrEnum):

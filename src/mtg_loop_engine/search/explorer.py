@@ -576,6 +576,17 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
             colorless=mana.colorless + seed.colorless,
             any_color=mana.any_color + seed.any_color,
         )
+    # Sliver Queen + Mana Echoes: seed {2} so the first create can fire; ETB mana pays the rest.
+    if _needs_mana_create_echoes_bootstrap(ordered):
+        mana = ManaAmount(
+            white=mana.white,
+            blue=mana.blue,
+            black=mana.black,
+            red=mana.red,
+            green=mana.green,
+            colorless=mana.colorless + 2,
+            any_color=mana.any_color,
+        )
     return InitialStateSpec(permanents=permanents, mana=mana)
 
 
@@ -1019,6 +1030,32 @@ def _needs_mana_create_token_sac_bootstrap(cards: list[CardSemantics]) -> bool:
             ):
                 has_sac_mana = True
     return has_mana_create and has_sac_mana
+
+
+def _needs_mana_create_echoes_bootstrap(cards: list[CardSemantics]) -> bool:
+    """Sliver Queen + Mana Echoes: seed {2} so the first create ETB can float repay mana."""
+    from mtg_loop_engine.semantics.enums import ManaScaleKind
+
+    has_mana_create = False
+    has_echoes = False
+    for card in cards:
+        for ab in card.abilities:
+            if (
+                isinstance(ab, ActivatedAbility)
+                and ab.supported
+                and any(isinstance(c, ManaCost) for c in ab.costs)
+                and any(isinstance(e, CreateTokenEffect) for e in ab.effects)
+            ):
+                has_mana_create = True
+            if isinstance(ab, TriggeredAbility) and ab.event == TriggerEvent.ENTER_BATTLEFIELD:
+                for e in ab.effects:
+                    if (
+                        isinstance(e, AddManaEffect)
+                        and e.mana_scale
+                        is ManaScaleKind.CONTROLLED_SHARING_CREATURE_TYPE
+                    ):
+                        has_echoes = True
+    return has_mana_create and has_echoes
 
 
 def _needs_lifelink_grant_seed(card: CardSemantics) -> bool:
