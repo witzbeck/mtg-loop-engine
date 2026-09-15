@@ -1298,6 +1298,70 @@ def pat_etb_bounce_controlled_creature(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_etb_bounce_controlled_creature_gw(text: str, name: str) -> Ability | None:
+    """Fleetfoot Panther: ETB bounce a green or white creature you control."""
+    m = re.match(
+        r"^When (?:this creature|~|"
+        + re.escape(name)
+        + r") enters(?: the battlefield)?, "
+        r"return a green or white creature you control to (?:its|their) owner's hand\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("etb-bounce-gw", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="self",
+        effects=[
+            MoveToZoneEffect(
+                zone=Zone.HAND, target="controlled_creature_green_or_white"
+            )
+        ],
+    )
+
+
+def pat_etb_bounce_controlled_permanent(text: str, name: str) -> Ability | None:
+    """Dream Stalker: ETB bounce a permanent you control."""
+    m = re.match(
+        r"^When (?:this creature|~|"
+        + re.escape(name)
+        + r") enters(?: the battlefield)?, "
+        r"return a permanent you control to (?:its|their) owner's hand\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("etb-bounce-perm", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="self",
+        effects=[MoveToZoneEffect(zone=Zone.HAND, target="controlled_permanent")],
+    )
+
+
+def pat_etb_bounce_controlled_nonland(text: str, name: str) -> Ability | None:
+    """Ancestral Statue: ETB bounce a nonland permanent you control."""
+    m = re.match(
+        r"^When (?:this creature|~|"
+        + re.escape(name)
+        + r") enters(?: the battlefield)?, "
+        r"return a nonland permanent you control to (?:its|their) owner's hand\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("etb-bounce-nonland", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="self",
+        effects=[MoveToZoneEffect(zone=Zone.HAND, target="controlled_nonland")],
+    )
+
+
 def pat_aluren_free_cast(text: str, name: str) -> Ability | None:
     """Aluren: cast creatures with mana value ≤ 3 without paying mana."""
     m = re.match(
@@ -1795,6 +1859,9 @@ PATTERNS: list[Pattern] = [
     Pattern("amplify_p1p1_replacement", pat_amplify_p1p1_replacement),
     Pattern("etb_create_food", pat_etb_create_food),
     Pattern("etb_bounce_controlled_creature", pat_etb_bounce_controlled_creature),
+    Pattern("etb_bounce_controlled_creature_gw", pat_etb_bounce_controlled_creature_gw),
+    Pattern("etb_bounce_controlled_permanent", pat_etb_bounce_controlled_permanent),
+    Pattern("etb_bounce_controlled_nonland", pat_etb_bounce_controlled_nonland),
     Pattern("aluren_free_cast", pat_aluren_free_cast),
     Pattern("instant_grant_tap_bounce", pat_instant_grant_tap_bounce),
     Pattern("create_token_put_p1p1_other", pat_create_token_put_p1p1_other),

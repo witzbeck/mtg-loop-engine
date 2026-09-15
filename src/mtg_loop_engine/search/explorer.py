@@ -130,7 +130,13 @@ def _has_etb_bounce_to_hand(card: CardSemantics) -> bool:
         and any(
             isinstance(e, MoveToZoneEffect)
             and e.zone == Zone.HAND
-            and e.target == "controlled_creature"
+            and e.target
+            in {
+                "controlled_creature",
+                "controlled_creature_green_or_white",
+                "controlled_permanent",
+                "controlled_nonland",
+            }
             for e in ab.effects
         )
         for ab in card.abilities
@@ -427,7 +433,12 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
             )
         )
     elif bounce_alarm_cast:
-        for i in range(_MANA_DORK_SEED_COUNT):
+        bounce_mv = max(
+            (c.mana_value for c in ordered if _has_etb_bounce_to_hand(c)),
+            default=0,
+        )
+        dork_n = max(_MANA_DORK_SEED_COUNT, bounce_mv)
+        for i in range(dork_n):
             permanents.append(
                 bf(
                     f"mana_dork_{i}",
@@ -573,6 +584,7 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
             exclude_source = False
             require_creature = False
             require_nonland = False
+            require_gw = False
             if ab is not None:
                 for effect in getattr(ab, "effects", []):
                     tgt = getattr(effect, "target", None)
@@ -581,16 +593,23 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
                         "target_other_creature",
                         "enchanted_creature",
                         "controlled_creature",
+                        "controlled_creature_green_or_white",
+                        "controlled_permanent",
+                        "controlled_nonland",
                         "target_nonland",
                     }:
                         needs_target = True
                     if tgt in {"target_other_creature", "enchanted_creature"}:
                         exclude_source = True
                         require_creature = True
-                    if tgt == "controlled_creature":
+                    if tgt in {
+                        "controlled_creature",
+                        "controlled_creature_green_or_white",
+                    }:
                         require_creature = True
-                    if tgt == "target_nonland":
+                    if tgt == "target_nonland" or tgt == "controlled_nonland":
                         require_nonland = True
+                    require_gw = tgt == "controlled_creature_green_or_white"
             if needs_target:
                 candidates = [
                     oid
@@ -611,6 +630,17 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
                         if "land" not in types:
                             filtered.append(oid)
                     candidates = filtered
+                if require_gw:
+                    gw: list[str] = []
+                    for oid in candidates:
+                        p = state.permanents[oid]
+                        colors = {c.upper() for c in p.colors}
+                        if not colors:
+                            sem = executor.semantics.get(p.oracle_id)
+                            colors = {c.upper() for c in (sem.colors if sem else [])}
+                        if colors & {"G", "W"}:
+                            gw.append(oid)
+                    candidates = gw
             else:
                 candidates = [None]
             for target in candidates:
