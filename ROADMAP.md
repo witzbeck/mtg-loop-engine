@@ -179,7 +179,7 @@ measure frontier → smallest reusable gap → discover → adjudicate → contr
    - **Slice 22 (enchanted-artifact cost reduction)** ✓ — Power Artifact; `ContinuousCostReduction` `enchanted_artifact_activated` −{2} floor 1; frontier P1 (**2** unlocks vs Basalt).
    - **Slice 23 (untap→mill)** ✓ — Mesmeric Orb; `TriggerEvent.UNTAP` → self-mill; frontier P1 (**2** unlocks vs Basalt).
    - **Slices 24–25 (cast-from-hand + Instant grant bounce)** ✓ — `cast_from_hand` + Aluren free cast MV≤3 (Drake/Lion rediscovery); Banishing Knack / Retraction Helix Instant grant `{T}`: bounce nonland (Alarm rediscovery with mana-dork seeds). Wirewood deferred.
-   - **Slice 26+** ○ — choose from live frontier P0/P1; cite compact pair-unlock evidence in the curriculum PR.
+   - **Slice 26+** ○ — recovery dig → bounce siblings → activated/cast bounce → Mana Echoes → Earthcraft → Wirewood; cite live P0/P1 in each curriculum PR ([`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDIDATES.md)).
    - **Path b (Bond/Blood)** ✓ — explicit generic life-gain seed; `core_bond_blood` frozen; disclosed on witness.
    - **Path b (Mindcrank / Bloodchief)** ✓ — explicit generic opponent life-loss seed (`seed_lose_life`, drain-sized); disclosed on witness.
    - **Rules-evidence rails** ✓ — [`docs/RULES_EVIDENCE.md`](docs/RULES_EVIDENCE.md), [`AGENTS.md`](AGENTS.md), [`.cursor/rules/rules-evidence.mdc`](.cursor/rules/rules-evidence.mdc), [`.agents/skills/rules-evidence/`](.agents/skills/rules-evidence/).
