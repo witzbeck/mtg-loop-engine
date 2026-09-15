@@ -109,9 +109,10 @@ uv run python scripts/spellbook_absent_discovery.py
 24. **Bounce target variants (slices 26–28)** ✓ — Fleetfoot Panther (G/W), Dream Stalker (permanent), Ancestral Statue (controlled nonland).
 25. **Activated / type-share bounce (slices 29–30)** ✓ — Temur Sabertooth paid bounce-other (indestructible rider proof-irrelevant) + Bell-Ringer; Cloudstone Curio nonartifact ETB → bounce sharing a permanent type + Aluren. **Tidespout Tyrant deferred** (needs `TriggerEvent.CAST` + non-creature cast/rock path).
 26. **Mana Echoes (slice 32)** ✓ — creature ETB → `{C}` × controlled sharing creature type; Sliver Queen rediscovery (`{2}` mana seed).
-27. **Frontier-driven slices (M5.2 Slice 33+):** Earthcraft → Wirewood. Path **a** preference remains. Ritual below.
-28. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-29. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+27. **Earthcraft + Wirewood (slices 33–34)** ✓ — Earthcraft tap-creature → untap basic land (hold priority with Drake); Wirewood battlefield-Elf any-color (Staff rediscovery).
+28. **Frontier-driven slices (M5.2 Slice 35+):** Path **a** preference remains; cite live P0/P1. Ritual below.
+29. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+30. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 

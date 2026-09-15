@@ -59,6 +59,8 @@ graph TB;
 - `activated_bounce_other_creature` — Temur; paid bounce another creature (indestructible rider matched, proof-irrelevant).
 - `etb_bounce_sharing_type` — Cloudstone; nonartifact ETB → bounce another sharing a permanent type.
 - `etb_mana_sharing_creature_type` — Mana Echoes; creature ETB → `{C}` × controlled sharing creature type.
+- `earthcraft_tap_untap_basic` — Earthcraft; tap controlled creature → untap basic land.
+- Wirewood Channeler matches scaled `BATTLEFIELD_ELF` any-color (slice-9 sibling).
 - `aluren_free_cast` — Aluren; creatures MV ≤ N without paying mana.
 - `instant_grant_tap_bounce` — Banishing Knack / Retraction Helix Instant grant.
 - `etb_other_green_put_p1p1_target` — Ivy Lane; green color filter on ETB subject.
