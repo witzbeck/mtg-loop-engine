@@ -244,6 +244,9 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
             "When this creature enters, untap all creatures you control."
         ),
         notes="Self-ETB untap-all; Flash reminder is proof-irrelevant.",
+        colors=("W",),
+        mana_cost="{2}{W}",
+        mana_value=3,
     ),
     "Gyre Sage": RealOracleCurriculum(
         name="Gyre Sage",
@@ -591,5 +594,36 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         notes="Slice 28: ETB bounce controlled nonland; Alarm + mana-dork pay {4}.",
         mana_cost="{4}",
         mana_value=4,
+    ),
+    "Temur Sabertooth": RealOracleCurriculum(
+        name="Temur Sabertooth",
+        types=["Creature", "Cat"],
+        oracle_text=(
+            "{1}{G}: You may return another creature you control to its owner's "
+            "hand. If you do, this creature gains indestructible until end of turn."
+        ),
+        notes=(
+            "Slice 29: paid bounce other creature; indestructible rider "
+            "proof-irrelevant. Rediscovery with Village Bell-Ringer + mana dorks."
+        ),
+        colors=("G",),
+        mana_cost="{2}{G}{G}",
+        mana_value=4,
+    ),
+    "Cloudstone Curio": RealOracleCurriculum(
+        name="Cloudstone Curio",
+        types=["Artifact"],
+        oracle_text=(
+            "Whenever a nonartifact permanent you control enters, you may return "
+            "another permanent you control that shares a permanent type with it "
+            "to its owner's hand."
+        ),
+        notes=(
+            "Slice 30: nonartifact ETB → bounce another sharing a permanent type; "
+            "Aluren rediscovery with generic creature seeds. Tidespout deferred "
+            "(needs CAST + non-creature cast path)."
+        ),
+        mana_cost="{3}",
+        mana_value=3,
     ),
 }

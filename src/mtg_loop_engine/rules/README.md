@@ -36,7 +36,8 @@ graph TB;
 - Exact pending-trigger match when `actor` / `ability_id` are supplied (no silent idx-0 fallback).
 - Exile-on-death replacements suppress death events and `DIES` triggers (CR 700.4); sacrifice events still fire.
 - Creature `DIES` queues carry subject `effective_toughness()` as trigger `amount` when > 0 (South Wind Avatar class).
-- `MoveToZoneEffect` bounce targets: `controlled_creature`, `controlled_creature_green_or_white`, `controlled_permanent`, `controlled_nonland`, `target_nonland` (Knack/Helix).
+- `MoveToZoneEffect` bounce targets: `controlled_creature`, `controlled_creature_green_or_white`, `controlled_permanent`, `controlled_nonland`, `other_controlled_creature` (Temur), `other_controlled_sharing_type` (Cloudstone; needs trigger subject), `target_nonland` (Knack/Helix).
+- `TriggeredAbility.filter` includes `controlled_nonartifact` (Cloudstone).
 - `cast_from_hand`: creature from `Zone.HAND` pays `CardSemantics.mana_cost`, or free under `FreeCastCreaturesByManaValue` (Aluren) when MV ≤ ceiling; bumps `events.cast` then ETB.
 - `activate_granted_tap_bounce` / `seed_grant_tap_bounce`: Instant grant `{T}`: bounce nonland (`Permanent.tap_bounce_nonland`, witness-persistent).
 - BF tapped→untapped via `_untap_permanent` queues `TriggerEvent.UNTAP` (Mesmeric Orb); self-mill bumps `events.mill` only.

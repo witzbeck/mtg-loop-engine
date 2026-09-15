@@ -333,10 +333,16 @@ class Executor:
         target_id: str | None,
         *,
         trigger_amount: int | None = None,
+        trigger_subject_id: str | None = None,
     ) -> ExecError | None:
         for effect in effects:
             err = self._apply_one(
-                state, source, effect, target_id, trigger_amount=trigger_amount
+                state,
+                source,
+                effect,
+                target_id,
+                trigger_amount=trigger_amount,
+                trigger_subject_id=trigger_subject_id,
             )
             if err:
                 return err
@@ -350,6 +356,7 @@ class Executor:
         target_id: str | None,
         *,
         trigger_amount: int | None = None,
+        trigger_subject_id: str | None = None,
     ) -> ExecError | None:
         if isinstance(effect, AddManaEffect):
             mult = self.tap_mana_multiplier(state) if source.tapped else 1
@@ -720,10 +727,16 @@ class Executor:
                 "controlled_creature_green_or_white",
                 "controlled_permanent",
                 "controlled_nonland",
+                "other_controlled_creature",
+                "other_controlled_sharing_type",
                 "target_nonland",
             }:
                 return self._bounce_to_zone(
-                    state, effect=effect, target_id=target_id
+                    state,
+                    effect=effect,
+                    target_id=target_id,
+                    source=source,
+                    trigger_subject_id=trigger_subject_id,
                 )
             return ExecError(
                 VerificationStatus.UNSUPPORTED_SEMANTICS,
@@ -741,10 +754,34 @@ class Executor:
         card = self.semantics.get(permanent.oracle_id)
         return {c.upper() for c in (card.colors if card else [])}
 
-    def _is_land_permanent(self, permanent: Permanent) -> bool:
+    _PERMANENT_TYPES = frozenset(
+        {
+            "artifact",
+            "battle",
+            "creature",
+            "enchantment",
+            "land",
+            "planeswalker",
+            "kindred",
+            "tribal",
+        }
+    )
+
+    def _permanent_type_set(self, permanent: Permanent) -> set[str]:
+        """CR 205.2a permanent types from card types + runtime flags."""
         card = self.semantics.get(permanent.oracle_id)
-        types = [t.casefold() for t in (card.types if card else [])]
-        return "land" in types
+        types = {t.casefold() for t in (card.types if card else [])}
+        if permanent.is_creature:
+            types.add("creature")
+        if permanent.is_artifact:
+            types.add("artifact")
+        return types & self._PERMANENT_TYPES
+
+    def _is_land_permanent(self, permanent: Permanent) -> bool:
+        return "land" in self._permanent_type_set(permanent)
+
+    def _is_artifact_permanent(self, permanent: Permanent) -> bool:
+        return "artifact" in self._permanent_type_set(permanent)
 
     def _bounce_to_zone(
         self,
@@ -752,6 +789,8 @@ class Executor:
         *,
         effect: MoveToZoneEffect,
         target_id: str | None,
+        source: Permanent | None = None,
+        trigger_subject_id: str | None = None,
     ) -> ExecError | None:
         if not target_id or target_id not in state.permanents:
             return ExecError(
@@ -769,17 +808,49 @@ class Executor:
             "controlled_creature_green_or_white",
             "controlled_permanent",
             "controlled_nonland",
+            "other_controlled_creature",
+            "other_controlled_sharing_type",
         }:
             if bounced.controller != "you":
                 return ExecError(
                     VerificationStatus.ILLEGAL_TARGET,
                     "bounce target must be controlled by you",
                 )
-        if tgt in {"controlled_creature", "controlled_creature_green_or_white"}:
+        if tgt in {
+            "controlled_creature",
+            "controlled_creature_green_or_white",
+            "other_controlled_creature",
+        }:
             if not bounced.is_creature:
                 return ExecError(
                     VerificationStatus.ILLEGAL_TARGET,
                     "bounce target must be a controlled creature",
+                )
+        if tgt == "other_controlled_creature":
+            if source is not None and bounced.object_id == source.object_id:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "bounce target must be another creature",
+                )
+        if tgt == "other_controlled_sharing_type":
+            subject_id = trigger_subject_id
+            if not subject_id or subject_id not in state.permanents:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "type-share bounce needs trigger subject",
+                )
+            if bounced.object_id == subject_id:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "bounce target must be another permanent",
+                )
+            subject = state.permanents[subject_id]
+            if not (
+                self._permanent_type_set(bounced) & self._permanent_type_set(subject)
+            ):
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "bounce target must share a permanent type with subject",
                 )
         if tgt == "controlled_creature_green_or_white":
             colors = self._permanent_colors(bounced)
@@ -837,6 +908,11 @@ class Executor:
                     not subject.is_creature or subject.controller != "you"
                 ):
                     continue
+                if ab.filter == "controlled_nonartifact":
+                    if subject.controller != "you" or self._is_artifact_permanent(
+                        subject
+                    ):
+                        continue
                 if ab.filter == "other_controlled_creature" and (
                     not subject.is_creature
                     or subject.controller != "you"
@@ -1236,6 +1312,7 @@ class Executor:
             ab.effects,
             step.target or tr.get("subject_id"),
             trigger_amount=tr.get("amount"),
+            trigger_subject_id=tr.get("subject_id"),
         )
 
     def _resolve_undying_return(

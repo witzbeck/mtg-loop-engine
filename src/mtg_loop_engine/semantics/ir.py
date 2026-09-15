@@ -183,6 +183,9 @@ class MoveToZoneEffect(BaseModel):
     # controlled_creature_green_or_white: Fleetfoot Panther color filter.
     # controlled_permanent: Dream Stalker — any permanent you control.
     # controlled_nonland: Ancestral Statue — nonland you control.
+    # other_controlled_creature: Temur — another creature you control (not source).
+    # other_controlled_sharing_type: Cloudstone — another permanent sharing a
+    #   permanent type with the trigger subject.
     # target_nonland: bounce any nonland permanent (Knack/Helix grant).
     target: Literal[
         "self",
@@ -190,6 +193,8 @@ class MoveToZoneEffect(BaseModel):
         "controlled_creature_green_or_white",
         "controlled_permanent",
         "controlled_nonland",
+        "other_controlled_creature",
+        "other_controlled_sharing_type",
         "target_nonland",
     ] = "self"
 
@@ -255,6 +260,7 @@ class TriggeredAbility(BaseModel):
         "token_creature",
         "self",
         "controlled_creature",
+        "controlled_nonartifact",
         "other_controlled_creature",
         "other_controlled_human",
         "other_controlled_green",
