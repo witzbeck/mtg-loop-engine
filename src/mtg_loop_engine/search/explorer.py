@@ -1205,6 +1205,34 @@ def _needs_life_gain_seed(card: CardSemantics) -> bool:
     )
 
 
+def _is_gain_life_put_counter(card: CardSemantics) -> bool:
+    """Heliod / Archangel: GAIN_LIFE → +1/+1 puts."""
+    return any(
+        isinstance(ab, TriggeredAbility)
+        and ab.event == TriggerEvent.GAIN_LIFE
+        and any(isinstance(e, AddCounterEffect) for e in ab.effects)
+        for ab in card.abilities
+    )
+
+
+def _is_counter_added_damage(card: CardSemantics) -> bool:
+    """Shalai-class: COUNTER_ADDED → damage (needs life-gain bootstrap + lifelink)."""
+    return any(
+        isinstance(ab, TriggeredAbility)
+        and ab.event == TriggerEvent.COUNTER_ADDED
+        and any(isinstance(e, DealDamageEffect) for e in ab.effects)
+        for ab in card.abilities
+    )
+
+
+def _lifelink_grant_ping_target(card: CardSemantics, perm_is_creature: bool) -> bool:
+    """Ballista remove-counter OR Shalai counter→damage can close with lifelink."""
+    if not perm_is_creature:
+        return False
+    caps = extract_capabilities(card)
+    return caps.removes_p1p1() or _is_counter_added_damage(card)
+
+
 def _needs_opponent_lose_life_seed(card: CardSemantics) -> bool:
     """Path-b mill feedback seed (Mindcrank / Bloodchief class)."""
     from mtg_loop_engine.semantics.ir import MillEffect
@@ -1272,13 +1300,8 @@ def _needs_mana_create_echoes_bootstrap(cards: list[CardSemantics]) -> bool:
 
 
 def _needs_lifelink_grant_seed(card: CardSemantics) -> bool:
-    """Heliod-class: GAIN_LIFE → counter, partner removes counters for damage."""
-    return any(
-        isinstance(ab, TriggeredAbility)
-        and ab.event == TriggerEvent.GAIN_LIFE
-        and any(isinstance(e, AddCounterEffect) for e in ab.effects)
-        for ab in card.abilities
-    )
+    """Heliod-class: GAIN_LIFE → counter; partner pings or deals counter-put damage."""
+    return _is_gain_life_put_counter(card)
 
 
 def build_witness(
@@ -1532,6 +1555,26 @@ def explore_pair(
             err = executor.run_step(start, seed)
             if err is None:
                 setup_actions = [seed]
+    # Heliod/Archangel + Shalai: no remove-counter ping to bootstrap — seed life gain.
+    if (
+        (_is_gain_life_put_counter(a) and _is_counter_added_damage(b))
+        or (_is_gain_life_put_counter(b) and _is_counter_added_damage(a))
+    ) and not any(s.op == "seed_gain_life" for s in setup_actions):
+        seed_actor = None
+        for perm in sorted(start.permanents.values(), key=lambda p: p.object_id):
+            card = semantics.get(perm.oracle_id)
+            if card is not None and _is_gain_life_put_counter(card):
+                seed_actor = perm.object_id
+                break
+        if seed_actor is not None:
+            seed = ActionStep(
+                op="seed_gain_life",
+                actor=seed_actor,
+                note="generic life-gain seed (Heliod/Shalai counter→damage bootstrap)",
+            )
+            err = executor.run_step(start, seed)
+            if err is None:
+                setup_actions = [*setup_actions, seed]
     if _needs_opponent_lose_life_seed(a) or _needs_opponent_lose_life_seed(b):
         seed_actor = None
         for perm in sorted(start.permanents.values(), key=lambda p: p.object_id):
@@ -1585,8 +1628,7 @@ def explore_pair(
                 continue
             if _needs_lifelink_grant_seed(card):
                 grantor = perm.object_id
-            caps = extract_capabilities(card)
-            if caps.removes_p1p1() and perm.is_creature:
+            if _lifelink_grant_ping_target(card, perm.is_creature):
                 pinger = perm.object_id
         if grantor is not None and pinger is not None and grantor != pinger:
             seed = ActionStep(
@@ -1612,8 +1654,7 @@ def explore_pair(
                 continue
             if card.oracle_id == grant_card.oracle_id:
                 grantor = perm.object_id
-            caps = extract_capabilities(card)
-            if caps.removes_p1p1() and perm.is_creature:
+            if _lifelink_grant_ping_target(card, perm.is_creature):
                 pinger = perm.object_id
         if (
             grant_ab is not None

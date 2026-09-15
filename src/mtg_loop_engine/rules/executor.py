@@ -700,17 +700,25 @@ class Executor:
             return None
 
         if isinstance(effect, DealDamageEffect):
+            qty = effect.amount
+            if effect.amount_from_trigger:
+                if trigger_amount is None or trigger_amount <= 0:
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_ACTION,
+                        "damage amount_from_trigger needs trigger amount",
+                    )
+                qty = trigger_amount
             to_opponent = effect.target == "opponent" or (
                 effect.target == "any_target"
                 and target_id in (None, "opponent")
             )
             if to_opponent:
-                state.life_opponent -= effect.amount
+                state.life_opponent -= qty
                 self._queue_triggers(
                     state,
                     TriggerEvent.OPPONENT_LOSE_LIFE,
                     source,
-                    amount=effect.amount,
+                    amount=qty,
                 )
             elif effect.target == "any_target" and target_id is not None:
                 # CR 702.92 / Triskelion-class: any-target may include the source.
@@ -724,18 +732,18 @@ class Executor:
                         VerificationStatus.ILLEGAL_TARGET,
                         "damage target must be a battlefield creature",
                     )
-                victim.damage_marked += effect.amount
+                victim.damage_marked += qty
             else:
                 return ExecError(
                     VerificationStatus.ILLEGAL_TARGET,
                     "deal damage needs opponent or creature target",
                 )
-            state.bump("damage", effect.amount)
-            if source.lifelink and effect.amount > 0:
-                state.life_you += effect.amount
-                state.bump("life_gain", effect.amount)
+            state.bump("damage", qty)
+            if source.lifelink and qty > 0:
+                state.life_you += qty
+                state.bump("life_gain", qty)
                 self._queue_triggers(
-                    state, TriggerEvent.GAIN_LIFE, source, amount=effect.amount
+                    state, TriggerEvent.GAIN_LIFE, source, amount=qty
                 )
             return None
 

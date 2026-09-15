@@ -112,9 +112,10 @@ uv run python scripts/spellbook_absent_discovery.py
 27. **Earthcraft + Wirewood (slices 33–34)** ✓ — Earthcraft tap-creature → untap basic land (hold priority with Drake); Wirewood battlefield-Elf any-color (Staff rediscovery).
 28. **Squirrel Nest (slice 35)** ✓ — enchanted-land `{T}`: create Squirrel (`TapCost.host="land"`); Earthcraft rediscovery. Deferred Patrol Signaler (`{Q}` create) / Quillspike (−1/−1 remove); Storm Herd rejected (one-shot).
 29. **Patrol Signaler + Quillspike (slices 36–37)** ✓ — Signaler `{1}{W}{Q}` create + Earthcraft/Plains double-tap; Quillspike hybrid remove-m1m1 + Devoted Druid (0/2 printed P/T). Storm Herd still rejected.
-30. **Frontier-driven slices (M5.2 Slice 38+):** Path **a** preference remains; cite live P0/P1. Ritual below.
-31. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-32. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+30. **Shalai and Hallar (slice 38)** ✓ — COUNTER_ADDED → that-much damage; Heliod rediscovery. Archangel COMPLETE unlock without short explorer close.
+31. **Frontier-driven slices (M5.2 Slice 39+):** Squirrel Girl → CAST/Shard → Tidespout planned; Path **a** preference remains; cite live P0/P1. Ritual below.
+32. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+33. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 

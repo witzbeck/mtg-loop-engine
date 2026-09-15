@@ -185,7 +185,8 @@ measure frontier → smallest reusable gap → discover → adjudicate → contr
    - **Slices 33–34 (Earthcraft + Wirewood)** ✓ — `TapCreatureCost` → untap basic land (hold priority before Drake bounce); Wirewood battlefield-Elf any-color; Staff rediscovery.
    - **Slice 35 (Squirrel Nest)** ✓ — enchanted-land `{T}`: create Squirrel (`TapCost.host="land"`); Earthcraft rediscovery. Deferred Patrol Signaler / Quillspike; rejected Storm Herd.
    - **Slices 36–37 (Patrol Signaler + Quillspike)** ✓ — `{1}{W}{Q}` create + Plains/Earthcraft; hybrid remove-m1m1 + Devoted Druid (printed 0/2).
-   - **Slice 38+** ○ — cite live P0/P1; Path **a** preference.
+   - **Slice 38 (Shalai and Hallar)** ✓ — COUNTER_ADDED on controlled creature → that-much damage; Heliod rediscovery. Archangel mass-puts unlock COMPLETE (no short explorer close).
+   - **Slice 39+** ○ — Squirrel Girl → CAST/Shard → Tidespout (planned A→B→B′→B″→C).
    - **Path b (Bond/Blood)** ✓ — explicit generic life-gain seed; `core_bond_blood` frozen; disclosed on witness.
    - **Path b (Mindcrank / Bloodchief)** ✓ — explicit generic opponent life-loss seed (`seed_lose_life`, drain-sized); disclosed on witness.
    - **Rules-evidence rails** ✓ — [`docs/RULES_EVIDENCE.md`](docs/RULES_EVIDENCE.md), [`AGENTS.md`](AGENTS.md), [`.cursor/rules/rules-evidence.mdc`](.cursor/rules/rules-evidence.mdc), [`.agents/skills/rules-evidence/`](.agents/skills/rules-evidence/).

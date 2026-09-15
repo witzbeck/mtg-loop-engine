@@ -1610,6 +1610,30 @@ def pat_create_token_put_p1p1_other(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_counters_put_damage_opponent(text: str, name: str) -> Ability | None:
+    """Shalai and Hallar: counters put on a creature you control → that much damage."""
+    short = name.split(",")[0].strip() if "," in name else name
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^Whenever one or more \+1/\+1 counters are put on a creature you control, "
+        rf"(?:{name_alt}) deals that much damage to (?:target |each )?opponent\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("counters-damage-opponent", text),
+        event=TriggerEvent.COUNTER_ADDED,
+        filter="controlled_creature",
+        effects=[
+            DealDamageEffect(amount=1, target="opponent", amount_from_trigger=True)
+        ],
+    )
+
+
 def pat_counters_put_may_create_token(text: str, name: str) -> Ability | None:
     """Scurry Oak: when +1/+1 counters are put on this, may create a token."""
     short = name.split(" of ")[0].strip() if " of " in name else name
@@ -2031,6 +2055,7 @@ PATTERNS: list[Pattern] = [
     Pattern("aluren_free_cast", pat_aluren_free_cast),
     Pattern("instant_grant_tap_bounce", pat_instant_grant_tap_bounce),
     Pattern("create_token_put_p1p1_other", pat_create_token_put_p1p1_other),
+    Pattern("counters_put_damage_opponent", pat_counters_put_damage_opponent),
     Pattern("counters_put_may_create_token", pat_counters_put_may_create_token),
     Pattern("etb_untap_target", pat_etb_untap_target),
     Pattern("sac_creature_add_mana", pat_sac_creature_add_mana),

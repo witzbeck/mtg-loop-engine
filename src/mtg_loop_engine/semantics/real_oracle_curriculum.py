@@ -725,4 +725,21 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{1}{G}",
         mana_value=2,
     ),
+    "Shalai and Hallar": RealOracleCurriculum(
+        name="Shalai and Hallar",
+        types=["Legendary", "Creature", "Angel", "Elf"],
+        oracle_text=(
+            "Flying, vigilance\n"
+            "Whenever one or more +1/+1 counters are put on a creature you control, "
+            "Shalai and Hallar deals that much damage to target opponent."
+        ),
+        notes=(
+            "Slice 38: COUNTER_ADDED on controlled creature → that-much damage; "
+            "Heliod rediscovery (paid lifelink grant). Archangel mass-puts unlock "
+            "COMPLETE for frontier but do not close a short explorer loop."
+        ),
+        colors=("R", "G", "W"),
+        mana_cost="{1}{R}{G}{W}",
+        mana_value=4,
+    ),
 }

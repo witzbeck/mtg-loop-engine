@@ -47,6 +47,9 @@ graph TB;
   Oracle-product witnesses that include the seed)
 - When a searched card has a grant-lifelink activate, seed `InitialStateSpec.mana` for one
   paid activation (Path b mana prerequisite — not a free grant)
+- Heliod/Archangel + Shalai-class (`COUNTER_ADDED` → damage): seed life gain to bootstrap
+  (no remove-counter ping start); grant lifelink targets include counter→damage creatures
+  as well as remove-counter pingers
 - When audited printed P/T is present on the fixture, `default_initial_state` uses it;
   `removes_p1p1` + toughness 0 → start with **2** p1p1 counters (SBA-safe)
 - Seed **four** `p1p1` counters on cards whose mana ability scales with +1/+1 counters (Gyre Sage) **or** with power (Kami / Viridian Joiner class via effective power), so Staff-class untap cycles clear (`{3}` untap creature + `{1}` untap Staff)
