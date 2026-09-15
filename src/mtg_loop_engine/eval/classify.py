@@ -35,6 +35,36 @@ _SCALED_MANA_SEED_LABELS: dict[str, str] = {
     "setup:basic-island": (
         "seeded generic basic Island for Earthcraft (identity irrelevant)"
     ),
+    "setup:mana-dork-seed": (
+        "generic tap-mana dork fodder for cast-from-hand loops (identity irrelevant)"
+    ),
+    "setup:bounce-creature-seed": (
+        "generic creature in hand to cast/bounce under grant+Alarm "
+        "(identity irrelevant)"
+    ),
+}
+
+# Setup ActionStep.op → disclosed generic prerequisite (Path-b / Instant grant / …).
+_SETUP_SEED_OP_LABELS: dict[str, str] = {
+    "seed_gain_life": (
+        "generic life-gain seed to start GAIN_LIFE triggers (identity irrelevant)"
+    ),
+    "seed_lose_life": (
+        "generic opponent life-loss seed to start OPPONENT_LOSE_LIFE "
+        "triggers (identity irrelevant)"
+    ),
+    "seed_create_token": (
+        "generic token-create seed to start CREATE_TOKEN triggers "
+        "(Food identity irrelevant)"
+    ),
+    "seed_grant_lifelink": (
+        "physics lifelink grant seed (not product-legal for ORACLE_EXACT; "
+        "identity of grant source irrelevant once lifelink is on the pinger)"
+    ),
+    "seed_grant_tap_bounce": (
+        "Instant tap-bounce grant seed (Banishing Knack / Retraction Helix "
+        "class; grant persists for the witness)"
+    ),
 }
 
 
@@ -180,6 +210,20 @@ def analyze_prerequisites(witness: LoopWitness) -> PrerequisiteAnalysis:
                 )
             )
             generic.append(text)
+
+    seen_generics = set(generic)
+    for step in witness.setup_actions:
+        label = _SETUP_SEED_OP_LABELS.get(step.op)
+        if label is None or label in seen_generics:
+            continue
+        seen_generics.add(label)
+        assumptions.append(
+            StateAssumption(
+                kind=AssumptionKind.GENERIC_PREREQUISITE,
+                description=label,
+            )
+        )
+        generic.append(label)
 
     for step in witness.loop_actions:
         perm = perms.get(step.actor or "")

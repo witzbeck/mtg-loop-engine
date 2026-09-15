@@ -197,8 +197,8 @@ measure frontier → smallest reusable gap → discover → adjudicate → contr
    (consistency hygiene).
    - **Docs / cheap helpers (anytime):** name the three color models in package
      READMEs; share `_has_subtype` / `_has_color`-style helpers when touching filters.
-   - **Path-b disclosure merge (when convenient):** `analyze_prerequisites` should
-     classify setup `seed_*` ops and **merge** with board generics so stamped
+   - **Path-b disclosure merge (when convenient):** ✓ `analyze_prerequisites` classifies
+     setup `seed_*` ops and merges with board generics so stamped
      `generic_prerequisites` match what the executor ran.
    - **Structured subject predicates / token colors+subtypes:** only when a frontier
      card forces a **third** sibling filter (e.g. another Elf / white creature) or

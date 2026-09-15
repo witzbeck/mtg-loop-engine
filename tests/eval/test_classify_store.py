@@ -76,6 +76,33 @@ def test_basalt_mana_reflection_is_strict_via_tap_multiplier():
     assert set(analysis.used_oracle_ids) == {BASALT.oracle_id, reflection.oracle_id}
 
 
+def test_path_b_seed_gain_life_disclosed_by_analyze_prerequisites():
+    """Path-b setup seed_* must appear in classify generics (ROADMAP §2b)."""
+    from mtg_loop_engine.semantics.compiler import compile_oracle_text
+    from mtg_loop_engine.semantics.real_oracle_curriculum import REAL_ORACLE_CURRICULUM
+
+    def _compile(key: str):
+        row = REAL_ORACLE_CURRICULUM[key]
+        return compile_oracle_text(
+            oracle_id=f"oracle:{key.lower().replace(' ', '-')}",
+            name=row.name,
+            oracle_text=row.oracle_text,
+            types=row.types,
+        ).semantics
+
+    bond = _compile("Sanguine Bond")
+    blood = _compile("Exquisite Blood")
+    found = explore_pair(bond, blood, max_depth=8)
+    assert found is not None
+    assert any(s.op == "seed_gain_life" for s in found.witness.setup_actions)
+    analysis = analyze_prerequisites(found.witness)
+    assert any("life-gain seed" in g for g in analysis.generic_prerequisites)
+    stamped = [
+        p.description for p in found.witness.classification.generic_prerequisites
+    ]
+    assert any("life-gain seed" in d for d in stamped)
+
+
 def test_store_roundtrip(tmp_path: Path):
     from mtg_loop_engine.eval.explain import record_from_hit
     from mtg_loop_engine.eval.schema import AdjudicationFailureReason, ReferenceStatus

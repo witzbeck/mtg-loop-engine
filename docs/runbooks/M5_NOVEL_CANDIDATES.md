@@ -138,7 +138,7 @@ without scaffolding full Comprehensive Rules (ADR 0006).
 | --- | --- | --- |
 | Document three color models | Docs hygiene (shipped with this note) | `rules/`, `search/` READMEs |
 | Shared subtype/color helpers | When next touching `_queue_triggers` / mana-scale filters | `rules/` |
-| Merge Path-b `seed_*` into `analyze_prerequisites` disclosure | Convenient small PR; physics unchanged | `eval/classify`, `search/explorer` |
+| Merge Path-b `seed_*` into `analyze_prerequisites` disclosure | ✓ shipped | `eval/classify`, `search/explorer` |
 | Structured `TriggeredAbility` subject predicates | Third sibling filter (Elf / white / …) | `semantics/ir`, patterns, executor |
 | Token create carries colors + subtypes | Frontier pair needs colored/typed ETB filters | patterns → IR → executor → seeds |
 
