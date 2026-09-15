@@ -556,4 +556,40 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{U}",
         mana_value=1,
     ),
+    "Fleetfoot Panther": RealOracleCurriculum(
+        name="Fleetfoot Panther",
+        types=["Creature", "Cat"],
+        oracle_text=(
+            "Flash\n"
+            "When this creature enters, return a green or white creature you "
+            "control to its owner's hand."
+        ),
+        notes="Slice 26: ETB bounce green-or-white creature; Aluren rediscovery.",
+        colors=("G", "W"),
+        mana_cost="{1}{G}{W}",
+        mana_value=3,
+    ),
+    "Dream Stalker": RealOracleCurriculum(
+        name="Dream Stalker",
+        types=["Creature", "Illusion"],
+        oracle_text=(
+            "When this creature enters, return a permanent you control to "
+            "its owner's hand."
+        ),
+        notes="Slice 27: ETB bounce any controlled permanent; Alarm rediscovery.",
+        colors=("U",),
+        mana_cost="{1}{U}",
+        mana_value=2,
+    ),
+    "Ancestral Statue": RealOracleCurriculum(
+        name="Ancestral Statue",
+        types=["Artifact", "Creature", "Golem"],
+        oracle_text=(
+            "When this creature enters, return a nonland permanent you control "
+            "to its owner's hand."
+        ),
+        notes="Slice 28: ETB bounce controlled nonland; Alarm + mana-dork pay {4}.",
+        mana_cost="{4}",
+        mana_value=4,
+    ),
 }

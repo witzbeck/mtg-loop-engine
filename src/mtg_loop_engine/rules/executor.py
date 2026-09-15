@@ -715,49 +715,16 @@ class Executor:
             if effect.target == "self":
                 source.zone = effect.zone
                 return None
-            if effect.target == "controlled_creature":
-                if not target_id or target_id not in state.permanents:
-                    return ExecError(
-                        VerificationStatus.ILLEGAL_TARGET, "bounce needs creature"
-                    )
-                bounced = state.permanents[target_id]
-                if (
-                    bounced.zone != Zone.BATTLEFIELD
-                    or bounced.controller != "you"
-                    or not bounced.is_creature
-                ):
-                    return ExecError(
-                        VerificationStatus.ILLEGAL_TARGET,
-                        "bounce target must be a controlled creature",
-                    )
-                bounced.zone = effect.zone
-                bounced.tapped = False
-                return None
-            if effect.target == "target_nonland":
-                if not target_id or target_id not in state.permanents:
-                    return ExecError(
-                        VerificationStatus.ILLEGAL_TARGET,
-                        "bounce needs nonland permanent",
-                    )
-                bounced = state.permanents[target_id]
-                if bounced.zone != Zone.BATTLEFIELD:
-                    return ExecError(
-                        VerificationStatus.ILLEGAL_TARGET,
-                        "bounce target must be on the battlefield",
-                    )
-                # Lands are not modeled with an is_land flag; treat non-creatures
-                # without artifact/enchantment-like board roles via name heuristics
-                # is weak — fail closed: reject only when type line says Land.
-                card = self.semantics.get(bounced.oracle_id)
-                types = [t.casefold() for t in (card.types if card else [])]
-                if "land" in types:
-                    return ExecError(
-                        VerificationStatus.ILLEGAL_TARGET,
-                        "bounce target must be nonland",
-                    )
-                bounced.zone = effect.zone
-                bounced.tapped = False
-                return None
+            if effect.target in {
+                "controlled_creature",
+                "controlled_creature_green_or_white",
+                "controlled_permanent",
+                "controlled_nonland",
+                "target_nonland",
+            }:
+                return self._bounce_to_zone(
+                    state, effect=effect, target_id=target_id
+                )
             return ExecError(
                 VerificationStatus.UNSUPPORTED_SEMANTICS,
                 f"unsupported move target {effect.target}",
@@ -766,6 +733,70 @@ class Executor:
         return ExecError(
             VerificationStatus.UNSUPPORTED_SEMANTICS, f"unknown effect {effect}"
         )
+
+    def _permanent_colors(self, permanent: Permanent) -> set[str]:
+        colors = {c.upper() for c in permanent.colors}
+        if colors:
+            return colors
+        card = self.semantics.get(permanent.oracle_id)
+        return {c.upper() for c in (card.colors if card else [])}
+
+    def _is_land_permanent(self, permanent: Permanent) -> bool:
+        card = self.semantics.get(permanent.oracle_id)
+        types = [t.casefold() for t in (card.types if card else [])]
+        return "land" in types
+
+    def _bounce_to_zone(
+        self,
+        state: GameState,
+        *,
+        effect: MoveToZoneEffect,
+        target_id: str | None,
+    ) -> ExecError | None:
+        if not target_id or target_id not in state.permanents:
+            return ExecError(
+                VerificationStatus.ILLEGAL_TARGET, "bounce needs a permanent"
+            )
+        bounced = state.permanents[target_id]
+        if bounced.zone != Zone.BATTLEFIELD:
+            return ExecError(
+                VerificationStatus.ILLEGAL_TARGET,
+                "bounce target must be on the battlefield",
+            )
+        tgt = effect.target
+        if tgt in {
+            "controlled_creature",
+            "controlled_creature_green_or_white",
+            "controlled_permanent",
+            "controlled_nonland",
+        }:
+            if bounced.controller != "you":
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "bounce target must be controlled by you",
+                )
+        if tgt in {"controlled_creature", "controlled_creature_green_or_white"}:
+            if not bounced.is_creature:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "bounce target must be a controlled creature",
+                )
+        if tgt == "controlled_creature_green_or_white":
+            colors = self._permanent_colors(bounced)
+            if not (colors & {"G", "W"}):
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "bounce target must be green or white",
+                )
+        if tgt in {"controlled_nonland", "target_nonland"}:
+            if self._is_land_permanent(bounced):
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "bounce target must be nonland",
+                )
+        bounced.zone = effect.zone
+        bounced.tapped = False
+        return None
 
     def _on_etb(self, state: GameState, permanent: Permanent) -> None:
         state.bump("etb")

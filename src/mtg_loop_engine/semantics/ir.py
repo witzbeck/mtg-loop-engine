@@ -180,8 +180,18 @@ class MoveToZoneEffect(BaseModel):
     kind: Literal["move_to_zone"] = "move_to_zone"
     zone: Zone
     # controlled_creature: bounce a creature you control (ETB Lion/Drake class).
+    # controlled_creature_green_or_white: Fleetfoot Panther color filter.
+    # controlled_permanent: Dream Stalker — any permanent you control.
+    # controlled_nonland: Ancestral Statue — nonland you control.
     # target_nonland: bounce any nonland permanent (Knack/Helix grant).
-    target: Literal["self", "controlled_creature", "target_nonland"] = "self"
+    target: Literal[
+        "self",
+        "controlled_creature",
+        "controlled_creature_green_or_white",
+        "controlled_permanent",
+        "controlled_nonland",
+        "target_nonland",
+    ] = "self"
 
 
 class GrantLifelinkEffect(BaseModel):
