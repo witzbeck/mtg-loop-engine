@@ -86,7 +86,7 @@ def evaluate_reference_subset(
     variants: list[dict[str, Any]],
     *,
     cards_by_name: dict[str, CardSemantics] | None = None,
-    max_depth: int = 6,
+    max_depth: int = 12,
 ) -> RecoveryReport:
     """Score conventional two-card rows. Pair labels are not passed into search."""
     lookup = cards_by_name or fixtures_by_name()

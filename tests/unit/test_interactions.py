@@ -219,3 +219,72 @@ def test_sac_token_capability_flags():
     caps = extract_capabilities(outlet)
     assert caps.needs_token_fodder()
     assert "sac_token" in caps.requires
+
+
+def test_bounce_free_cast_and_grant_neighborhoods():
+    from mtg_loop_engine.semantics.enums import Zone
+    from mtg_loop_engine.semantics.ir import (
+        FreeCastCreaturesByManaValue,
+        InstantGrantTapBounce,
+        MoveToZoneEffect,
+    )
+
+    drake = CardSemantics(
+        oracle_id="t:drake",
+        name="Drake",
+        types=["Creature"],
+        abilities=[
+            TriggeredAbility(
+                ability_id="bounce",
+                event=TriggerEvent.ENTER_BATTLEFIELD,
+                filter="self",
+                effects=[
+                    MoveToZoneEffect(zone=Zone.HAND, target="controlled_creature")
+                ],
+            )
+        ],
+    )
+    aluren = CardSemantics(
+        oracle_id="t:aluren",
+        name="Aluren",
+        types=["Enchantment"],
+        abilities=[
+            FreeCastCreaturesByManaValue(ability_id="free", max_mana_value=3)
+        ],
+    )
+    knack = CardSemantics(
+        oracle_id="t:knack",
+        name="Knack",
+        types=["Instant"],
+        abilities=[InstantGrantTapBounce(ability_id="grant")],
+    )
+    alarm = CardSemantics(
+        oracle_id="t:alarm",
+        name="Alarm",
+        types=["Enchantment"],
+        abilities=[
+            TriggeredAbility(
+                ability_id="untap-all",
+                event=TriggerEvent.ENTER_BATTLEFIELD,
+                filter="creature",
+                effects=[UntapEffect(target="all_creatures")],
+            )
+        ],
+    )
+    idx = InteractionIndex([drake, aluren])
+    pairs = {(p.left_id, p.right_id): p.reasons for p in idx.candidate_pairs()}
+    key = tuple(sorted((drake.oracle_id, aluren.oracle_id)))
+    assert key in pairs
+    assert "bounce_free_cast" in pairs[key] or "etb_free_cast" in pairs[key]
+
+    idx2 = InteractionIndex([knack, alarm])
+    pairs2 = {(p.left_id, p.right_id): p.reasons for p in idx2.candidate_pairs()}
+    key2 = tuple(sorted((knack.oracle_id, alarm.oracle_id)))
+    assert key2 in pairs2
+    assert "grant_bounce_etb" in pairs2[key2] or "grant_bounce_untap" in pairs2[key2]
+
+    idx3 = InteractionIndex([drake, alarm])
+    pairs3 = {(p.left_id, p.right_id): p.reasons for p in idx3.candidate_pairs()}
+    key3 = tuple(sorted((drake.oracle_id, alarm.oracle_id)))
+    assert key3 in pairs3
+    assert "bounce_untap" in pairs3[key3]

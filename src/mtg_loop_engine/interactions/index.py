@@ -97,6 +97,17 @@ class InteractionIndex:
             out |= self.by_triggers["card_to_opponent_graveyard"]
         if "card_to_opponent_graveyard" in cap.triggers_on:
             out |= self.by_produces["mill"]
+        # Bounce / free-cast / Instant grant (slices 24–25).
+        if "bounce_to_hand" in cap.produces:
+            out |= self.by_modifies["free_cast_creature"] | self.by_produces["untap"]
+        if "free_cast_creature" in cap.modifies:
+            out |= self.by_produces["bounce_to_hand"] | self.by_triggers["enter_battlefield"]
+        if "enter_battlefield" in cap.triggers_on:
+            out |= self.by_modifies["free_cast_creature"] | self.by_produces["grant_tap_bounce"]
+        if "grant_tap_bounce" in cap.produces:
+            out |= self.by_triggers["enter_battlefield"] | self.by_produces["untap"]
+        if "untap" in cap.produces:
+            out |= self.by_produces["bounce_to_hand"] | self.by_produces["grant_tap_bounce"]
         out.discard(oid)
         return out
 

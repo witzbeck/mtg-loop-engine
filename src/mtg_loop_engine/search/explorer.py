@@ -322,8 +322,11 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
         else:
             counters = {}
         # Aluren + Drake/Lion: start bounce creature in hand for free recast.
+        # Alarm + Drake/Lion: same — cast pays mana from seeded dorks.
         start_zone = Zone.BATTLEFIELD
-        if is_creature and _has_etb_bounce_to_hand(card) and free_cast_partner:
+        if is_creature and _has_etb_bounce_to_hand(card) and (
+            free_cast_partner or alarm_partner
+        ):
             start_zone = Zone.HAND
         permanents.append(
             bf(
@@ -384,6 +387,12 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
             )
         )
     # Knack/Helix + Alarm: mana dorks, grant host, creature in hand to bounce.
+    # Drake/Lion + Alarm (no Aluren): mana dorks so cast_from_hand can pay MV.
+    bounce_alarm_cast = (
+        alarm_partner
+        and any(_has_etb_bounce_to_hand(c) for c in ordered)
+        and not free_cast_partner
+    )
     if instant_grant and alarm_partner:
         for i in range(_MANA_DORK_SEED_COUNT):
             permanents.append(
@@ -417,6 +426,18 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
                 zone=Zone.HAND,
             )
         )
+    elif bounce_alarm_cast:
+        for i in range(_MANA_DORK_SEED_COUNT):
+            permanents.append(
+                bf(
+                    f"mana_dork_{i}",
+                    MANA_DORK_SEED_ORACLE_ID,
+                    "Seed Mana Dork",
+                    is_creature=True,
+                    power=1,
+                    toughness=1,
+                )
+            )
     pair_caps = [extract_capabilities(c) for c in ordered]
     if any(c.needs_creature_count_mana_seed() for c in pair_caps):
         for i in range(_SCALED_MANA_SEED_COUNT):

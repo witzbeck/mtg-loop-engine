@@ -204,6 +204,8 @@ def join_reasons(left: CardCapabilities, right: CardCapabilities) -> list[str]:
         reasons.append("bounce_free_cast")
     if "enter_battlefield" in left.triggers_on and "free_cast_creature" in right.modifies:
         reasons.append("etb_free_cast")
+    if "bounce_to_hand" in left.produces and "untap" in right.produces:
+        reasons.append("bounce_untap")
     if "grant_tap_bounce" in left.produces and "enter_battlefield" in right.triggers_on:
         reasons.append("grant_bounce_etb")
     if "grant_tap_bounce" in right.produces and "untap" in left.produces:
