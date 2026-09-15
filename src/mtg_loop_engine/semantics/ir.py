@@ -93,6 +93,7 @@ class AddManaEffect(BaseModel):
         None, "green", "any_color", "colorless"
     ] = None
     # Scaled tap mana (Circle / Priest / Bloom Tender class).
+    # Also Mana Echoes ETB → colorless × sharing creature type (trigger subject).
     mana_scale: ManaScaleKind | None = None
     scale_color: Literal["green", "any_color", "colorless"] = "green"
 

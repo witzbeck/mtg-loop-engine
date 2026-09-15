@@ -1403,6 +1403,32 @@ def pat_etb_bounce_sharing_type(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_etb_mana_sharing_creature_type(text: str, name: str) -> Ability | None:
+    """Mana Echoes: creature ETB → add {C} × controlled creatures sharing a type."""
+    from mtg_loop_engine.semantics.enums import ManaScaleKind
+
+    m = re.match(
+        r"^Whenever a creature enters(?: the battlefield)?, "
+        r"you may add an amount of \{C\} equal to the number of creatures you control "
+        r"that share a creature type with it\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("etb-mana-share-type", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="creature",
+        effects=[
+            AddManaEffect(
+                mana_scale=ManaScaleKind.CONTROLLED_SHARING_CREATURE_TYPE,
+                scale_color="colorless",
+            )
+        ],
+    )
+
+
 def pat_aluren_free_cast(text: str, name: str) -> Ability | None:
     """Aluren: cast creatures with mana value ≤ 3 without paying mana."""
     m = re.match(
@@ -1905,6 +1931,7 @@ PATTERNS: list[Pattern] = [
     Pattern("etb_bounce_controlled_nonland", pat_etb_bounce_controlled_nonland),
     Pattern("activated_bounce_other_creature", pat_activated_bounce_other_creature),
     Pattern("etb_bounce_sharing_type", pat_etb_bounce_sharing_type),
+    Pattern("etb_mana_sharing_creature_type", pat_etb_mana_sharing_creature_type),
     Pattern("aluren_free_cast", pat_aluren_free_cast),
     Pattern("instant_grant_tap_bounce", pat_instant_grant_tap_bounce),
     Pattern("create_token_put_p1p1_other", pat_create_token_put_p1p1_other),

@@ -59,6 +59,41 @@ def _has_defender(sem: CardSemantics) -> bool:
     return False
 
 
+# CR 205.2a card types + 205.4a supertypes — not creature subtypes.
+_NON_CREATURE_TYPE_WORDS = frozenset(
+    {
+        "artifact",
+        "battle",
+        "conspiracy",
+        "creature",
+        "dungeon",
+        "enchantment",
+        "instant",
+        "land",
+        "phenomenon",
+        "plane",
+        "planeswalker",
+        "scheme",
+        "sorcery",
+        "tribal",
+        "kindred",
+        "vanguard",
+        "basic",
+        "legendary",
+        "ongoing",
+        "snow",
+        "world",
+        "token",
+        "colorless",
+        "white",
+        "blue",
+        "black",
+        "red",
+        "green",
+    }
+)
+
+
 def _controlled_permanents(state: GameState, controller: str = "you") -> list[Permanent]:
     return [
         p
@@ -400,6 +435,37 @@ class Executor:
                         )
                     if colors:
                         state.bump("mana", len(colors) * mult)
+                    return None
+                if (
+                    effect.mana_scale
+                    is ManaScaleKind.CONTROLLED_SHARING_CREATURE_TYPE
+                ):
+                    if (
+                        not trigger_subject_id
+                        or trigger_subject_id not in state.permanents
+                    ):
+                        return ExecError(
+                            VerificationStatus.ILLEGAL_TARGET,
+                            "sharing-type mana needs trigger subject",
+                        )
+                    subject = state.permanents[trigger_subject_id]
+                    subtypes = self._creature_subtypes(subject)
+                    if not subtypes:
+                        return None
+                    qty = sum(
+                        1
+                        for p in _controlled_permanents(state)
+                        if p.is_creature
+                        and (self._creature_subtypes(p) & subtypes)
+                    )
+                    if qty > 0:
+                        color = effect.scale_color
+                        setattr(
+                            state.mana,
+                            color,
+                            getattr(state.mana, color) + qty,
+                        )
+                        state.bump("mana", qty)
                     return None
                 qty = self._effective_tap_mana_qty(
                     state,
@@ -776,6 +842,24 @@ class Executor:
         if permanent.is_artifact:
             types.add("artifact")
         return types & self._PERMANENT_TYPES
+
+    def _creature_subtypes(self, permanent: Permanent) -> set[str]:
+        """Creature subtypes for Mana Echoes-style type sharing."""
+        card = self.semantics.get(permanent.oracle_id)
+        if card is not None:
+            return {
+                t.casefold()
+                for t in card.types
+                if t.casefold() not in _NON_CREATURE_TYPE_WORDS
+            }
+        # Token without registered semantics: infer from name words (e.g. "colorless Sliver").
+        if permanent.is_creature:
+            return {
+                w
+                for w in permanent.name.casefold().split()
+                if w not in _NON_CREATURE_TYPE_WORDS
+            }
+        return set()
 
     def _is_land_permanent(self, permanent: Permanent) -> bool:
         return "land" in self._permanent_type_set(permanent)
