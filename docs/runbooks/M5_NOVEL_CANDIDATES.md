@@ -117,6 +117,35 @@ uv run python scripts/spellbook_absent_discovery.py
 4. Positive verify + adversarial hard negative.
 5. Discovery/seam regression when search behavior changes.
 6. Remeasure frontier + absent discovery; seed workbench when absences appear.
+7. **Sibling check (hygiene):** if the slice adds a compound subject filter, mana-scale
+   arm, or color observation path that duplicates an existing sibling (e.g. Human vs
+   green ETB filters), prefer a shared helper now; schedule a structured predicate /
+   parameterized pattern family only when this is the **third** copy or the frontier
+   needs token colors/subtypes. Do not open a wholesale de-hardcode PR without
+   pair-unlock evidence (`ROADMAP.md` §2b).
+
+#### Consistency hygiene (opportunistic)
+
+Not an M5 Slice epic. Keeps witness construction, disclosure, and IR filters aligned
+without scaffolding full Comprehensive Rules (ADR 0006).
+
+| Follow-through | When | Owner packages |
+| --- | --- | --- |
+| Document three color models | Docs hygiene (shipped with this note) | `rules/`, `search/` READMEs |
+| Shared subtype/color helpers | When next touching `_queue_triggers` / mana-scale filters | `rules/` |
+| Merge Path-b `seed_*` into `analyze_prerequisites` disclosure | Convenient small PR; physics unchanged | `eval/classify`, `search/explorer` |
+| Structured `TriggeredAbility` subject predicates | Third sibling filter (Elf / white / …) | `semantics/ir`, patterns, executor |
+| Token create carries colors + subtypes | Frontier pair needs colored/typed ETB filters | patterns → IR → executor → seeds |
+
+**Three color models** (do not conflate):
+
+1. **Payment** — `ManaAmount.any_color` may pay W/U/B/R/G; generic cannot pay colored.
+2. **Permanent / card colors** — `Permanent.colors` / `CardSemantics.colors` (Ivy Lane).
+3. **Vivid / devotion proxies** — inferred from activated-cost mana symbols today; not the same as (2).
+
+**Intentional (not debt):** explorer category seeds (creature/elf/defender fodder, Path-b
+life/token seeds, Queen+Altar bootstrap); `seed_grant_lifelink` quarantine; search-only
+participant gate.
 
 #### Life-drain bootstrap (policy)
 
@@ -180,3 +209,5 @@ M5 exit also requires the checklist in [`ROADMAP.md`](../../ROADMAP.md) (reprodu
 - Treat absence as a false positive or auto-`NOVEL`.
 - Tighten joins solely to hide absences.
 - Scaffold deferred M6/M7/LLM/`VERIFIED`-path work.
+- Open a wholesale “de-hardcode witness/oracle / full color-query” epic without frontier
+  pair-unlock evidence (ADR 0006 / `ROADMAP.md` §2b).

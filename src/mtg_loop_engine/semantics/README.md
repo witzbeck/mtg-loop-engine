@@ -91,6 +91,11 @@ Real-Oracle curriculum under `real_oracle_curriculum.py` includes live Gravecraw
 1. Add a deterministic pattern in `patterns/` for the unsupported family.
 2. Prove it with a fixture/compiler test before claiming coverage wins.
 3. Prefer real-Oracle fragments from Spellbook failure taxonomy (`ROADMAP.md` M4 follow-through) over gold-only wording.
+4. Prefer reusable IR (shared effect/amount/filter fields) over card-shaped one-offs.
+   Compound subject filters (`other_controlled_human` / `other_controlled_green`) may
+   stay as literals through a second sibling; on a **third** subtype/color twin, prefer
+   structured predicates (or a parameterized pattern family) rather than another
+   `Literal` + executor branch — see `ROADMAP.md` §2b and the M5 runbook hygiene table.
 
 ## Bigger-picture relationship
 

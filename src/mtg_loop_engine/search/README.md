@@ -107,6 +107,16 @@ CLI: `mtg-loop-engine discover-gold`.
 
 Discovered witnesses carry `assumptions=["discovered_without_pair_labels", …]` and classification stamped from `analyze_prerequisites`. Accepted discoveries are always `strict_two_card=True` under current search policy (both essentials participate; functional externals empty). They may still list `generic_prerequisites` (tokens, aura host, scaled-mana fodder, Path-b life seeds). Pair keys from corpus are eval-only and must not be imported here.
 
+**Color seeding:** essentials copy `card.colors` onto `PermanentSpec`; category fodder /
+`token:seed` usually omit colors. That is fine for current scaled-mana unlocks. Green
+ETB filters that depend on seed tokens ETBing will need token color/subtype plumbing
+(`ROADMAP.md` §2b) — payment `any_color` does not satisfy those filters.
+
+**Disclosure caveat:** `build_witness` may build Path-b setup-seed generic descriptions,
+then replace them with `analyze_prerequisites` board generics when that analysis is
+non-empty. Setup ops still run; stamped text can omit Path-b lines until classify merges
+setup `seed_*` ops (`ROADMAP.md` §2b).
+
 ## Failure behavior
 
 Returns `None` / empty verified hits when bounds exhaust, the oracle rejects all candidates, or only bystander-verified sequences exist. Injected reject-all verifier ⇒ no hits (`tests/unit/test_explorer.py`).

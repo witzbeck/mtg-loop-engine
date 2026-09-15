@@ -183,6 +183,22 @@ measure frontier → smallest reusable gap → discover → adjudicate → contr
    - **Path b (Mindcrank / Bloodchief)** ✓ — explicit generic opponent life-loss seed (`seed_lose_life`, drain-sized); disclosed on witness.
    - **Rules-evidence rails** ✓ — [`docs/RULES_EVIDENCE.md`](docs/RULES_EVIDENCE.md), [`AGENTS.md`](AGENTS.md), [`.cursor/rules/rules-evidence.mdc`](.cursor/rules/rules-evidence.mdc), [`.agents/skills/rules-evidence/`](.agents/skills/rules-evidence/).
 
+2b. **Witness / IR consistency hygiene (opportunistic; not a Slice epic)** ○ —
+   Curriculum grows attested physics deliberately (ADR 0003 / 0010): Human before green
+   was sequencing (`types` existed; `colors` plumbed in Slice 21), not a standing gap.
+   Forward consistency is a side effect of the M5.2 ritual; retroactive hygiene is
+   **not** a named de-hardcode workstream and must **not** scaffold full color/mana/
+   targeting CR (ADR 0006). Detail: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDIDATES.md)
+   (consistency hygiene).
+   - **Docs / cheap helpers (anytime):** name the three color models in package
+     READMEs; share `_has_subtype` / `_has_color`-style helpers when touching filters.
+   - **Path-b disclosure merge (when convenient):** `analyze_prerequisites` should
+     classify setup `seed_*` ops and **merge** with board generics so stamped
+     `generic_prerequisites` match what the executor ran.
+   - **Structured subject predicates / token colors+subtypes:** only when a frontier
+     card forces a **third** sibling filter (e.g. another Elf / white creature) or
+     when colored/typed token ETB is required for unlock — not as a standalone epic.
+
 3. **Workbench adjudication (M5.3)** ◐ — live queue after slice 23 remeasure (**70** COMPLETE · **62** verified · **56** in_reference · **6** absent): prior defender-mana / Heronblade aura / Sunbond pairs — all **`valid_generic_prerequisite`**, keep `ABSENT_FROM_REFERENCE` (not `NOVEL`). Run `--persist-workbench` after each curriculum PR.
 4. **Optional baseline / M5.4 exit** — freeze an absent-discovery summary only when intentionally certifying; then apply the M5 exit gate above.
 

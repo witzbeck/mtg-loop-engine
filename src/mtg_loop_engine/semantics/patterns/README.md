@@ -78,6 +78,9 @@ Covered via `tests/semantic/test_compiler.py` (all gold fixtures compile `COMPLE
 1. Add the narrowest pattern that matches real Oracle (not only gold fixture wording).
 2. Place it in order so it does not shadow a more specific matcher incorrectly.
 3. Add/extend a compiler test before merging.
+4. When adding a third sibling of an existing compound filter / mana-scale / ETB→counter
+   family, prefer parameterization or structured IR over another one-off `pat_*` +
+   filter string (`ROADMAP.md` §2b).
 
 ## Bigger-picture relationship
 

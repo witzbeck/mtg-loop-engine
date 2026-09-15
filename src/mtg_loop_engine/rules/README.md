@@ -49,7 +49,7 @@ graph TB;
 - Power-scaled tap mana (`equal_to_source_power`) uses `Permanent.effective_power()` (printed ± counters).
 - `AddCounterEffect.amount_from_trigger` + `target=enchanted_creature`: Sunbond / Light of Promise put that many +1/+1 on the host creature (explorer supplies the host target; no attachment graph yet).
 - `AddCounterEffect.target=each_controlled_creature`: Archangel / Cathars mass +1/+1 puts (per-creature `COUNTER_ADDED` triggers).
-- Trigger filters `controlled_creature` / `other_controlled_creature` / `other_controlled_human` for ETB subject gates.
+- Trigger filters `controlled_creature` / `other_controlled_creature` / `other_controlled_human` / `other_controlled_green` for ETB subject gates.
 
 ## Non-responsibilities
 
@@ -64,6 +64,20 @@ graph TB;
 - Cost reduction and trigger resolution must match what patterns claim to support.
 - `ManaAmount.any_color` models "mana of any color": it may pay W/U/B/R/G (or generic), but generic mana still cannot pay colored costs.
 - Adversarial witnesses (targets/triggers the explorer would never emit) must still fail closed.
+
+### Color models (three distinct notions)
+
+| Model | Source of truth | Typical consumers |
+| --- | --- | --- |
+| **Payment** | `ManaAmount` WUBRG + `any_color` | Cost payment (`pay_mana`) |
+| **Permanent / card colors** | `Permanent.colors` (fallback `CardSemantics.colors`) | Subject filters (`other_controlled_green`) |
+| **Vivid / devotion proxies** | Mana symbols on **activated costs** among controlled permanents | `VIVID_PERMANENT_COLORS`, `DEVOTION_GREEN` scales |
+
+Payment “any color” is not permanent color identity. Vivid/devotion do not currently read
+`Permanent.colors`. Compound trigger filters (`other_controlled_human` vs
+`other_controlled_green`) are curriculum-shaped literals; generalize to structured
+predicates only on a third sibling or frontier need (`ROADMAP.md` §2b /
+[`docs/runbooks/M5_NOVEL_CANDIDATES.md`](../../../docs/runbooks/M5_NOVEL_CANDIDATES.md)).
 
 ## Main entry points
 
