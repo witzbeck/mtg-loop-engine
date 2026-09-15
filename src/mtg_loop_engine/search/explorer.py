@@ -143,6 +143,33 @@ def _has_etb_bounce_to_hand(card: CardSemantics) -> bool:
     )
 
 
+def _has_activated_bounce_other_creature(card: CardSemantics) -> bool:
+    return any(
+        isinstance(ab, ActivatedAbility)
+        and any(
+            isinstance(e, MoveToZoneEffect)
+            and e.zone == Zone.HAND
+            and e.target == "other_controlled_creature"
+            for e in ab.effects
+        )
+        for ab in card.abilities
+    )
+
+
+def _has_cloudstone_bounce(card: CardSemantics) -> bool:
+    return any(
+        isinstance(ab, TriggeredAbility)
+        and ab.event == TriggerEvent.ENTER_BATTLEFIELD
+        and any(
+            isinstance(e, MoveToZoneEffect)
+            and e.zone == Zone.HAND
+            and e.target == "other_controlled_sharing_type"
+            for e in ab.effects
+        )
+        for ab in card.abilities
+    )
+
+
 def _has_free_cast(card: CardSemantics) -> bool:
     return any(isinstance(ab, FreeCastCreaturesByManaValue) for ab in card.abilities)
 
@@ -152,13 +179,12 @@ def _has_instant_grant_tap_bounce(card: CardSemantics) -> bool:
 
 
 def _has_etb_untap_all_creatures(card: CardSemantics) -> bool:
-    """Intruder Alarm class: creature ETB → untap all creatures."""
+    """Intruder Alarm / Village Bell-Ringer: ETB → untap all creatures."""
     from mtg_loop_engine.semantics.ir import UntapEffect
 
     return any(
         isinstance(ab, TriggeredAbility)
         and ab.event == TriggerEvent.ENTER_BATTLEFIELD
-        and ab.filter == "creature"
         and any(isinstance(e, UntapEffect) and e.target == "all_creatures" for e in ab.effects)
         for ab in card.abilities
     )
@@ -299,6 +325,8 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
     free_cast_partner = any(_has_free_cast(c) for c in ordered)
     instant_grant = any(_has_instant_grant_tap_bounce(c) for c in ordered)
     alarm_partner = any(_has_etb_untap_all_creatures(c) for c in ordered)
+    activated_bounce = any(_has_activated_bounce_other_creature(c) for c in ordered)
+    cloudstone_partner = any(_has_cloudstone_bounce(c) for c in ordered)
     permanents = []
     for i, card in enumerate(ordered):
         types = {t.lower() for t in card.types}
@@ -329,10 +357,13 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
             counters = {}
         # Aluren + Drake/Lion: start bounce creature in hand for free recast.
         # Alarm + Drake/Lion: same — cast pays mana from seeded dorks.
+        # Cloudstone + Aluren: cast creature from hand; bounce a second creature.
         start_zone = Zone.BATTLEFIELD
         if is_creature and _has_etb_bounce_to_hand(card) and (
             free_cast_partner or alarm_partner
         ):
+            start_zone = Zone.HAND
+        elif is_creature and cloudstone_partner and free_cast_partner:
             start_zone = Zone.HAND
         permanents.append(
             bf(
@@ -449,6 +480,51 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
                     toughness=1,
                 )
             )
+    # Temur + Bell-Ringer: mana dorks pay bounce activation + recast after untap-all.
+    elif activated_bounce and alarm_partner:
+        # {1}{G} bounce + {2}{W} Bell-Ringer ≈ 5 any-color taps per cycle.
+        for i in range(max(_MANA_DORK_SEED_COUNT, 5)):
+            permanents.append(
+                bf(
+                    f"mana_dork_{i}",
+                    MANA_DORK_SEED_ORACLE_ID,
+                    "Seed Mana Dork",
+                    is_creature=True,
+                    power=1,
+                    toughness=1,
+                )
+            )
+    # Cloudstone + Aluren: need a second Creature on BF to bounce (type-share).
+    if cloudstone_partner and free_cast_partner:
+        has_bf_creature = any(
+            p.is_creature and p.zone == Zone.BATTLEFIELD for p in permanents
+        )
+        has_hand_creature = any(
+            p.is_creature and p.zone == Zone.HAND for p in permanents
+        )
+        if not has_hand_creature:
+            permanents.append(
+                bf(
+                    "cloudstone_cast_seed",
+                    BOUNCE_CREATURE_SEED_ORACLE_ID,
+                    "Seed Bounce Creature",
+                    is_creature=True,
+                    power=1,
+                    toughness=1,
+                    zone=Zone.HAND,
+                )
+            )
+        if not has_bf_creature:
+            permanents.append(
+                bf(
+                    "cloudstone_bf_seed",
+                    BOUNCE_CREATURE_SEED_ORACLE_ID,
+                    "Seed Bounce Creature",
+                    is_creature=True,
+                    power=1,
+                    toughness=1,
+                )
+            )
     pair_caps = [extract_capabilities(c) for c in ordered]
     if any(c.needs_creature_count_mana_seed() for c in pair_caps):
         for i in range(_SCALED_MANA_SEED_COUNT):
@@ -514,6 +590,13 @@ def _effect_needs_permanent_target(ability: ActivatedAbility) -> bool:
         if getattr(effect, "target", None) in {
             "target_permanent",
             "target_other_creature",
+            "other_controlled_creature",
+            "other_controlled_sharing_type",
+            "controlled_creature",
+            "controlled_creature_green_or_white",
+            "controlled_permanent",
+            "controlled_nonland",
+            "target_nonland",
         }:
             return True
     return False
@@ -582,9 +665,11 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
             )
             needs_target = False
             exclude_source = False
+            exclude_subject = False
             require_creature = False
             require_nonland = False
             require_gw = False
+            require_share_type = False
             if ab is not None:
                 for effect in getattr(ab, "effects", []):
                     tgt = getattr(effect, "target", None)
@@ -596,10 +681,16 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
                         "controlled_creature_green_or_white",
                         "controlled_permanent",
                         "controlled_nonland",
+                        "other_controlled_creature",
+                        "other_controlled_sharing_type",
                         "target_nonland",
                     }:
                         needs_target = True
-                    if tgt in {"target_other_creature", "enchanted_creature"}:
+                    if tgt in {
+                        "target_other_creature",
+                        "enchanted_creature",
+                        "other_controlled_creature",
+                    }:
                         exclude_source = True
                         require_creature = True
                     if tgt in {
@@ -607,14 +698,20 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
                         "controlled_creature_green_or_white",
                     }:
                         require_creature = True
+                    if tgt == "other_controlled_sharing_type":
+                        exclude_subject = True
+                        require_share_type = True
                     if tgt == "target_nonland" or tgt == "controlled_nonland":
                         require_nonland = True
                     require_gw = tgt == "controlled_creature_green_or_white"
             if needs_target:
+                exclude = set()
+                if exclude_source:
+                    exclude.add(trig["source_id"])
+                if exclude_subject and trig.get("subject_id"):
+                    exclude.add(trig["subject_id"])
                 candidates = [
-                    oid
-                    for oid in tapped_first
-                    if not exclude_source or oid != trig["source_id"]
+                    oid for oid in tapped_first if oid not in exclude
                 ]
                 if require_creature:
                     candidates = [
@@ -641,6 +738,21 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
                         if colors & {"G", "W"}:
                             gw.append(oid)
                     candidates = gw
+                if require_share_type:
+                    subject_id = trig.get("subject_id")
+                    subject = (
+                        state.permanents.get(subject_id) if subject_id else None
+                    )
+                    if subject is None:
+                        candidates = []
+                    else:
+                        subj_types = executor._permanent_type_set(subject)
+                        candidates = [
+                            oid
+                            for oid in candidates
+                            if executor._permanent_type_set(state.permanents[oid])
+                            & subj_types
+                        ]
             else:
                 candidates = [None]
             for target in candidates:
@@ -692,7 +804,21 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
                 targets = ["opponent", perm.object_id]
             elif need_effect_target:
                 exclude_source = any(
-                    getattr(e, "target", None) == "target_other_creature"
+                    getattr(e, "target", None)
+                    in {
+                        "target_other_creature",
+                        "other_controlled_creature",
+                    }
+                    for e in ab.effects
+                )
+                require_creature = any(
+                    getattr(e, "target", None)
+                    in {
+                        "target_other_creature",
+                        "other_controlled_creature",
+                        "controlled_creature",
+                        "controlled_creature_green_or_white",
+                    }
                     for e in ab.effects
                 )
                 targets = [
@@ -701,10 +827,7 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
                     if p.zone == Zone.BATTLEFIELD
                     and p.controller == "you"
                     and (not exclude_source or p.object_id != perm.object_id)
-                    and (
-                        not exclude_source
-                        or p.is_creature
-                    )
+                    and (not require_creature or p.is_creature)
                 ]
             else:
                 targets = [None]

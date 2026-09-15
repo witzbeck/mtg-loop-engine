@@ -1362,6 +1362,47 @@ def pat_etb_bounce_controlled_nonland(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_activated_bounce_other_creature(text: str, name: str) -> Ability | None:
+    """Temur Sabertooth: paid bounce another creature; indestructible rider is proof-irrelevant."""
+    m = re.match(
+        r"^((?:\{[^}]+\})+): You may return another creature you control to "
+        r"(?:its|their) owner's hand\. If you do, "
+        r"(?:this creature|~|"
+        + re.escape(name)
+        + r") gains indestructible until end of turn\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("activated-bounce-other", text),
+        costs=[ManaCost(amount=_parse_mana_braces(m.group(1)))],
+        effects=[MoveToZoneEffect(zone=Zone.HAND, target="other_controlled_creature")],
+    )
+
+
+def pat_etb_bounce_sharing_type(text: str, name: str) -> Ability | None:
+    """Cloudstone Curio: nonartifact ETB may bounce another permanent sharing a type."""
+    m = re.match(
+        r"^Whenever a nonartifact permanent you control enters(?: the battlefield)?, "
+        r"you may return another permanent you control that shares a permanent type "
+        r"with it to (?:its|their) owner's hand\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("etb-bounce-share-type", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="controlled_nonartifact",
+        effects=[
+            MoveToZoneEffect(zone=Zone.HAND, target="other_controlled_sharing_type")
+        ],
+    )
+
+
 def pat_aluren_free_cast(text: str, name: str) -> Ability | None:
     """Aluren: cast creatures with mana value ≤ 3 without paying mana."""
     m = re.match(
@@ -1862,6 +1903,8 @@ PATTERNS: list[Pattern] = [
     Pattern("etb_bounce_controlled_creature_gw", pat_etb_bounce_controlled_creature_gw),
     Pattern("etb_bounce_controlled_permanent", pat_etb_bounce_controlled_permanent),
     Pattern("etb_bounce_controlled_nonland", pat_etb_bounce_controlled_nonland),
+    Pattern("activated_bounce_other_creature", pat_activated_bounce_other_creature),
+    Pattern("etb_bounce_sharing_type", pat_etb_bounce_sharing_type),
     Pattern("aluren_free_cast", pat_aluren_free_cast),
     Pattern("instant_grant_tap_bounce", pat_instant_grant_tap_bounce),
     Pattern("create_token_put_p1p1_other", pat_create_token_put_p1p1_other),
