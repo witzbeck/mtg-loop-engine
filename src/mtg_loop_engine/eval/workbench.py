@@ -126,14 +126,36 @@ def _render_card_header(st, name: str, oracle_text: str) -> None:
 
 def _render_loop_narrative(st, witness, proof) -> None:
     st.markdown("#### How the loop works")
+    st.markdown("**Object map** (ids in loop steps ≠ Card 1 / Card 2 order)")
+    for perm in witness.initial_state.permanents:
+        zone = perm.zone.value if hasattr(perm.zone, "value") else perm.zone
+        st.write(f"- `{perm.object_id}` — **{perm.name}** · zone `{zone}`")
+    claim = getattr(proof, "claim_consequence", None)
+    claim_val = claim.value if claim is not None and hasattr(claim, "value") else claim
+    net = getattr(proof, "net_state", None)
+    claim_line = f"`{claim_val}`" if claim_val else "(none)"
+    st.markdown(f"**Claim consequence:** {claim_line}")
+    if net is not None:
+        mana = net.mana
+        st.caption(
+            "Net per iteration — "
+            f"mana W/U/B/R/G/C="
+            f"{mana.white}/{mana.blue}/{mana.black}/{mana.red}/"
+            f"{mana.green}/{mana.colorless}; "
+            f"life_you={net.life_you}; life_opponent={net.life_opponent}; "
+            f"tokens={net.creature_tokens}; +1/+1={net.plus_one_counters}"
+        )
     st.markdown(full_narrative(witness, proof))
 
 
 def _render_verifier_details(st, candidate) -> None:
     with st.expander(":material/verified: Verifier details", expanded=False):
+        claim = candidate.proof.claim_consequence
+        claim_val = claim.value if claim is not None else "(none)"
         st.markdown(
             f"**Status:** `{candidate.proof.status.value}`  \n"
             f"**Coverage:** `{candidate.proof.semantic_coverage.value}`  \n"
+            f"**Claim consequence:** `{claim_val}`  \n"
             f"**Proof hash:** `{candidate.proof.proof_hash}`"
         )
         analysis = candidate.analysis
@@ -142,9 +164,16 @@ def _render_verifier_details(st, candidate) -> None:
             f"{analysis.essential_functional_count} participating card(s), "
             f"`strict_two_card={analysis.strict_two_card}`"
         )
+        st.markdown("**Object map**")
+        for perm in candidate.witness.initial_state.permanents:
+            zone = perm.zone.value if hasattr(perm.zone, "value") else perm.zone
+            st.write(f"- `{perm.object_id}` — {perm.name} · `{zone}`")
         st.markdown("**Starting-state assumptions**")
         for assumption in analysis.assumptions:
-            st.write(f"- `{assumption.kind.value}` — {assumption.description}")
+            oid = f" (`{assumption.object_id}`)" if assumption.object_id else ""
+            st.write(
+                f"- `{assumption.kind.value}` — {assumption.description}{oid}"
+            )
         st.markdown("**Prerequisites**")
         st.write("Generic:", analysis.generic_prerequisites or "(none)")
         st.write("Functional external:", analysis.functional_external_requirements or "(none)")
@@ -159,6 +188,14 @@ def _render_verifier_details(st, candidate) -> None:
         st.markdown("**Outputs per iteration**")
         for out in candidate.proof.output_deltas:
             st.write(f"- {out.type.value}: +{out.delta_per_iteration} ({out.consequence.value})")
+        net = candidate.proof.net_state
+        if net is not None:
+            st.markdown("**Net state per iteration**")
+            st.write(
+                f"- mana: {net.mana.model_dump(mode='json')}; "
+                f"life_you={net.life_you}; life_opponent={net.life_opponent}; "
+                f"tokens={net.creature_tokens}; +1/+1={net.plus_one_counters}"
+            )
 
     with st.expander(":material/code: Compiled IR (debug)", expanded=False):
         for card in candidate.witness.card_semantics:

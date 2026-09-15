@@ -40,8 +40,8 @@ graph TB;
 | Reference recovery | `spellbook_eval.py`, `metrics.py` | Among **eligible/supported** reference rows, how many rediscover? Stages: compile → join → search → optional prerequisite mismatch → recovered. |
 | Compiler frontier (M5.1) | `compiler_frontier.py` + `scripts/spellbook_compiler_priority.py` | Rank missing fragments by COMPLETE / both-COMPLETE pair unlock (not rediscovery). Live under `data/eval/`. |
 | Human-adjudicated precision | `metrics.precision_from_records` + `provenance.is_precision_eligible_ids` | Among adjudicated **ORACLE_EXACT×ORACLE_EXACT** discoveries, how many are valid classes? (ADR 0007) |
-| Prerequisite analysis | `classify.py` | Participation / assumptions / `strict_two_card` **detection**; discloses tokens, aura host, **scaled-mana board fodder**, counter seeds, and Path-b / Instant-grant setup `seed_*` ops as `generic_prerequisites`. |
-| Persistence / UX | `store.py`, `workbench.py`, `narrate.py`, `glossary.py`, `explain.py` | Reviewer workflow; `AdjudicationClass` + optional `AdjudicationFailureReason` |
+| Prerequisite analysis | `classify.py` | Participation / assumptions / `strict_two_card` **detection**; intrinsic pair-piece text is **zone-aware** (hand / GY / BF, …); discloses tokens, aura host, **scaled-mana board fodder**, counter seeds, and Path-b / Instant-grant setup `seed_*` ops as `generic_prerequisites`. |
+| Persistence / UX | `store.py`, `workbench.py`, `narrate.py`, `glossary.py`, `explain.py` | Reviewer workflow; object map (`object_id` → name → zone) + `claim_consequence` / net zeros beside the loop body; `AdjudicationClass` + optional `AdjudicationFailureReason` |
 
 ### Spellbook absence
 

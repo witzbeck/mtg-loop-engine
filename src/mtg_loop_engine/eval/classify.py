@@ -8,6 +8,7 @@ from mtg_loop_engine.eval.schema import (
     StateAssumption,
 )
 from mtg_loop_engine.proofs.models import LoopWitness
+from mtg_loop_engine.semantics.enums import Zone
 from mtg_loop_engine.semantics.ir import (
     AddCounterCost,
     AddManaEffect,
@@ -19,6 +20,23 @@ from mtg_loop_engine.semantics.ir import (
     ReplacementReduceM1M1Counters,
     TapCost,
 )
+
+# Intrinsic pair-piece wording must match witness zones (hand-seeded free-cast, etc.).
+_ZONE_BEGIN_PHRASE: dict[Zone, str] = {
+    Zone.BATTLEFIELD: "on the battlefield",
+    Zone.HAND: "in hand",
+    Zone.GRAVEYARD: "in the graveyard",
+    Zone.EXILE: "in exile",
+    Zone.LIBRARY: "in the library",
+    Zone.STACK: "on the stack",
+    Zone.COMMAND: "in the command zone",
+}
+
+
+def _intrinsic_start_description(name: str, zone: Zone) -> str:
+    """Zone-aware intrinsic assumption text for a searched pair piece."""
+    phrase = _ZONE_BEGIN_PHRASE.get(zone, f"in zone {zone.value}")
+    return f"{name} begins {phrase}"
 
 # Must match search.explorer seed ids (avoid import cycle with explorer → classify).
 _AURA_HOST_OBJECT_ID = "aura-host"
@@ -159,7 +177,7 @@ def analyze_prerequisites(witness: LoopWitness) -> PrerequisiteAnalysis:
             assumptions.append(
                 StateAssumption(
                     kind=AssumptionKind.INTRINSIC,
-                    description=f"{perm.name} begins on the battlefield",
+                    description=_intrinsic_start_description(perm.name, perm.zone),
                     object_id=perm.object_id,
                     oracle_id=perm.oracle_id,
                 )

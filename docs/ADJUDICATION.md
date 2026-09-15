@@ -53,6 +53,8 @@ graph TB;
 
 **M5.3 batch (post–waves):** Temur / Wirewood / Knack / Alarm / scaled-mana absences → **`valid_generic_prerequisite`**; Aluren + Dream Stalker → **`valid_strict_two_card`**. Still keep `ABSENT_FROM_REFERENCE` (not `NOVEL`).
 
+**Aluren + Dream Stalker (calibration):** Free cast of Dream (MV 2) under Aluren; Dream ETB returns **itself** (Oracle has no “another”). Claim is `repeatable_event` (gross cast/ETB; net pools zero). Aluren’s mana cost is intrinsic setup (enchantment already on BF), not unpaid loop mana. Object ids (`c0`/`c1`) are not Card 1/Card 2 display order; intrinsic assumptions must match witness **zones** (Dream starts in hand). Not a `rules_or_semantics_false_positive`.
+
 **Counts toward precision:** yes (valid).
 
 ### `functional_external_requirement`
