@@ -1319,10 +1319,23 @@ def build_witness(
         Prerequisite(kind="functional", description=item)
         for item in analysis.functional_external_requirements
     ]
-    generic_prereqs = [
+    # Prefer classify disclosure; keep explorer-only board labels if classify is empty.
+    analysis_generics = [
         Prerequisite(kind="board", description=item)
         for item in analysis.generic_prerequisites
-    ] or generic
+    ]
+    if analysis_generics:
+        # Union with explorer labels so Path-b / setup seeds never drop when
+        # classify also reports tokens or scaled fodder.
+        seen = {p.description for p in analysis_generics}
+        merged = list(analysis_generics)
+        for p in generic:
+            if p.description not in seen:
+                seen.add(p.description)
+                merged.append(p)
+        generic_prereqs = merged
+    else:
+        generic_prereqs = generic
     witness.classification = Classification(
         essential_card_count=max(analysis.essential_functional_count, 1),
         strict_two_card=analysis.strict_two_card,
