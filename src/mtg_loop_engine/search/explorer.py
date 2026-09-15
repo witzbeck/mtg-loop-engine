@@ -315,8 +315,19 @@ def _needs_creature_host(card: CardSemantics) -> bool:
     return any(
         isinstance(ab, ActivatedAbility)
         and any(
-            (isinstance(c, TapCost) and not c.source_self)
+            (isinstance(c, TapCost) and not c.source_self and c.host == "creature")
             or (isinstance(c, UntapSymbolCost) and not c.source_self)
+            for c in ab.costs
+        )
+        for ab in card.abilities
+    )
+
+
+def _needs_land_host(card: CardSemantics) -> bool:
+    return any(
+        isinstance(ab, ActivatedAbility)
+        and any(
+            isinstance(c, TapCost) and not c.source_self and c.host == "land"
             for c in ab.costs
         )
         for ab in card.abilities
@@ -574,6 +585,17 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
                 is_artifact=False,
             )
         )
+    elif any(_needs_land_host(c) for c in ordered):
+        # Nest-class land aura without Earthcraft still needs a tap host.
+        permanents.append(
+            bf(
+                "basic_island",
+                BASIC_ISLAND_SEED_ORACLE_ID,
+                "Seed Island",
+                is_creature=False,
+                is_artifact=False,
+            )
+        )
     pair_caps = [extract_capabilities(c) for c in ordered]
     if any(c.needs_creature_count_mana_seed() for c in pair_caps):
         for i in range(_SCALED_MANA_SEED_COUNT):
@@ -678,6 +700,13 @@ def _any_target_damage(ability: ActivatedAbility) -> bool:
 
 def _tap_cost_needs_host(ability: ActivatedAbility) -> bool:
     return any(isinstance(c, TapCost) and not c.source_self for c in ability.costs)
+
+
+def _tap_cost_host_kind(ability: ActivatedAbility) -> str:
+    for cost in ability.costs:
+        if isinstance(cost, TapCost) and not cost.source_self:
+            return cost.host
+    return "creature"
 
 def _untap_symbol_cost_needs_host(ability: ActivatedAbility) -> bool:
     return any(
@@ -905,15 +934,19 @@ def _activation_steps(
             if selector:
                 targets = _fodder_ids(state, selector)
             elif need_tap_host:
-                targets = [
-                    p.object_id
-                    for p in state.permanents.values()
-                    if p.zone == Zone.BATTLEFIELD
-                    and p.controller == "you"
-                    and p.is_creature
-                    and not p.tapped
-                    and p.object_id != perm.object_id
-                ]
+                host_kind = _tap_cost_host_kind(ab)
+                targets = []
+                for p in state.permanents.values():
+                    if p.zone != Zone.BATTLEFIELD or p.controller != "you":
+                        continue
+                    if p.tapped or p.object_id == perm.object_id:
+                        continue
+                    if host_kind == "land":
+                        if not executor._is_land_permanent(p):
+                            continue
+                    elif not p.is_creature:
+                        continue
+                    targets.append(p.object_id)
             elif need_untap_host:
                 targets = [
                     p.object_id
@@ -1267,8 +1300,8 @@ def build_witness(
             Prerequisite(
                 kind="board",
                 description=(
-                    "generic basic Island for Earthcraft untap / blue mana "
-                    "(identity irrelevant)"
+                    "generic basic Island for enchanted-land tap hosts / "
+                    "Earthcraft untap (identity irrelevant)"
                 ),
             )
         )

@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Literal
 
 from mtg_loop_engine.semantics.enums import TriggerEvent, Zone
 from mtg_loop_engine.semantics.ir import (
@@ -693,26 +694,29 @@ def pat_equipped_untap_pump(text: str, name: str) -> Ability | None:
 
 
 def pat_enchanted_tap_create_token(text: str, name: str) -> Ability | None:
-    """Presence of Gond class: enchanted creature has {T}: create token.
+    """Presence of Gond / Squirrel Nest: enchanted host has {T}: create token.
 
-    Land hosts (Squirrel Nest) stay unsupported until land seeds exist.
+    Creature hosts (Gond) and land hosts (Nest) share CreateTokenEffect physics;
+    ``TapCost.host`` selects which permanent may pay {T}.
     """
     m = re.match(
-        r'^Enchanted creature has '
+        r'^Enchanted (creature|land) has '
         r'"\{T\}: Create (?:a|one)(?: (\d+)/(\d+))? (.+?) creature token\."\.?$',
         text,
         re.IGNORECASE,
     )
     if not m:
         return None
-    power = int(m.group(1) or 1)
-    toughness = int(m.group(2) or 1)
+    host_raw = m.group(1).casefold()
+    host: Literal["creature", "land"] = "land" if host_raw == "land" else "creature"
+    power = int(m.group(2) or 1)
+    toughness = int(m.group(3) or 1)
     return ActivatedAbility(
         ability_id=_ability_id("enchanted-tap-token", text),
-        costs=[TapCost(source_self=False)],
+        costs=[TapCost(source_self=False, host=host)],
         effects=[
             CreateTokenEffect(
-                name=m.group(3).strip(),
+                name=m.group(4).strip(),
                 power=power,
                 toughness=toughness,
                 quantity=1,

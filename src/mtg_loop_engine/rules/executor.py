@@ -1133,8 +1133,13 @@ class Executor:
             return permanent.is_token and permanent.is_creature
         return False
 
-    def _validate_tap_host(self, tap_perm: Permanent | None) -> ExecError | None:
-        """Host for enchanted-creature {T}: exist, BF, controlled, creature, untapped, not sick."""
+    def _validate_tap_host(
+        self,
+        tap_perm: Permanent | None,
+        *,
+        host: str = "creature",
+    ) -> ExecError | None:
+        """Host for enchanted {T}: BF, controlled, untapped; kind from ``TapCost.host``."""
         if tap_perm is None:
             return ExecError(VerificationStatus.ILLEGAL_TARGET, "tap host missing")
         if tap_perm.zone != Zone.BATTLEFIELD:
@@ -1145,14 +1150,19 @@ class Executor:
             return ExecError(
                 VerificationStatus.ILLEGAL_TARGET, "tap host not controlled"
             )
-        if not tap_perm.is_creature:
+        if host == "land":
+            if not self._is_land_permanent(tap_perm):
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET, "tap host not a land"
+                )
+        elif not tap_perm.is_creature:
             return ExecError(
                 VerificationStatus.ILLEGAL_TARGET, "tap host not a creature"
             )
         if tap_perm.tapped:
             return ExecError(VerificationStatus.ILLEGAL_ACTION, "already tapped")
-        # CR 302.6: creatures with summoning sickness cannot {T} (including mana abilities).
-        if tap_perm.summoning_sick:
+        # CR 302.6: creatures with summoning sickness cannot {T}; lands have no sickness.
+        if host == "creature" and tap_perm.summoning_sick:
             return ExecError(VerificationStatus.TIMING_VIOLATION, "summoning sick")
         return None
 
@@ -1261,7 +1271,7 @@ class Executor:
                             VerificationStatus.ILLEGAL_ACTION, "tap cost needs host"
                         )
                     tap_perm = state.permanents.get(step.target)
-                    err = self._validate_tap_host(tap_perm)
+                    err = self._validate_tap_host(tap_perm, host=cost.host)
                     if err:
                         return err
                 else:

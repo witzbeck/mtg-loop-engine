@@ -42,6 +42,8 @@ class TapCost(BaseModel):
     kind: Literal["tap"] = "tap"
     # When False, tap `step.target` (enchanted host) instead of the activating permanent.
     source_self: bool = True
+    # Host permanent kind when ``source_self`` is False (Gond creature vs Nest land).
+    host: Literal["creature", "land"] = "creature"
 
 
 class ManaCost(BaseModel):

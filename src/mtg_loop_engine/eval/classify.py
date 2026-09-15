@@ -33,7 +33,8 @@ _SCALED_MANA_SEED_LABELS: dict[str, str] = {
         "seeded generic defender for board-scaled mana (identity irrelevant)"
     ),
     "setup:basic-island": (
-        "seeded generic basic Island for Earthcraft (identity irrelevant)"
+        "seeded generic basic Island for enchanted-land tap / Earthcraft "
+        "(identity irrelevant)"
     ),
     "setup:mana-dork-seed": (
         "generic tap-mana dork fodder for cast-from-hand loops (identity irrelevant)"

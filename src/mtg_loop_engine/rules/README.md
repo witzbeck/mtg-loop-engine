@@ -32,7 +32,8 @@ graph TB;
 - Replay setup and loop actions faithfully within the modeled rules surface.
 - GY activations when abilities return to battlefield; optional `requires_zombie` gate for cast-from-GY shapes.
 - Combo-player favorable / opponent adversarial choice ownership (see executor docstring and frozen product decisions).
-- Explicit sacrifice / host-tap target revalidation (BF, controller, creature/token selectors); invalid explicit objects → `ILLEGAL_TARGET`.
+- Explicit sacrifice / host-tap target revalidation (BF, controller, creature/token/land selectors); invalid explicit objects → `ILLEGAL_TARGET`.
+- Enchanted `{T}` hosts: `TapCost.host="creature"` (Gond) requires creature + not summoning sick; `host="land"` (Nest) requires a land (no sickness).
 - Exact pending-trigger match when `actor` / `ability_id` are supplied (no silent idx-0 fallback).
 - Exile-on-death replacements suppress death events and `DIES` triggers (CR 700.4); sacrifice events still fire.
 - Creature `DIES` queues carry subject `effective_toughness()` as trigger `amount` when > 0 (South Wind Avatar class).

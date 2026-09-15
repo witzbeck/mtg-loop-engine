@@ -668,4 +668,19 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{3}{G}",
         mana_value=4,
     ),
+    "Squirrel Nest": RealOracleCurriculum(
+        name="Squirrel Nest",
+        types=["Enchantment", "Aura"],
+        oracle_text=(
+            "Enchant land\n"
+            'Enchanted land has "{T}: Create a 1/1 green Squirrel creature token."'
+        ),
+        notes=(
+            "Slice 35: enchanted-land tap-token grant (Gond sibling); "
+            "Earthcraft rediscovery via land host + tap-creature untap."
+        ),
+        colors=("G",),
+        mana_cost="{1}{G}",
+        mana_value=2,
+    ),
 }

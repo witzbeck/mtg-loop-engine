@@ -51,6 +51,8 @@ graph TB;
 
 **M5.3 examples (defender-count + untap):** Axebane Guardian + Pemmin's Aura; Axebane + Umbral Mantle; Overgrown Battlement + Umbral Mantle — net mana depends on other defenders; keep `ABSENT_FROM_REFERENCE` unless a human upgrades to `NOVEL`.
 
+**M5.3 batch (post–waves):** Temur / Wirewood / Knack / Alarm / scaled-mana absences → **`valid_generic_prerequisite`**; Aluren + Dream Stalker → **`valid_strict_two_card`**. Still keep `ABSENT_FROM_REFERENCE` (not `NOVEL`).
+
 **Counts toward precision:** yes (valid).
 
 ### `functional_external_requirement`

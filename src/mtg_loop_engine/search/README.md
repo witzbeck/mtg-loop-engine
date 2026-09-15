@@ -51,7 +51,8 @@ graph TB;
   `removes_p1p1` + toughness 0 → start with **2** p1p1 counters (SBA-safe)
 - Seed **four** `p1p1` counters on cards whose mana ability scales with +1/+1 counters (Gyre Sage) **or** with power (Kami / Viridian Joiner class via effective power), so Staff-class untap cycles clear (`{3}` untap creature + `{1}` untap Staff)
 - For remove-counter `any_target` damage, emit activate steps with `target="opponent"` first (Heliod path); self (`actor`) is also legal for undying self-ping
-- Seed a generic creature **aura host** (non-token setup permanent) when an activated ability uses `TapCost(source_self=False)` and neither essential is a creature (Presence of Gond + Intruder Alarm class); otherwise tap the partner creature. Host tap is tracked in `LoopRelevantState` so recurrence fails closed when the host stays tapped.
+- Seed a generic creature **aura host** (non-token setup permanent) when an activated ability uses `TapCost(source_self=False, host="creature")` and neither essential is a creature (Presence of Gond + Intruder Alarm class); otherwise tap the partner creature. Host tap is tracked in `LoopRelevantState` so recurrence fails closed when the host stays tapped.
+- Seed a generic **basic Island** when Earthcraft is searched and/or a card uses `TapCost(host="land")` (Squirrel Nest): Nest tap host + Earthcraft untap target. ETB-bounce partners start in hand; hold priority to tap the bounce creature before resolving its ETB.
 - Seed **three** board-scaled mana fodder permanents when a searched card’s tap-mana ability scales with controlled creatures, elves, or defenders (`scaled-mana:creature-seed` / `elf-seed` / `defender-seed`). These are generic prerequisites (identity irrelevant within the category); `analyze_prerequisites` discloses them — they do **not** alone clear `strict_two_card` (that flag is participant-only).
 - Seed one generic creature token when a mana-cost create-token activate pairs with a sac-for-mana outlet (Sliver Queen + Ashnod’s Altar); sac fodder prefers tokens over essentials.
 - **Cast-from-hand:** emit `cast_from_hand` for creatures in hand; Aluren free-cast when partner has `FreeCastCreaturesByManaValue`. ETB-bounce creatures start in hand when paired with free cast.
@@ -59,7 +60,6 @@ graph TB;
 - **Temur activated bounce:** with Village Bell-Ringer (self-ETB untap-all), seed mana dorks to pay `{1}{G}` + recast.
 - **Cloudstone type-share bounce:** with Aluren, seed a second Creature on BF (and cast seed in hand when the searched pair has no creature) so type-share bounce has a partner.
 - **Mana Echoes + mana-create token:** seed `{2}` colorless so the first Sliver Queen-class create can fire; ETB sharing-type mana repays.
-- **Earthcraft:** seed a basic Island (`{T}: {U}`); ETB-bounce partners start in hand; hold priority to tap the bounce creature before resolving its ETB.
 - When loop actions activate a `once_per_turn` ability, `derive_relevant_state`
   adds `permanents.<id>.once_per_turn_used.<ability_id>` as `EXACT` (helpers live in
   `verify.mandatory_recurrence`; the verifier re-applies them so omitting them from a
