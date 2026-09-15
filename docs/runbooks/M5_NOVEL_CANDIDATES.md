@@ -115,9 +115,10 @@ uv run python scripts/spellbook_absent_discovery.py
 30. **Shalai and Hallar (slice 38)** ✓ — COUNTER_ADDED → that-much damage; Heliod rediscovery. Archangel COMPLETE unlock without short explorer close.
 31. **Squirrel Girl (slice 39)** ✓ — ETB create (attacks not modeled) + mana create X=Squirrels; Altar rediscovery. Ability-word split accepts Marvel-style names.
 32. **Shard of the Nightbringer (slice 40)** ✓ — ETB intervening-if cast + half-life drain (`Permanent.was_cast`); Vito/Bond COMPLETE unlock. Two-card rediscovery deferred (needs bounce/recast).
-33. **Frontier-driven slices (M5.2 Slice 41+):** Tidespout CAST + non-creature cast planned; Path **a** preference remains; cite live P0/P1. Ritual below.
-34. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-35. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+33. **Tidespout Tyrant (slice 41)** ✓ — `TriggerEvent.CAST` bounce target permanent; artifact `cast_from_hand`; Sol Ring rediscovery (mana abilities while holding priority).
+34. **Frontier-driven slices (M5.2 Slice 42+):** Path **a** preference remains; cite live P0/P1. Ritual below.
+35. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+36. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 

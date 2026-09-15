@@ -188,7 +188,8 @@ measure frontier → smallest reusable gap → discover → adjudicate → contr
    - **Slice 38 (Shalai and Hallar)** ✓ — COUNTER_ADDED on controlled creature → that-much damage; Heliod rediscovery. Archangel mass-puts unlock COMPLETE (no short explorer close).
    - **Slice 39 (Squirrel Girl)** ✓ — ETB create (attacks not modeled) + mana create X=Squirrels; Altar rediscovery.
    - **Slice 40 (Shard cast intervening-if)** ✓ — ETB `intervening_if=cast` + half-life drain; Vito/Bond COMPLETE unlock (2-card rediscovery needs bounce/recast).
-   - **Slice 41+** ○ — Tidespout `TriggerEvent.CAST` + non-creature cast.
+   - **Slice 41 (Tidespout CAST bounce)** ✓ — `TriggerEvent.CAST` + artifact `cast_from_hand`; Sol Ring rediscovery (hold-priority mana abilities).
+   - **Slice 42+** ○ — cite live P0/P1; Path **a** preference.
    - **Path b (Bond/Blood)** ✓ — explicit generic life-gain seed; `core_bond_blood` frozen; disclosed on witness.
    - **Path b (Mindcrank / Bloodchief)** ✓ — explicit generic opponent life-loss seed (`seed_lose_life`, drain-sized); disclosed on witness.
    - **Rules-evidence rails** ✓ — [`docs/RULES_EVIDENCE.md`](docs/RULES_EVIDENCE.md), [`AGENTS.md`](AGENTS.md), [`.cursor/rules/rules-evidence.mdc`](.cursor/rules/rules-evidence.mdc), [`.agents/skills/rules-evidence/`](.agents/skills/rules-evidence/).

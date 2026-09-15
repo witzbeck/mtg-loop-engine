@@ -43,7 +43,7 @@ graph TB;
 - `TapCreatureCost` (Earthcraft): tap an untapped controlled creature as a cost (not the creature's own `{T}` — summoning sickness does not apply). `UntapEffect(target_basic_land)`. Optional `ActionStep.cost_target` selects the creature when `target` is the land (Signaler vs token).
 - `HybridManaCost` ({B/G}) and `RemoveCounterCost` (Quillspike): pay one of the listed colors; remove m1m1 from a controlled creature.
 - Holding priority: while triggers are pending, explorer may activate `TapCreatureCost` abilities before resolving ETB bounce (Drake + Earthcraft).
-- `cast_from_hand`: creature from `Zone.HAND` pays `CardSemantics.mana_cost`, or free under `FreeCastCreaturesByManaValue` (Aluren) when MV ≤ ceiling; bumps `events.cast`, sets `Permanent.was_cast`, then ETB.
+- `cast_from_hand`: creature **or artifact** from `Zone.HAND` pays `CardSemantics.mana_cost`, or free under `FreeCastCreaturesByManaValue` (Aluren) when MV ≤ ceiling; bumps `events.cast`, sets `Permanent.was_cast`, queues `TriggerEvent.CAST`, then ETB. Artifacts are not summoning sick.
 - Intervening-if `cast` (Shard): queue/resolve ETB triggers only when `subject.was_cast` (CR 603.4 check at both times).
 - `LoseLifeEffect.half_life_rounded_up`: lose `ceil(life/2)`; following `GainLifeEffect(amount_from_trigger=True)` in the same ability uses that qty.
 - `activate_granted_tap_bounce` / `seed_grant_tap_bounce`: Instant grant `{T}`: bounce nonland (`Permanent.tap_bounce_nonland`, witness-persistent).

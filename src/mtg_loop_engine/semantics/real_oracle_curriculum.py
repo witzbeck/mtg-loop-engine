@@ -776,4 +776,27 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{5}{B}{B}{B}",
         mana_value=8,
     ),
+    "Tidespout Tyrant": RealOracleCurriculum(
+        name="Tidespout Tyrant",
+        types=["Creature", "Djinn"],
+        oracle_text=(
+            "Flying\n"
+            "Whenever you cast a spell, return target permanent to its owner's hand."
+        ),
+        notes=(
+            "Slice 41: TriggerEvent.CAST bounce; Sol Ring rediscovery "
+            "(artifact cast_from_hand)."
+        ),
+        colors=("U",),
+        mana_cost="{5}{U}{U}{U}",
+        mana_value=8,
+    ),
+    "Sol Ring": RealOracleCurriculum(
+        name="Sol Ring",
+        types=["Artifact"],
+        oracle_text="{T}: Add {C}{C}.",
+        notes="Slice 41 partner: {1} rock; cast→tap→Tidespout bounce→recast.",
+        mana_cost="{1}",
+        mana_value=1,
+    ),
 }

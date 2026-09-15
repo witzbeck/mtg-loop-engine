@@ -167,6 +167,15 @@ def _bounce_creature_seed_semantics() -> CardSemantics:
     )
 
 
+def _has_cast_bounce(card: CardSemantics) -> bool:
+    return any(
+        isinstance(ab, TriggeredAbility)
+        and ab.event == TriggerEvent.CAST
+        and any(isinstance(e, MoveToZoneEffect) for e in ab.effects)
+        for ab in card.abilities
+    )
+
+
 def _has_etb_bounce_to_hand(card: CardSemantics) -> bool:
     return any(
         isinstance(ab, TriggeredAbility)
@@ -467,6 +476,7 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
     activated_bounce = any(_has_activated_bounce_other_creature(c) for c in ordered)
     cloudstone_partner = any(_has_cloudstone_bounce(c) for c in ordered)
     earthcraft_partner = any(_has_earthcraft(c) for c in ordered)
+    cast_bounce_partner = any(_has_cast_bounce(c) for c in ordered)
     permanents = []
     for i, card in enumerate(ordered):
         types = {t.lower() for t in card.types}
@@ -475,6 +485,7 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
             continue
         caps = extract_capabilities(card)
         is_creature = "creature" in types
+        is_artifact = "artifact" in types
         fix = GOLD_ORACLE_FIXTURES.get(card.oracle_id)
         if (
             is_creature
@@ -499,6 +510,7 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
         # Alarm + Drake/Lion: same — cast pays mana from seeded dorks.
         # Cloudstone + Aluren: cast creature from hand; bounce a second creature.
         # Earthcraft + Drake: cast from hand; hold priority to tap Drake, untap Island.
+        # Tidespout + rock: start artifact in hand for cast→bounce→recast.
         start_zone = Zone.BATTLEFIELD
         if is_creature and _has_etb_bounce_to_hand(card) and (
             free_cast_partner or alarm_partner or earthcraft_partner
@@ -506,13 +518,15 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
             start_zone = Zone.HAND
         elif is_creature and cloudstone_partner and free_cast_partner:
             start_zone = Zone.HAND
+        elif is_artifact and not is_creature and cast_bounce_partner:
+            start_zone = Zone.HAND
         permanents.append(
             bf(
                 f"c{i}",
                 card.oracle_id,
                 card.name,
                 is_creature=is_creature,
-                is_artifact="artifact" in types,
+                is_artifact=is_artifact,
                 counters=counters,
                 power=power,
                 toughness=toughness,
@@ -760,6 +774,20 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
                 colorless=mana.colorless + seed.colorless,
                 any_color=mana.any_color + seed.any_color,
             )
+    # Tidespout + rock: seed colorless for the first cast (any_color repay from rock tap).
+    if cast_bounce_partner:
+        for card in ordered:
+            types = {t.lower() for t in card.types}
+            if "artifact" in types and "creature" not in types and card.mana_value > 0:
+                mana = ManaAmount(
+                    white=mana.white,
+                    blue=mana.blue,
+                    black=mana.black,
+                    red=mana.red,
+                    green=mana.green,
+                    colorless=mana.colorless + card.mana_value,
+                    any_color=mana.any_color,
+                )
     # Sliver Queen + Mana Echoes: seed {2} so the first create can fire; ETB mana pays the rest.
     if _needs_mana_create_echoes_bootstrap(ordered):
         mana = ManaAmount(
@@ -859,11 +887,12 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
     """Deterministic legal actions.
 
     With pending triggers, combo-player may hold priority to activate
-    Earthcraft-class ``TapCreatureCost`` abilities (e.g. tap Drake before bounce).
+    Earthcraft-class ``TapCreatureCost`` abilities and mana abilities
+    (e.g. tap Drake before bounce; tap Sol Ring before Tidespout bounce).
     """
     steps: list[ActionStep] = []
     if state.pending_triggers:
-        # Holding priority first so BFS can Earthcraft-tap before resolving ETB bounce.
+        # Holding priority: Earthcraft tap-creature costs + mana abilities.
         steps.extend(
             _activation_steps(executor, state, tap_creature_cost_only=True)
         )
@@ -992,9 +1021,11 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
 
     steps.extend(_activation_steps(executor, state, tap_creature_cost_only=False))
 
-    # Cast creatures from hand (Aluren free cast or paid mana_cost).
+    # Cast creatures/artifacts from hand (Aluren free cast or paid mana_cost).
     for perm in sorted(state.permanents.values(), key=lambda p: p.object_id):
-        if perm.zone != Zone.HAND or not perm.is_creature or perm.controller != "you":
+        if perm.zone != Zone.HAND or perm.controller != "you":
+            continue
+        if not (perm.is_creature or perm.is_artifact):
             continue
         step = ActionStep(op="cast_from_hand", actor=perm.object_id)
         if _try_apply(executor, state, step) is not None:
@@ -1041,7 +1072,9 @@ def _activation_steps(
         for ab in card.abilities:
             if not isinstance(ab, ActivatedAbility) or not ab.supported:
                 continue
-            if tap_creature_cost_only and not _has_tap_creature_cost(ab):
+            if tap_creature_cost_only and not (
+                _has_tap_creature_cost(ab) or ab.is_mana_ability
+            ):
                 continue
             selector = _sac_selector(ab)
             remove_cost = _remove_counter_cost(ab)

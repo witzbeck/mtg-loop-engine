@@ -840,6 +840,7 @@ class Executor:
                 "other_controlled_creature",
                 "other_controlled_sharing_type",
                 "target_nonland",
+                "target_permanent",
             }:
                 return self._bounce_to_zone(
                     state,
@@ -1000,6 +1001,9 @@ class Executor:
                 )
         bounced.zone = effect.zone
         bounced.tapped = False
+        if effect.zone == Zone.HAND:
+            bounced.was_cast = False
+            bounced.summoning_sick = False
         return None
 
     def _on_etb(self, state: GameState, permanent: Permanent) -> None:
@@ -1780,7 +1784,7 @@ class Executor:
     def cast_from_hand(
         self, state: GameState, step: ActionStep
     ) -> ExecError | None:
-        """Cast a creature from hand (pay mana_cost, or free under Aluren-class)."""
+        """Cast a permanent spell from hand (creatures + artifacts for rock/Tidespout)."""
         if not step.actor:
             return ExecError(VerificationStatus.ILLEGAL_ACTION, "cast needs actor")
         perm = state.permanents.get(step.actor)
@@ -1790,10 +1794,10 @@ class Executor:
             return ExecError(
                 VerificationStatus.ILLEGAL_ACTION, "cast requires card in hand"
             )
-        if not perm.is_creature:
+        if not (perm.is_creature or perm.is_artifact):
             return ExecError(
                 VerificationStatus.UNSUPPORTED_SEMANTICS,
-                "cast_from_hand models creatures only",
+                "cast_from_hand models creatures and artifacts only",
             )
         card = self.semantics.get(perm.oracle_id)
         if card is None:
@@ -1806,10 +1810,12 @@ class Executor:
                 return err
         perm.zone = Zone.BATTLEFIELD
         perm.tapped = False
-        perm.summoning_sick = True
+        perm.summoning_sick = bool(perm.is_creature)
         perm.damage_marked = 0
         perm.was_cast = True
         state.bump("cast")
+        # CAST triggers see the spell as cast; subject is the permanent that entered.
+        self._queue_triggers(state, TriggerEvent.CAST, perm)
         self._on_etb(state, perm)
         return None
 

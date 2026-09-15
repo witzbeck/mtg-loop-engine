@@ -230,6 +230,7 @@ class MoveToZoneEffect(BaseModel):
     # other_controlled_sharing_type: Cloudstone — another permanent sharing a
     #   permanent type with the trigger subject.
     # target_nonland: bounce any nonland permanent (Knack/Helix grant).
+    # target_permanent: any permanent (Tidespout).
     target: Literal[
         "self",
         "controlled_creature",
@@ -239,6 +240,7 @@ class MoveToZoneEffect(BaseModel):
         "other_controlled_creature",
         "other_controlled_sharing_type",
         "target_nonland",
+        "target_permanent",
     ] = "self"
 
 

@@ -61,7 +61,8 @@ graph TB;
 - Seed a generic **basic Plains** when a searched card has self `{Q}` create paid with white (Patrol Signaler): Earthcraft + double-tap Plains pays `{1}{W}` (Spellbook notable). Earthcraft steps enumerate `cost_target` (creature) × `target` (land).
 - Seed **three** board-scaled mana fodder permanents when a searched card’s tap-mana ability scales with controlled creatures, elves, or defenders (`scaled-mana:creature-seed` / `elf-seed` / `defender-seed`). These are generic prerequisites (identity irrelevant within the category); `analyze_prerequisites` discloses them — they do **not** alone clear `strict_two_card` (that flag is participant-only).
 - Seed one generic creature token when a mana-cost create-token activate pairs with a sac-for-mana outlet (Sliver Queen + Ashnod’s Altar); sac fodder prefers tokens over essentials.
-- **Cast-from-hand:** emit `cast_from_hand` for creatures in hand; Aluren free-cast when partner has `FreeCastCreaturesByManaValue`. ETB-bounce creatures start in hand when paired with free cast.
+- **Cast-from-hand:** emit `cast_from_hand` for creatures **and artifacts** in hand; Aluren free-cast when partner has `FreeCastCreaturesByManaValue`. ETB-bounce creatures start in hand when paired with free cast. Tidespout + rock: artifact starts in hand; seed colorless = rock MV.
+- With pending triggers, hold-priority activations include Earthcraft `TapCreatureCost` **and mana abilities** (Sol Ring before Tidespout bounce).
 - **Instant grant tap-bounce:** `seed_grant_tap_bounce` onto a grant host; emit `activate_granted_tap_bounce`. With Intruder Alarm, seed mana dorks + a bounce creature in hand (generic prerequisites).
 - **Temur activated bounce:** with Village Bell-Ringer (self-ETB untap-all), seed mana dorks to pay `{1}{G}` + recast.
 - **Cloudstone type-share bounce:** with Aluren, seed a second Creature on BF (and cast seed in hand when the searched pair has no creature) so type-share bounce has a partner.

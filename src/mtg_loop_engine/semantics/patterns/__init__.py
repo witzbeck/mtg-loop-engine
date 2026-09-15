@@ -1087,6 +1087,24 @@ def _strip_ability_word(text: str) -> str:
     return re.sub(r"^.+?—\s*", "", text.strip(), count=1)
 
 
+def pat_cast_bounce_target_permanent(text: str, name: str) -> Ability | None:
+    """Tidespout Tyrant: whenever you cast a spell, bounce target permanent."""
+    cleaned = _strip_ability_word(text)
+    m = re.match(
+        r"^Whenever you cast a spell, return target permanent to (?:its|their) owner's hand\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("cast-bounce-permanent", text),
+        event=TriggerEvent.CAST,
+        filter="any",
+        effects=[MoveToZoneEffect(zone=Zone.HAND, target="target_permanent")],
+    )
+
+
 def pat_etb_if_cast_half_life_drain(text: str, name: str) -> Ability | None:
     """Shard of the Nightbringer: ETB if cast → opponent loses half life; you gain that much."""
     cleaned = _strip_ability_word(text)
@@ -2129,6 +2147,7 @@ PATTERNS: list[Pattern] = [
     ),
     Pattern("tap_create_token", pat_tap_create_token),
     Pattern("mana_untap_create_token", pat_mana_untap_create_token),
+    Pattern("cast_bounce_target_permanent", pat_cast_bounce_target_permanent),
     Pattern("etb_if_cast_half_life_drain", pat_etb_if_cast_half_life_drain),
     Pattern("etb_or_attacks_create_token", pat_etb_or_attacks_create_token),
     Pattern("mana_create_tokens_equal_subtype", pat_mana_create_tokens_equal_subtype),
