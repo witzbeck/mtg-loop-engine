@@ -101,13 +101,14 @@ uv run python scripts/spellbook_absent_discovery.py
 16. **Human ETB + power mana (slice 16)** ✓ — Heronblade Elite; `other_controlled_human` → self p1p1 + power tap. Deferred Ivy Lane (green color filter).
 17. **Mana-activated token create (slice 17)** ✓ — Sliver Queen `{2}: create token`; Queen+Ashnod seed-token bootstrap. Deferred Wirewood (near-duplicate of slice 9).
 18. **Dies→life=toughness (slice 18)** ✓ — South Wind Avatar; DIES amount from toughness + fixed drain on gain life.
-19. **ETB bounce (slices 19–20)** ✓ — Shrieking Drake / Whitemane Lion; bounce to hand. Rediscovery waits on cast-from-hand.
+19. **ETB bounce (slices 19–20)** ✓ — Shrieking Drake / Whitemane Lion; bounce to hand. Rediscovery via slices 24–25 cast-from-hand.
 20. **Green ETB counters (slice 21)** ✓ — Ivy Lane Denizen; creature `colors` + `other_controlled_green`.
 21. **Enchanted-artifact cost reduction (slice 22)** ✓ — Power Artifact −{2} activate (floor 1).
 22. **Untap→mill (slice 23)** ✓ — Mesmeric Orb; permanent untap mills controller.
-23. **Frontier-driven slices (M5.2):** pick from live P0/P1; ritual below. Path **a** preference remains.
-18. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-19. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+23. **Cast-from-hand + Instant grant bounce (slices 24–25)** ✓ — `cast_from_hand` + Aluren free cast MV≤3 (Drake/Lion rediscovery); Banishing Knack / Retraction Helix Instant grant `{T}`: bounce nonland (Alarm rediscovery with mana-dork seeds). Wirewood deferred.
+24. **Frontier-driven slices (M5.2 Slice 26+):** recovery dig → bounce siblings → activated/cast bounce → Mana Echoes → Earthcraft → Wirewood. Path **a** preference remains. Ritual below.
+25. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+26. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 
