@@ -53,6 +53,9 @@ graph TB;
 - `mana_create_token` — Sliver Queen `{N}: Create a P/T … token` (tap variant remains `tap_create_token`).
 - `dies_gain_life_equal_toughness` — South Wind Avatar; DIES queue carries subject toughness as trigger amount.
 - `etb_bounce_controlled_creature` — Drake / Lion; bounce a controlled creature to hand.
+- `etb_bounce_controlled_creature_gw` — Fleetfoot; bounce green-or-white creature.
+- `etb_bounce_controlled_permanent` — Dream Stalker; bounce any controlled permanent.
+- `etb_bounce_controlled_nonland` — Ancestral Statue; bounce controlled nonland.
 - `aluren_free_cast` — Aluren; creatures MV ≤ N without paying mana.
 - `instant_grant_tap_bounce` — Banishing Knack / Retraction Helix Instant grant.
 - `etb_other_green_put_p1p1_target` — Ivy Lane; green color filter on ETB subject.
