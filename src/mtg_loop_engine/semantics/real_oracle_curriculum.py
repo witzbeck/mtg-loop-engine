@@ -725,4 +725,78 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{1}{G}",
         mana_value=2,
     ),
+    "Shalai and Hallar": RealOracleCurriculum(
+        name="Shalai and Hallar",
+        types=["Legendary", "Creature", "Angel", "Elf"],
+        oracle_text=(
+            "Flying, vigilance\n"
+            "Whenever one or more +1/+1 counters are put on a creature you control, "
+            "Shalai and Hallar deals that much damage to target opponent."
+        ),
+        notes=(
+            "Slice 38: COUNTER_ADDED on controlled creature → that-much damage; "
+            "Heliod rediscovery (paid lifelink grant). Archangel mass-puts unlock "
+            "COMPLETE for frontier but do not close a short explorer loop."
+        ),
+        colors=("R", "G", "W"),
+        mana_cost="{1}{R}{G}{W}",
+        mana_value=4,
+    ),
+    "The Unbeatable Squirrel Girl": RealOracleCurriculum(
+        name="The Unbeatable Squirrel Girl",
+        types=["Legendary", "Creature", "Squirrel", "Human", "Hero"],
+        oracle_text=(
+            "Do You Like Squirrels? — Whenever The Unbeatable Squirrel Girl enters "
+            "or attacks, create a 1/1 green Squirrel creature token.\n"
+            "I LOVE Squirrels! — {1}{G}{G}{G}: Create X 1/1 green Squirrel creature "
+            "tokens, where X is the number of Squirrels you control."
+        ),
+        notes=(
+            "Slice 39: ETB create (attacks not modeled) + mana create X=Squirrels; "
+            "Altar / Earthcraft rediscovery."
+        ),
+        colors=("G",),
+        mana_cost="{1}{G}{G}{G}",
+        mana_value=4,
+    ),
+    "Shard of the Nightbringer": RealOracleCurriculum(
+        name="Shard of the Nightbringer",
+        types=["Creature", "C'tan"],
+        oracle_text=(
+            "Flying\n"
+            "Drain Life — When this creature enters, if you cast it, target opponent "
+            "loses half their life, rounded up. You gain life equal to the life lost "
+            "this way."
+        ),
+        notes=(
+            "Slice 40: ETB intervening-if cast + half-life drain; Vito/Bond COMPLETE "
+            "unlock (two-card rediscovery needs bounce/recast — deferred)."
+        ),
+        colors=("B",),
+        mana_cost="{5}{B}{B}{B}",
+        mana_value=8,
+    ),
+    "Tidespout Tyrant": RealOracleCurriculum(
+        name="Tidespout Tyrant",
+        types=["Creature", "Djinn"],
+        oracle_text=(
+            "Flying\n"
+            "Whenever you cast a spell, return target permanent to its owner's hand."
+        ),
+        notes=(
+            "Slice 41: TriggerEvent.CAST bounce; Sol Ring rediscovery "
+            "(artifact cast_from_hand)."
+        ),
+        colors=("U",),
+        mana_cost="{5}{U}{U}{U}",
+        mana_value=8,
+    ),
+    "Sol Ring": RealOracleCurriculum(
+        name="Sol Ring",
+        types=["Artifact"],
+        oracle_text="{T}: Add {C}{C}.",
+        notes="Slice 41 partner: {1} rock; cast→tap→Tidespout bounce→recast.",
+        mana_cost="{1}",
+        mana_value=1,
+    ),
 }

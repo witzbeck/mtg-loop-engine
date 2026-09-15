@@ -149,6 +149,9 @@ class CreateTokenEffect(BaseModel):
     power: int = 1
     toughness: int = 1
     quantity: int = 1
+    # When set, create that many tokens equal to controlled creatures with this
+    # subtype (Squirrel Girl X = Squirrels; token names infer subtype).
+    quantity_equal_to_controlled_subtype: str | None = None
     is_creature: bool = True
     is_artifact: bool = False
     treasure: bool = False
@@ -185,6 +188,8 @@ class DealDamageEffect(BaseModel):
     kind: Literal["deal_damage"] = "deal_damage"
     amount: int = 1
     target: Literal["opponent", "any_target"] = "opponent"
+    # When True, use the pending trigger's recorded amount (Shalai / "that much").
+    amount_from_trigger: bool = False
 
 
 class GainLifeEffect(BaseModel):
@@ -204,6 +209,8 @@ class LoseLifeEffect(BaseModel):
     amount: int = 1
     who: Literal["opponent", "you"] = "opponent"
     amount_from_trigger: bool = False
+    # Shard-class: lose ceil(current_life / 2); amount recorded for following gains.
+    half_life_rounded_up: bool = False
 
 
 class MillEffect(BaseModel):
@@ -223,6 +230,7 @@ class MoveToZoneEffect(BaseModel):
     # other_controlled_sharing_type: Cloudstone — another permanent sharing a
     #   permanent type with the trigger subject.
     # target_nonland: bounce any nonland permanent (Knack/Helix grant).
+    # target_permanent: any permanent (Tidespout).
     target: Literal[
         "self",
         "controlled_creature",
@@ -232,6 +240,7 @@ class MoveToZoneEffect(BaseModel):
         "other_controlled_creature",
         "other_controlled_sharing_type",
         "target_nonland",
+        "target_permanent",
     ] = "self"
 
 

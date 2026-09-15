@@ -1082,6 +1082,129 @@ def pat_enchantments_have_graveyard_drain(text: str, name: str) -> Ability | Non
     return pat_card_to_opponent_gy_lose_life(m.group("inner"), name)
 
 
+def _strip_ability_word(text: str) -> str:
+    """Drop leading ability-word / named-ability prefix (… — )."""
+    return re.sub(r"^.+?—\s*", "", text.strip(), count=1)
+
+
+def pat_cast_bounce_target_permanent(text: str, name: str) -> Ability | None:
+    """Tidespout Tyrant: whenever you cast a spell, bounce target permanent."""
+    cleaned = _strip_ability_word(text)
+    m = re.match(
+        r"^Whenever you cast a spell, return target permanent to (?:its|their) owner's hand\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("cast-bounce-permanent", text),
+        event=TriggerEvent.CAST,
+        filter="any",
+        effects=[MoveToZoneEffect(zone=Zone.HAND, target="target_permanent")],
+    )
+
+
+def pat_etb_if_cast_half_life_drain(text: str, name: str) -> Ability | None:
+    """Shard of the Nightbringer: ETB if cast → opponent loses half life; you gain that much."""
+    cleaned = _strip_ability_word(text)
+    m = re.match(
+        r"^When (?:this creature|~|"
+        + re.escape(name)
+        + r") enters(?: the battlefield)?, if you cast it, "
+        r"target opponent loses half their life, rounded up\. "
+        r"You gain life equal to the life lost this way\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("etb-cast-half-drain", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="self",
+        intervening_if="cast",
+        effects=[
+            LoseLifeEffect(who="opponent", half_life_rounded_up=True),
+            GainLifeEffect(amount_from_trigger=True),
+        ],
+    )
+
+
+def pat_etb_or_attacks_create_token(text: str, name: str) -> Ability | None:
+    """Squirrel Girl: enters or attacks → create token (ETB modeled; attacks not)."""
+    cleaned = _strip_ability_word(text)
+    short = name.split(",")[0].strip() if "," in name else name
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^Whenever (?:{name_alt}) enters or attacks, "
+        rf"create (?:a|one)(?: (\d+)/(\d+))? "
+        rf"(?:(?:white|blue|black|red|green|colorless) )?"
+        rf"(.+?) creature token\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    power = int(m.group(1) or 1)
+    toughness = int(m.group(2) or 1)
+    token_name = m.group(3).strip()
+    return TriggeredAbility(
+        ability_id=_ability_id("etb-create-token", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="self",
+        effects=[
+            CreateTokenEffect(
+                name=token_name, power=power, toughness=toughness, quantity=1
+            )
+        ],
+    )
+
+
+def pat_mana_create_tokens_equal_subtype(text: str, name: str) -> Ability | None:
+    """Squirrel Girl: {cost}: Create X tokens equal to controlled subtype count."""
+    cleaned = _strip_ability_word(text)
+    m = re.match(
+        r"^((?:\{[^}]+\})+): Create X(?: (\d+)/(\d+))? "
+        r"(?:(?:white|blue|black|red|green|colorless) )?"
+        r"(.+?) creature tokens?, where X is the number of (.+?) you control\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    cost = _parse_mana_braces(m.group(1))
+    if cost.total() <= 0:
+        return None
+    power = int(m.group(2) or 1)
+    toughness = int(m.group(3) or 1)
+    token_name = m.group(4).strip()
+    subtype_phrase = m.group(5).strip()
+    # Prefer printed token name as subtype when phrase is its English plural.
+    if subtype_phrase.casefold() in {
+        token_name.casefold(),
+        f"{token_name}s".casefold(),
+    }:
+        subtype = token_name
+    else:
+        subtype = subtype_phrase.rstrip("s") if subtype_phrase.endswith("s") else subtype_phrase
+    return ActivatedAbility(
+        ability_id=_ability_id("mana-tokens-eq-subtype", text),
+        costs=[ManaCost(amount=cost)],
+        effects=[
+            CreateTokenEffect(
+                name=token_name,
+                power=power,
+                toughness=toughness,
+                quantity=1,
+                quantity_equal_to_controlled_subtype=subtype,
+            )
+        ],
+    )
+
+
 def pat_etb_damage(text: str, name: str) -> Ability | None:
     """Creature ETB → fixed damage to opponent (Impact Tremors / Purphoros class)."""
     # Optional ability word ("Alliance — ") and trailing reminder text.
@@ -1610,6 +1733,30 @@ def pat_create_token_put_p1p1_other(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_counters_put_damage_opponent(text: str, name: str) -> Ability | None:
+    """Shalai and Hallar: counters put on a creature you control → that much damage."""
+    short = name.split(",")[0].strip() if "," in name else name
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^Whenever one or more \+1/\+1 counters are put on a creature you control, "
+        rf"(?:{name_alt}) deals that much damage to (?:target |each )?opponent\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("counters-damage-opponent", text),
+        event=TriggerEvent.COUNTER_ADDED,
+        filter="controlled_creature",
+        effects=[
+            DealDamageEffect(amount=1, target="opponent", amount_from_trigger=True)
+        ],
+    )
+
+
 def pat_counters_put_may_create_token(text: str, name: str) -> Ability | None:
     """Scurry Oak: when +1/+1 counters are put on this, may create a token."""
     short = name.split(" of ")[0].strip() if " of " in name else name
@@ -2000,6 +2147,10 @@ PATTERNS: list[Pattern] = [
     ),
     Pattern("tap_create_token", pat_tap_create_token),
     Pattern("mana_untap_create_token", pat_mana_untap_create_token),
+    Pattern("cast_bounce_target_permanent", pat_cast_bounce_target_permanent),
+    Pattern("etb_if_cast_half_life_drain", pat_etb_if_cast_half_life_drain),
+    Pattern("etb_or_attacks_create_token", pat_etb_or_attacks_create_token),
+    Pattern("mana_create_tokens_equal_subtype", pat_mana_create_tokens_equal_subtype),
     Pattern("mana_create_token", pat_mana_create_token),
     Pattern("hybrid_remove_m1m1_pump", pat_hybrid_remove_m1m1_pump),
     Pattern("tap_add_mana", pat_tap_add_mana),
@@ -2031,6 +2182,7 @@ PATTERNS: list[Pattern] = [
     Pattern("aluren_free_cast", pat_aluren_free_cast),
     Pattern("instant_grant_tap_bounce", pat_instant_grant_tap_bounce),
     Pattern("create_token_put_p1p1_other", pat_create_token_put_p1p1_other),
+    Pattern("counters_put_damage_opponent", pat_counters_put_damage_opponent),
     Pattern("counters_put_may_create_token", pat_counters_put_may_create_token),
     Pattern("etb_untap_target", pat_etb_untap_target),
     Pattern("sac_creature_add_mana", pat_sac_creature_add_mana),

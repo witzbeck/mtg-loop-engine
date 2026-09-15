@@ -47,6 +47,11 @@ graph TB;
   Oracle-product witnesses that include the seed)
 - When a searched card has a grant-lifelink activate, seed `InitialStateSpec.mana` for one
   paid activation (Path b mana prerequisite — not a free grant)
+- Heliod/Archangel + Shalai-class (`COUNTER_ADDED` → damage): seed life gain to bootstrap
+  (no remove-counter ping start); grant lifelink targets include counter→damage creatures
+  as well as remove-counter pingers
+- Subtype X-create (Squirrel Girl) + sac outlet: seed three named subtype tokens and
+  `any_color` mana for one activate so Altar repay can close MINIMUM mana recurrence
 - When audited printed P/T is present on the fixture, `default_initial_state` uses it;
   `removes_p1p1` + toughness 0 → start with **2** p1p1 counters (SBA-safe)
 - Seed **four** `p1p1` counters on cards whose mana ability scales with +1/+1 counters (Gyre Sage) **or** with power (Kami / Viridian Joiner class via effective power), so Staff-class untap cycles clear (`{3}` untap creature + `{1}` untap Staff)
@@ -56,7 +61,8 @@ graph TB;
 - Seed a generic **basic Plains** when a searched card has self `{Q}` create paid with white (Patrol Signaler): Earthcraft + double-tap Plains pays `{1}{W}` (Spellbook notable). Earthcraft steps enumerate `cost_target` (creature) × `target` (land).
 - Seed **three** board-scaled mana fodder permanents when a searched card’s tap-mana ability scales with controlled creatures, elves, or defenders (`scaled-mana:creature-seed` / `elf-seed` / `defender-seed`). These are generic prerequisites (identity irrelevant within the category); `analyze_prerequisites` discloses them — they do **not** alone clear `strict_two_card` (that flag is participant-only).
 - Seed one generic creature token when a mana-cost create-token activate pairs with a sac-for-mana outlet (Sliver Queen + Ashnod’s Altar); sac fodder prefers tokens over essentials.
-- **Cast-from-hand:** emit `cast_from_hand` for creatures in hand; Aluren free-cast when partner has `FreeCastCreaturesByManaValue`. ETB-bounce creatures start in hand when paired with free cast.
+- **Cast-from-hand:** emit `cast_from_hand` for creatures **and artifacts** in hand; Aluren free-cast when partner has `FreeCastCreaturesByManaValue`. ETB-bounce creatures start in hand when paired with free cast. Tidespout + rock: artifact starts in hand; seed colorless = rock MV.
+- With pending triggers, hold-priority activations include Earthcraft `TapCreatureCost` **and mana abilities** (Sol Ring before Tidespout bounce).
 - **Instant grant tap-bounce:** `seed_grant_tap_bounce` onto a grant host; emit `activate_granted_tap_bounce`. With Intruder Alarm, seed mana dorks + a bounce creature in hand (generic prerequisites).
 - **Temur activated bounce:** with Village Bell-Ringer (self-ETB untap-all), seed mana dorks to pay `{1}{G}` + recast.
 - **Cloudstone type-share bounce:** with Aluren, seed a second Creature on BF (and cast seed in hand when the searched pair has no creature) so type-share bounce has a partner.

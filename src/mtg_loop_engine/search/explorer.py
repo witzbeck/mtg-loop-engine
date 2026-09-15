@@ -167,6 +167,15 @@ def _bounce_creature_seed_semantics() -> CardSemantics:
     )
 
 
+def _has_cast_bounce(card: CardSemantics) -> bool:
+    return any(
+        isinstance(ab, TriggeredAbility)
+        and ab.event == TriggerEvent.CAST
+        and any(isinstance(e, MoveToZoneEffect) for e in ab.effects)
+        for ab in card.abilities
+    )
+
+
 def _has_etb_bounce_to_hand(card: CardSemantics) -> bool:
     return any(
         isinstance(ab, TriggeredAbility)
@@ -410,6 +419,54 @@ def _mana_for_grant_lifelink(card: CardSemantics) -> ManaAmount | None:
     return None
 
 
+def _subtype_scaled_create_ability(card: CardSemantics) -> ActivatedAbility | None:
+    for ab in card.abilities:
+        if not isinstance(ab, ActivatedAbility) or not ab.supported:
+            continue
+        if any(
+            isinstance(e, CreateTokenEffect) and e.quantity_equal_to_controlled_subtype
+            for e in ab.effects
+        ):
+            return ab
+    return None
+
+
+def _mana_for_subtype_scaled_create(card: CardSemantics) -> ManaAmount | None:
+    """Seed pool for one Squirrel Girl-class X-create activate.
+
+    Seed as ``any_color`` so Altar sac repay (also any_color) can meet the same
+    MINIMUM recurrence floor as the setup pool.
+    """
+    ab = _subtype_scaled_create_ability(card)
+    if ab is None:
+        return None
+    for cost in ab.costs:
+        if isinstance(cost, ManaCost):
+            need = cost.amount
+            total = (
+                need.white
+                + need.blue
+                + need.black
+                + need.red
+                + need.green
+                + need.colorless
+                + need.generic
+                + need.any_color
+            )
+            return ManaAmount(any_color=total) if total > 0 else None
+    return None
+
+
+def _subtype_token_seed_name(card: CardSemantics) -> str | None:
+    ab = _subtype_scaled_create_ability(card)
+    if ab is None:
+        return None
+    for e in ab.effects:
+        if isinstance(e, CreateTokenEffect) and e.quantity_equal_to_controlled_subtype:
+            return e.name
+    return None
+
+
 def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpec:
     """Place both cards on the battlefield with generic fodder/counters as needed."""
     ordered = sorted([a, b], key=lambda c: c.oracle_id)
@@ -419,6 +476,7 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
     activated_bounce = any(_has_activated_bounce_other_creature(c) for c in ordered)
     cloudstone_partner = any(_has_cloudstone_bounce(c) for c in ordered)
     earthcraft_partner = any(_has_earthcraft(c) for c in ordered)
+    cast_bounce_partner = any(_has_cast_bounce(c) for c in ordered)
     permanents = []
     for i, card in enumerate(ordered):
         types = {t.lower() for t in card.types}
@@ -427,6 +485,7 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
             continue
         caps = extract_capabilities(card)
         is_creature = "creature" in types
+        is_artifact = "artifact" in types
         fix = GOLD_ORACLE_FIXTURES.get(card.oracle_id)
         if (
             is_creature
@@ -451,6 +510,7 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
         # Alarm + Drake/Lion: same — cast pays mana from seeded dorks.
         # Cloudstone + Aluren: cast creature from hand; bounce a second creature.
         # Earthcraft + Drake: cast from hand; hold priority to tap Drake, untap Island.
+        # Tidespout + rock: start artifact in hand for cast→bounce→recast.
         start_zone = Zone.BATTLEFIELD
         if is_creature and _has_etb_bounce_to_hand(card) and (
             free_cast_partner or alarm_partner or earthcraft_partner
@@ -458,13 +518,15 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
             start_zone = Zone.HAND
         elif is_creature and cloudstone_partner and free_cast_partner:
             start_zone = Zone.HAND
+        elif is_artifact and not is_creature and cast_bounce_partner:
+            start_zone = Zone.HAND
         permanents.append(
             bf(
                 f"c{i}",
                 card.oracle_id,
                 card.name,
                 is_creature=is_creature,
-                is_artifact="artifact" in types,
+                is_artifact=is_artifact,
                 counters=counters,
                 power=power,
                 toughness=toughness,
@@ -474,6 +536,26 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
         )
     need_token = any(extract_capabilities(c).needs_token_fodder() for c in ordered)
     need_token = need_token or _needs_mana_create_token_sac_bootstrap(ordered)
+    subtype_seed = next(
+        (n for c in ordered if (n := _subtype_token_seed_name(c)) is not None),
+        None,
+    )
+    # Subtype X-create + Altar: seed enough named tokens so X ≥ mana cost and
+    # sac can repay (SG + 3 Squirrels → X=4 for {1}{G}{G}{G}).
+    if subtype_seed is not None and _needs_mana_create_token_sac_bootstrap(ordered):
+        for i in range(3):
+            permanents.append(
+                bf(
+                    f"subtype_seed_{i}",
+                    f"token:{subtype_seed}",
+                    subtype_seed,
+                    is_creature=True,
+                    is_token=True,
+                    power=1,
+                    toughness=1,
+                )
+            )
+        need_token = False
     need_zombie = any(_needs_zombie_gate(c) for c in ordered)
     need_creature_host = any(_needs_creature_host(c) for c in ordered)
     has_creature = any(p.is_creature for p in permanents)
@@ -679,18 +761,33 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
             )
     mana = ManaAmount()
     for card in ordered:
-        seed = _mana_for_grant_lifelink(card)
-        if seed is None:
-            continue
-        mana = ManaAmount(
-            white=mana.white + seed.white,
-            blue=mana.blue + seed.blue,
-            black=mana.black + seed.black,
-            red=mana.red + seed.red,
-            green=mana.green + seed.green,
-            colorless=mana.colorless + seed.colorless,
-            any_color=mana.any_color + seed.any_color,
-        )
+        for seed_fn in (_mana_for_grant_lifelink, _mana_for_subtype_scaled_create):
+            seed = seed_fn(card)
+            if seed is None:
+                continue
+            mana = ManaAmount(
+                white=mana.white + seed.white,
+                blue=mana.blue + seed.blue,
+                black=mana.black + seed.black,
+                red=mana.red + seed.red,
+                green=mana.green + seed.green,
+                colorless=mana.colorless + seed.colorless,
+                any_color=mana.any_color + seed.any_color,
+            )
+    # Tidespout + rock: seed colorless for the first cast (any_color repay from rock tap).
+    if cast_bounce_partner:
+        for card in ordered:
+            types = {t.lower() for t in card.types}
+            if "artifact" in types and "creature" not in types and card.mana_value > 0:
+                mana = ManaAmount(
+                    white=mana.white,
+                    blue=mana.blue,
+                    black=mana.black,
+                    red=mana.red,
+                    green=mana.green,
+                    colorless=mana.colorless + card.mana_value,
+                    any_color=mana.any_color,
+                )
     # Sliver Queen + Mana Echoes: seed {2} so the first create can fire; ETB mana pays the rest.
     if _needs_mana_create_echoes_bootstrap(ordered):
         mana = ManaAmount(
@@ -790,11 +887,12 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
     """Deterministic legal actions.
 
     With pending triggers, combo-player may hold priority to activate
-    Earthcraft-class ``TapCreatureCost`` abilities (e.g. tap Drake before bounce).
+    Earthcraft-class ``TapCreatureCost`` abilities and mana abilities
+    (e.g. tap Drake before bounce; tap Sol Ring before Tidespout bounce).
     """
     steps: list[ActionStep] = []
     if state.pending_triggers:
-        # Holding priority first so BFS can Earthcraft-tap before resolving ETB bounce.
+        # Holding priority: Earthcraft tap-creature costs + mana abilities.
         steps.extend(
             _activation_steps(executor, state, tap_creature_cost_only=True)
         )
@@ -923,9 +1021,11 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
 
     steps.extend(_activation_steps(executor, state, tap_creature_cost_only=False))
 
-    # Cast creatures from hand (Aluren free cast or paid mana_cost).
+    # Cast creatures/artifacts from hand (Aluren free cast or paid mana_cost).
     for perm in sorted(state.permanents.values(), key=lambda p: p.object_id):
-        if perm.zone != Zone.HAND or not perm.is_creature or perm.controller != "you":
+        if perm.zone != Zone.HAND or perm.controller != "you":
+            continue
+        if not (perm.is_creature or perm.is_artifact):
             continue
         step = ActionStep(op="cast_from_hand", actor=perm.object_id)
         if _try_apply(executor, state, step) is not None:
@@ -972,7 +1072,9 @@ def _activation_steps(
         for ab in card.abilities:
             if not isinstance(ab, ActivatedAbility) or not ab.supported:
                 continue
-            if tap_creature_cost_only and not _has_tap_creature_cost(ab):
+            if tap_creature_cost_only and not (
+                _has_tap_creature_cost(ab) or ab.is_mana_ability
+            ):
                 continue
             selector = _sac_selector(ab)
             remove_cost = _remove_counter_cost(ab)
@@ -1205,6 +1307,34 @@ def _needs_life_gain_seed(card: CardSemantics) -> bool:
     )
 
 
+def _is_gain_life_put_counter(card: CardSemantics) -> bool:
+    """Heliod / Archangel: GAIN_LIFE → +1/+1 puts."""
+    return any(
+        isinstance(ab, TriggeredAbility)
+        and ab.event == TriggerEvent.GAIN_LIFE
+        and any(isinstance(e, AddCounterEffect) for e in ab.effects)
+        for ab in card.abilities
+    )
+
+
+def _is_counter_added_damage(card: CardSemantics) -> bool:
+    """Shalai-class: COUNTER_ADDED → damage (needs life-gain bootstrap + lifelink)."""
+    return any(
+        isinstance(ab, TriggeredAbility)
+        and ab.event == TriggerEvent.COUNTER_ADDED
+        and any(isinstance(e, DealDamageEffect) for e in ab.effects)
+        for ab in card.abilities
+    )
+
+
+def _lifelink_grant_ping_target(card: CardSemantics, perm_is_creature: bool) -> bool:
+    """Ballista remove-counter OR Shalai counter→damage can close with lifelink."""
+    if not perm_is_creature:
+        return False
+    caps = extract_capabilities(card)
+    return caps.removes_p1p1() or _is_counter_added_damage(card)
+
+
 def _needs_opponent_lose_life_seed(card: CardSemantics) -> bool:
     """Path-b mill feedback seed (Mindcrank / Bloodchief class)."""
     from mtg_loop_engine.semantics.ir import MillEffect
@@ -1272,13 +1402,8 @@ def _needs_mana_create_echoes_bootstrap(cards: list[CardSemantics]) -> bool:
 
 
 def _needs_lifelink_grant_seed(card: CardSemantics) -> bool:
-    """Heliod-class: GAIN_LIFE → counter, partner removes counters for damage."""
-    return any(
-        isinstance(ab, TriggeredAbility)
-        and ab.event == TriggerEvent.GAIN_LIFE
-        and any(isinstance(e, AddCounterEffect) for e in ab.effects)
-        for ab in card.abilities
-    )
+    """Heliod-class: GAIN_LIFE → counter; partner pings or deals counter-put damage."""
+    return _is_gain_life_put_counter(card)
 
 
 def build_witness(
@@ -1532,6 +1657,26 @@ def explore_pair(
             err = executor.run_step(start, seed)
             if err is None:
                 setup_actions = [seed]
+    # Heliod/Archangel + Shalai: no remove-counter ping to bootstrap — seed life gain.
+    if (
+        (_is_gain_life_put_counter(a) and _is_counter_added_damage(b))
+        or (_is_gain_life_put_counter(b) and _is_counter_added_damage(a))
+    ) and not any(s.op == "seed_gain_life" for s in setup_actions):
+        seed_actor = None
+        for perm in sorted(start.permanents.values(), key=lambda p: p.object_id):
+            card = semantics.get(perm.oracle_id)
+            if card is not None and _is_gain_life_put_counter(card):
+                seed_actor = perm.object_id
+                break
+        if seed_actor is not None:
+            seed = ActionStep(
+                op="seed_gain_life",
+                actor=seed_actor,
+                note="generic life-gain seed (Heliod/Shalai counter→damage bootstrap)",
+            )
+            err = executor.run_step(start, seed)
+            if err is None:
+                setup_actions = [*setup_actions, seed]
     if _needs_opponent_lose_life_seed(a) or _needs_opponent_lose_life_seed(b):
         seed_actor = None
         for perm in sorted(start.permanents.values(), key=lambda p: p.object_id):
@@ -1585,8 +1730,7 @@ def explore_pair(
                 continue
             if _needs_lifelink_grant_seed(card):
                 grantor = perm.object_id
-            caps = extract_capabilities(card)
-            if caps.removes_p1p1() and perm.is_creature:
+            if _lifelink_grant_ping_target(card, perm.is_creature):
                 pinger = perm.object_id
         if grantor is not None and pinger is not None and grantor != pinger:
             seed = ActionStep(
@@ -1612,8 +1756,7 @@ def explore_pair(
                 continue
             if card.oracle_id == grant_card.oracle_id:
                 grantor = perm.object_id
-            caps = extract_capabilities(card)
-            if caps.removes_p1p1() and perm.is_creature:
+            if _lifelink_grant_ping_target(card, perm.is_creature):
                 pinger = perm.object_id
         if (
             grant_ab is not None

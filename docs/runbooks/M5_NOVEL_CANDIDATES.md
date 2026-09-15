@@ -112,9 +112,13 @@ uv run python scripts/spellbook_absent_discovery.py
 27. **Earthcraft + Wirewood (slices 33–34)** ✓ — Earthcraft tap-creature → untap basic land (hold priority with Drake); Wirewood battlefield-Elf any-color (Staff rediscovery).
 28. **Squirrel Nest (slice 35)** ✓ — enchanted-land `{T}`: create Squirrel (`TapCost.host="land"`); Earthcraft rediscovery. Deferred Patrol Signaler (`{Q}` create) / Quillspike (−1/−1 remove); Storm Herd rejected (one-shot).
 29. **Patrol Signaler + Quillspike (slices 36–37)** ✓ — Signaler `{1}{W}{Q}` create + Earthcraft/Plains double-tap; Quillspike hybrid remove-m1m1 + Devoted Druid (0/2 printed P/T). Storm Herd still rejected.
-30. **Frontier-driven slices (M5.2 Slice 38+):** Path **a** preference remains; cite live P0/P1. Ritual below.
-31. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-32. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+30. **Shalai and Hallar (slice 38)** ✓ — COUNTER_ADDED → that-much damage; Heliod rediscovery. Archangel COMPLETE unlock without short explorer close.
+31. **Squirrel Girl (slice 39)** ✓ — ETB create (attacks not modeled) + mana create X=Squirrels; Altar rediscovery. Ability-word split accepts Marvel-style names.
+32. **Shard of the Nightbringer (slice 40)** ✓ — ETB intervening-if cast + half-life drain (`Permanent.was_cast`); Vito/Bond COMPLETE unlock. Two-card rediscovery deferred (needs bounce/recast).
+33. **Tidespout Tyrant (slice 41)** ✓ — `TriggerEvent.CAST` bounce target permanent; artifact `cast_from_hand`; Sol Ring rediscovery (mana abilities while holding priority).
+34. **Frontier-driven slices (M5.2 Slice 42+):** Path **a** preference remains; cite live P0/P1. Ritual below.
+35. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+36. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 
@@ -181,11 +185,11 @@ Trigger after every meaningful curriculum/physics PR (COMPLETE growth, new verif
 
 #### Current queue (remeasured post–waves + M5.3 batch)
 
-Probe: **84** COMPLETE · **88** verified · **69** in_reference · **19** absent (post–slices 36–37). Workbench `spellbook_absent`: **22** unique pairs, **0** unreviewed.
+Probe: **86** COMPLETE · **91** verified · **70** in_reference · **21** absent (post–slices 38–39). Workbench `spellbook_absent`: **0** unreviewed after re-apply + new Shalai/Sunbond labels (`valid_generic_prerequisite`).
 
 | Adjudication | Count | Notes |
 | --- | ---: | --- |
-| `valid_generic_prerequisite` | 18 | Scaled mana / dork / grant / Temur / Wirewood / Alarm seeds |
+| `valid_generic_prerequisite` | 21 | Scaled mana / dork / grant / Temur / Wirewood / Alarm / Shalai life seeds |
 | `valid_strict_two_card` | 1 | Aluren + Dream Stalker (no generics stamped) |
 | `duplicate_or_equivalent_interaction` | 2 | Basalt/Impact + Gond bystanders (prior) |
 | `needs_rules_research` | 1 | Warleader's Call + Gond (prior) |

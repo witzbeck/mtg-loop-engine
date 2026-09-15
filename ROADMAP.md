@@ -185,7 +185,11 @@ measure frontier → smallest reusable gap → discover → adjudicate → contr
    - **Slices 33–34 (Earthcraft + Wirewood)** ✓ — `TapCreatureCost` → untap basic land (hold priority before Drake bounce); Wirewood battlefield-Elf any-color; Staff rediscovery.
    - **Slice 35 (Squirrel Nest)** ✓ — enchanted-land `{T}`: create Squirrel (`TapCost.host="land"`); Earthcraft rediscovery. Deferred Patrol Signaler / Quillspike; rejected Storm Herd.
    - **Slices 36–37 (Patrol Signaler + Quillspike)** ✓ — `{1}{W}{Q}` create + Plains/Earthcraft; hybrid remove-m1m1 + Devoted Druid (printed 0/2).
-   - **Slice 38+** ○ — cite live P0/P1; Path **a** preference.
+   - **Slice 38 (Shalai and Hallar)** ✓ — COUNTER_ADDED on controlled creature → that-much damage; Heliod rediscovery. Archangel mass-puts unlock COMPLETE (no short explorer close).
+   - **Slice 39 (Squirrel Girl)** ✓ — ETB create (attacks not modeled) + mana create X=Squirrels; Altar rediscovery.
+   - **Slice 40 (Shard cast intervening-if)** ✓ — ETB `intervening_if=cast` + half-life drain; Vito/Bond COMPLETE unlock (2-card rediscovery needs bounce/recast).
+   - **Slice 41 (Tidespout CAST bounce)** ✓ — `TriggerEvent.CAST` + artifact `cast_from_hand`; Sol Ring rediscovery (hold-priority mana abilities).
+   - **Slice 42+** ○ — cite live P0/P1; Path **a** preference.
    - **Path b (Bond/Blood)** ✓ — explicit generic life-gain seed; `core_bond_blood` frozen; disclosed on witness.
    - **Path b (Mindcrank / Bloodchief)** ✓ — explicit generic opponent life-loss seed (`seed_lose_life`, drain-sized); disclosed on witness.
    - **Rules-evidence rails** ✓ — [`docs/RULES_EVIDENCE.md`](docs/RULES_EVIDENCE.md), [`AGENTS.md`](AGENTS.md), [`.cursor/rules/rules-evidence.mdc`](.cursor/rules/rules-evidence.mdc), [`.agents/skills/rules-evidence/`](.agents/skills/rules-evidence/).
@@ -206,7 +210,7 @@ measure frontier → smallest reusable gap → discover → adjudicate → contr
      card forces a **third** sibling filter (e.g. another Elf / white creature) or
      when colored/typed token ETB is required for unlock — not as a standalone epic.
 
-3. **Workbench adjudication (M5.3)** ◐ — live probe post–slices 36–37 (**84** COMPLETE · **88** verified · **69** in_reference · **19** absent): **22** unique `spellbook_absent` pairs disposed (**18** `valid_generic_prerequisite`, **1** `valid_strict_two_card` Aluren+Dream Stalker, **2** duplicate Gond bystanders, **1** `needs_rules_research` Warleader's Call+Gond). Keep `ABSENT_FROM_REFERENCE` (not `NOVEL`). Run `--persist-workbench` after each curriculum PR.
+3. **Workbench adjudication (M5.3)** ◐ — live probe post–slices 38–39 (**86** COMPLETE · **91** verified · **70** in_reference · **21** absent): **22** unique `spellbook_absent` pairs disposed (**18** `valid_generic_prerequisite`, **1** `valid_strict_two_card` Aluren+Dream Stalker, **2** duplicate Gond bystanders, **1** `needs_rules_research` Warleader's Call+Gond). Keep `ABSENT_FROM_REFERENCE` (not `NOVEL`). Run `--persist-workbench` after each curriculum PR.
 4. **Optional baseline / M5.4 exit** — freeze an absent-discovery summary only when intentionally certifying; then apply the M5 exit gate above.
 
 Playbook: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDIDATES.md).

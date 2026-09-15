@@ -373,13 +373,20 @@ class Executor:
         trigger_amount: int | None = None,
         trigger_subject_id: str | None = None,
     ) -> ExecError | None:
+        amount = trigger_amount
         for effect in effects:
+            # Half-life lose: compute qty before apply so following gains can reuse it.
+            if isinstance(effect, LoseLifeEffect) and effect.half_life_rounded_up:
+                life = (
+                    state.life_opponent if effect.who == "opponent" else state.life_you
+                )
+                amount = (life + 1) // 2
             err = self._apply_one(
                 state,
                 source,
                 effect,
                 target_id,
-                trigger_amount=trigger_amount,
+                trigger_amount=amount,
                 trigger_subject_id=trigger_subject_id,
             )
             if err:
@@ -548,7 +555,20 @@ class Executor:
             return None
 
         if isinstance(effect, CreateTokenEffect):
-            for _ in range(effect.quantity):
+            qty = effect.quantity
+            if effect.quantity_equal_to_controlled_subtype:
+                subtype = effect.quantity_equal_to_controlled_subtype.casefold()
+                qty = sum(
+                    1
+                    for p in state.permanents.values()
+                    if p.zone == Zone.BATTLEFIELD
+                    and p.controller == "you"
+                    and p.is_creature
+                    and subtype in self._creature_subtypes(p)
+                )
+            if qty <= 0:
+                return None
+            for _ in range(qty):
                 oid = state.next_token_id()
                 tok = Permanent(
                     object_id=oid,
@@ -700,17 +720,25 @@ class Executor:
             return None
 
         if isinstance(effect, DealDamageEffect):
+            qty = effect.amount
+            if effect.amount_from_trigger:
+                if trigger_amount is None or trigger_amount <= 0:
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_ACTION,
+                        "damage amount_from_trigger needs trigger amount",
+                    )
+                qty = trigger_amount
             to_opponent = effect.target == "opponent" or (
                 effect.target == "any_target"
                 and target_id in (None, "opponent")
             )
             if to_opponent:
-                state.life_opponent -= effect.amount
+                state.life_opponent -= qty
                 self._queue_triggers(
                     state,
                     TriggerEvent.OPPONENT_LOSE_LIFE,
                     source,
-                    amount=effect.amount,
+                    amount=qty,
                 )
             elif effect.target == "any_target" and target_id is not None:
                 # CR 702.92 / Triskelion-class: any-target may include the source.
@@ -724,18 +752,18 @@ class Executor:
                         VerificationStatus.ILLEGAL_TARGET,
                         "damage target must be a battlefield creature",
                     )
-                victim.damage_marked += effect.amount
+                victim.damage_marked += qty
             else:
                 return ExecError(
                     VerificationStatus.ILLEGAL_TARGET,
                     "deal damage needs opponent or creature target",
                 )
-            state.bump("damage", effect.amount)
-            if source.lifelink and effect.amount > 0:
-                state.life_you += effect.amount
-                state.bump("life_gain", effect.amount)
+            state.bump("damage", qty)
+            if source.lifelink and qty > 0:
+                state.life_you += qty
+                state.bump("life_gain", qty)
                 self._queue_triggers(
-                    state, TriggerEvent.GAIN_LIFE, source, amount=effect.amount
+                    state, TriggerEvent.GAIN_LIFE, source, amount=qty
                 )
             return None
 
@@ -757,11 +785,17 @@ class Executor:
             return None
 
         if isinstance(effect, LoseLifeEffect):
-            qty = (
-                trigger_amount
-                if effect.amount_from_trigger and trigger_amount is not None
-                else effect.amount
-            )
+            if effect.half_life_rounded_up:
+                life = (
+                    state.life_opponent if effect.who == "opponent" else state.life_you
+                )
+                qty = (life + 1) // 2
+            else:
+                qty = (
+                    trigger_amount
+                    if effect.amount_from_trigger and trigger_amount is not None
+                    else effect.amount
+                )
             if qty is None or qty <= 0:
                 return ExecError(VerificationStatus.ILLEGAL_ACTION, "lose life amount")
             if effect.who == "opponent":
@@ -806,6 +840,7 @@ class Executor:
                 "other_controlled_creature",
                 "other_controlled_sharing_type",
                 "target_nonland",
+                "target_permanent",
             }:
                 return self._bounce_to_zone(
                     state,
@@ -966,6 +1001,9 @@ class Executor:
                 )
         bounced.zone = effect.zone
         bounced.tapped = False
+        if effect.zone == Zone.HAND:
+            bounced.was_cast = False
+            bounced.summoning_sick = False
         return None
 
     def _on_etb(self, state: GameState, permanent: Permanent) -> None:
@@ -1048,6 +1086,9 @@ class Executor:
                 if ab.filter == "token_creature" and not (
                     subject.is_token and subject.is_creature
                 ):
+                    continue
+                # CR 603.4 intervening-if (cast): only if subject entered via cast_from_hand.
+                if ab.intervening_if == "cast" and not subject.was_cast:
                     continue
                 entry = {
                     "source_id": perm.object_id,
@@ -1541,6 +1582,11 @@ class Executor:
         ab = self.find_ability(source.oracle_id, tr["ability_id"])
         if not isinstance(ab, TriggeredAbility):
             return ExecError(VerificationStatus.ILLEGAL_ACTION, "bad trigger")
+        # CR 603.4: re-check intervening-if on resolution.
+        if ab.intervening_if == "cast":
+            subject = state.permanents.get(tr.get("subject_id") or source.object_id)
+            if subject is None or not subject.was_cast:
+                return None
         return self.apply_effects(
             state,
             source,
@@ -1738,7 +1784,7 @@ class Executor:
     def cast_from_hand(
         self, state: GameState, step: ActionStep
     ) -> ExecError | None:
-        """Cast a creature from hand (pay mana_cost, or free under Aluren-class)."""
+        """Cast a permanent spell from hand (creatures + artifacts for rock/Tidespout)."""
         if not step.actor:
             return ExecError(VerificationStatus.ILLEGAL_ACTION, "cast needs actor")
         perm = state.permanents.get(step.actor)
@@ -1748,10 +1794,10 @@ class Executor:
             return ExecError(
                 VerificationStatus.ILLEGAL_ACTION, "cast requires card in hand"
             )
-        if not perm.is_creature:
+        if not (perm.is_creature or perm.is_artifact):
             return ExecError(
                 VerificationStatus.UNSUPPORTED_SEMANTICS,
-                "cast_from_hand models creatures only",
+                "cast_from_hand models creatures and artifacts only",
             )
         card = self.semantics.get(perm.oracle_id)
         if card is None:
@@ -1764,9 +1810,12 @@ class Executor:
                 return err
         perm.zone = Zone.BATTLEFIELD
         perm.tapped = False
-        perm.summoning_sick = True
+        perm.summoning_sick = bool(perm.is_creature)
         perm.damage_marked = 0
+        perm.was_cast = True
         state.bump("cast")
+        # CAST triggers see the spell as cast; subject is the permanent that entered.
+        self._queue_triggers(state, TriggerEvent.CAST, perm)
         self._on_etb(state, perm)
         return None
 

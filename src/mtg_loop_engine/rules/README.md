@@ -43,7 +43,9 @@ graph TB;
 - `TapCreatureCost` (Earthcraft): tap an untapped controlled creature as a cost (not the creature's own `{T}` — summoning sickness does not apply). `UntapEffect(target_basic_land)`. Optional `ActionStep.cost_target` selects the creature when `target` is the land (Signaler vs token).
 - `HybridManaCost` ({B/G}) and `RemoveCounterCost` (Quillspike): pay one of the listed colors; remove m1m1 from a controlled creature.
 - Holding priority: while triggers are pending, explorer may activate `TapCreatureCost` abilities before resolving ETB bounce (Drake + Earthcraft).
-- `cast_from_hand`: creature from `Zone.HAND` pays `CardSemantics.mana_cost`, or free under `FreeCastCreaturesByManaValue` (Aluren) when MV ≤ ceiling; bumps `events.cast` then ETB.
+- `cast_from_hand`: creature **or artifact** from `Zone.HAND` pays `CardSemantics.mana_cost`, or free under `FreeCastCreaturesByManaValue` (Aluren) when MV ≤ ceiling; bumps `events.cast`, sets `Permanent.was_cast`, queues `TriggerEvent.CAST`, then ETB. Artifacts are not summoning sick.
+- Intervening-if `cast` (Shard): queue/resolve ETB triggers only when `subject.was_cast` (CR 603.4 check at both times).
+- `LoseLifeEffect.half_life_rounded_up`: lose `ceil(life/2)`; following `GainLifeEffect(amount_from_trigger=True)` in the same ability uses that qty.
 - `activate_granted_tap_bounce` / `seed_grant_tap_bounce`: Instant grant `{T}`: bounce nonland (`Permanent.tap_bounce_nonland`, witness-persistent).
 - BF tapped→untapped via `_untap_permanent` queues `TriggerEvent.UNTAP` (Mesmeric Orb); self-mill bumps `events.mill` only.
 - Summoning sickness blocks `{T}` / `TapCost` even on mana abilities (CR 302.6); haste not modeled.
@@ -53,6 +55,8 @@ graph TB;
   `ORACLE_EXACT` witnesses (verifier quarantines). Product Heliod uses `GrantLifelinkEffect`
   from a paid `{1}{W}` activation.
 - `DealDamageEffect` `any_target`: opponent life when `step.target` is `None`/`opponent`; mark damage on a BF creature id (self-ping legal when `target == actor`).
+- `DealDamageEffect.amount_from_trigger`: Shalai-class “that much” damage from `COUNTER_ADDED` amount.
+- `CreateTokenEffect.quantity_equal_to_controlled_subtype`: Squirrel Girl X-create; token names infer subtype when unregistered.
 - `ReplacementAmplifyP1P1Counters` (Kami / Hardened Scales): +1/+1 puts become that many plus one; creature vs permanent scope; multiple sources stack.
 - Power-scaled tap mana (`equal_to_source_power`) uses `Permanent.effective_power()` (printed ± counters).
 - `AddCounterEffect.amount_from_trigger` + `target=enchanted_creature`: Sunbond / Light of Promise put that many +1/+1 on the host creature (explorer supplies the host target; no attachment graph yet).
