@@ -174,11 +174,12 @@ measure frontier → smallest reusable gap → discover → adjudicate → contr
    - **Slice 16 (Human ETB + power mana)** ✓ — Heronblade Elite `other_controlled_human` → self p1p1 + power-scaled any-color; frontier P0 (**2** unlocks vs Staff / Mantle). Deferred Ivy Lane Denizen (green color filter not modeled yet).
    - **Slice 17 (mana-activated token create)** ✓ — Sliver Queen `{2}: create 1/1`; explorer seed token for Queen+Altar bootstrap; frontier P0 (**2** unlocks). Rejected Storm Herd; deferred Wirewood (slice-9 sibling).
    - **Slice 18 (dies→life=toughness)** ✓ — South Wind Avatar; DIES amount from subject toughness + existing fixed drain on GAIN_LIFE; frontier P0 (**2** unlocks vs Exquisite).
-   - **Slices 19–20 (ETB bounce)** ✓ — Shrieking Drake / Whitemane Lion; `MoveToZoneEffect` → hand (`controlled_creature`); frontier P1 (**2** cards / **2** unlocks). Rediscovery deferred until cast-from-hand exists.
+   - **Slices 19–20 (ETB bounce)** ✓ — Shrieking Drake / Whitemane Lion; `MoveToZoneEffect` → hand (`controlled_creature`); frontier P1 (**2** cards / **2** unlocks). Rediscovery via slices 24–25 cast-from-hand.
    - **Slice 21 (green ETB counters)** ✓ — Ivy Lane Denizen; `colors` on `CardSemantics`/`Permanent` + `other_controlled_green`; frontier P0 (**2** unlocks).
    - **Slice 22 (enchanted-artifact cost reduction)** ✓ — Power Artifact; `ContinuousCostReduction` `enchanted_artifact_activated` −{2} floor 1; frontier P1 (**2** unlocks vs Basalt).
    - **Slice 23 (untap→mill)** ✓ — Mesmeric Orb; `TriggerEvent.UNTAP` → self-mill; frontier P1 (**2** unlocks vs Basalt).
-   - **Slice 24+** ○ — choose from live frontier P0/P1; cite compact pair-unlock evidence in the curriculum PR.
+   - **Slices 24–25 (cast-from-hand + Instant grant bounce)** ✓ — `cast_from_hand` + Aluren free cast MV≤3 (Drake/Lion rediscovery); Banishing Knack / Retraction Helix Instant grant `{T}`: bounce nonland (Alarm rediscovery with mana-dork seeds). Wirewood deferred.
+   - **Slice 26+** ○ — choose from live frontier P0/P1; cite compact pair-unlock evidence in the curriculum PR.
    - **Path b (Bond/Blood)** ✓ — explicit generic life-gain seed; `core_bond_blood` frozen; disclosed on witness.
    - **Path b (Mindcrank / Bloodchief)** ✓ — explicit generic opponent life-loss seed (`seed_lose_life`, drain-sized); disclosed on witness.
    - **Rules-evidence rails** ✓ — [`docs/RULES_EVIDENCE.md`](docs/RULES_EVIDENCE.md), [`AGENTS.md`](AGENTS.md), [`.cursor/rules/rules-evidence.mdc`](.cursor/rules/rules-evidence.mdc), [`.agents/skills/rules-evidence/`](.agents/skills/rules-evidence/).
@@ -199,7 +200,7 @@ measure frontier → smallest reusable gap → discover → adjudicate → contr
      card forces a **third** sibling filter (e.g. another Elf / white creature) or
      when colored/typed token ETB is required for unlock — not as a standalone epic.
 
-3. **Workbench adjudication (M5.3)** ◐ — live queue after slice 23 remeasure (**70** COMPLETE · **62** verified · **56** in_reference · **6** absent): prior defender-mana / Heronblade aura / Sunbond pairs — all **`valid_generic_prerequisite`**, keep `ABSENT_FROM_REFERENCE` (not `NOVEL`). Run `--persist-workbench` after each curriculum PR.
+3. **Workbench adjudication (M5.3)** ◐ — live queue after slices 24–25 remeasure (**73** COMPLETE · **62** verified · **56** in_reference · **6** absent): prior defender-mana / Heronblade aura / Sunbond pairs — all **`valid_generic_prerequisite`**, keep `ABSENT_FROM_REFERENCE` (not `NOVEL`). Run `--persist-workbench` after each curriculum PR.
 4. **Optional baseline / M5.4 exit** — freeze an absent-discovery summary only when intentionally certifying; then apply the M5 exit gate above.
 
 Playbook: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDIDATES.md).

@@ -42,9 +42,12 @@ from mtg_loop_engine.semantics.ir import (
     CardSemantics,
     CreateTokenEffect,
     DealDamageEffect,
+    FreeCastCreaturesByManaValue,
     GrantLifelinkEffect,
+    InstantGrantTapBounce,
     ManaAmount,
     ManaCost,
+    MoveToZoneEffect,
     SacrificeCost,
     TapCost,
     TriggeredAbility,
@@ -70,6 +73,7 @@ OUTPUT_EVENT_KEYS = {
     "mana": OutputType.MANA,
     "token": OutputType.TOKEN,
     "etb": OutputType.ETB,
+    "cast": OutputType.CAST,
     "untap": OutputType.UNTAP,
     "damage": OutputType.DAMAGE,
     "life_gain": OutputType.LIFE_GAIN,
@@ -79,6 +83,79 @@ OUTPUT_EVENT_KEYS = {
     "sacrifice": OutputType.SACRIFICE,
     "draw": OutputType.DRAW,
 }
+
+
+MANA_DORK_SEED_ORACLE_ID = "setup:mana-dork-seed"
+BOUNCE_CREATURE_SEED_ORACLE_ID = "setup:bounce-creature-seed"
+GRANT_HOST_OBJECT_ID = "grant-host"
+_MANA_DORK_SEED_COUNT = 3
+
+
+def _mana_dork_seed_semantics() -> CardSemantics:
+    return CardSemantics(
+        oracle_id=MANA_DORK_SEED_ORACLE_ID,
+        name="Seed Mana Dork",
+        types=["Creature"],
+        mana_cost=ManaAmount(),
+        mana_value=0,
+        abilities=[
+            ActivatedAbility(
+                ability_id="seed-tap-mana",
+                costs=[TapCost()],
+                effects=[AddManaEffect(amount=ManaAmount(any_color=1))],
+                is_mana_ability=True,
+                uses_stack=False,
+            )
+        ],
+        coverage=SemanticCoverage.COMPLETE,
+    )
+
+
+def _bounce_creature_seed_semantics() -> CardSemantics:
+    return CardSemantics(
+        oracle_id=BOUNCE_CREATURE_SEED_ORACLE_ID,
+        name="Seed Bounce Creature",
+        types=["Creature"],
+        mana_cost=ManaAmount(generic=1),
+        mana_value=1,
+        abilities=[],
+        coverage=SemanticCoverage.COMPLETE,
+    )
+
+
+def _has_etb_bounce_to_hand(card: CardSemantics) -> bool:
+    return any(
+        isinstance(ab, TriggeredAbility)
+        and ab.event == TriggerEvent.ENTER_BATTLEFIELD
+        and any(
+            isinstance(e, MoveToZoneEffect)
+            and e.zone == Zone.HAND
+            and e.target == "controlled_creature"
+            for e in ab.effects
+        )
+        for ab in card.abilities
+    )
+
+
+def _has_free_cast(card: CardSemantics) -> bool:
+    return any(isinstance(ab, FreeCastCreaturesByManaValue) for ab in card.abilities)
+
+
+def _has_instant_grant_tap_bounce(card: CardSemantics) -> bool:
+    return any(isinstance(ab, InstantGrantTapBounce) for ab in card.abilities)
+
+
+def _has_etb_untap_all_creatures(card: CardSemantics) -> bool:
+    """Intruder Alarm class: creature ETB → untap all creatures."""
+    from mtg_loop_engine.semantics.ir import UntapEffect
+
+    return any(
+        isinstance(ab, TriggeredAbility)
+        and ab.event == TriggerEvent.ENTER_BATTLEFIELD
+        and ab.filter == "creature"
+        and any(isinstance(e, UntapEffect) and e.target == "all_creatures" for e in ab.effects)
+        for ab in card.abilities
+    )
 
 
 ZOMBIE_SEED_ORACLE_ID = "token:zombie-seed"
@@ -142,6 +219,21 @@ def _inject_seed_semantics(
             abilities=[],
             coverage=SemanticCoverage.COMPLETE,
         )
+    if any(p.oracle_id == MANA_DORK_SEED_ORACLE_ID for p in spec.permanents):
+        semantics[MANA_DORK_SEED_ORACLE_ID] = _mana_dork_seed_semantics()
+    if any(p.oracle_id == BOUNCE_CREATURE_SEED_ORACLE_ID for p in spec.permanents):
+        semantics[BOUNCE_CREATURE_SEED_ORACLE_ID] = _bounce_creature_seed_semantics()
+    if any(p.object_id == GRANT_HOST_OBJECT_ID for p in spec.permanents):
+        semantics.setdefault(
+            AURA_HOST_ORACLE_ID,
+            CardSemantics(
+                oracle_id=AURA_HOST_ORACLE_ID,
+                name="Grant Host",
+                types=["Creature"],
+                abilities=[],
+                coverage=SemanticCoverage.COMPLETE,
+            ),
+        )
 
 
 def _needs_zombie_gate(card: CardSemantics) -> bool:
@@ -198,9 +290,15 @@ def _mana_for_grant_lifelink(card: CardSemantics) -> ManaAmount | None:
 def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpec:
     """Place both cards on the battlefield with generic fodder/counters as needed."""
     ordered = sorted([a, b], key=lambda c: c.oracle_id)
+    free_cast_partner = any(_has_free_cast(c) for c in ordered)
+    instant_grant = any(_has_instant_grant_tap_bounce(c) for c in ordered)
+    alarm_partner = any(_has_etb_untap_all_creatures(c) for c in ordered)
     permanents = []
     for i, card in enumerate(ordered):
         types = {t.lower() for t in card.types}
+        # Instant grant cards are not battlefield permanents; setup grants instead.
+        if _has_instant_grant_tap_bounce(card):
+            continue
         caps = extract_capabilities(card)
         is_creature = "creature" in types
         fix = GOLD_ORACLE_FIXTURES.get(card.oracle_id)
@@ -223,6 +321,10 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
             counters = {"p1p1": 2 if toughness == 0 else 1}
         else:
             counters = {}
+        # Aluren + Drake/Lion: start bounce creature in hand for free recast.
+        start_zone = Zone.BATTLEFIELD
+        if is_creature and _has_etb_bounce_to_hand(card) and free_cast_partner:
+            start_zone = Zone.HAND
         permanents.append(
             bf(
                 f"c{i}",
@@ -234,6 +336,7 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
                 power=power,
                 toughness=toughness,
                 colors=list(card.colors),
+                zone=start_zone,
             )
         )
     need_token = any(extract_capabilities(c).needs_token_fodder() for c in ordered)
@@ -278,6 +381,40 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
                 is_token=False,
                 power=1,
                 toughness=1,
+            )
+        )
+    # Knack/Helix + Alarm: mana dorks, grant host, creature in hand to bounce.
+    if instant_grant and alarm_partner:
+        for i in range(_MANA_DORK_SEED_COUNT):
+            permanents.append(
+                bf(
+                    f"mana_dork_{i}",
+                    MANA_DORK_SEED_ORACLE_ID,
+                    "Seed Mana Dork",
+                    is_creature=True,
+                    power=1,
+                    toughness=1,
+                )
+            )
+        permanents.append(
+            bf(
+                GRANT_HOST_OBJECT_ID,
+                AURA_HOST_ORACLE_ID,
+                "Grant Host",
+                is_creature=True,
+                power=1,
+                toughness=1,
+            )
+        )
+        permanents.append(
+            bf(
+                "bounce_seed",
+                BOUNCE_CREATURE_SEED_ORACLE_ID,
+                "Seed Bounce Creature",
+                is_creature=True,
+                power=1,
+                toughness=1,
+                zone=Zone.HAND,
             )
         )
     pair_caps = [extract_capabilities(c) for c in ordered]
@@ -414,6 +551,7 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
             needs_target = False
             exclude_source = False
             require_creature = False
+            require_nonland = False
             if ab is not None:
                 for effect in getattr(ab, "effects", []):
                     tgt = getattr(effect, "target", None)
@@ -422,6 +560,7 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
                         "target_other_creature",
                         "enchanted_creature",
                         "controlled_creature",
+                        "target_nonland",
                     }:
                         needs_target = True
                     if tgt in {"target_other_creature", "enchanted_creature"}:
@@ -429,6 +568,8 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
                         require_creature = True
                     if tgt == "controlled_creature":
                         require_creature = True
+                    if tgt == "target_nonland":
+                        require_nonland = True
             if needs_target:
                 candidates = [
                     oid
@@ -441,6 +582,14 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
                         for oid in candidates
                         if state.permanents[oid].is_creature
                     ]
+                if require_nonland:
+                    filtered: list[str] = []
+                    for oid in candidates:
+                        sem = executor.semantics.get(state.permanents[oid].oracle_id)
+                        types = [t.casefold() for t in (sem.types if sem else [])]
+                        if "land" not in types:
+                            filtered.append(oid)
+                    candidates = filtered
             else:
                 candidates = [None]
             for target in candidates:
@@ -517,6 +666,39 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
                 )
                 if _try_apply(executor, state, step) is not None:
                     steps.append(step)
+
+    # Cast creatures from hand (Aluren free cast or paid mana_cost).
+    for perm in sorted(state.permanents.values(), key=lambda p: p.object_id):
+        if perm.zone != Zone.HAND or not perm.is_creature or perm.controller != "you":
+            continue
+        step = ActionStep(op="cast_from_hand", actor=perm.object_id)
+        if _try_apply(executor, state, step) is not None:
+            steps.append(step)
+
+    # Knack/Helix granted {T}: bounce nonland.
+    for perm in sorted(state.permanents.values(), key=lambda p: p.object_id):
+        if (
+            perm.zone != Zone.BATTLEFIELD
+            or perm.controller != "you"
+            or not perm.tap_bounce_nonland
+            or perm.tapped
+            or perm.summoning_sick
+        ):
+            continue
+        for target in sorted(state.permanents.values(), key=lambda p: p.object_id):
+            if target.zone != Zone.BATTLEFIELD:
+                continue
+            sem = executor.semantics.get(target.oracle_id)
+            types = [t.casefold() for t in (sem.types if sem else [])]
+            if "land" in types:
+                continue
+            step = ActionStep(
+                op="activate_granted_tap_bounce",
+                actor=perm.object_id,
+                target=target.object_id,
+            )
+            if _try_apply(executor, state, step) is not None:
+                steps.append(step)
     return steps
 
 
@@ -756,6 +938,36 @@ def build_witness(
                 ),
             )
         )
+    if any(s.op == "seed_grant_tap_bounce" for s in setup):
+        generic.append(
+            Prerequisite(
+                kind="board",
+                description=(
+                    "Instant tap-bounce grant seed (Banishing Knack / Retraction Helix "
+                    "class; grant persists for the witness)"
+                ),
+            )
+        )
+    if any(p.oracle_id == MANA_DORK_SEED_ORACLE_ID for p in spec.permanents):
+        generic.append(
+            Prerequisite(
+                kind="board",
+                description=(
+                    "generic tap-mana dork fodder for cast-from-hand loops "
+                    "(identity irrelevant)"
+                ),
+            )
+        )
+    if any(p.oracle_id == BOUNCE_CREATURE_SEED_ORACLE_ID for p in spec.permanents):
+        generic.append(
+            Prerequisite(
+                kind="board",
+                description=(
+                    "generic creature in hand to cast/bounce under grant+Alarm "
+                    "(identity irrelevant)"
+                ),
+            )
+        )
     grant_ability_ids = {
         ab.ability_id
         for card in (a, b)
@@ -962,6 +1174,18 @@ def explore_pair(
             err = executor.run_step(start, step)
             if err is None:
                 setup_actions = [*setup_actions, step]
+    # Banishing Knack / Retraction Helix: Instant grant via setup onto grant host.
+    if _has_instant_grant_tap_bounce(a) or _has_instant_grant_tap_bounce(b):
+        host = start.permanents.get(GRANT_HOST_OBJECT_ID)
+        if host is not None and host.is_creature:
+            seed = ActionStep(
+                op="seed_grant_tap_bounce",
+                target=GRANT_HOST_OBJECT_ID,
+                note="Instant grant {T}: bounce nonland (witness-persistent)",
+            )
+            err = executor.run_step(start, seed)
+            if err is None:
+                setup_actions = [*setup_actions, seed]
     queue: deque[tuple[GameState, list[ActionStep]]] = deque([(start, [])])
     expanded: set[tuple] = set()
     visited = 0

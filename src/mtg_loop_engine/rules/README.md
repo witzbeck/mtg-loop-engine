@@ -37,6 +37,9 @@ graph TB;
 - Exile-on-death replacements suppress death events and `DIES` triggers (CR 700.4); sacrifice events still fire.
 - Creature `DIES` queues carry subject `effective_toughness()` as trigger `amount` when > 0 (South Wind Avatar class).
 - `MoveToZoneEffect` `controlled_creature` → hand (ETB bounce); target must be a controlled BF creature.
+- `MoveToZoneEffect` `target_nonland` → hand (Knack/Helix grant); reject Land type lines.
+- `cast_from_hand`: creature from `Zone.HAND` pays `CardSemantics.mana_cost`, or free under `FreeCastCreaturesByManaValue` (Aluren) when MV ≤ ceiling; bumps `events.cast` then ETB.
+- `activate_granted_tap_bounce` / `seed_grant_tap_bounce`: Instant grant `{T}`: bounce nonland (`Permanent.tap_bounce_nonland`, witness-persistent).
 - BF tapped→untapped via `_untap_permanent` queues `TriggerEvent.UNTAP` (Mesmeric Orb); self-mill bumps `events.mill` only.
 - Summoning sickness blocks `{T}` / `TapCost` even on mana abilities (CR 302.6); haste not modeled.
 - State-based actions after each successful `run_step`: creatures you control die on toughness ≤ 0 or lethal `damage_marked` (CR 704.5f/g); cascades bounded.

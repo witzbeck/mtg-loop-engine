@@ -107,12 +107,13 @@ def bf(
     power: int | None = None,
     toughness: int | None = None,
     colors: list[str] | None = None,
+    zone: Zone = Zone.BATTLEFIELD,
 ) -> PermanentSpec:
     return PermanentSpec(
         object_id=object_id,
         oracle_id=oracle_id,
         name=name,
-        zone=Zone.BATTLEFIELD,
+        zone=zone,
         tapped=tapped,
         is_creature=is_creature,
         is_artifact=is_artifact,

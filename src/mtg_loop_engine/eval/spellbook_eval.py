@@ -64,13 +64,21 @@ def compile_card(
     oracle_text: str,
     types: list[str],
     colors: list[str] | None = None,
+    mana_cost: str | None = None,
+    mana_value: float | int | None = None,
 ) -> CardSemantics:
+    from mtg_loop_engine.semantics.patterns import _parse_mana_braces
+
+    parsed = _parse_mana_braces(mana_cost or "") if mana_cost else None
+    mv = int(mana_value) if mana_value is not None else None
     return compile_oracle_text(
         oracle_id=oracle_id,
         name=name,
         oracle_text=oracle_text,
         types=types,
         colors=colors,
+        mana_cost=parsed,
+        mana_value=mv,
     ).semantics
 
 

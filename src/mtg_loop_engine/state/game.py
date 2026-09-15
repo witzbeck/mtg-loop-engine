@@ -32,6 +32,8 @@ class Permanent:
     once_per_turn_used: set[str] = field(default_factory=set)
     # Scryfall WUBRG letters; empty = colorless.
     colors: list[str] = field(default_factory=list)
+    # Knack/Helix grant: {T}: return target nonland to hand (persists for witness).
+    tap_bounce_nonland: bool = False
 
     def effective_power(self) -> int | None:
         """Power after +1/+1 and -1/-1 counters. None if no printed power."""
@@ -73,6 +75,7 @@ class Permanent:
             damage_marked=self.damage_marked,
             once_per_turn_used=set(self.once_per_turn_used),
             colors=list(self.colors),
+            tap_bounce_nonland=self.tap_bounce_nonland,
         )
 
 
@@ -106,6 +109,7 @@ class GameState:
                 undying=p.undying,
                 damage_marked=p.damage_marked,
                 colors=list(p.colors),
+                tap_bounce_nonland=getattr(p, "tap_bounce_nonland", False),
             )
             for p in spec.permanents
         }

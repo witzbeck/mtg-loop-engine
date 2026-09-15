@@ -172,7 +172,7 @@ Trigger after every meaningful curriculum/physics PR (COMPLETE growth, new verif
 
 **DuckDB lock:** if Streamlit workbench is already running, stop it (Ctrl+C in that terminal — closing the browser tab is not enough) before `--persist-workbench`, or persist to a scratch `--db` path and re-run without `--db` after restart so the main store upserts.
 
-#### Current queue (remeasured post–slice 23)
+#### Current queue (remeasured post–slices 24–25)
 
 | Pair | Join reasons | Adjudication | Notes |
 | --- | --- | --- | --- |
@@ -183,7 +183,7 @@ Trigger after every meaningful curriculum/physics PR (COMPLETE growth, new verif
 | Freed from the Real + Heronblade Elite | mana_pay, tap_untap | `valid_generic_prerequisite` | Power mana + aura untap (slice 16) |
 | Heronblade Elite + Pemmin's Aura | mana_pay, tap_untap | `valid_generic_prerequisite` | Power mana + aura untap (slice 16) |
 
-Probe (post–slice 23): **70** COMPLETE · **62** verified · **56** in_reference · **6** absent. Keep `ABSENT_FROM_REFERENCE` (not `NOVEL`).
+Probe (post–slices 24–25): **73** COMPLETE · **62** verified · **56** in_reference · **6** absent. Keep `ABSENT_FROM_REFERENCE` (not `NOVEL`).
 
 Absences are curriculum: finite / bystander / illegal activation failures feed the next frontier pass and should become regressions at the lowest useful layer.
 

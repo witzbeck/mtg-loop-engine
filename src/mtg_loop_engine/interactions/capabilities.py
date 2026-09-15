@@ -15,10 +15,13 @@ from mtg_loop_engine.semantics.ir import (
     CreateTokenEffect,
     DealDamageEffect,
     DrawEffect,
+    FreeCastCreaturesByManaValue,
     GainLifeEffect,
+    InstantGrantTapBounce,
     LoseLifeEffect,
     ManaCost,
     MillEffect,
+    MoveToZoneEffect,
     RemoveCounterEffect,
     ReplacementAmplifyP1P1Counters,
     ReplacementMultiplyTapMana,
@@ -67,6 +70,12 @@ def extract_capabilities(card: CardSemantics) -> CardCapabilities:
             continue
         if isinstance(ab, ContinuousCostReduction):
             caps.modifies.add("reduce_activation_cost")
+            continue
+        if isinstance(ab, FreeCastCreaturesByManaValue):
+            caps.modifies.add("free_cast_creature")
+            continue
+        if isinstance(ab, InstantGrantTapBounce):
+            caps.produces.add("grant_tap_bounce")
             continue
         if isinstance(ab, ReplacementReduceM1M1Counters):
             caps.modifies.add("m1m1_put")
@@ -152,6 +161,11 @@ def _effects(effects: list, caps: CardCapabilities) -> None:
             caps.produces.add("draw")
         elif isinstance(effect, ReturnToBattlefieldEffect):
             caps.produces.add("etb")
+        elif isinstance(effect, MoveToZoneEffect):
+            from mtg_loop_engine.semantics.enums import Zone as _Zone
+
+            if effect.zone is _Zone.HAND:
+                caps.produces.add("bounce_to_hand")
 
 
 def join_reasons(left: CardCapabilities, right: CardCapabilities) -> list[str]:
@@ -186,4 +200,12 @@ def join_reasons(left: CardCapabilities, right: CardCapabilities) -> list[str]:
         reasons.append("loss_to_gain")
     if "mill" in left.produces and "card_to_opponent_graveyard" in right.triggers_on:
         reasons.append("mill_to_graveyard")
+    if "bounce_to_hand" in left.produces and "free_cast_creature" in right.modifies:
+        reasons.append("bounce_free_cast")
+    if "enter_battlefield" in left.triggers_on and "free_cast_creature" in right.modifies:
+        reasons.append("etb_free_cast")
+    if "grant_tap_bounce" in left.produces and "enter_battlefield" in right.triggers_on:
+        reasons.append("grant_bounce_etb")
+    if "grant_tap_bounce" in right.produces and "untap" in left.produces:
+        reasons.append("grant_bounce_untap")
     return reasons

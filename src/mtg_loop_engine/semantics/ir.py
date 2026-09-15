@@ -180,7 +180,8 @@ class MoveToZoneEffect(BaseModel):
     kind: Literal["move_to_zone"] = "move_to_zone"
     zone: Zone
     # controlled_creature: bounce a creature you control (ETB Lion/Drake class).
-    target: Literal["self", "controlled_creature"] = "self"
+    # target_nonland: bounce any nonland permanent (Knack/Helix grant).
+    target: Literal["self", "controlled_creature", "target_nonland"] = "self"
 
 
 class GrantLifelinkEffect(BaseModel):
@@ -191,6 +192,13 @@ class GrantLifelinkEffect(BaseModel):
 
     kind: Literal["grant_lifelink"] = "grant_lifelink"
     target: Literal["target_other_creature"] = "target_other_creature"
+
+
+class GrantTapBounceNonlandEffect(BaseModel):
+    """Banishing Knack / Retraction Helix: grant {T}: bounce nonland (persists for witness)."""
+
+    kind: Literal["grant_tap_bounce_nonland"] = "grant_tap_bounce_nonland"
+    target: Literal["target_creature"] = "target_creature"
 
 
 Effect = Annotated[
@@ -207,7 +215,8 @@ Effect = Annotated[
     | LoseLifeEffect
     | MillEffect
     | MoveToZoneEffect
-    | GrantLifelinkEffect,
+    | GrantLifelinkEffect
+    | GrantTapBounceNonlandEffect,
     Field(discriminator="kind"),
 ]
 
@@ -298,6 +307,23 @@ class ReplacementMultiplyTapMana(BaseModel):
     supported: bool = True
 
 
+class FreeCastCreaturesByManaValue(BaseModel):
+    """Aluren: cast creatures with mana value ≤ N without paying mana."""
+
+    kind: Literal["free_cast_creatures_by_mv"] = "free_cast_creatures_by_mv"
+    ability_id: str
+    max_mana_value: int = 3
+    supported: bool = True
+
+
+class InstantGrantTapBounce(BaseModel):
+    """Banishing Knack / Retraction Helix Instant: setup grants tap-bounce (witness-persistent)."""
+
+    kind: Literal["instant_grant_tap_bounce"] = "instant_grant_tap_bounce"
+    ability_id: str
+    supported: bool = True
+
+
 class ProofIrrelevantStatic(BaseModel):
     """Oracle text intentionally modeled as supported but non-participating in loop proofs."""
 
@@ -315,6 +341,8 @@ Ability = Annotated[
     | ReplacementReduceM1M1Counters
     | ReplacementAmplifyP1P1Counters
     | ReplacementMultiplyTapMana
+    | FreeCastCreaturesByManaValue
+    | InstantGrantTapBounce
     | ProofIrrelevantStatic,
     Field(discriminator="kind"),
 ]
@@ -326,6 +354,8 @@ class CardSemantics(BaseModel):
     types: list[str] = Field(default_factory=list)
     # Scryfall WUBRG color letters (e.g. ["G"]); empty = colorless.
     colors: list[str] = Field(default_factory=list)
+    mana_cost: ManaAmount = Field(default_factory=ManaAmount)
+    mana_value: int = 0
     abilities: list[Ability] = Field(default_factory=list)
     unsupported_fragments: list[str] = Field(default_factory=list)
     coverage: SemanticCoverage = SemanticCoverage.COMPLETE
