@@ -7,10 +7,12 @@
     "Elf",
     "Druid"
   ],
-  "type_line": "Creature \u2014 Elf Druid",
+  "type_line": "Creature — Elf Druid",
+  "power": 0,
+  "toughness": 2,
   "audit": {
-    "audited_at": "2026-08-25",
+    "audited_at": "2026-09-15",
     "source": "manual_oracle_audit",
-    "notes": "Wave 2"
+    "notes": "Wave 2; printed P/T for Quillspike SBA (ADR 0010)."
   }
 }

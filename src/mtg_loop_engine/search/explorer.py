@@ -37,6 +37,7 @@ from mtg_loop_engine.semantics.enums import (
 from mtg_loop_engine.semantics.provenance import provenance_of
 from mtg_loop_engine.semantics.ir import (
     ActivatedAbility,
+    AddCounterCost,
     AddCounterEffect,
     AddManaEffect,
     CardSemantics,
@@ -48,6 +49,7 @@ from mtg_loop_engine.semantics.ir import (
     ManaAmount,
     ManaCost,
     MoveToZoneEffect,
+    RemoveCounterCost,
     SacrificeCost,
     TapCost,
     TriggeredAbility,
@@ -88,6 +90,7 @@ OUTPUT_EVENT_KEYS = {
 MANA_DORK_SEED_ORACLE_ID = "setup:mana-dork-seed"
 BOUNCE_CREATURE_SEED_ORACLE_ID = "setup:bounce-creature-seed"
 BASIC_ISLAND_SEED_ORACLE_ID = "setup:basic-island"
+BASIC_PLAINS_SEED_ORACLE_ID = "setup:basic-plains"
 GRANT_HOST_OBJECT_ID = "grant-host"
 _MANA_DORK_SEED_COUNT = 3
 
@@ -124,6 +127,26 @@ def _basic_island_seed_semantics() -> CardSemantics:
                 ability_id="seed-island-tap",
                 costs=[TapCost()],
                 effects=[AddManaEffect(amount=ManaAmount(blue=1))],
+                is_mana_ability=True,
+                uses_stack=False,
+            )
+        ],
+        coverage=SemanticCoverage.COMPLETE,
+    )
+
+
+def _basic_plains_seed_semantics() -> CardSemantics:
+    return CardSemantics(
+        oracle_id=BASIC_PLAINS_SEED_ORACLE_ID,
+        name="Seed Plains",
+        types=["Basic", "Land", "Plains"],
+        mana_cost=ManaAmount(),
+        mana_value=0,
+        abilities=[
+            ActivatedAbility(
+                ability_id="seed-plains-tap",
+                costs=[TapCost()],
+                effects=[AddManaEffect(amount=ManaAmount(white=1))],
                 is_mana_ability=True,
                 uses_stack=False,
             )
@@ -290,6 +313,8 @@ def _inject_seed_semantics(
         semantics[MANA_DORK_SEED_ORACLE_ID] = _mana_dork_seed_semantics()
     if any(p.oracle_id == BASIC_ISLAND_SEED_ORACLE_ID for p in spec.permanents):
         semantics[BASIC_ISLAND_SEED_ORACLE_ID] = _basic_island_seed_semantics()
+    if any(p.oracle_id == BASIC_PLAINS_SEED_ORACLE_ID for p in spec.permanents):
+        semantics[BASIC_PLAINS_SEED_ORACLE_ID] = _basic_plains_seed_semantics()
     if any(p.oracle_id == BOUNCE_CREATURE_SEED_ORACLE_ID for p in spec.permanents):
         semantics[BOUNCE_CREATURE_SEED_ORACLE_ID] = _bounce_creature_seed_semantics()
     if any(p.object_id == GRANT_HOST_OBJECT_ID for p in spec.permanents):
@@ -332,6 +357,24 @@ def _needs_land_host(card: CardSemantics) -> bool:
         )
         for ab in card.abilities
     )
+
+
+def _needs_white_basic_land(card: CardSemantics) -> bool:
+    """Patrol Signaler class: self {Q} create paid with white (+ generic via second tap)."""
+    from mtg_loop_engine.semantics.ir import ManaCost, UntapSymbolCost
+
+    for ab in card.abilities:
+        if not isinstance(ab, ActivatedAbility):
+            continue
+        has_self_q = any(
+            isinstance(c, UntapSymbolCost) and c.source_self for c in ab.costs
+        )
+        has_white = any(
+            isinstance(c, ManaCost) and c.amount.white > 0 for c in ab.costs
+        )
+        if has_self_q and has_white:
+            return True
+    return False
 
 
 def _grant_lifelink_ability(card: CardSemantics) -> ActivatedAbility | None:
@@ -575,27 +618,28 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
                     toughness=1,
                 )
             )
-    if earthcraft_partner:
-        permanents.append(
-            bf(
-                "basic_island",
-                BASIC_ISLAND_SEED_ORACLE_ID,
-                "Seed Island",
-                is_creature=False,
-                is_artifact=False,
+    if earthcraft_partner or any(_needs_land_host(c) for c in ordered):
+        use_plains = any(_needs_white_basic_land(c) for c in ordered)
+        if use_plains:
+            permanents.append(
+                bf(
+                    "basic_plains",
+                    BASIC_PLAINS_SEED_ORACLE_ID,
+                    "Seed Plains",
+                    is_creature=False,
+                    is_artifact=False,
+                )
             )
-        )
-    elif any(_needs_land_host(c) for c in ordered):
-        # Nest-class land aura without Earthcraft still needs a tap host.
-        permanents.append(
-            bf(
-                "basic_island",
-                BASIC_ISLAND_SEED_ORACLE_ID,
-                "Seed Island",
-                is_creature=False,
-                is_artifact=False,
+        else:
+            permanents.append(
+                bf(
+                    "basic_island",
+                    BASIC_ISLAND_SEED_ORACLE_ID,
+                    "Seed Island",
+                    is_creature=False,
+                    is_artifact=False,
+                )
             )
-        )
     pair_caps = [extract_capabilities(c) for c in ordered]
     if any(c.needs_creature_count_mana_seed() for c in pair_caps):
         for i in range(_SCALED_MANA_SEED_COUNT):
@@ -712,6 +756,13 @@ def _untap_symbol_cost_needs_host(ability: ActivatedAbility) -> bool:
     return any(
         isinstance(c, UntapSymbolCost) and not c.source_self for c in ability.costs
     )
+
+
+def _remove_counter_cost(ability: ActivatedAbility) -> RemoveCounterCost | None:
+    for cost in ability.costs:
+        if isinstance(cost, RemoveCounterCost):
+            return cost
+    return None
 
 
 def _sac_selector(ability: ActivatedAbility) -> str | None:
@@ -924,6 +975,7 @@ def _activation_steps(
             if tap_creature_cost_only and not _has_tap_creature_cost(ab):
                 continue
             selector = _sac_selector(ab)
+            remove_cost = _remove_counter_cost(ab)
             need_effect_target = _effect_needs_permanent_target(ab)
             need_tap_host = _tap_cost_needs_host(ab)
             need_untap_host = _untap_symbol_cost_needs_host(ab)
@@ -931,8 +983,50 @@ def _activation_steps(
             require_basic_land = any(
                 getattr(e, "target", None) == "target_basic_land" for e in ab.effects
             )
+            tap_creature = _has_tap_creature_cost(ab)
+            # Earthcraft: enumerate (creature fodder, basic land) so Signaler vs token
+            # choices are searchable (TapCreatureCost uses cost_target; land uses target).
+            if tap_creature and require_basic_land:
+                creatures = [
+                    p.object_id
+                    for p in state.permanents.values()
+                    if p.zone == Zone.BATTLEFIELD
+                    and p.controller == "you"
+                    and p.is_creature
+                    and not p.tapped
+                    and p.object_id != perm.object_id
+                ]
+                lands = [
+                    p.object_id
+                    for p in state.permanents.values()
+                    if p.zone == Zone.BATTLEFIELD
+                    and p.controller == "you"
+                    and executor._is_basic_land(p)
+                ]
+                for cost_target in creatures:
+                    for land in lands:
+                        step = ActionStep(
+                            op="activate",
+                            actor=perm.object_id,
+                            ability_id=ab.ability_id,
+                            target=land,
+                            cost_target=cost_target,
+                        )
+                        if _try_apply(executor, state, step) is not None:
+                            steps.append(step)
+                continue
             if selector:
                 targets = _fodder_ids(state, selector)
+            elif remove_cost is not None:
+                targets = []
+                for p in state.permanents.values():
+                    if p.zone != Zone.BATTLEFIELD or p.controller != "you":
+                        continue
+                    if remove_cost.selector == "creature_controlled" and not p.is_creature:
+                        continue
+                    if p.counters.get(remove_cost.counter_type, 0) < remove_cost.quantity:
+                        continue
+                    targets.append(p.object_id)
             elif need_tap_host:
                 host_kind = _tap_cost_host_kind(ab)
                 targets = []
@@ -1046,8 +1140,9 @@ def derive_relevant_state(
                     value=qty,
                 )
             )
-    # Once-per-turn + pending-trigger dims: shared with verifier (ADR 0008).
+    # Once-per-turn + pending-trigger + m1m1-pay dims: shared with verifier (ADR 0008).
     from mtg_loop_engine.verify.mandatory_recurrence import (
+        m1m1_pay_dimensions,
         once_per_turn_dimensions,
         pending_trigger_dimensions,
     )
@@ -1058,6 +1153,8 @@ def derive_relevant_state(
                 loop_actions=loop_actions, cards=cards, before=before
             )
         )
+    if cards:
+        dims.extend(m1m1_pay_dimensions(cards=cards, before=before))
     dims.extend(pending_trigger_dimensions(before))
     if any(p.is_token for p in spec.permanents):
         dims.append(
@@ -1302,6 +1399,16 @@ def build_witness(
                 description=(
                     "generic basic Island for enchanted-land tap hosts / "
                     "Earthcraft untap (identity irrelevant)"
+                ),
+            )
+        )
+    if any(p.oracle_id == BASIC_PLAINS_SEED_ORACLE_ID for p in spec.permanents):
+        generic.append(
+            Prerequisite(
+                kind="board",
+                description=(
+                    "generic basic Plains for paid {Q} create / Earthcraft untap "
+                    "(identity irrelevant; double-tap pays {1}{W})"
                 ),
             )
         )

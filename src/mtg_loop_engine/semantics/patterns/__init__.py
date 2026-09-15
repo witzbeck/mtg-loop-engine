@@ -21,12 +21,14 @@ from mtg_loop_engine.semantics.ir import (
     FreeCastCreaturesByManaValue,
     GainLifeEffect,
     GrantLifelinkEffect,
+    HybridManaCost,
     InstantGrantTapBounce,
     LoseLifeEffect,
     ManaAmount,
     ManaCost,
     MillEffect,
     MoveToZoneEffect,
+    RemoveCounterCost,
     RemoveCounterEffect,
     ReplacementAmplifyP1P1Counters,
     ReplacementExileInsteadOfGraveyard,
@@ -670,6 +672,70 @@ def pat_mana_create_token(text: str, name: str) -> Ability | None:
                 name=token_name, power=power, toughness=toughness, quantity=1
             )
         ],
+    )
+
+
+def pat_mana_untap_create_token(text: str, name: str) -> Ability | None:
+    """Patrol Signaler class: {mana}, {Q}: create creature token."""
+    m = re.match(
+        r"^((?:\{[^}]+\})+), \{Q\}: Create (?:a|one)(?: (\d+)/(\d+))? (.+?) "
+        r"creature token\.(?: \(\{Q\} is the untap symbol\.\))?\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    power = int(m.group(2) or 1)
+    toughness = int(m.group(3) or 1)
+    return ActivatedAbility(
+        ability_id=_ability_id("mana-untap-token", text),
+        costs=[
+            ManaCost(amount=_parse_mana_braces(m.group(1))),
+            UntapSymbolCost(source_self=True),
+        ],
+        effects=[
+            CreateTokenEffect(
+                name=m.group(4).strip(),
+                power=power,
+                toughness=toughness,
+                quantity=1,
+            )
+        ],
+    )
+
+
+def pat_hybrid_remove_m1m1_pump(text: str, name: str) -> Ability | None:
+    """Quillspike: {B/G}, remove -1/-1 from a creature you control; +N/+N until EOT irrelevant."""
+    m = re.match(
+        r"^\{([WUBRG])/([WUBRG])\}, Remove a -1/-1 counter from a creature you control: "
+        r"This creature gets [+-]\d+/[+-]\d+ until end of turn\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    color_map = {
+        "W": "white",
+        "U": "blue",
+        "B": "black",
+        "R": "red",
+        "G": "green",
+    }
+    c1 = color_map[m.group(1).upper()]
+    c2 = color_map[m.group(2).upper()]
+    if c1 == "green":
+        colors = (c1, c2)
+    elif c2 == "green":
+        colors = (c2, c1)
+    else:
+        colors = (c1, c2)
+    return ActivatedAbility(
+        ability_id=_ability_id("hybrid-remove-m1m1", text),
+        costs=[
+            HybridManaCost(colors=colors),
+            RemoveCounterCost(counter_type="m1m1", quantity=1),
+        ],
+        effects=[],
     )
 
 
@@ -1933,7 +1999,9 @@ PATTERNS: list[Pattern] = [
         pat_enchanted_gain_life_put_that_many_p1p1,
     ),
     Pattern("tap_create_token", pat_tap_create_token),
+    Pattern("mana_untap_create_token", pat_mana_untap_create_token),
     Pattern("mana_create_token", pat_mana_create_token),
+    Pattern("hybrid_remove_m1m1_pump", pat_hybrid_remove_m1m1_pump),
     Pattern("tap_add_mana", pat_tap_add_mana),
     Pattern("mana_untap_enchanted", pat_mana_untap_enchanted),
     Pattern("mana_tap_enchanted", pat_mana_tap_enchanted),

@@ -111,9 +111,10 @@ uv run python scripts/spellbook_absent_discovery.py
 26. **Mana Echoes (slice 32)** ✓ — creature ETB → `{C}` × controlled sharing creature type; Sliver Queen rediscovery (`{2}` mana seed).
 27. **Earthcraft + Wirewood (slices 33–34)** ✓ — Earthcraft tap-creature → untap basic land (hold priority with Drake); Wirewood battlefield-Elf any-color (Staff rediscovery).
 28. **Squirrel Nest (slice 35)** ✓ — enchanted-land `{T}`: create Squirrel (`TapCost.host="land"`); Earthcraft rediscovery. Deferred Patrol Signaler (`{Q}` create) / Quillspike (−1/−1 remove); Storm Herd rejected (one-shot).
-29. **Frontier-driven slices (M5.2 Slice 36+):** Path **a** preference remains; cite live P0/P1. Ritual below.
-30. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-31. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+29. **Patrol Signaler + Quillspike (slices 36–37)** ✓ — Signaler `{1}{W}{Q}` create + Earthcraft/Plains double-tap; Quillspike hybrid remove-m1m1 + Devoted Druid (0/2 printed P/T). Storm Herd still rejected.
+30. **Frontier-driven slices (M5.2 Slice 38+):** Path **a** preference remains; cite live P0/P1. Ritual below.
+31. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+32. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 
@@ -180,7 +181,7 @@ Trigger after every meaningful curriculum/physics PR (COMPLETE growth, new verif
 
 #### Current queue (remeasured post–waves + M5.3 batch)
 
-Probe: **82** COMPLETE · **87** verified · **68** in_reference · **19** absent · rediscovered **70** (post–Slice 35 Nest). Workbench `spellbook_absent`: **22** unique pairs, **0** unreviewed.
+Probe: **84** COMPLETE · **88** verified · **69** in_reference · **19** absent (post–slices 36–37). Workbench `spellbook_absent`: **22** unique pairs, **0** unreviewed.
 
 | Adjudication | Count | Notes |
 | --- | ---: | --- |

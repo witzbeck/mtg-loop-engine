@@ -119,6 +119,8 @@ class ActionStep(BaseModel):
     actor: str | None = None  # permanent object_id
     ability_id: str | None = None
     target: str | None = None
+    # TapCreatureCost fodder when ``target`` is reserved for an effect (Earthcraft land).
+    cost_target: str | None = None
     choose_may: bool | None = None
     note: str | None = None
 

@@ -36,6 +36,10 @@ _SCALED_MANA_SEED_LABELS: dict[str, str] = {
         "seeded generic basic Island for enchanted-land tap / Earthcraft "
         "(identity irrelevant)"
     ),
+    "setup:basic-plains": (
+        "seeded generic basic Plains for paid {Q} create / Earthcraft "
+        "(identity irrelevant; double-tap pays {1}{W})"
+    ),
     "setup:mana-dork-seed": (
         "generic tap-mana dork fodder for cast-from-hand loops (identity irrelevant)"
     ),

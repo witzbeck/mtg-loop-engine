@@ -243,7 +243,7 @@ def _wave2_hard_negatives() -> list[LoopWitness]:
             ],
             relevant_state=LoopRelevantState(dimensions=[]),
             expected_outputs=[out(OutputType.MANA, 1)],
-            expected_status=VerificationStatus.NOT_A_LOOP,
+            expected_status=VerificationStatus.STATE_NOT_RECURRENT,
             tier="hard_negative",
             assumptions=["untap-only without Vizier does not produce mana"],
         )

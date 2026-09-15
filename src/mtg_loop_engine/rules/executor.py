@@ -21,12 +21,14 @@ from mtg_loop_engine.semantics.ir import (
     GainLifeEffect,
     GrantLifelinkEffect,
     GrantTapBounceNonlandEffect,
+    HybridManaCost,
     LoseLifeEffect,
     ManaAmount,
     ManaCost,
     MillEffect,
     MoveToZoneEffect,
     ProofIrrelevantStatic,
+    RemoveCounterCost,
     RemoveCounterEffect,
     ReplacementAmplifyP1P1Counters,
     ReplacementExileInsteadOfGraveyard,
@@ -1302,6 +1304,22 @@ class Executor:
                 err = self.pay_mana(state, need)
                 if err:
                     return err
+            elif isinstance(cost, HybridManaCost):
+                paid = False
+                for color in cost.colors:
+                    if color not in ("white", "blue", "black", "red", "green"):
+                        continue
+                    if getattr(state.mana, color) <= 0 and state.mana.any_color <= 0:
+                        continue
+                    err = self.pay_mana(state, ManaAmount(**{color: 1}))
+                    if err is None:
+                        paid = True
+                        break
+                if not paid:
+                    return ExecError(
+                        VerificationStatus.MANA_RESTRICTION,
+                        f"cannot pay hybrid {'/'.join(cost.colors)}",
+                    )
             elif isinstance(cost, AddCounterCost):
                 qty = cost.quantity
                 if cost.counter_type in {"m1m1", "-1/-1"}:
@@ -1312,6 +1330,40 @@ class Executor:
                     key = cost.counter_type
                     perm.counters[key] = perm.counters.get(key, 0) + qty
                     state.bump("counter", qty)
+            elif isinstance(cost, RemoveCounterCost):
+                if not step.target:
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_ACTION,
+                        "remove-counter cost needs target",
+                    )
+                host = state.permanents.get(step.target)
+                if host is None:
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_TARGET, "remove-counter host missing"
+                    )
+                if host.zone != Zone.BATTLEFIELD or host.controller != "you":
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_TARGET,
+                        "remove-counter host not controlled BF",
+                    )
+                if cost.selector == "creature_controlled" and not host.is_creature:
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_TARGET,
+                        "remove-counter host not a creature",
+                    )
+                key = cost.counter_type
+                have = host.counters.get(key, 0)
+                if have < cost.quantity:
+                    return ExecError(
+                        VerificationStatus.RESOURCE_DEFICIT,
+                        f"need {cost.quantity} {key} counters",
+                    )
+                host.counters[key] = have - cost.quantity
+                if host.counters[key] <= 0:
+                    del host.counters[key]
+                state.bump("counter", cost.quantity)
+                # Host was only for the cost; do not pass through as effect target.
+                step = step.model_copy(update={"target": None})
             elif isinstance(cost, UntapSymbolCost):
                 untap_perm = perm
                 if not cost.source_self:
@@ -1364,9 +1416,27 @@ class Executor:
                     fodder = state.permanents[fodder_id]
                     self.sacrifice(state, fodder)
             elif isinstance(cost, TapCreatureCost):
-                tapped_id = self._pick_tap_creature(
-                    state, source=perm, allow_source=cost.allow_source
-                )
+                tapped_id = None
+                if step.cost_target:
+                    cand = state.permanents.get(step.cost_target)
+                    if (
+                        cand is not None
+                        and cand.zone == Zone.BATTLEFIELD
+                        and cand.controller == "you"
+                        and cand.is_creature
+                        and not cand.tapped
+                        and (cost.allow_source or cand.object_id != perm.object_id)
+                    ):
+                        tapped_id = cand.object_id
+                    else:
+                        return ExecError(
+                            VerificationStatus.ILLEGAL_TARGET,
+                            "tap-creature cost_target illegal",
+                        )
+                if tapped_id is None:
+                    tapped_id = self._pick_tap_creature(
+                        state, source=perm, allow_source=cost.allow_source
+                    )
                 if not tapped_id:
                     return ExecError(
                         VerificationStatus.RESOURCE_DEFICIT,
@@ -1411,6 +1481,8 @@ class Executor:
         """Pick an untapped controlled creature to tap for Earthcraft-class costs.
 
         Summoning sickness does not apply: the creature is not activating its own {T}.
+        Prefer creatures with self ``{Q}`` costs (Patrol Signaler) so Earthcraft can
+        set up untap-symbol activations; among others prefer tokens (Nest squirrels).
         """
         candidates: list[Permanent] = []
         for p in state.permanents.values():
@@ -1423,8 +1495,22 @@ class Executor:
             candidates.append(p)
         if not candidates:
             return None
-        # Prefer tokens / non-source seeds so essentials stay available to cast.
-        candidates.sort(key=lambda p: (not p.is_token, p.object_id))
+
+        def sort_key(p: Permanent) -> tuple:
+            card = self.semantics.get(p.oracle_id)
+            has_self_q = False
+            if card is not None:
+                for ab in card.abilities:
+                    if not isinstance(ab, ActivatedAbility):
+                        continue
+                    if any(
+                        isinstance(c, UntapSymbolCost) and c.source_self for c in ab.costs
+                    ):
+                        has_self_q = True
+                        break
+            return (not has_self_q, not p.is_token, p.object_id)
+
+        candidates.sort(key=sort_key)
         return candidates[0].object_id
 
     def resolve_trigger(self, state: GameState, step: ActionStep) -> ExecError | None:

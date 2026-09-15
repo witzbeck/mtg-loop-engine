@@ -53,6 +53,7 @@ graph TB;
 - For remove-counter `any_target` damage, emit activate steps with `target="opponent"` first (Heliod path); self (`actor`) is also legal for undying self-ping
 - Seed a generic creature **aura host** (non-token setup permanent) when an activated ability uses `TapCost(source_self=False, host="creature")` and neither essential is a creature (Presence of Gond + Intruder Alarm class); otherwise tap the partner creature. Host tap is tracked in `LoopRelevantState` so recurrence fails closed when the host stays tapped.
 - Seed a generic **basic Island** when Earthcraft is searched and/or a card uses `TapCost(host="land")` (Squirrel Nest): Nest tap host + Earthcraft untap target. ETB-bounce partners start in hand; hold priority to tap the bounce creature before resolving its ETB.
+- Seed a generic **basic Plains** when a searched card has self `{Q}` create paid with white (Patrol Signaler): Earthcraft + double-tap Plains pays `{1}{W}` (Spellbook notable). Earthcraft steps enumerate `cost_target` (creature) × `target` (land).
 - Seed **three** board-scaled mana fodder permanents when a searched card’s tap-mana ability scales with controlled creatures, elves, or defenders (`scaled-mana:creature-seed` / `elf-seed` / `defender-seed`). These are generic prerequisites (identity irrelevant within the category); `analyze_prerequisites` discloses them — they do **not** alone clear `strict_two_card` (that flag is participant-only).
 - Seed one generic creature token when a mana-cost create-token activate pairs with a sac-for-mana outlet (Sliver Queen + Ashnod’s Altar); sac fodder prefers tokens over essentials.
 - **Cast-from-hand:** emit `cast_from_hand` for creatures in hand; Aluren free-cast when partner has `FreeCastCreaturesByManaValue`. ETB-bounce creatures start in hand when paired with free cast.
@@ -64,7 +65,9 @@ graph TB;
   adds `permanents.<id>.once_per_turn_used.<ability_id>` as `EXACT` (helpers live in
   `verify.mandatory_recurrence`; the verifier re-applies them so omitting them from a
   hand-authored witness cannot bypass recurrence — ADR 0008). Pending trigger depth
-  is likewise mandatory (`pending_triggers.count`).
+  is likewise mandatory (`pending_triggers.count`). Cards that can pay by putting
+  `m1m1` start with mandatory `counters.m1m1` EXACT 0 so finite Gond/Basalt+Druid
+  accumulations fail closed.
 - Orchestrate pool → pairs → explorer (`discover.discover_loops`)
 - Reuse `corpus.builders` (`bf`, `two_card`) so witness shape matches gold
 - Prune via `reusable_fingerprint` (`pruning.py`). Equality asserts search-equivalence for currently modeled future legal behavior: fingerprints include `summoning_sick`, `once_per_turn_used`, and trigger `subject_id`/`amount` (not only source+ability). Monotonic event counters alone do not change the fingerprint.

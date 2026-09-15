@@ -51,6 +51,13 @@ class ManaCost(BaseModel):
     amount: ManaAmount = Field(default_factory=ManaAmount)
 
 
+class HybridManaCost(BaseModel):
+    """Pay one mana of either listed color ({B/G} class). Combo-player tries in order."""
+
+    kind: Literal["hybrid_mana"] = "hybrid_mana"
+    colors: tuple[str, str]
+
+
 class SacrificeCost(BaseModel):
     kind: Literal["sacrifice"] = "sacrifice"
     # Generic fodder vs self.
@@ -66,6 +73,15 @@ class AddCounterCost(BaseModel):
     counter_type: str = "m1m1"
     quantity: int = 1
     target: Literal["self"] = "self"
+
+
+class RemoveCounterCost(BaseModel):
+    """Pay by removing counters from a controlled creature (Quillspike class)."""
+
+    kind: Literal["remove_counter_cost"] = "remove_counter_cost"
+    counter_type: str = "m1m1"
+    quantity: int = 1
+    selector: Literal["creature_controlled"] = "creature_controlled"
 
 
 class UntapSymbolCost(BaseModel):
@@ -85,7 +101,14 @@ class TapCreatureCost(BaseModel):
 
 
 Cost = Annotated[
-    TapCost | ManaCost | SacrificeCost | AddCounterCost | UntapSymbolCost | TapCreatureCost,
+    TapCost
+    | ManaCost
+    | HybridManaCost
+    | SacrificeCost
+    | AddCounterCost
+    | RemoveCounterCost
+    | UntapSymbolCost
+    | TapCreatureCost,
     Field(discriminator="kind"),
 ]
 
