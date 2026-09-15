@@ -106,7 +106,7 @@ uv run python scripts/spellbook_absent_discovery.py
 21. **Enchanted-artifact cost reduction (slice 22)** ✓ — Power Artifact −{2} activate (floor 1).
 22. **Untap→mill (slice 23)** ✓ — Mesmeric Orb; permanent untap mills controller.
 23. **Cast-from-hand + Instant grant bounce (slices 24–25)** ✓ — `cast_from_hand` + Aluren free cast MV≤3 (Drake/Lion rediscovery); Banishing Knack / Retraction Helix Instant grant `{T}`: bounce nonland (Alarm rediscovery with mana-dork seeds). Wirewood deferred.
-24. **Frontier-driven slices (M5.2 Slice 26+):** bounce siblings → activated/cast bounce → Mana Echoes → Earthcraft → Wirewood; recovery dig before more COMPLETE. Path **a** preference remains. Ritual below.
+24. **Frontier-driven slices (M5.2 Slice 26+):** recovery dig → bounce siblings → activated/cast bounce → Mana Echoes → Earthcraft → Wirewood. Path **a** preference remains. Ritual below.
 25. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
 26. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
