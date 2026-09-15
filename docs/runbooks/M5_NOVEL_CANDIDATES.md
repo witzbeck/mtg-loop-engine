@@ -185,12 +185,12 @@ Trigger after every meaningful curriculum/physics PR (COMPLETE growth, new verif
 
 #### Current queue (remeasured post–waves + M5.3 batch)
 
-Probe: **86** COMPLETE · **91** verified · **70** in_reference · **21** absent (post–slices 38–39). Workbench `spellbook_absent`: **0** unreviewed after re-apply + new Shalai/Sunbond labels (`valid_generic_prerequisite`).
+Probe: **88** COMPLETE · **95** verified · **73** in_reference · **22** absent (post–classify zone-assumption fix refresh). Workbench `spellbook_absent`: **22** unique pairs persisted.
 
 | Adjudication | Count | Notes |
 | --- | ---: | --- |
 | `valid_generic_prerequisite` | 21 | Scaled mana / dork / grant / Temur / Wirewood / Alarm / Shalai life seeds |
-| `valid_strict_two_card` | 1 | Aluren + Dream Stalker (no generics stamped) |
+| `valid_strict_two_card` | 1 | Aluren + Dream Stalker (no generics; `repeatable_event` self-bounce; keep `ABSENT_FROM_REFERENCE`) |
 | `duplicate_or_equivalent_interaction` | 2 | Basalt/Impact + Gond bystanders (prior) |
 | `needs_rules_research` | 1 | Warleader's Call + Gond (prior) |
 

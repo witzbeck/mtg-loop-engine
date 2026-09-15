@@ -27,8 +27,25 @@ def _render(
     lines = [
         f"{names} was accepted as {proof.status.value}.",
         "",
-        "Loop body:",
+        "Object map (ids in loop steps; not Card 1/Card 2 display order):",
     ]
+    for perm in witness.initial_state.permanents:
+        zone = perm.zone.value if hasattr(perm.zone, "value") else perm.zone
+        lines.append(f"- {perm.object_id}: {perm.name} ({zone})")
+    claim = proof.claim_consequence
+    claim_val = claim.value if claim is not None else "(none)"
+    lines.append("")
+    lines.append(f"Claim consequence: {claim_val}")
+    if proof.net_state is not None:
+        net = proof.net_state
+        lines.append(
+            "Net per iteration: "
+            f"mana={net.mana.model_dump(mode='json')}; "
+            f"life_you={net.life_you}; life_opponent={net.life_opponent}; "
+            f"tokens={net.creature_tokens}; +1/+1={net.plus_one_counters}"
+        )
+    lines.append("")
+    lines.append("Loop body:")
     if not witness.loop_actions:
         lines.append("- (empty)")
     for i, step in enumerate(witness.loop_actions, start=1):
@@ -52,7 +69,10 @@ def _render(
     lines.append("")
     lines.append("Starting-state assumptions:")
     for assumption in analysis.assumptions:
-        lines.append(f"- [{assumption.kind.value}] {assumption.description}")
+        oid = f" ({assumption.object_id})" if assumption.object_id else ""
+        lines.append(
+            f"- [{assumption.kind.value}] {assumption.description}{oid}"
+        )
     lines.append("")
     lines.append("Essential-piece analysis:")
     lines.append(

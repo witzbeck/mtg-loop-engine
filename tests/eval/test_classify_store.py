@@ -103,6 +103,43 @@ def test_path_b_seed_gain_life_disclosed_by_analyze_prerequisites():
     assert any("life-gain seed" in d for d in stamped)
 
 
+def test_hand_seeded_free_cast_assumptions_use_zone():
+    """Aluren + Dream: bounce creature starts in hand; do not stamp BF."""
+    from mtg_loop_engine.semantics.compiler import compile_oracle_text
+    from mtg_loop_engine.semantics.enums import Zone
+    from mtg_loop_engine.semantics.patterns import _parse_mana_braces
+    from mtg_loop_engine.semantics.ir import ManaAmount
+    from mtg_loop_engine.semantics.real_oracle_curriculum import REAL_ORACLE_CURRICULUM
+
+    def _compile(key: str):
+        row = REAL_ORACLE_CURRICULUM[key]
+        cost = _parse_mana_braces(row.mana_cost) if row.mana_cost else ManaAmount()
+        return compile_oracle_text(
+            oracle_id=f"oracle:{key.lower().replace(' ', '-')}",
+            name=row.name,
+            oracle_text=row.oracle_text,
+            types=row.types,
+            colors=list(row.colors),
+            mana_cost=cost,
+            mana_value=row.mana_value,
+        ).semantics
+
+    aluren = _compile("Aluren")
+    dream = _compile("Dream Stalker")
+    found = explore_pair(aluren, dream, max_depth=8)
+    assert found is not None
+    dream_perm = next(
+        p for p in found.witness.initial_state.permanents if p.name == "Dream Stalker"
+    )
+    assert dream_perm.zone == Zone.HAND
+    analysis = analyze_prerequisites(found.witness)
+    descriptions = [a.description for a in analysis.assumptions]
+    assert any("Dream Stalker begins in hand" == d for d in descriptions)
+    assert not any("Dream Stalker begins on the battlefield" == d for d in descriptions)
+    assert any("Aluren begins on the battlefield" == d for d in descriptions)
+    assert analysis.strict_two_card is True
+
+
 def test_store_roundtrip(tmp_path: Path):
     from mtg_loop_engine.eval.explain import record_from_hit
     from mtg_loop_engine.eval.schema import AdjudicationFailureReason, ReferenceStatus
