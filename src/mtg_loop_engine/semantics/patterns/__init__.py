@@ -1087,6 +1087,32 @@ def _strip_ability_word(text: str) -> str:
     return re.sub(r"^.+?—\s*", "", text.strip(), count=1)
 
 
+def pat_etb_if_cast_half_life_drain(text: str, name: str) -> Ability | None:
+    """Shard of the Nightbringer: ETB if cast → opponent loses half life; you gain that much."""
+    cleaned = _strip_ability_word(text)
+    m = re.match(
+        r"^When (?:this creature|~|"
+        + re.escape(name)
+        + r") enters(?: the battlefield)?, if you cast it, "
+        r"target opponent loses half their life, rounded up\. "
+        r"You gain life equal to the life lost this way\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("etb-cast-half-drain", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="self",
+        intervening_if="cast",
+        effects=[
+            LoseLifeEffect(who="opponent", half_life_rounded_up=True),
+            GainLifeEffect(amount_from_trigger=True),
+        ],
+    )
+
+
 def pat_etb_or_attacks_create_token(text: str, name: str) -> Ability | None:
     """Squirrel Girl: enters or attacks → create token (ETB modeled; attacks not)."""
     cleaned = _strip_ability_word(text)
@@ -2103,6 +2129,7 @@ PATTERNS: list[Pattern] = [
     ),
     Pattern("tap_create_token", pat_tap_create_token),
     Pattern("mana_untap_create_token", pat_mana_untap_create_token),
+    Pattern("etb_if_cast_half_life_drain", pat_etb_if_cast_half_life_drain),
     Pattern("etb_or_attacks_create_token", pat_etb_or_attacks_create_token),
     Pattern("mana_create_tokens_equal_subtype", pat_mana_create_tokens_equal_subtype),
     Pattern("mana_create_token", pat_mana_create_token),

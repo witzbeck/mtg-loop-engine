@@ -114,9 +114,10 @@ uv run python scripts/spellbook_absent_discovery.py
 29. **Patrol Signaler + Quillspike (slices 36–37)** ✓ — Signaler `{1}{W}{Q}` create + Earthcraft/Plains double-tap; Quillspike hybrid remove-m1m1 + Devoted Druid (0/2 printed P/T). Storm Herd still rejected.
 30. **Shalai and Hallar (slice 38)** ✓ — COUNTER_ADDED → that-much damage; Heliod rediscovery. Archangel COMPLETE unlock without short explorer close.
 31. **Squirrel Girl (slice 39)** ✓ — ETB create (attacks not modeled) + mana create X=Squirrels; Altar rediscovery. Ability-word split accepts Marvel-style names.
-32. **Frontier-driven slices (M5.2 Slice 40+):** CAST/Shard → Tidespout planned; Path **a** preference remains; cite live P0/P1. Ritual below.
-33. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-34. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+32. **Shard of the Nightbringer (slice 40)** ✓ — ETB intervening-if cast + half-life drain (`Permanent.was_cast`); Vito/Bond COMPLETE unlock. Two-card rediscovery deferred (needs bounce/recast).
+33. **Frontier-driven slices (M5.2 Slice 41+):** Tidespout CAST + non-creature cast planned; Path **a** preference remains; cite live P0/P1. Ritual below.
+34. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+35. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 

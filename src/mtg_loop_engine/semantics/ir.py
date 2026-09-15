@@ -209,6 +209,8 @@ class LoseLifeEffect(BaseModel):
     amount: int = 1
     who: Literal["opponent", "you"] = "opponent"
     amount_from_trigger: bool = False
+    # Shard-class: lose ceil(current_life / 2); amount recorded for following gains.
+    half_life_rounded_up: bool = False
 
 
 class MillEffect(BaseModel):

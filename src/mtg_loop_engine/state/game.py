@@ -34,6 +34,8 @@ class Permanent:
     colors: list[str] = field(default_factory=list)
     # Knack/Helix grant: {T}: return target nonland to hand (persists for witness).
     tap_bounce_nonland: bool = False
+    # True iff this permanent entered via cast_from_hand (Shard intervening-if).
+    was_cast: bool = False
 
     def effective_power(self) -> int | None:
         """Power after +1/+1 and -1/-1 counters. None if no printed power."""
@@ -76,6 +78,7 @@ class Permanent:
             once_per_turn_used=set(self.once_per_turn_used),
             colors=list(self.colors),
             tap_bounce_nonland=self.tap_bounce_nonland,
+            was_cast=self.was_cast,
         )
 
 

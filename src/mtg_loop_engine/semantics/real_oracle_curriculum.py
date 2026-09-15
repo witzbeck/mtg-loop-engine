@@ -759,4 +759,21 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{1}{G}{G}{G}",
         mana_value=4,
     ),
+    "Shard of the Nightbringer": RealOracleCurriculum(
+        name="Shard of the Nightbringer",
+        types=["Creature", "C'tan"],
+        oracle_text=(
+            "Flying\n"
+            "Drain Life — When this creature enters, if you cast it, target opponent "
+            "loses half their life, rounded up. You gain life equal to the life lost "
+            "this way."
+        ),
+        notes=(
+            "Slice 40: ETB intervening-if cast + half-life drain; Vito/Bond COMPLETE "
+            "unlock (two-card rediscovery needs bounce/recast — deferred)."
+        ),
+        colors=("B",),
+        mana_cost="{5}{B}{B}{B}",
+        mana_value=8,
+    ),
 }

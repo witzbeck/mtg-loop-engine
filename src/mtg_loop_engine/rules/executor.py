@@ -373,13 +373,20 @@ class Executor:
         trigger_amount: int | None = None,
         trigger_subject_id: str | None = None,
     ) -> ExecError | None:
+        amount = trigger_amount
         for effect in effects:
+            # Half-life lose: compute qty before apply so following gains can reuse it.
+            if isinstance(effect, LoseLifeEffect) and effect.half_life_rounded_up:
+                life = (
+                    state.life_opponent if effect.who == "opponent" else state.life_you
+                )
+                amount = (life + 1) // 2
             err = self._apply_one(
                 state,
                 source,
                 effect,
                 target_id,
-                trigger_amount=trigger_amount,
+                trigger_amount=amount,
                 trigger_subject_id=trigger_subject_id,
             )
             if err:
@@ -778,11 +785,17 @@ class Executor:
             return None
 
         if isinstance(effect, LoseLifeEffect):
-            qty = (
-                trigger_amount
-                if effect.amount_from_trigger and trigger_amount is not None
-                else effect.amount
-            )
+            if effect.half_life_rounded_up:
+                life = (
+                    state.life_opponent if effect.who == "opponent" else state.life_you
+                )
+                qty = (life + 1) // 2
+            else:
+                qty = (
+                    trigger_amount
+                    if effect.amount_from_trigger and trigger_amount is not None
+                    else effect.amount
+                )
             if qty is None or qty <= 0:
                 return ExecError(VerificationStatus.ILLEGAL_ACTION, "lose life amount")
             if effect.who == "opponent":
@@ -1069,6 +1082,9 @@ class Executor:
                 if ab.filter == "token_creature" and not (
                     subject.is_token and subject.is_creature
                 ):
+                    continue
+                # CR 603.4 intervening-if (cast): only if subject entered via cast_from_hand.
+                if ab.intervening_if == "cast" and not subject.was_cast:
                     continue
                 entry = {
                     "source_id": perm.object_id,
@@ -1562,6 +1578,11 @@ class Executor:
         ab = self.find_ability(source.oracle_id, tr["ability_id"])
         if not isinstance(ab, TriggeredAbility):
             return ExecError(VerificationStatus.ILLEGAL_ACTION, "bad trigger")
+        # CR 603.4: re-check intervening-if on resolution.
+        if ab.intervening_if == "cast":
+            subject = state.permanents.get(tr.get("subject_id") or source.object_id)
+            if subject is None or not subject.was_cast:
+                return None
         return self.apply_effects(
             state,
             source,
@@ -1787,6 +1808,7 @@ class Executor:
         perm.tapped = False
         perm.summoning_sick = True
         perm.damage_marked = 0
+        perm.was_cast = True
         state.bump("cast")
         self._on_etb(state, perm)
         return None
