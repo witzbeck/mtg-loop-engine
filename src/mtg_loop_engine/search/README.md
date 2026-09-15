@@ -59,6 +59,7 @@ graph TB;
 - **Temur activated bounce:** with Village Bell-Ringer (self-ETB untap-all), seed mana dorks to pay `{1}{G}` + recast.
 - **Cloudstone type-share bounce:** with Aluren, seed a second Creature on BF (and cast seed in hand when the searched pair has no creature) so type-share bounce has a partner.
 - **Mana Echoes + mana-create token:** seed `{2}` colorless so the first Sliver Queen-class create can fire; ETB sharing-type mana repays.
+- **Earthcraft:** seed a basic Island (`{T}: {U}`); ETB-bounce partners start in hand; hold priority to tap the bounce creature before resolving its ETB.
 - When loop actions activate a `once_per_turn` ability, `derive_relevant_state`
   adds `permanents.<id>.once_per_turn_used.<ability_id>` as `EXACT` (helpers live in
   `verify.mandatory_recurrence`; the verifier re-applies them so omitting them from a

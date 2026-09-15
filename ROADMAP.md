@@ -182,7 +182,8 @@ measure frontier → smallest reusable gap → discover → adjudicate → contr
    - **Slices 26–28 (bounce target variants)** ✓ — Fleetfoot (G/W creature), Dream Stalker (permanent), Ancestral Statue (controlled nonland); Alarm mana-dork count scales to bounce MV.
    - **Slices 29–30 (activated / type-share bounce)** ✓ — Temur Sabertooth `{1}{G}` bounce other creature (indestructible rider proof-irrelevant) + Bell-Ringer rediscovery; Cloudstone Curio nonartifact ETB → type-share bounce + Aluren. **Tidespout Tyrant deferred** (CAST + non-creature cast).
    - **Slice 32 (Mana Echoes)** ✓ — creature ETB → `{C}` × controlled sharing creature type; Sliver Queen rediscovery with `{2}` mana seed.
-   - **Slice 33+** ○ — Earthcraft → Wirewood; cite live P0/P1 in each curriculum PR.
+   - **Slices 33–34 (Earthcraft + Wirewood)** ✓ — `TapCreatureCost` → untap basic land (hold priority before Drake bounce); Wirewood battlefield-Elf any-color; Staff rediscovery.
+   - **Slice 35+** ○ — cite live P0/P1; Path **a** preference.
    - **Path b (Bond/Blood)** ✓ — explicit generic life-gain seed; `core_bond_blood` frozen; disclosed on witness.
    - **Path b (Mindcrank / Bloodchief)** ✓ — explicit generic opponent life-loss seed (`seed_lose_life`, drain-sized); disclosed on witness.
    - **Rules-evidence rails** ✓ — [`docs/RULES_EVIDENCE.md`](docs/RULES_EVIDENCE.md), [`AGENTS.md`](AGENTS.md), [`.cursor/rules/rules-evidence.mdc`](.cursor/rules/rules-evidence.mdc), [`.agents/skills/rules-evidence/`](.agents/skills/rules-evidence/).

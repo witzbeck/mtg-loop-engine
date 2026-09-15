@@ -32,6 +32,9 @@ _SCALED_MANA_SEED_LABELS: dict[str, str] = {
     "scaled-mana:defender-seed": (
         "seeded generic defender for board-scaled mana (identity irrelevant)"
     ),
+    "setup:basic-island": (
+        "seeded generic basic Island for Earthcraft (identity irrelevant)"
+    ),
 }
 
 
