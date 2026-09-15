@@ -54,6 +54,8 @@ graph TB;
 - Seed a generic creature **aura host** (non-token setup permanent) when an activated ability uses `TapCost(source_self=False)` and neither essential is a creature (Presence of Gond + Intruder Alarm class); otherwise tap the partner creature. Host tap is tracked in `LoopRelevantState` so recurrence fails closed when the host stays tapped.
 - Seed **three** board-scaled mana fodder permanents when a searched card’s tap-mana ability scales with controlled creatures, elves, or defenders (`scaled-mana:creature-seed` / `elf-seed` / `defender-seed`). These are generic prerequisites (identity irrelevant within the category); `analyze_prerequisites` discloses them — they do **not** alone clear `strict_two_card` (that flag is participant-only).
 - Seed one generic creature token when a mana-cost create-token activate pairs with a sac-for-mana outlet (Sliver Queen + Ashnod’s Altar); sac fodder prefers tokens over essentials.
+- **Cast-from-hand:** emit `cast_from_hand` for creatures in hand; Aluren free-cast when partner has `FreeCastCreaturesByManaValue`. ETB-bounce creatures start in hand when paired with free cast.
+- **Instant grant tap-bounce:** `seed_grant_tap_bounce` onto a grant host; emit `activate_granted_tap_bounce`. With Intruder Alarm, seed mana dorks + a bounce creature in hand (generic prerequisites).
 - When loop actions activate a `once_per_turn` ability, `derive_relevant_state`
   adds `permanents.<id>.once_per_turn_used.<ability_id>` as `EXACT` (helpers live in
   `verify.mandatory_recurrence`; the verifier re-applies them so omitting them from a
@@ -106,6 +108,16 @@ CLI: `mtg-loop-engine discover-gold`.
 ## Data contracts
 
 Discovered witnesses carry `assumptions=["discovered_without_pair_labels", …]` and classification stamped from `analyze_prerequisites`. Accepted discoveries are always `strict_two_card=True` under current search policy (both essentials participate; functional externals empty). They may still list `generic_prerequisites` (tokens, aura host, scaled-mana fodder, Path-b life seeds). Pair keys from corpus are eval-only and must not be imported here.
+
+**Color seeding:** essentials copy `card.colors` onto `PermanentSpec`; category fodder /
+`token:seed` usually omit colors. That is fine for current scaled-mana unlocks. Green
+ETB filters that depend on seed tokens ETBing will need token color/subtype plumbing
+(`ROADMAP.md` §2b) — payment `any_color` does not satisfy those filters.
+
+**Disclosure caveat:** `build_witness` may build Path-b setup-seed generic descriptions,
+then replace them with `analyze_prerequisites` board generics when that analysis is
+non-empty. Setup ops still run; stamped text can omit Path-b lines until classify merges
+setup `seed_*` ops (`ROADMAP.md` §2b).
 
 ## Failure behavior
 

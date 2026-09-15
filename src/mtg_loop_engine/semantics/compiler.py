@@ -6,7 +6,7 @@ import re
 
 from mtg_loop_engine.semantics.coverage import CompileReport, FragmentResult
 from mtg_loop_engine.semantics.enums import SemanticCoverage
-from mtg_loop_engine.semantics.ir import CardSemantics
+from mtg_loop_engine.semantics.ir import CardSemantics, ManaAmount
 from mtg_loop_engine.semantics.patterns import try_match
 
 
@@ -72,6 +72,8 @@ def compile_oracle_text(
     oracle_text: str,
     types: list[str] | None = None,
     colors: list[str] | None = None,
+    mana_cost: ManaAmount | None = None,
+    mana_value: int | None = None,
     treat_unsupported_as_relevant: bool = True,
 ) -> CompileReport:
     """Compile Oracle text into CardSemantics with explicit coverage.
@@ -97,6 +99,8 @@ def compile_oracle_text(
             name=name,
             types=types or [],
             colors=list(colors or []),
+            mana_cost=(mana_cost or ManaAmount()).model_copy(deep=True),
+            mana_value=int(mana_value if mana_value is not None else (mana_cost or ManaAmount()).total()),
             abilities=[],
             unsupported_fragments=unsupported,
             coverage=coverage,
@@ -145,11 +149,15 @@ def compile_oracle_text(
     else:
         coverage = SemanticCoverage.PARTIAL_IRRELEVANT_TO_PROOF
 
+    cost = (mana_cost or ManaAmount()).model_copy(deep=True)
+    mv = int(mana_value if mana_value is not None else cost.total())
     semantics = CardSemantics(
         oracle_id=oracle_id,
         name=name,
         types=types or [],
         colors=list(colors or []),
+        mana_cost=cost,
+        mana_value=mv,
         abilities=abilities,
         unsupported_fragments=unsupported,
         coverage=coverage,

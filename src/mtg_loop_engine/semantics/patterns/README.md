@@ -53,6 +53,8 @@ graph TB;
 - `mana_create_token` — Sliver Queen `{N}: Create a P/T … token` (tap variant remains `tap_create_token`).
 - `dies_gain_life_equal_toughness` — South Wind Avatar; DIES queue carries subject toughness as trigger amount.
 - `etb_bounce_controlled_creature` — Drake / Lion; bounce a controlled creature to hand.
+- `aluren_free_cast` — Aluren; creatures MV ≤ N without paying mana.
+- `instant_grant_tap_bounce` — Banishing Knack / Retraction Helix Instant grant.
 - `etb_other_green_put_p1p1_target` — Ivy Lane; green color filter on ETB subject.
 - `power_artifact_cost_reduction` — enchanted artifact activate −{N} (floor 1).
 - `untap_mill_controller` — Mesmeric; UNTAP → self-mill.
@@ -78,6 +80,9 @@ Covered via `tests/semantic/test_compiler.py` (all gold fixtures compile `COMPLE
 1. Add the narrowest pattern that matches real Oracle (not only gold fixture wording).
 2. Place it in order so it does not shadow a more specific matcher incorrectly.
 3. Add/extend a compiler test before merging.
+4. When adding a third sibling of an existing compound filter / mana-scale / ETB→counter
+   family, prefer parameterization or structured IR over another one-off `pat_*` +
+   filter string (`ROADMAP.md` §2b).
 
 ## Bigger-picture relationship
 

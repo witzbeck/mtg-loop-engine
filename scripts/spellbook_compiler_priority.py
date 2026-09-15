@@ -90,7 +90,15 @@ def semantics_from_scryfall(card: dict[str, Any]) -> CardSemantics:
     text = oracle_text_from_card(card)
     types = types_from_line(card.get("type_line"))
     colors = [str(c) for c in (card.get("colors") or [])]
-    return compile_card(oracle_id, name, text, types, colors=colors)
+    return compile_card(
+        oracle_id,
+        name,
+        text,
+        types,
+        colors=colors,
+        mana_cost=card.get("mana_cost"),
+        mana_value=card.get("cmc"),
+    )
 
 
 def lookup_semantics(name: str, index: dict[str, dict[str, Any]]) -> CardSemantics | None:

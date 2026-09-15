@@ -12,6 +12,8 @@ class RealOracleCurriculum:
     oracle_text: str
     notes: str = ""
     colors: tuple[str, ...] = ()
+    mana_cost: str | None = None
+    mana_value: int | None = None
 
 
 # Live wording from Scryfall oracle_cards bulk (local snapshot), except where noted.
@@ -461,7 +463,13 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
             "When this creature enters, return a creature you control to "
             "its owner's hand."
         ),
-        notes="Frontier P1 slices 19–20: ETB bounce controlled creature.",
+        notes=(
+            "Frontier P1 slices 19–20: ETB bounce; slices 24–25 rediscovery via "
+            "cast-from-hand + Aluren."
+        ),
+        colors=("U",),
+        mana_cost="{U}",
+        mana_value=1,
     ),
     "Whitemane Lion": RealOracleCurriculum(
         name="Whitemane Lion",
@@ -472,6 +480,9 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
             "its owner's hand."
         ),
         notes="Same ETB bounce as Shrieking Drake (Flash irrelevant).",
+        colors=("W",),
+        mana_cost="{1}{W}",
+        mana_value=2,
     ),
     "Ivy Lane Denizen": RealOracleCurriculum(
         name="Ivy Lane Denizen",
@@ -504,5 +515,45 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
             "mills a card."
         ),
         notes="Frontier P1 slice 23: UNTAP → self-mill (Basalt / Aphetto pairs).",
+    ),
+    "Aluren": RealOracleCurriculum(
+        name="Aluren",
+        types=["Enchantment"],
+        oracle_text=(
+            "Any player may cast creature spells with mana value 3 or less "
+            "without paying their mana costs and as though they had flash."
+        ),
+        notes=(
+            "Slice 24–25: free cast MV≤3; Drake/Lion rediscovery path-a."
+        ),
+        colors=("G",),
+        mana_cost="{2}{G}{G}",
+        mana_value=4,
+    ),
+    "Banishing Knack": RealOracleCurriculum(
+        name="Banishing Knack",
+        types=["Instant"],
+        oracle_text=(
+            'Until end of turn, target creature gains '
+            '"{T}: Return target nonland permanent to its owner\'s hand."'
+        ),
+        notes=(
+            "Slice 24–25: Instant grant tap-bounce (witness-persistent setup)."
+        ),
+        colors=("U",),
+        mana_cost="{U}",
+        mana_value=1,
+    ),
+    "Retraction Helix": RealOracleCurriculum(
+        name="Retraction Helix",
+        types=["Instant"],
+        oracle_text=(
+            'Until end of turn, target creature gains '
+            '"{T}: Return target nonland permanent to its owner\'s hand."'
+        ),
+        notes="Same Instant grant as Banishing Knack.",
+        colors=("U",),
+        mana_cost="{U}",
+        mana_value=1,
     ),
 }

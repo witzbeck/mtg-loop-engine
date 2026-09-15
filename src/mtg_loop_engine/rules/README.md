@@ -37,6 +37,9 @@ graph TB;
 - Exile-on-death replacements suppress death events and `DIES` triggers (CR 700.4); sacrifice events still fire.
 - Creature `DIES` queues carry subject `effective_toughness()` as trigger `amount` when > 0 (South Wind Avatar class).
 - `MoveToZoneEffect` `controlled_creature` → hand (ETB bounce); target must be a controlled BF creature.
+- `MoveToZoneEffect` `target_nonland` → hand (Knack/Helix grant); reject Land type lines.
+- `cast_from_hand`: creature from `Zone.HAND` pays `CardSemantics.mana_cost`, or free under `FreeCastCreaturesByManaValue` (Aluren) when MV ≤ ceiling; bumps `events.cast` then ETB.
+- `activate_granted_tap_bounce` / `seed_grant_tap_bounce`: Instant grant `{T}`: bounce nonland (`Permanent.tap_bounce_nonland`, witness-persistent).
 - BF tapped→untapped via `_untap_permanent` queues `TriggerEvent.UNTAP` (Mesmeric Orb); self-mill bumps `events.mill` only.
 - Summoning sickness blocks `{T}` / `TapCost` even on mana abilities (CR 302.6); haste not modeled.
 - State-based actions after each successful `run_step`: creatures you control die on toughness ≤ 0 or lethal `damage_marked` (CR 704.5f/g); cascades bounded.
@@ -49,7 +52,7 @@ graph TB;
 - Power-scaled tap mana (`equal_to_source_power`) uses `Permanent.effective_power()` (printed ± counters).
 - `AddCounterEffect.amount_from_trigger` + `target=enchanted_creature`: Sunbond / Light of Promise put that many +1/+1 on the host creature (explorer supplies the host target; no attachment graph yet).
 - `AddCounterEffect.target=each_controlled_creature`: Archangel / Cathars mass +1/+1 puts (per-creature `COUNTER_ADDED` triggers).
-- Trigger filters `controlled_creature` / `other_controlled_creature` / `other_controlled_human` for ETB subject gates.
+- Trigger filters `controlled_creature` / `other_controlled_creature` / `other_controlled_human` / `other_controlled_green` for ETB subject gates.
 
 ## Non-responsibilities
 
@@ -64,6 +67,20 @@ graph TB;
 - Cost reduction and trigger resolution must match what patterns claim to support.
 - `ManaAmount.any_color` models "mana of any color": it may pay W/U/B/R/G (or generic), but generic mana still cannot pay colored costs.
 - Adversarial witnesses (targets/triggers the explorer would never emit) must still fail closed.
+
+### Color models (three distinct notions)
+
+| Model | Source of truth | Typical consumers |
+| --- | --- | --- |
+| **Payment** | `ManaAmount` WUBRG + `any_color` | Cost payment (`pay_mana`) |
+| **Permanent / card colors** | `Permanent.colors` (fallback `CardSemantics.colors`) | Subject filters (`other_controlled_green`) |
+| **Vivid / devotion proxies** | Mana symbols on **activated costs** among controlled permanents | `VIVID_PERMANENT_COLORS`, `DEVOTION_GREEN` scales |
+
+Payment “any color” is not permanent color identity. Vivid/devotion do not currently read
+`Permanent.colors`. Compound trigger filters (`other_controlled_human` vs
+`other_controlled_green`) are curriculum-shaped literals; generalize to structured
+predicates only on a third sibling or frontier need (`ROADMAP.md` §2b /
+[`docs/runbooks/M5_NOVEL_CANDIDATES.md`](../../../docs/runbooks/M5_NOVEL_CANDIDATES.md)).
 
 ## Main entry points
 

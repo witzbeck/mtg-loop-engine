@@ -12,6 +12,8 @@ from mtg_loop_engine.semantics.ir import (
     AddCounterCost,
     AddManaEffect,
     ContinuousCostReduction,
+    FreeCastCreaturesByManaValue,
+    InstantGrantTapBounce,
     ManaCost,
     ReplacementMultiplyTapMana,
     ReplacementReduceM1M1Counters,
@@ -180,6 +182,8 @@ def analyze_prerequisites(witness: LoopWitness) -> PrerequisiteAnalysis:
         perm = perms.get(step.actor or "")
         if perm is not None and not perm.is_token and perm.oracle_id in pair_ids:
             used.add(perm.oracle_id)
+        if step.op == "cast_from_hand" and perm is not None and perm.oracle_id in pair_ids:
+            used.add(perm.oracle_id)
 
     if _loop_pays_mana(witness):
         for card in witness.card_semantics:
@@ -187,6 +191,22 @@ def analyze_prerequisites(witness: LoopWitness) -> PrerequisiteAnalysis:
                 used.add(card.oracle_id)
                 notes.append(
                     f"{card.name} participates via continuous activation-cost reduction"
+                )
+
+    if any(s.op == "cast_from_hand" for s in witness.loop_actions):
+        for card in witness.card_semantics:
+            if any(isinstance(ab, FreeCastCreaturesByManaValue) for ab in card.abilities):
+                used.add(card.oracle_id)
+                notes.append(
+                    f"{card.name} participates via free cast of creatures by mana value"
+                )
+
+    if any(s.op == "activate_granted_tap_bounce" for s in witness.loop_actions):
+        for card in witness.card_semantics:
+            if any(isinstance(ab, InstantGrantTapBounce) for ab in card.abilities):
+                used.add(card.oracle_id)
+                notes.append(
+                    f"{card.name} participates via Instant grant of {{T}}: bounce nonland"
                 )
 
     if _loop_pays_m1m1_counter(witness):

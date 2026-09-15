@@ -17,8 +17,10 @@ from mtg_loop_engine.semantics.ir import (
     CreateTokenEffect,
     DealDamageEffect,
     DrawEffect,
+    FreeCastCreaturesByManaValue,
     GainLifeEffect,
     GrantLifelinkEffect,
+    InstantGrantTapBounce,
     LoseLifeEffect,
     ManaAmount,
     ManaCost,
@@ -1296,6 +1298,37 @@ def pat_etb_bounce_controlled_creature(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_aluren_free_cast(text: str, name: str) -> Ability | None:
+    """Aluren: cast creatures with mana value ≤ 3 without paying mana."""
+    m = re.match(
+        r"^Any player may cast creature spells with mana value (\d+) or less "
+        r"without paying their mana costs(?: and as though they had flash)?\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return FreeCastCreaturesByManaValue(
+        ability_id=_ability_id("free-cast-mv", text),
+        max_mana_value=int(m.group(1)),
+    )
+
+
+def pat_instant_grant_tap_bounce(text: str, name: str) -> Ability | None:
+    """Banishing Knack / Retraction Helix: Instant grants {T}: bounce nonland."""
+    m = re.match(
+        r'^Until end of turn, target creature gains '
+        r'"\{T\}: Return target nonland permanent to (?:its|their) owner\'s hand\."\.?$',
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return InstantGrantTapBounce(
+        ability_id=_ability_id("instant-grant-tap-bounce", text),
+    )
+
+
 def pat_etb_create_food(text: str, name: str) -> Ability | None:
     """Rosie ETB: When NAME enters, create a Food token."""
     short = name.split(" of ")[0].strip() if " of " in name else name
@@ -1762,6 +1795,8 @@ PATTERNS: list[Pattern] = [
     Pattern("amplify_p1p1_replacement", pat_amplify_p1p1_replacement),
     Pattern("etb_create_food", pat_etb_create_food),
     Pattern("etb_bounce_controlled_creature", pat_etb_bounce_controlled_creature),
+    Pattern("aluren_free_cast", pat_aluren_free_cast),
+    Pattern("instant_grant_tap_bounce", pat_instant_grant_tap_bounce),
     Pattern("create_token_put_p1p1_other", pat_create_token_put_p1p1_other),
     Pattern("counters_put_may_create_token", pat_counters_put_may_create_token),
     Pattern("etb_untap_target", pat_etb_untap_target),

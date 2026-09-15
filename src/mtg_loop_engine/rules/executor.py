@@ -17,8 +17,10 @@ from mtg_loop_engine.semantics.ir import (
     CreateTokenEffect,
     DealDamageEffect,
     DrawEffect,
+    FreeCastCreaturesByManaValue,
     GainLifeEffect,
     GrantLifelinkEffect,
+    GrantTapBounceNonlandEffect,
     LoseLifeEffect,
     ManaAmount,
     ManaCost,
@@ -578,6 +580,22 @@ class Executor:
             p.lifelink = True
             return None
 
+        if isinstance(effect, GrantTapBounceNonlandEffect):
+            tid = target_id
+            if not tid or tid not in state.permanents:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "grant tap-bounce needs target creature",
+                )
+            p = state.permanents[tid]
+            if not p.is_creature or p.zone != Zone.BATTLEFIELD:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "grant tap-bounce target must be a battlefield creature",
+                )
+            p.tap_bounce_nonland = True
+            return None
+
         if isinstance(effect, RemoveCounterEffect):
             tid = source.object_id
             p = state.permanents[tid]
@@ -715,9 +733,34 @@ class Executor:
                 bounced.zone = effect.zone
                 bounced.tapped = False
                 return None
+            if effect.target == "target_nonland":
+                if not target_id or target_id not in state.permanents:
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_TARGET,
+                        "bounce needs nonland permanent",
+                    )
+                bounced = state.permanents[target_id]
+                if bounced.zone != Zone.BATTLEFIELD:
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_TARGET,
+                        "bounce target must be on the battlefield",
+                    )
+                # Lands are not modeled with an is_land flag; treat non-creatures
+                # without artifact/enchantment-like board roles via name heuristics
+                # is weak — fail closed: reject only when type line says Land.
+                card = self.semantics.get(bounced.oracle_id)
+                types = [t.casefold() for t in (card.types if card else [])]
+                if "land" in types:
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_TARGET,
+                        "bounce target must be nonland",
+                    )
+                bounced.zone = effect.zone
+                bounced.tapped = False
+                return None
             return ExecError(
                 VerificationStatus.UNSUPPORTED_SEMANTICS,
-                f"move_to_zone target {effect.target}",
+                f"unsupported move target {effect.target}",
             )
 
         return ExecError(
@@ -1305,12 +1348,127 @@ class Executor:
                 )
             perm.undying = True
             return None
+        if op == "seed_grant_tap_bounce":
+            # Banishing Knack / Retraction Helix Instant: setup grant (witness-persistent).
+            if not step.target or step.target not in state.permanents:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "seed_grant_tap_bounce needs target creature",
+                )
+            perm = state.permanents[step.target]
+            if not perm.is_creature or perm.zone != Zone.BATTLEFIELD:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "seed_grant_tap_bounce target must be a battlefield creature",
+                )
+            perm.tap_bounce_nonland = True
+            return None
+        if op == "cast_from_hand":
+            return self.cast_from_hand(state, step)
+        if op == "activate_granted_tap_bounce":
+            return self.activate_granted_tap_bounce(state, step)
         if op == "opponent_must_cooperate":
             return ExecError(
                 VerificationStatus.OPPONENT_COOPERATION_REQUIRED,
                 step.note or "opponent cooperation required",
             )
         return ExecError(VerificationStatus.UNSUPPORTED_RULE, f"unknown op {op}")
+
+    def free_cast_max_mv(self, state: GameState) -> int | None:
+        """Highest Aluren-class free-cast MV ceiling on the battlefield, if any."""
+        best: int | None = None
+        for perm in state.permanents.values():
+            if perm.zone != Zone.BATTLEFIELD or perm.controller != "you":
+                continue
+            card = self.semantics.get(perm.oracle_id)
+            if card is None:
+                continue
+            for ab in card.abilities:
+                if isinstance(ab, FreeCastCreaturesByManaValue) and ab.supported:
+                    best = (
+                        ab.max_mana_value
+                        if best is None
+                        else max(best, ab.max_mana_value)
+                    )
+        return best
+
+    def cast_from_hand(
+        self, state: GameState, step: ActionStep
+    ) -> ExecError | None:
+        """Cast a creature from hand (pay mana_cost, or free under Aluren-class)."""
+        if not step.actor:
+            return ExecError(VerificationStatus.ILLEGAL_ACTION, "cast needs actor")
+        perm = state.permanents.get(step.actor)
+        if perm is None:
+            return ExecError(VerificationStatus.ILLEGAL_ACTION, "cast actor missing")
+        if perm.zone != Zone.HAND or perm.controller != "you":
+            return ExecError(
+                VerificationStatus.ILLEGAL_ACTION, "cast requires card in hand"
+            )
+        if not perm.is_creature:
+            return ExecError(
+                VerificationStatus.UNSUPPORTED_SEMANTICS,
+                "cast_from_hand models creatures only",
+            )
+        card = self.semantics.get(perm.oracle_id)
+        if card is None:
+            return ExecError(VerificationStatus.ILLEGAL_ACTION, "cast missing semantics")
+        free_max = self.free_cast_max_mv(state)
+        free = free_max is not None and card.mana_value <= free_max
+        if not free:
+            err = self.pay_mana(state, card.mana_cost)
+            if err:
+                return err
+        perm.zone = Zone.BATTLEFIELD
+        perm.tapped = False
+        perm.summoning_sick = True
+        perm.damage_marked = 0
+        state.bump("cast")
+        self._on_etb(state, perm)
+        return None
+
+    def activate_granted_tap_bounce(
+        self, state: GameState, step: ActionStep
+    ) -> ExecError | None:
+        """Knack/Helix grant: {T}: return target nonland permanent to hand."""
+        if not step.actor or not step.target:
+            return ExecError(
+                VerificationStatus.ILLEGAL_ACTION,
+                "granted tap-bounce needs actor and target",
+            )
+        actor = state.permanents.get(step.actor)
+        if actor is None:
+            return ExecError(VerificationStatus.ILLEGAL_ACTION, "actor missing")
+        if (
+            actor.zone != Zone.BATTLEFIELD
+            or actor.controller != "you"
+            or not actor.tap_bounce_nonland
+        ):
+            return ExecError(
+                VerificationStatus.ILLEGAL_ACTION,
+                "actor lacks granted tap-bounce",
+            )
+        if actor.tapped:
+            return ExecError(VerificationStatus.ILLEGAL_ACTION, "already tapped")
+        if actor.summoning_sick:
+            return ExecError(VerificationStatus.TIMING_VIOLATION, "summoning sick")
+        target = state.permanents.get(step.target)
+        if target is None or target.zone != Zone.BATTLEFIELD:
+            return ExecError(
+                VerificationStatus.ILLEGAL_TARGET,
+                "bounce target must be on the battlefield",
+            )
+        card = self.semantics.get(target.oracle_id)
+        types = [t.casefold() for t in (card.types if card else [])]
+        if "land" in types:
+            return ExecError(
+                VerificationStatus.ILLEGAL_TARGET,
+                "bounce target must be nonland",
+            )
+        actor.tapped = True
+        target.zone = Zone.HAND
+        target.tapped = False
+        return None
 
     def run_sequence(
         self, state: GameState, steps: list[ActionStep]
