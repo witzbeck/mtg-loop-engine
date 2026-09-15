@@ -641,4 +641,31 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{2}{R}{R}",
         mana_value=4,
     ),
+    "Earthcraft": RealOracleCurriculum(
+        name="Earthcraft",
+        types=["Enchantment"],
+        oracle_text="Tap an untapped creature you control: Untap target basic land.",
+        notes=(
+            "Slice 33: tap-creature cost → untap basic land; hold priority with "
+            "Drake ETB bounce; basic Island seed."
+        ),
+        colors=("G",),
+        mana_cost="{1}{G}",
+        mana_value=2,
+    ),
+    "Wirewood Channeler": RealOracleCurriculum(
+        name="Wirewood Channeler",
+        types=["Creature", "Elf", "Druid"],
+        oracle_text=(
+            "{T}: Add X mana of any one color, where X is the number of Elves "
+            "on the battlefield."
+        ),
+        notes=(
+            "Slice 34: battlefield Elf-count any-color tap mana (slice-9 sibling); "
+            "Staff/Mantle rediscovery."
+        ),
+        colors=("G",),
+        mana_cost="{3}{G}",
+        mana_value=4,
+    ),
 }

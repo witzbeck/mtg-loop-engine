@@ -35,6 +35,7 @@ from mtg_loop_engine.semantics.ir import (
     ReturnToBattlefieldEffect,
     SacrificeCost,
     TapCost,
+    TapCreatureCost,
     TapEffect,
     TriggeredAbility,
     UntapEffect,
@@ -194,6 +195,12 @@ def pat_tap_add_mana(text: str, name: str) -> Ability | None:
             r"^\{T\}: Add \{G\} for each Elf on the battlefield\.?$",
             ManaScaleKind.BATTLEFIELD_ELF,
             "green",
+        ),
+        (
+            r"^\{T\}: Add X mana of any one color, where X is the number of "
+            r"Elves on the battlefield\.?$",
+            ManaScaleKind.BATTLEFIELD_ELF,
+            "any_color",
         ),
         (
             r"^\{T\}: Add \{G\} for each Elf you control\.?$",
@@ -1429,6 +1436,22 @@ def pat_etb_mana_sharing_creature_type(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_earthcraft_tap_untap_basic(text: str, name: str) -> Ability | None:
+    """Earthcraft: tap an untapped creature you control: untap target basic land."""
+    m = re.match(
+        r"^Tap an untapped creature you control: Untap target basic land\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("earthcraft-untap-basic", text),
+        costs=[TapCreatureCost()],
+        effects=[UntapEffect(target="target_basic_land")],
+    )
+
+
 def pat_aluren_free_cast(text: str, name: str) -> Ability | None:
     """Aluren: cast creatures with mana value ≤ 3 without paying mana."""
     m = re.match(
@@ -1932,6 +1955,7 @@ PATTERNS: list[Pattern] = [
     Pattern("activated_bounce_other_creature", pat_activated_bounce_other_creature),
     Pattern("etb_bounce_sharing_type", pat_etb_bounce_sharing_type),
     Pattern("etb_mana_sharing_creature_type", pat_etb_mana_sharing_creature_type),
+    Pattern("earthcraft_tap_untap_basic", pat_earthcraft_tap_untap_basic),
     Pattern("aluren_free_cast", pat_aluren_free_cast),
     Pattern("instant_grant_tap_bounce", pat_instant_grant_tap_bounce),
     Pattern("create_token_put_p1p1_other", pat_create_token_put_p1p1_other),

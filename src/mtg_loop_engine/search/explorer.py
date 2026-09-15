@@ -87,6 +87,7 @@ OUTPUT_EVENT_KEYS = {
 
 MANA_DORK_SEED_ORACLE_ID = "setup:mana-dork-seed"
 BOUNCE_CREATURE_SEED_ORACLE_ID = "setup:bounce-creature-seed"
+BASIC_ISLAND_SEED_ORACLE_ID = "setup:basic-island"
 GRANT_HOST_OBJECT_ID = "grant-host"
 _MANA_DORK_SEED_COUNT = 3
 
@@ -103,6 +104,26 @@ def _mana_dork_seed_semantics() -> CardSemantics:
                 ability_id="seed-tap-mana",
                 costs=[TapCost()],
                 effects=[AddManaEffect(amount=ManaAmount(any_color=1))],
+                is_mana_ability=True,
+                uses_stack=False,
+            )
+        ],
+        coverage=SemanticCoverage.COMPLETE,
+    )
+
+
+def _basic_island_seed_semantics() -> CardSemantics:
+    return CardSemantics(
+        oracle_id=BASIC_ISLAND_SEED_ORACLE_ID,
+        name="Seed Island",
+        types=["Basic", "Land", "Island"],
+        mana_cost=ManaAmount(),
+        mana_value=0,
+        abilities=[
+            ActivatedAbility(
+                ability_id="seed-island-tap",
+                costs=[TapCost()],
+                effects=[AddManaEffect(amount=ManaAmount(blue=1))],
                 is_mana_ability=True,
                 uses_stack=False,
             )
@@ -164,6 +185,20 @@ def _has_cloudstone_bounce(card: CardSemantics) -> bool:
             isinstance(e, MoveToZoneEffect)
             and e.zone == Zone.HAND
             and e.target == "other_controlled_sharing_type"
+            for e in ab.effects
+        )
+        for ab in card.abilities
+    )
+
+
+def _has_earthcraft(card: CardSemantics) -> bool:
+    from mtg_loop_engine.semantics.ir import TapCreatureCost, UntapEffect
+
+    return any(
+        isinstance(ab, ActivatedAbility)
+        and any(isinstance(c, TapCreatureCost) for c in ab.costs)
+        and any(
+            isinstance(e, UntapEffect) and e.target == "target_basic_land"
             for e in ab.effects
         )
         for ab in card.abilities
@@ -253,6 +288,8 @@ def _inject_seed_semantics(
         )
     if any(p.oracle_id == MANA_DORK_SEED_ORACLE_ID for p in spec.permanents):
         semantics[MANA_DORK_SEED_ORACLE_ID] = _mana_dork_seed_semantics()
+    if any(p.oracle_id == BASIC_ISLAND_SEED_ORACLE_ID for p in spec.permanents):
+        semantics[BASIC_ISLAND_SEED_ORACLE_ID] = _basic_island_seed_semantics()
     if any(p.oracle_id == BOUNCE_CREATURE_SEED_ORACLE_ID for p in spec.permanents):
         semantics[BOUNCE_CREATURE_SEED_ORACLE_ID] = _bounce_creature_seed_semantics()
     if any(p.object_id == GRANT_HOST_OBJECT_ID for p in spec.permanents):
@@ -327,6 +364,7 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
     alarm_partner = any(_has_etb_untap_all_creatures(c) for c in ordered)
     activated_bounce = any(_has_activated_bounce_other_creature(c) for c in ordered)
     cloudstone_partner = any(_has_cloudstone_bounce(c) for c in ordered)
+    earthcraft_partner = any(_has_earthcraft(c) for c in ordered)
     permanents = []
     for i, card in enumerate(ordered):
         types = {t.lower() for t in card.types}
@@ -358,9 +396,10 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
         # Aluren + Drake/Lion: start bounce creature in hand for free recast.
         # Alarm + Drake/Lion: same — cast pays mana from seeded dorks.
         # Cloudstone + Aluren: cast creature from hand; bounce a second creature.
+        # Earthcraft + Drake: cast from hand; hold priority to tap Drake, untap Island.
         start_zone = Zone.BATTLEFIELD
         if is_creature and _has_etb_bounce_to_hand(card) and (
-            free_cast_partner or alarm_partner
+            free_cast_partner or alarm_partner or earthcraft_partner
         ):
             start_zone = Zone.HAND
         elif is_creature and cloudstone_partner and free_cast_partner:
@@ -525,6 +564,16 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
                     toughness=1,
                 )
             )
+    if earthcraft_partner:
+        permanents.append(
+            bf(
+                "basic_island",
+                BASIC_ISLAND_SEED_ORACLE_ID,
+                "Seed Island",
+                is_creature=False,
+                is_artifact=False,
+            )
+        )
     pair_caps = [extract_capabilities(c) for c in ordered]
     if any(c.needs_creature_count_mana_seed() for c in pair_caps):
         for i in range(_SCALED_MANA_SEED_COUNT):
@@ -600,6 +649,7 @@ def _effect_needs_permanent_target(ability: ActivatedAbility) -> bool:
     for effect in ability.effects:
         if getattr(effect, "target", None) in {
             "target_permanent",
+            "target_basic_land",
             "target_other_creature",
             "other_controlled_creature",
             "other_controlled_sharing_type",
@@ -611,6 +661,12 @@ def _effect_needs_permanent_target(ability: ActivatedAbility) -> bool:
         }:
             return True
     return False
+
+
+def _has_tap_creature_cost(ability: ActivatedAbility) -> bool:
+    from mtg_loop_engine.semantics.ir import TapCreatureCost
+
+    return any(isinstance(c, TapCreatureCost) for c in ability.costs)
 
 
 def _any_target_damage(ability: ActivatedAbility) -> bool:
@@ -651,9 +707,17 @@ def _fodder_ids(state: GameState, selector: str) -> list[str]:
 
 
 def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
-    """Deterministic legal actions. Pending triggers are resolved before new activations."""
+    """Deterministic legal actions.
+
+    With pending triggers, combo-player may hold priority to activate
+    Earthcraft-class ``TapCreatureCost`` abilities (e.g. tap Drake before bounce).
+    """
     steps: list[ActionStep] = []
     if state.pending_triggers:
+        # Holding priority first so BFS can Earthcraft-tap before resolving ETB bounce.
+        steps.extend(
+            _activation_steps(executor, state, tap_creature_cost_only=True)
+        )
         bf_ids = [
             p.object_id
             for p in state.permanents.values()
@@ -686,6 +750,7 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
                     tgt = getattr(effect, "target", None)
                     if tgt in {
                         "target_permanent",
+                        "target_basic_land",
                         "target_other_creature",
                         "enchanted_creature",
                         "controlled_creature",
@@ -776,81 +841,7 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
                     steps.append(step)
         return steps
 
-    for perm in sorted(state.permanents.values(), key=lambda p: p.object_id):
-        card = executor.semantics.get(perm.oracle_id)
-        if not card:
-            continue
-        for ab in card.abilities:
-            if not isinstance(ab, ActivatedAbility) or not ab.supported:
-                continue
-            selector = _sac_selector(ab)
-            need_effect_target = _effect_needs_permanent_target(ab)
-            need_tap_host = _tap_cost_needs_host(ab)
-            need_untap_host = _untap_symbol_cost_needs_host(ab)
-            any_target_dmg = _any_target_damage(ab)
-            if selector:
-                targets = _fodder_ids(state, selector)
-            elif need_tap_host:
-                targets = [
-                    p.object_id
-                    for p in state.permanents.values()
-                    if p.zone == Zone.BATTLEFIELD
-                    and p.controller == "you"
-                    and p.is_creature
-                    and not p.tapped
-                    and p.object_id != perm.object_id
-                ]
-            elif need_untap_host:
-                targets = [
-                    p.object_id
-                    for p in state.permanents.values()
-                    if p.zone == Zone.BATTLEFIELD
-                    and p.controller == "you"
-                    and p.is_creature
-                    and p.tapped
-                    and p.object_id != perm.object_id
-                ]
-            elif any_target_dmg:
-                # Opponent first (Heliod/Ballista); self legal for undying self-ping.
-                targets = ["opponent", perm.object_id]
-            elif need_effect_target:
-                exclude_source = any(
-                    getattr(e, "target", None)
-                    in {
-                        "target_other_creature",
-                        "other_controlled_creature",
-                    }
-                    for e in ab.effects
-                )
-                require_creature = any(
-                    getattr(e, "target", None)
-                    in {
-                        "target_other_creature",
-                        "other_controlled_creature",
-                        "controlled_creature",
-                        "controlled_creature_green_or_white",
-                    }
-                    for e in ab.effects
-                )
-                targets = [
-                    p.object_id
-                    for p in state.permanents.values()
-                    if p.zone == Zone.BATTLEFIELD
-                    and p.controller == "you"
-                    and (not exclude_source or p.object_id != perm.object_id)
-                    and (not require_creature or p.is_creature)
-                ]
-            else:
-                targets = [None]
-            for target in targets:
-                step = ActionStep(
-                    op="activate",
-                    actor=perm.object_id,
-                    ability_id=ab.ability_id,
-                    target=target,
-                )
-                if _try_apply(executor, state, step) is not None:
-                    steps.append(step)
+    steps.extend(_activation_steps(executor, state, tap_creature_cost_only=False))
 
     # Cast creatures from hand (Aluren free cast or paid mana_cost).
     for perm in sorted(state.permanents.values(), key=lambda p: p.object_id):
@@ -884,6 +875,98 @@ def legal_steps(executor: Executor, state: GameState) -> list[ActionStep]:
             )
             if _try_apply(executor, state, step) is not None:
                 steps.append(step)
+    return steps
+
+
+def _activation_steps(
+    executor: Executor,
+    state: GameState,
+    *,
+    tap_creature_cost_only: bool,
+) -> list[ActionStep]:
+    steps: list[ActionStep] = []
+    for perm in sorted(state.permanents.values(), key=lambda p: p.object_id):
+        card = executor.semantics.get(perm.oracle_id)
+        if not card:
+            continue
+        for ab in card.abilities:
+            if not isinstance(ab, ActivatedAbility) or not ab.supported:
+                continue
+            if tap_creature_cost_only and not _has_tap_creature_cost(ab):
+                continue
+            selector = _sac_selector(ab)
+            need_effect_target = _effect_needs_permanent_target(ab)
+            need_tap_host = _tap_cost_needs_host(ab)
+            need_untap_host = _untap_symbol_cost_needs_host(ab)
+            any_target_dmg = _any_target_damage(ab)
+            require_basic_land = any(
+                getattr(e, "target", None) == "target_basic_land" for e in ab.effects
+            )
+            if selector:
+                targets = _fodder_ids(state, selector)
+            elif need_tap_host:
+                targets = [
+                    p.object_id
+                    for p in state.permanents.values()
+                    if p.zone == Zone.BATTLEFIELD
+                    and p.controller == "you"
+                    and p.is_creature
+                    and not p.tapped
+                    and p.object_id != perm.object_id
+                ]
+            elif need_untap_host:
+                targets = [
+                    p.object_id
+                    for p in state.permanents.values()
+                    if p.zone == Zone.BATTLEFIELD
+                    and p.controller == "you"
+                    and p.is_creature
+                    and p.tapped
+                    and p.object_id != perm.object_id
+                ]
+            elif any_target_dmg:
+                targets = ["opponent", perm.object_id]
+            elif need_effect_target:
+                exclude_source = any(
+                    getattr(e, "target", None)
+                    in {
+                        "target_other_creature",
+                        "other_controlled_creature",
+                    }
+                    for e in ab.effects
+                )
+                require_creature = any(
+                    getattr(e, "target", None)
+                    in {
+                        "target_other_creature",
+                        "other_controlled_creature",
+                        "controlled_creature",
+                        "controlled_creature_green_or_white",
+                    }
+                    for e in ab.effects
+                )
+                targets = []
+                for p in state.permanents.values():
+                    if p.zone != Zone.BATTLEFIELD or p.controller != "you":
+                        continue
+                    if exclude_source and p.object_id == perm.object_id:
+                        continue
+                    if require_creature and not p.is_creature:
+                        continue
+                    if require_basic_land and not executor._is_basic_land(p):
+                        continue
+                    targets.append(p.object_id)
+            else:
+                targets = [None]
+            for target in targets:
+                step = ActionStep(
+                    op="activate",
+                    actor=perm.object_id,
+                    ability_id=ab.ability_id,
+                    target=target,
+                )
+                if _try_apply(executor, state, step) is not None:
+                    steps.append(step)
     return steps
 
 
@@ -1175,6 +1258,16 @@ def build_witness(
                 kind="board",
                 description=(
                     "generic creature in hand to cast/bounce under grant+Alarm "
+                    "(identity irrelevant)"
+                ),
+            )
+        )
+    if any(p.oracle_id == BASIC_ISLAND_SEED_ORACLE_ID for p in spec.permanents):
+        generic.append(
+            Prerequisite(
+                kind="board",
+                description=(
+                    "generic basic Island for Earthcraft untap / blue mana "
                     "(identity irrelevant)"
                 ),
             )

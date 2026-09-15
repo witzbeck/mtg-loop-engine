@@ -74,8 +74,16 @@ class UntapSymbolCost(BaseModel):
     source_self: bool = True
 
 
+class TapCreatureCost(BaseModel):
+    """Earthcraft: tap an untapped creature you control (not the source by default)."""
+
+    kind: Literal["tap_creature"] = "tap_creature"
+    # Prefer non-source creatures; explorer/executor auto-pick when step has no fodder id.
+    allow_source: bool = False
+
+
 Cost = Annotated[
-    TapCost | ManaCost | SacrificeCost | AddCounterCost | UntapSymbolCost,
+    TapCost | ManaCost | SacrificeCost | AddCounterCost | UntapSymbolCost | TapCreatureCost,
     Field(discriminator="kind"),
 ]
 
@@ -100,7 +108,9 @@ class AddManaEffect(BaseModel):
 
 class UntapEffect(BaseModel):
     kind: Literal["untap"] = "untap"
-    target: Literal["self", "target_permanent", "all_creatures"] = "self"
+    target: Literal["self", "target_permanent", "target_basic_land", "all_creatures"] = (
+        "self"
+    )
 
 
 class TapEffect(BaseModel):

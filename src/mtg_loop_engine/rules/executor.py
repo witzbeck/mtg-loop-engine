@@ -35,6 +35,7 @@ from mtg_loop_engine.semantics.ir import (
     ReturnToBattlefieldEffect,
     SacrificeCost,
     TapCost,
+    TapCreatureCost,
     TapEffect,
     TriggeredAbility,
     UntapEffect,
@@ -525,7 +526,14 @@ class Executor:
             tid = source.object_id if effect.target == "self" else target_id
             if not tid or tid not in state.permanents:
                 return ExecError(VerificationStatus.ILLEGAL_TARGET, "untap target missing")
-            self._untap_permanent(state, state.permanents[tid])
+            target_perm = state.permanents[tid]
+            if effect.target == "target_basic_land":
+                if not self._is_basic_land(target_perm):
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_TARGET,
+                        "untap target must be a basic land",
+                    )
+            self._untap_permanent(state, target_perm)
             state.bump("untap")
             return None
 
@@ -863,6 +871,11 @@ class Executor:
 
     def _is_land_permanent(self, permanent: Permanent) -> bool:
         return "land" in self._permanent_type_set(permanent)
+
+    def _is_basic_land(self, permanent: Permanent) -> bool:
+        card = self.semantics.get(permanent.oracle_id)
+        types = {t.casefold() for t in (card.types if card else [])}
+        return "land" in types and "basic" in types
 
     def _is_artifact_permanent(self, permanent: Permanent) -> bool:
         return "artifact" in self._permanent_type_set(permanent)
@@ -1340,6 +1353,22 @@ class Executor:
                             )
                     fodder = state.permanents[fodder_id]
                     self.sacrifice(state, fodder)
+            elif isinstance(cost, TapCreatureCost):
+                tapped_id = self._pick_tap_creature(
+                    state, source=perm, allow_source=cost.allow_source
+                )
+                if not tapped_id:
+                    return ExecError(
+                        VerificationStatus.RESOURCE_DEFICIT,
+                        "no untapped creature to tap for cost",
+                    )
+                tap_perm = state.permanents[tapped_id]
+                if tap_perm.tapped:
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_ACTION, "already tapped"
+                    )
+                # Not {T} on the creature — summoning sickness does not apply (CR 302.6).
+                tap_perm.tapped = True
 
         err = self.apply_effects(state, perm, ab.effects, step.target)
         if err:
@@ -1361,6 +1390,32 @@ class Executor:
             if self.matches_sacrifice_selector(p, selector):
                 return p.object_id
         return None
+
+    def _pick_tap_creature(
+        self,
+        state: GameState,
+        *,
+        source: Permanent,
+        allow_source: bool,
+    ) -> str | None:
+        """Pick an untapped controlled creature to tap for Earthcraft-class costs.
+
+        Summoning sickness does not apply: the creature is not activating its own {T}.
+        """
+        candidates: list[Permanent] = []
+        for p in state.permanents.values():
+            if p.zone != Zone.BATTLEFIELD or p.controller != "you":
+                continue
+            if not p.is_creature or p.tapped:
+                continue
+            if not allow_source and p.object_id == source.object_id:
+                continue
+            candidates.append(p)
+        if not candidates:
+            return None
+        # Prefer tokens / non-source seeds so essentials stay available to cast.
+        candidates.sort(key=lambda p: (not p.is_token, p.object_id))
+        return candidates[0].object_id
 
     def resolve_trigger(self, state: GameState, step: ActionStep) -> ExecError | None:
         if not state.pending_triggers:
