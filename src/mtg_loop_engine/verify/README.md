@@ -33,7 +33,8 @@ graph TB;
 - Fail-closed `LoopRelevantState` path grammar (`STATE_NOT_RECURRENT` on invalid paths)
 - Execute setup + loop via `rules.Executor`
 - Check proof-specific recurrence (`LoopRelevantState`) plus **mandatory**
-  dimensions (ADR 0008: once-per-turn usage, pending trigger count)
+  dimensions (ADR 0008: once-per-turn usage, pending trigger count, EXACT
+  `m1m1` 0 for m1m1-pay permanents that start at zero)
 - Derive `claim_consequence` from net state + gross outputs; reject when
   `expected_claim_consequence` disagrees (`ACCUMULATES` / `REPEATABLE_EVENT` /
   `LETHAL`)

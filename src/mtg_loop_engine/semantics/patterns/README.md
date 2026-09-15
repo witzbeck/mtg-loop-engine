@@ -60,6 +60,9 @@ graph TB;
 - `etb_bounce_sharing_type` — Cloudstone; nonartifact ETB → bounce another sharing a permanent type.
 - `etb_mana_sharing_creature_type` — Mana Echoes; creature ETB → `{C}` × controlled sharing creature type.
 - `earthcraft_tap_untap_basic` — Earthcraft; tap controlled creature → untap basic land.
+- `enchanted_tap_create_token` — Gond / Nest; enchanted creature or land has `{T}`: create token (`TapCost.host`).
+- `mana_untap_create_token` — Patrol Signaler; `{mana}, {Q}`: create token.
+- `hybrid_remove_m1m1_pump` — Quillspike; `{B/G}` + remove −1/−1; pump until EOT proof-irrelevant.
 - Wirewood Channeler matches scaled `BATTLEFIELD_ELF` any-color (slice-9 sibling).
 - `aluren_free_cast` — Aluren; creatures MV ≤ N without paying mana.
 - `instant_grant_tap_bounce` — Banishing Knack / Retraction Helix Instant grant.

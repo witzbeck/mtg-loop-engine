@@ -42,11 +42,20 @@ class TapCost(BaseModel):
     kind: Literal["tap"] = "tap"
     # When False, tap `step.target` (enchanted host) instead of the activating permanent.
     source_self: bool = True
+    # Host permanent kind when ``source_self`` is False (Gond creature vs Nest land).
+    host: Literal["creature", "land"] = "creature"
 
 
 class ManaCost(BaseModel):
     kind: Literal["mana"] = "mana"
     amount: ManaAmount = Field(default_factory=ManaAmount)
+
+
+class HybridManaCost(BaseModel):
+    """Pay one mana of either listed color ({B/G} class). Combo-player tries in order."""
+
+    kind: Literal["hybrid_mana"] = "hybrid_mana"
+    colors: tuple[str, str]
 
 
 class SacrificeCost(BaseModel):
@@ -66,6 +75,15 @@ class AddCounterCost(BaseModel):
     target: Literal["self"] = "self"
 
 
+class RemoveCounterCost(BaseModel):
+    """Pay by removing counters from a controlled creature (Quillspike class)."""
+
+    kind: Literal["remove_counter_cost"] = "remove_counter_cost"
+    counter_type: str = "m1m1"
+    quantity: int = 1
+    selector: Literal["creature_controlled"] = "creature_controlled"
+
+
 class UntapSymbolCost(BaseModel):
     """Pay {Q} by untapping the activating permanent or equipped host."""
 
@@ -83,7 +101,14 @@ class TapCreatureCost(BaseModel):
 
 
 Cost = Annotated[
-    TapCost | ManaCost | SacrificeCost | AddCounterCost | UntapSymbolCost | TapCreatureCost,
+    TapCost
+    | ManaCost
+    | HybridManaCost
+    | SacrificeCost
+    | AddCounterCost
+    | RemoveCounterCost
+    | UntapSymbolCost
+    | TapCreatureCost,
     Field(discriminator="kind"),
 ]
 

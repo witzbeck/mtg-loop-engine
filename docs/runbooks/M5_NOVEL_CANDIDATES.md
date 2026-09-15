@@ -110,9 +110,11 @@ uv run python scripts/spellbook_absent_discovery.py
 25. **Activated / type-share bounce (slices 29–30)** ✓ — Temur Sabertooth paid bounce-other (indestructible rider proof-irrelevant) + Bell-Ringer; Cloudstone Curio nonartifact ETB → bounce sharing a permanent type + Aluren. **Tidespout Tyrant deferred** (needs `TriggerEvent.CAST` + non-creature cast/rock path).
 26. **Mana Echoes (slice 32)** ✓ — creature ETB → `{C}` × controlled sharing creature type; Sliver Queen rediscovery (`{2}` mana seed).
 27. **Earthcraft + Wirewood (slices 33–34)** ✓ — Earthcraft tap-creature → untap basic land (hold priority with Drake); Wirewood battlefield-Elf any-color (Staff rediscovery).
-28. **Frontier-driven slices (M5.2 Slice 35+):** Path **a** preference remains; cite live P0/P1. Ritual below.
-29. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-30. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+28. **Squirrel Nest (slice 35)** ✓ — enchanted-land `{T}`: create Squirrel (`TapCost.host="land"`); Earthcraft rediscovery. Deferred Patrol Signaler (`{Q}` create) / Quillspike (−1/−1 remove); Storm Herd rejected (one-shot).
+29. **Patrol Signaler + Quillspike (slices 36–37)** ✓ — Signaler `{1}{W}{Q}` create + Earthcraft/Plains double-tap; Quillspike hybrid remove-m1m1 + Devoted Druid (0/2 printed P/T). Storm Herd still rejected.
+30. **Frontier-driven slices (M5.2 Slice 38+):** Path **a** preference remains; cite live P0/P1. Ritual below.
+31. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+32. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 
@@ -177,18 +179,18 @@ Trigger after every meaningful curriculum/physics PR (COMPLETE growth, new verif
 
 **DuckDB lock:** if Streamlit workbench is already running, stop it (Ctrl+C in that terminal — closing the browser tab is not enough) before `--persist-workbench`, or persist to a scratch `--db` path and re-run without `--db` after restart so the main store upserts.
 
-#### Current queue (remeasured post–Wave 1 recovery dig)
+#### Current queue (remeasured post–waves + M5.3 batch)
 
-| Pair | Join reasons | Adjudication | Notes |
-| --- | --- | --- | --- |
-| Axebane Guardian + Pemmin's Aura | tap_untap, mana_pay | `valid_generic_prerequisite` | Defender-count mana + aura untap |
-| Axebane Guardian + Umbral Mantle | tap_untap, mana_pay | `valid_generic_prerequisite` | Defender mana + `{3}{Q}` |
-| Overgrown Battlement + Umbral Mantle | mana_pay, tap_untap | `valid_generic_prerequisite` | Defender green mana + `{3}{Q}` |
-| Sunbond + Triskelion | counter_reload | `valid_generic_prerequisite` | Life→counter aura + remove-counter damage |
-| Freed from the Real + Heronblade Elite | mana_pay, tap_untap | `valid_generic_prerequisite` | Power mana + aura untap (slice 16) |
-| Heronblade Elite + Pemmin's Aura | mana_pay, tap_untap | `valid_generic_prerequisite` | Power mana + aura untap (slice 16) |
+Probe: **84** COMPLETE · **88** verified · **69** in_reference · **19** absent (post–slices 36–37). Workbench `spellbook_absent`: **22** unique pairs, **0** unreviewed.
 
-Probe (post–Wave 1): **73** COMPLETE · **68** verified · **62** in_reference · **6** absent · eligible **84** / rediscovered **62** (was **56**; join_miss **16→10**). Keep `ABSENT_FROM_REFERENCE` (not `NOVEL`).
+| Adjudication | Count | Notes |
+| --- | ---: | --- |
+| `valid_generic_prerequisite` | 18 | Scaled mana / dork / grant / Temur / Wirewood / Alarm seeds |
+| `valid_strict_two_card` | 1 | Aluren + Dream Stalker (no generics stamped) |
+| `duplicate_or_equivalent_interaction` | 2 | Basalt/Impact + Gond bystanders (prior) |
+| `needs_rules_research` | 1 | Warleader's Call + Gond (prior) |
+
+Keep `ABSENT_FROM_REFERENCE` (not `NOVEL`). Run `--persist-workbench` after each curriculum PR.
 
 **Wave 1 recovery note:** `join_reasons` for bounce/free-cast/grant existed, but `InteractionIndex._complement_ids` omitted those tags → Spellbook `join_miss`. Fix + Drake/Alarm mana-dork seeds + recovery `max_depth` 12.
 

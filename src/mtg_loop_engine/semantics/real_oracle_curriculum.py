@@ -668,4 +668,61 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{3}{G}",
         mana_value=4,
     ),
+    "Squirrel Nest": RealOracleCurriculum(
+        name="Squirrel Nest",
+        types=["Enchantment", "Aura"],
+        oracle_text=(
+            "Enchant land\n"
+            'Enchanted land has "{T}: Create a 1/1 green Squirrel creature token."'
+        ),
+        notes=(
+            "Slice 35: enchanted-land tap-token grant (Gond sibling); "
+            "Earthcraft rediscovery via land host + tap-creature untap."
+        ),
+        colors=("G",),
+        mana_cost="{1}{G}",
+        mana_value=2,
+    ),
+    "Patrol Signaler": RealOracleCurriculum(
+        name="Patrol Signaler",
+        types=["Creature", "Kithkin", "Soldier"],
+        oracle_text=(
+            "{1}{W}, {Q}: Create a 1/1 white Kithkin Soldier creature token. "
+            "({Q} is the untap symbol.)"
+        ),
+        notes=(
+            "Slice 36: paid self-{Q} create; Earthcraft + basic Plains double-tap "
+            "pays {1}{W} (Spellbook notable)."
+        ),
+        colors=("W",),
+        mana_cost="{1}{W}",
+        mana_value=2,
+    ),
+    "Quillspike": RealOracleCurriculum(
+        name="Quillspike",
+        types=["Creature", "Beast"],
+        oracle_text=(
+            "{B/G}, Remove a -1/-1 counter from a creature you control: "
+            "This creature gets +3/+3 until end of turn."
+        ),
+        notes=(
+            "Slice 37: hybrid mana + remove-m1m1 cost; +3/+3 until EOT proof-irrelevant; "
+            "Devoted Druid rediscovery."
+        ),
+        colors=("B", "G"),
+        mana_cost="{2}{B/G}",
+        mana_value=3,
+    ),
+    "Devoted Druid": RealOracleCurriculum(
+        name="Devoted Druid",
+        types=["Creature", "Elf", "Druid"],
+        oracle_text=(
+            "{T}: Add {G}.\n"
+            "Put a -1/-1 counter on this creature: Untap this creature."
+        ),
+        notes="Slice 37 partner: tap mana + m1m1-untap (already COMPLETE).",
+        colors=("G",),
+        mana_cost="{1}{G}",
+        mana_value=2,
+    ),
 }

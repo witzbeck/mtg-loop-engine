@@ -17,11 +17,13 @@ from mtg_loop_engine.semantics.ir import (
     DrawEffect,
     FreeCastCreaturesByManaValue,
     GainLifeEffect,
+    HybridManaCost,
     InstantGrantTapBounce,
     LoseLifeEffect,
     ManaCost,
     MillEffect,
     MoveToZoneEffect,
+    RemoveCounterCost,
     RemoveCounterEffect,
     ReplacementAmplifyP1P1Counters,
     ReplacementMultiplyTapMana,
@@ -100,6 +102,8 @@ def extract_capabilities(card: CardSemantics) -> CardCapabilities:
                     caps.requires.add("tap")
                 elif isinstance(cost, ManaCost):
                     caps.requires.add("mana")
+                elif isinstance(cost, HybridManaCost):
+                    caps.requires.add("mana")
                 elif isinstance(cost, SacrificeCost):
                     caps.requires.add(f"sac_{cost.selector}")
                     if cost.selector == "self":
@@ -113,8 +117,17 @@ def extract_capabilities(card: CardSemantics) -> CardCapabilities:
                     "-1/-1",
                 }:
                     caps.requires.add("m1m1_put")
+                    caps.produces.add("add_counter")
+                elif isinstance(cost, RemoveCounterCost) and cost.counter_type in {
+                    "m1m1",
+                    "-1/-1",
+                }:
+                    caps.requires.add("remove_counter")
                 elif isinstance(cost, UntapSymbolCost):
                     caps.produces.add("untap")
+                    if cost.source_self:
+                        # Must be tapped to pay {Q} on self (Patrol Signaler class).
+                        caps.requires.add("tap")
             for effect in ab.effects:
                 if isinstance(effect, RemoveCounterEffect):
                     caps.requires.add("remove_counter")

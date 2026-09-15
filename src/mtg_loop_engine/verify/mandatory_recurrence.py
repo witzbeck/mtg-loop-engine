@@ -14,8 +14,8 @@ from mtg_loop_engine.proofs.models import (
     LoopWitness,
     StateDimension,
 )
-from mtg_loop_engine.semantics.enums import ComparisonOp
-from mtg_loop_engine.semantics.ir import ActivatedAbility, CardSemantics
+from mtg_loop_engine.semantics.enums import ComparisonOp, Zone
+from mtg_loop_engine.semantics.ir import ActivatedAbility, AddCounterCost, CardSemantics
 from mtg_loop_engine.state.game import GameState
 
 
@@ -73,14 +73,57 @@ def pending_trigger_dimensions(before: GameState) -> list[StateDimension]:
     ]
 
 
+def m1m1_pay_dimensions(
+    *,
+    cards: list[CardSemantics],
+    before: GameState,
+) -> list[StateDimension]:
+    """Pin EXACT m1m1 when a permanent can pay by putting -1/-1 and starts at zero.
+
+    Closes finite Gond/Basalt+Druid false infinites: accumulation fails recurrence
+    while Quillspike-class reload (return to zero) still verifies.
+    """
+    by_oracle = {c.oracle_id: c for c in cards}
+    dims: list[StateDimension] = []
+    for live in before.permanents.values():
+        if live.zone != Zone.BATTLEFIELD:
+            continue
+        if "m1m1" in live.counters:
+            continue
+        card = by_oracle.get(live.oracle_id)
+        if card is None:
+            continue
+        if any(
+            isinstance(ab, ActivatedAbility)
+            and any(
+                isinstance(cost, AddCounterCost)
+                and cost.counter_type in {"m1m1", "-1/-1"}
+                for cost in ab.costs
+            )
+            for ab in card.abilities
+        ):
+            dims.append(
+                StateDimension(
+                    path=f"permanents.{live.object_id}.counters.m1m1",
+                    op=ComparisonOp.EXACT,
+                    value=0,
+                )
+            )
+    return dims
+
+
 def mandatory_recurrence_dimensions(
     witness: LoopWitness, before: GameState
 ) -> list[StateDimension]:
-    return once_per_turn_dimensions(
-        loop_actions=witness.loop_actions,
-        cards=witness.card_semantics,
-        before=before,
-    ) + pending_trigger_dimensions(before)
+    return (
+        once_per_turn_dimensions(
+            loop_actions=witness.loop_actions,
+            cards=witness.card_semantics,
+            before=before,
+        )
+        + pending_trigger_dimensions(before)
+        + m1m1_pay_dimensions(cards=witness.card_semantics, before=before)
+    )
 
 
 def effective_relevant_state(

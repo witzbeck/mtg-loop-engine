@@ -279,6 +279,8 @@ GOLD_ORACLE_FIXTURES: dict[str, OracleFixture] = {
             "{T}: Add {G}.\n"
             "Put a -1/-1 counter on this creature: Untap this creature."
         ),
+        power=0,
+        toughness=2,
         provenance=Provenance.ORACLE_EXACT,
     ),
     "oracle:vizier-of-remedies": OracleFixture(

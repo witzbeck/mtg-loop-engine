@@ -32,14 +32,16 @@ graph TB;
 - Replay setup and loop actions faithfully within the modeled rules surface.
 - GY activations when abilities return to battlefield; optional `requires_zombie` gate for cast-from-GY shapes.
 - Combo-player favorable / opponent adversarial choice ownership (see executor docstring and frozen product decisions).
-- Explicit sacrifice / host-tap target revalidation (BF, controller, creature/token selectors); invalid explicit objects → `ILLEGAL_TARGET`.
+- Explicit sacrifice / host-tap target revalidation (BF, controller, creature/token/land selectors); invalid explicit objects → `ILLEGAL_TARGET`.
+- Enchanted `{T}` hosts: `TapCost.host="creature"` (Gond) requires creature + not summoning sick; `host="land"` (Nest) requires a land (no sickness).
 - Exact pending-trigger match when `actor` / `ability_id` are supplied (no silent idx-0 fallback).
 - Exile-on-death replacements suppress death events and `DIES` triggers (CR 700.4); sacrifice events still fire.
 - Creature `DIES` queues carry subject `effective_toughness()` as trigger `amount` when > 0 (South Wind Avatar class).
 - `MoveToZoneEffect` bounce targets: `controlled_creature`, `controlled_creature_green_or_white`, `controlled_permanent`, `controlled_nonland`, `other_controlled_creature` (Temur), `other_controlled_sharing_type` (Cloudstone; needs trigger subject), `target_nonland` (Knack/Helix).
 - `TriggeredAbility.filter` includes `controlled_nonartifact` (Cloudstone).
 - Mana Echoes: `AddManaEffect` `CONTROLLED_SHARING_CREATURE_TYPE` counts controlled creatures sharing a creature subtype with the trigger subject (token names infer subtypes when unregistered).
-- `TapCreatureCost` (Earthcraft): tap an untapped controlled creature as a cost (not the creature's own `{T}` — summoning sickness does not apply). `UntapEffect(target_basic_land)`.
+- `TapCreatureCost` (Earthcraft): tap an untapped controlled creature as a cost (not the creature's own `{T}` — summoning sickness does not apply). `UntapEffect(target_basic_land)`. Optional `ActionStep.cost_target` selects the creature when `target` is the land (Signaler vs token).
+- `HybridManaCost` ({B/G}) and `RemoveCounterCost` (Quillspike): pay one of the listed colors; remove m1m1 from a controlled creature.
 - Holding priority: while triggers are pending, explorer may activate `TapCreatureCost` abilities before resolving ETB bounce (Drake + Earthcraft).
 - `cast_from_hand`: creature from `Zone.HAND` pays `CardSemantics.mana_cost`, or free under `FreeCastCreaturesByManaValue` (Aluren) when MV ≤ ceiling; bumps `events.cast` then ETB.
 - `activate_granted_tap_bounce` / `seed_grant_tap_bounce`: Instant grant `{T}`: bounce nonland (`Permanent.tap_bounce_nonland`, witness-persistent).
