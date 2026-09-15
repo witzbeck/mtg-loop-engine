@@ -742,4 +742,21 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{1}{R}{G}{W}",
         mana_value=4,
     ),
+    "The Unbeatable Squirrel Girl": RealOracleCurriculum(
+        name="The Unbeatable Squirrel Girl",
+        types=["Legendary", "Creature", "Squirrel", "Human", "Hero"],
+        oracle_text=(
+            "Do You Like Squirrels? — Whenever The Unbeatable Squirrel Girl enters "
+            "or attacks, create a 1/1 green Squirrel creature token.\n"
+            "I LOVE Squirrels! — {1}{G}{G}{G}: Create X 1/1 green Squirrel creature "
+            "tokens, where X is the number of Squirrels you control."
+        ),
+        notes=(
+            "Slice 39: ETB create (attacks not modeled) + mana create X=Squirrels; "
+            "Altar / Earthcraft rediscovery."
+        ),
+        colors=("G",),
+        mana_cost="{1}{G}{G}{G}",
+        mana_value=4,
+    ),
 }

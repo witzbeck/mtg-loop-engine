@@ -64,6 +64,8 @@ graph TB;
 - `mana_untap_create_token` — Patrol Signaler; `{mana}, {Q}`: create token.
 - `hybrid_remove_m1m1_pump` — Quillspike; `{B/G}` + remove −1/−1; pump until EOT proof-irrelevant.
 - `counters_put_damage_opponent` — Shalai; COUNTER_ADDED on controlled creature → that-much damage (`amount_from_trigger`).
+- `etb_or_attacks_create_token` — Squirrel Girl; ETB create (attacks not modeled).
+- `mana_create_tokens_equal_subtype` — Squirrel Girl; `{cost}: Create X` equal to controlled subtype count.
 - Wirewood Channeler matches scaled `BATTLEFIELD_ELF` any-color (slice-9 sibling).
 - `aluren_free_cast` — Aluren; creatures MV ≤ N without paying mana.
 - `instant_grant_tap_bounce` — Banishing Knack / Retraction Helix Instant grant.

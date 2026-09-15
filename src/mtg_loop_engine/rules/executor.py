@@ -548,7 +548,20 @@ class Executor:
             return None
 
         if isinstance(effect, CreateTokenEffect):
-            for _ in range(effect.quantity):
+            qty = effect.quantity
+            if effect.quantity_equal_to_controlled_subtype:
+                subtype = effect.quantity_equal_to_controlled_subtype.casefold()
+                qty = sum(
+                    1
+                    for p in state.permanents.values()
+                    if p.zone == Zone.BATTLEFIELD
+                    and p.controller == "you"
+                    and p.is_creature
+                    and subtype in self._creature_subtypes(p)
+                )
+            if qty <= 0:
+                return None
+            for _ in range(qty):
                 oid = state.next_token_id()
                 tok = Permanent(
                     object_id=oid,

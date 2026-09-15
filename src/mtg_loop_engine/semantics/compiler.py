@@ -44,8 +44,8 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
         r"Flying |Flash |Haste |Vigilance |Trample |Lifelink |Deathtouch |Reach |"
         r"Defender |Menace |Hexproof |Shroud |First strike |Double strike |"
         r"Umbra armor |"
-        # Ability words (e.g. "Fateful hour — …")
-        r"[A-Z][a-z]+(?: [a-z]+)? — )"
+        # Ability words / named abilities (incl. ALL CAPS, ?, ! — Marvel style)
+        r".{1,60}? — )"
     )
     for line in raw_lines:
         if not line:
