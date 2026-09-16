@@ -93,13 +93,15 @@ class UntapSymbolCost(BaseModel):
 
 
 class TapCreatureCost(BaseModel):
-    """Earthcraft / Supportive Parents: tap untapped creature(s) you control."""
+    """Earthcraft / Supportive Parents / Azami: tap untapped creature(s) you control."""
 
     kind: Literal["tap_creature"] = "tap_creature"
     # Prefer non-source creatures; explorer/executor auto-pick when step has no fodder id.
     allow_source: bool = False
     # Supportive Parents: tap two untapped creatures.
     quantity: int = 1
+    # Azami: tap an untapped Wizard you control.
+    subtype: str | None = None
 
 
 class PayLifeCost(BaseModel):

@@ -102,7 +102,7 @@ narrows mid-flight.
 | E57 | pending | Indestructible grants | CLOSE_BUILD | 3 | — | mixed | Static indestructible |
 | E58 | pending | Split second | CLOSE_BUILD | 2 | — | low | Stack lockout |
 | E59 | pending | Kicker / casualty / buyback | CLOSE_BUILD | 7 | — | mixed | Additional cast costs |
-| E60 | pending | Tap-for-draw | CLOSE_BUILD | 10 | — | yes | Tap untapped wizard/… → draw |
+| E60 | done | Tap-for-draw | CLOSE_BUILD | 10 | — | yes | Arcanis/Azami/Temple Bell/Kwain |
 | E61 | pending | Charge counters | CLOSE_BUILD | 3 | — | mixed | Enters with X charge |
 | E62 | pending | Discard engines | CLOSE_BUILD | 12 | — | mixed | Discard payoffs |
 | E63 | pending | Destroy / wrath | CLOSE_BUILD | 11 | — | low | One-shotish; Path-a rare |

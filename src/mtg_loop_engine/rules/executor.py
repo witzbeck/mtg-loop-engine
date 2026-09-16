@@ -1987,6 +1987,7 @@ class Executor:
             elif isinstance(cost, TapCreatureCost):
                 need = max(int(cost.quantity or 1), 1)
                 tapped_ids: list[str] = []
+                need_sub = cost.subtype.casefold() if cost.subtype else None
                 if step.cost_target and need == 1:
                     cand = state.permanents.get(step.cost_target)
                     if (
@@ -1996,6 +1997,10 @@ class Executor:
                         and cand.is_creature
                         and not cand.tapped
                         and (cost.allow_source or cand.object_id != perm.object_id)
+                        and (
+                            need_sub is None
+                            or need_sub in self._creature_subtypes(cand)
+                        )
                     ):
                         tapped_ids.append(cand.object_id)
                     else:
@@ -2009,6 +2014,7 @@ class Executor:
                         source=perm,
                         allow_source=cost.allow_source,
                         exclude=set(tapped_ids),
+                        subtype=cost.subtype,
                     )
                     if not picked:
                         return ExecError(
@@ -2110,6 +2116,7 @@ class Executor:
         source: Permanent,
         allow_source: bool,
         exclude: set[str] | None = None,
+        subtype: str | None = None,
     ) -> str | None:
         """Pick an untapped controlled creature to tap for Earthcraft-class costs.
 
@@ -2118,6 +2125,7 @@ class Executor:
         set up untap-symbol activations; among others prefer tokens (Nest squirrels).
         """
         skip = exclude or set()
+        need = subtype.casefold() if subtype else None
         candidates: list[Permanent] = []
         for p in state.permanents.values():
             if p.object_id in skip:
@@ -2127,6 +2135,8 @@ class Executor:
             if not p.is_creature or p.tapped:
                 continue
             if not allow_source and p.object_id == source.object_id:
+                continue
+            if need and need not in self._creature_subtypes(p):
                 continue
             candidates.append(p)
         if not candidates:

@@ -149,8 +149,9 @@ uv run python scripts/spellbook_absent_discovery.py
     `ReplacementDoubleCounters` (Doubling Season / Primal Vigor), `ProliferateEffect` (Viral Drake).
 50. **E22a Eldrazi tokens + Exalted/Chosen** ✓ — Spawn/Scion creates; Exalted double-tokens wording;
     Ajani's Chosen enchantment-ETB Cat.
-51. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-52. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+51. **E60 tap-for-draw** ✓ — Arcanis draw-N; Azami tap-Wizard; Temple Bell / Kwain each-draw→you.
+52. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+53. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 
