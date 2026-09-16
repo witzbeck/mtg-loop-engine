@@ -49,7 +49,7 @@ def test_compile_all_gold_fixtures_high_coverage():
     assert metrics.cards_complete == len(GOLD_ORACLE_FIXTURES)
 
 
-def test_unsupported_scepter_fails_closed():
+def test_unsupported_storm_fails_closed():
     fix = UNSUPPORTED_FIXTURE
     report = compile_oracle_text(
         oracle_id=fix.oracle_id,

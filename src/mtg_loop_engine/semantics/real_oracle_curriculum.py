@@ -2474,6 +2474,55 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_value=2,
     ),
 
+    # M5 E33 — spell copy / Isochron
+    "Dramatic Reversal": RealOracleCurriculum(
+        name="Dramatic Reversal",
+        types=["Instant"],
+        oracle_text="Untap all nonland permanents you control.",
+        notes="E33: untap-all-nonlands spell body (Isochron imprint).",
+        colors=("U",),
+        mana_cost="{1}{U}",
+        mana_value=2,
+    ),
+    "Isochron Scepter": RealOracleCurriculum(
+        name="Isochron Scepter",
+        types=["Artifact"],
+        oracle_text=(
+            "Imprint — When Isochron Scepter enters, you may exile an instant "
+            "card with mana value 2 or less from your hand.\n"
+            "{2}, {T}: You may copy the exiled card. If you do, you may cast "
+            "the copy without paying its mana cost."
+        ),
+        notes="E33: imprint MV≤2 instant; cast copy.",
+        mana_cost="{2}",
+        mana_value=2,
+    ),
+    "Dualcaster Mage": RealOracleCurriculum(
+        name="Dualcaster Mage",
+        types=["Creature", "Human", "Wizard"],
+        oracle_text=(
+            "Flash\n"
+            "When this creature enters, copy target instant or sorcery spell. "
+            "You may choose new targets for the copy."
+        ),
+        notes="E33: ETB copy last-cast instant/sorcery; Flash PI.",
+        colors=("R",),
+        mana_cost="{1}{R}{R}",
+        mana_value=3,
+    ),
+    "Twincast": RealOracleCurriculum(
+        name="Twincast",
+        types=["Instant"],
+        oracle_text=(
+            "Copy target instant or sorcery spell. "
+            "You may choose new targets for the copy."
+        ),
+        notes="E33: spell-copy body (Twincast / Reverberate family).",
+        colors=("U",),
+        mana_cost="{U}{U}",
+        mana_value=2,
+    ),
+
     # M5 E54 — impulse / top-deck
     "Sensei's Divining Top": RealOracleCurriculum(
         name="Sensei's Divining Top",
