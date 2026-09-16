@@ -782,6 +782,17 @@ class Executor:
                         state, effect, effect.equal_to_source_p1p1_counters, qty
                     )
                 return None
+            if effect.equal_to_source_charge_counters:
+                qty = self._effective_tap_mana_qty(
+                    state,
+                    source,
+                    max(int(source.counters.get("charge", 0)), 0),
+                )
+                if qty > 0:
+                    self._credit_mana(
+                        state, effect, effect.equal_to_source_charge_counters, qty
+                    )
+                return None
             if effect.mana_scale is not None:
                 if effect.mana_scale is ManaScaleKind.VIVID_PERMANENT_COLORS:
                     colors = _colors_among_controlled(state, self.semantics)
@@ -1957,26 +1968,30 @@ class Executor:
                     perm.counters[key] = perm.counters.get(key, 0) + qty
                     state.bump("counter", qty)
             elif isinstance(cost, RemoveCounterCost):
-                if not step.target:
-                    return ExecError(
-                        VerificationStatus.ILLEGAL_ACTION,
-                        "remove-counter cost needs target",
-                    )
-                host = state.permanents.get(step.target)
-                if host is None:
-                    return ExecError(
-                        VerificationStatus.ILLEGAL_TARGET, "remove-counter host missing"
-                    )
-                if host.zone != Zone.BATTLEFIELD or host.controller != "you":
-                    return ExecError(
-                        VerificationStatus.ILLEGAL_TARGET,
-                        "remove-counter host not controlled BF",
-                    )
-                if cost.selector == "creature_controlled" and not host.is_creature:
-                    return ExecError(
-                        VerificationStatus.ILLEGAL_TARGET,
-                        "remove-counter host not a creature",
-                    )
+                if cost.selector == "self":
+                    host = perm
+                else:
+                    if not step.target:
+                        return ExecError(
+                            VerificationStatus.ILLEGAL_ACTION,
+                            "remove-counter cost needs target",
+                        )
+                    host = state.permanents.get(step.target)
+                    if host is None:
+                        return ExecError(
+                            VerificationStatus.ILLEGAL_TARGET,
+                            "remove-counter host missing",
+                        )
+                    if host.zone != Zone.BATTLEFIELD or host.controller != "you":
+                        return ExecError(
+                            VerificationStatus.ILLEGAL_TARGET,
+                            "remove-counter host not controlled BF",
+                        )
+                    if cost.selector == "creature_controlled" and not host.is_creature:
+                        return ExecError(
+                            VerificationStatus.ILLEGAL_TARGET,
+                            "remove-counter host not a creature",
+                        )
                 key = cost.counter_type
                 have = host.counters.get(key, 0)
                 if have < cost.quantity:
@@ -1989,7 +2004,8 @@ class Executor:
                     del host.counters[key]
                 state.bump("counter", cost.quantity)
                 # Host was only for the cost; do not pass through as effect target.
-                step = step.model_copy(update={"target": None})
+                if cost.selector != "self":
+                    step = step.model_copy(update={"target": None})
             elif isinstance(cost, UntapSymbolCost):
                 untap_perm = perm
                 if not cost.source_self:

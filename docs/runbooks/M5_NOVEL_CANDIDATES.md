@@ -158,8 +158,9 @@ uv run python scripts/spellbook_absent_discovery.py
 56. **E13b ETB remainders** ✓ — Blasting Station untap; Hyrax; Warstorm Surge; Sporemound landfall; Molten Gatekeeper; Yotian Dissident.
 57. **E50 life replacement** ✓ — Bloodletter double loss; Archive double gain/draw; Everlasting Torment can't-gain.
 58. **E62 discard outlets** ✓ — Mind Over Matter; Skirge Familiar; Glint-Horn Buccaneer (`DiscardCost` + `hand_you`).
-59. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-60. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+59. **E61 charge counters** ✓ — Astral Cornucopia; Druids' Repository; Coretapper.
+60. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+61. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 

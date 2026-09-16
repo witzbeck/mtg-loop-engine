@@ -76,12 +76,12 @@ class AddCounterCost(BaseModel):
 
 
 class RemoveCounterCost(BaseModel):
-    """Pay by removing counters from a controlled creature (Quillspike class)."""
+    """Pay by removing counters from self or a controlled creature."""
 
     kind: Literal["remove_counter_cost"] = "remove_counter_cost"
     counter_type: str = "m1m1"
     quantity: int = 1
-    selector: Literal["creature_controlled"] = "creature_controlled"
+    selector: Literal["creature_controlled", "self"] = "creature_controlled"
 
 
 class UntapSymbolCost(BaseModel):
@@ -162,6 +162,10 @@ class AddManaEffect(BaseModel):
     ] = None
     # Gyre Sage class: "{T}: Add {G} for each +1/+1 counter on this creature."
     equal_to_source_p1p1_counters: Literal[
+        None, "green", "any_color", "colorless"
+    ] = None
+    # Astral Cornucopia / Everflowing Chalice: mana = charge counters on source.
+    equal_to_source_charge_counters: Literal[
         None, "green", "any_color", "colorless"
     ] = None
     # Scaled tap mana (Circle / Priest / Bloom Tender class).
