@@ -252,7 +252,95 @@ def pat_tap_add_mana(text: str, name: str) -> Ability | None:
                 is_mana_ability=True,
                 uses_stack=False,
             )
+    # M5 E01 — Metalcraft / Ferocious gated tap-mana; spend-only; hand-artifact scale.
+    m_metalcraft = re.match(
+        r"^(?:Metalcraft — )?\{T\}: Add one mana of any color\. "
+        r"Activate only if you control three or more artifacts\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if m_metalcraft:
+        return ActivatedAbility(
+            ability_id=_ability_id("tap-mana-metalcraft", text),
+            costs=[TapCost()],
+            effects=[AddManaEffect(amount=ManaAmount(any_color=1))],
+            is_mana_ability=True,
+            uses_stack=False,
+            requires_metalcraft=True,
+        )
+    m_ferocious = re.match(
+        r"^(?:Ferocious — )?\{T\}: Add ((?:\{[^}]+\})+)\. "
+        r"Activate only if you control a creature with power (\d+) or greater\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if m_ferocious:
+        amount = _parse_mana_braces(m_ferocious.group(1))
+        return ActivatedAbility(
+            ability_id=_ability_id("tap-mana-ferocious", text),
+            costs=[TapCost()],
+            effects=[AddManaEffect(amount=amount)],
+            is_mana_ability=True,
+            uses_stack=False,
+            requires_controlled_power_at_least=int(m_ferocious.group(2)),
+        )
+    m_spend = re.match(
+        r"^\{T\}: Add ((?:\{[^}]+\})+)\. "
+        r"Spend this mana only to activate abilities\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if m_spend:
+        amount = _parse_mana_braces(m_spend.group(1))
+        return ActivatedAbility(
+            ability_id=_ability_id("tap-mana-activate-only", text),
+            costs=[TapCost()],
+            effects=[
+                AddManaEffect(amount=amount, spend_only="activate_abilities")
+            ],
+            is_mana_ability=True,
+            uses_stack=False,
+        )
+    m_metalworker = re.match(
+        r"^\{T\}: Reveal any number of artifact cards in your hand\. "
+        r"Add \{C\}\{C\} for each card revealed this way\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if m_metalworker:
+        return ActivatedAbility(
+            ability_id=_ability_id("tap-mana-hand-artifacts", text),
+            costs=[TapCost()],
+            effects=[
+                AddManaEffect(
+                    mana_scale=ManaScaleKind.HAND_ARTIFACTS,
+                    scale_color="colorless",
+                    scale_multiplier=2,
+                )
+            ],
+            is_mana_ability=True,
+            uses_stack=False,
+        )
     return None
+
+
+def pat_tap_two_creatures_add_mana(text: str, name: str) -> Ability | None:
+    """Supportive Parents: Tap two untapped creatures you control: Add any color."""
+    m = re.match(
+        r"^Tap two untapped creatures you control: "
+        r"Add one mana of any color\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("tap-two-add-mana", text),
+        costs=[TapCreatureCost(allow_source=True, quantity=2)],
+        effects=[AddManaEffect(amount=ManaAmount(any_color=1))],
+        is_mana_ability=True,
+        uses_stack=False,
+    )
 
 
 def pat_mana_untap_self(text: str, name: str) -> Ability | None:
@@ -1949,6 +2037,13 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
     if re.match(r"^Ward \{[^}]+\}(?: \([^)]+\))?$", clause, re.IGNORECASE):
         return _proof_irrelevant(clause)
 
+    if re.match(
+        r"^Eternalize (?:\{[^}]+\})+(?: \([^)]*\))?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
     # Enchant line alone — not joined granted abilities ("Enchanted … has …").
     if re.match(r"^Enchant (?:target )?[A-Za-z][A-Za-z\s]*\.?$", clause, re.IGNORECASE):
         return _proof_irrelevant(clause)
@@ -2153,6 +2248,7 @@ PATTERNS: list[Pattern] = [
     Pattern("mana_create_tokens_equal_subtype", pat_mana_create_tokens_equal_subtype),
     Pattern("mana_create_token", pat_mana_create_token),
     Pattern("hybrid_remove_m1m1_pump", pat_hybrid_remove_m1m1_pump),
+    Pattern("tap_two_creatures_add_mana", pat_tap_two_creatures_add_mana),
     Pattern("tap_add_mana", pat_tap_add_mana),
     Pattern("mana_untap_enchanted", pat_mana_untap_enchanted),
     Pattern("mana_tap_enchanted", pat_mana_tap_enchanted),

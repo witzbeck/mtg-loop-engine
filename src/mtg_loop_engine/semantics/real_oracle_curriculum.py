@@ -799,4 +799,66 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{1}",
         mana_value=1,
     ),
+    # M5 E01 — gated / restricted tap-mana cluster
+    "Metalworker": RealOracleCurriculum(
+        name="Metalworker",
+        types=["Artifact", "Creature", "Construct"],
+        oracle_text=(
+            "{T}: Reveal any number of artifact cards in your hand. "
+            "Add {C}{C} for each card revealed this way."
+        ),
+        notes="E01: hand-artifact mana scale; Staff rediscovery with hand seeds.",
+        mana_cost="{3}",
+        mana_value=3,
+    ),
+    "Omen Hawker": RealOracleCurriculum(
+        name="Omen Hawker",
+        types=["Creature", "Cephalid", "Advisor"],
+        oracle_text=(
+            "{T}: Add {C}{U}. Spend this mana only to activate abilities."
+        ),
+        notes="E01: spend-only activate-abilities mana; Freed/Pemmin partner.",
+        colors=("U",),
+        mana_cost="{U}",
+        mana_value=1,
+    ),
+    "Mox Opal": RealOracleCurriculum(
+        name="Mox Opal",
+        types=["Artifact"],
+        oracle_text=(
+            "Metalcraft — {T}: Add one mana of any color. "
+            "Activate only if you control three or more artifacts."
+        ),
+        notes="E01: metalcraft activation gate.",
+        mana_cost="{0}",
+        mana_value=0,
+    ),
+    "Fanatic of Rhonas": RealOracleCurriculum(
+        name="Fanatic of Rhonas",
+        types=["Creature", "Snake", "Druid"],
+        oracle_text=(
+            "{T}: Add {G}.\n"
+            "Ferocious — {T}: Add {G}{G}{G}{G}. "
+            "Activate only if you control a creature with power 4 or greater.\n"
+            "Eternalize {2}{G}{G} "
+            "(Exile this card from your graveyard: Create a token that's a copy of it, "
+            "except it's a 4/4 black Zombie Snake Druid with no mana cost. "
+            "Eternalize only as a sorcery.)"
+        ),
+        notes="E01: ferocious gate + basic tap; eternalize proof-irrelevant.",
+        colors=("G",),
+        mana_cost="{1}{G}",
+        mana_value=2,
+    ),
+    "Supportive Parents": RealOracleCurriculum(
+        name="Supportive Parents",
+        types=["Creature", "Human", "Citizen"],
+        oracle_text=(
+            "Tap two untapped creatures you control: Add one mana of any color."
+        ),
+        notes="E01: TapCreatureCost quantity=2 mana ability.",
+        colors=("G",),
+        mana_cost="{2}{G}",
+        mana_value=3,
+    ),
 }

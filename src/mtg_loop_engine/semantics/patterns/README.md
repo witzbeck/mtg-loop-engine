@@ -47,6 +47,7 @@ graph TB;
 - Power-scaled tap mana (`equal_to_source_power`) uses effective power; explorer seeds four `p1p1` when `mana_from_power` so Staff-class untap cycles clear `{3}` (Kami class).
 - `amplify_p1p1_replacement` — Kami (permanent) / Hardened Scales (creature) “that many plus one”.
 - Board-scaled tap mana (`mana_scale` / `ManaScaleKind`) counts creatures, elves, defenders, enchantments, devotion, or vivid colors; explorer may seed generic creature/elf/defender permanents when the scale needs mass (Staff-class untap cycle).
+- **E01 gated tap-mana:** metalcraft / ferocious activation gates; hand-artifact scale (`HAND_ARTIFACTS` × multiplier); spend-only activate-abilities mana (`mana_activate_only` pool); `TapCreatureCost.quantity` (Supportive Parents).
 - `enchanted_gain_life_put_that_many_p1p1` — Light of Promise / Sunbond; counters use `amount_from_trigger` on the enchanted host (`enchanted_creature` target).
 - `gain_life_put_p1p1_each_controlled` / `etb_put_p1p1_each_controlled` — Archangel / Cathars; `each_controlled_creature` mass puts.
 - `etb_other_human_put_p1p1_self` — Heronblade; Human subtype filter on ETB subject.

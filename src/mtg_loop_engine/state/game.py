@@ -86,6 +86,8 @@ class Permanent:
 class GameState:
     permanents: dict[str, Permanent]
     mana: ManaAmount
+    # Omen Hawker-class: spend only to activate abilities.
+    mana_activate_only: ManaAmount = field(default_factory=ManaAmount)
     life_you: int = 40
     life_opponent: int = 40
     event_counters: dict[str, int] = field(default_factory=dict)
@@ -128,6 +130,7 @@ class GameState:
         return GameState(
             permanents={k: v.copy() for k, v in self.permanents.items()},
             mana=self.mana.model_copy(deep=True),
+            mana_activate_only=self.mana_activate_only.model_copy(deep=True),
             life_you=self.life_you,
             life_opponent=self.life_opponent,
             event_counters=dict(self.event_counters),

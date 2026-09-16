@@ -63,7 +63,7 @@ narrows mid-flight.
 
 | ID | Status | Epic | Disp | Est. cards | Sole-gap ≈ | Path-a | Notes / examples |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| E01 | pending | Gated / restricted tap-mana | CLOSE_NOW | 8 | 5 | yes | Metalworker, Omen Hawker, Mox Opal, Fanatic of Rhonas, Supportive Parents; extends slice 9 |
+| E01 | done | Gated / restricted tap-mana | CLOSE_NOW | 8 | 5 | yes | Metalworker, Omen Hawker, Mox Opal, Fanatic of Rhonas, Supportive Parents; extends slice 9 |
 | E02 | pending | Damage-dealt reflect | CLOSE_NOW | 17 | 9 | maybe | Spitemare-class, Coalhauler, Reckoner, Arcbond |
 | E03 | pending | Token-create ×2 | CLOSE_NOW | 5 | 3 | yes | Parallel Lives, Anointed Procession (+ Doubling Season token half) |
 | E04 | pending | Draw-trigger effects | CLOSE_NOW | 14 | 5 | maybe | Niv-Mizzet, Psychosis Crawler, Queza, … |

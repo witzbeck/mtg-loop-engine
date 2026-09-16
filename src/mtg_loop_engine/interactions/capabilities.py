@@ -31,6 +31,7 @@ from mtg_loop_engine.semantics.ir import (
     ReturnToBattlefieldEffect,
     SacrificeCost,
     TapCost,
+    TapCreatureCost,
     TriggeredAbility,
     UntapEffect,
     UntapSymbolCost,
@@ -63,6 +64,18 @@ class CardCapabilities(BaseModel):
 
     def needs_defender_count_mana_seed(self) -> bool:
         return "mana_scale_defender" in self.produces
+
+    def needs_hand_artifact_mana_seed(self) -> bool:
+        return "mana_scale_hand_artifact" in self.produces
+
+    def needs_metalcraft_seed(self) -> bool:
+        return "metalcraft" in self.requires
+
+    def needs_ferocious_seed(self) -> bool:
+        return "ferocious_power" in self.requires
+
+    def needs_tap_creature_pair_seed(self) -> bool:
+        return "tap_creature_pair" in self.requires
 
 
 def extract_capabilities(card: CardSemantics) -> CardCapabilities:
@@ -97,6 +110,10 @@ def extract_capabilities(card: CardSemantics) -> CardCapabilities:
                 caps.produces.add("dies_return")
             continue
         if isinstance(ab, ActivatedAbility):
+            if ab.requires_metalcraft:
+                caps.requires.add("metalcraft")
+            if ab.requires_controlled_power_at_least is not None:
+                caps.requires.add("ferocious_power")
             for cost in ab.costs:
                 if isinstance(cost, TapCost):
                     caps.requires.add("tap")
@@ -104,6 +121,11 @@ def extract_capabilities(card: CardSemantics) -> CardCapabilities:
                     caps.requires.add("mana")
                 elif isinstance(cost, HybridManaCost):
                     caps.requires.add("mana")
+                elif isinstance(cost, TapCreatureCost):
+                    if cost.quantity >= 2:
+                        caps.requires.add("tap_creature_pair")
+                    else:
+                        caps.requires.add("tap_creature")
                 elif isinstance(cost, SacrificeCost):
                     caps.requires.add(f"sac_{cost.selector}")
                     if cost.selector == "self":
@@ -154,6 +176,8 @@ def _effects(effects: list, caps: CardCapabilities) -> None:
                 caps.produces.add("mana_scale_elf")
             elif effect.mana_scale is ManaScaleKind.CONTROLLED_DEFENDERS:
                 caps.produces.add("mana_scale_defender")
+            elif effect.mana_scale is ManaScaleKind.HAND_ARTIFACTS:
+                caps.produces.add("mana_scale_hand_artifact")
         elif isinstance(effect, UntapEffect):
             caps.produces.add("untap")
         elif isinstance(effect, CreateTokenEffect):
