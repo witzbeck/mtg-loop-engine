@@ -42,6 +42,8 @@ from mtg_loop_engine.semantics.ir import (
     ReplacementDoubleOpponentLifeLoss,
     ReplacementDoubleDraw,
     StaticCantGainLife,
+    StaticCdaPT,
+    StaticNontokenCreaturesAreForests,
     ProliferateEffect,
     BounceControlledCost,
     GrantActivatedAbility,
@@ -474,7 +476,7 @@ class Executor:
                             or not p.is_creature
                         ):
                             continue
-                        pw = p.effective_power()
+                        pw = self._effective_power(state, p)
                         if pw is not None and pw >= ab.power_threshold:
                             units += 1
                 elif ab.scale_by == "p1p1_on_source":
@@ -820,7 +822,7 @@ class Executor:
         if isinstance(effect, AddManaEffect):
             mult = self.tap_mana_multiplier(state) if source.tapped else 1
             if effect.equal_to_source_power:
-                power = source.effective_power()
+                power = self._effective_power(state, source)
                 qty = self._effective_tap_mana_qty(
                     state, source, max(int(power or 0), 0)
                 )
@@ -928,7 +930,7 @@ class Executor:
                     for p in state.permanents.values()
                     if p.zone == Zone.BATTLEFIELD
                     and p.controller == "you"
-                    and self._is_land_permanent(p)
+                    and self._is_land_permanent(p, state)
                 ]
                 # Combo-favorable: prefer tapped lands first.
                 lands.sort(key=lambda p: (not p.tapped, p.object_id))
@@ -953,7 +955,7 @@ class Executor:
                         "untap target must be a basic land",
                     )
             if effect.target == "target_land":
-                if not self._is_land_permanent(target_perm):
+                if not self._is_land_permanent(target_perm, state):
                     return ExecError(
                         VerificationStatus.ILLEGAL_TARGET,
                         "untap target must be a land",
@@ -1253,7 +1255,7 @@ class Executor:
         if isinstance(effect, DealDamageEffect):
             qty = effect.amount
             if effect.equal_to_source_power:
-                qty = int(source.effective_power() or 0)
+                qty = int(self._effective_power(state, source) or 0)
             elif effect.equal_to_trigger_subject_power:
                 if (
                     not trigger_subject_id
@@ -1264,7 +1266,10 @@ class Executor:
                         "damage equal_to_trigger_subject_power needs subject",
                     )
                 qty = int(
-                    state.permanents[trigger_subject_id].effective_power() or 0
+                    self._effective_power(
+                        state, state.permanents[trigger_subject_id]
+                    )
+                    or 0
                 )
             elif effect.equal_to_sacrificed_power:
                 qty = int(state.last_sacrificed_power)
@@ -1371,8 +1376,11 @@ class Executor:
                         or "artifact" in self._permanent_type_set(p)
                     )
                 )
+            elif effect.amount_from_trigger and trigger_amount is not None:
+                qty = int(trigger_amount)
             draw_events = max(int(qty), 0) * self._draw_multiplier(state)
             for _ in range(draw_events):
+                state.hand_you += 1
                 state.bump("draw", 1)
                 self._queue_triggers(state, TriggerEvent.DRAW, source, amount=1)
             return None
@@ -1526,8 +1534,65 @@ class Executor:
             }
         return set()
 
-    def _is_land_permanent(self, permanent: Permanent) -> bool:
-        return "land" in self._permanent_type_set(permanent)
+    def _is_land_permanent(
+        self, permanent: Permanent, state: GameState | None = None
+    ) -> bool:
+        if "land" in self._permanent_type_set(permanent):
+            return True
+        if state is None:
+            return False
+        if (
+            permanent.controller != "you"
+            or not permanent.is_creature
+            or permanent.is_token
+            or permanent.zone != Zone.BATTLEFIELD
+        ):
+            return False
+        return self._nontoken_creatures_are_forests(state)
+
+    def _nontoken_creatures_are_forests(self, state: GameState) -> bool:
+        for perm in state.permanents.values():
+            if perm.zone != Zone.BATTLEFIELD or perm.controller != "you":
+                continue
+            card = self.semantics.get(perm.oracle_id)
+            if not card:
+                continue
+            if any(
+                isinstance(ab, StaticNontokenCreaturesAreForests)
+                for ab in card.abilities
+            ):
+                return True
+        return False
+
+    def _cda_base(self, state: GameState, kind: str) -> int:
+        if kind == "lands_you_control":
+            return sum(
+                1
+                for p in state.permanents.values()
+                if p.zone == Zone.BATTLEFIELD
+                and p.controller == "you"
+                and self._is_land_permanent(p, state)
+            )
+        if kind == "cards_in_hand":
+            return int(state.hand_you)
+        if kind == "life_you":
+            return int(state.life_you)
+        if kind == "devotion_green":
+            return _devotion(state, self.semantics, "green")
+        return 0
+
+    def _effective_power(self, state: GameState, permanent: Permanent) -> int | None:
+        card = self.semantics.get(permanent.oracle_id)
+        if card:
+            for ab in card.abilities:
+                if isinstance(ab, StaticCdaPT):
+                    base = self._cda_base(state, ab.power_from)
+                    return (
+                        base
+                        + permanent.counters.get("p1p1", 0)
+                        - permanent.counters.get("m1m1", 0)
+                    )
+        return permanent.effective_power()
 
     def _is_basic_land(self, permanent: Permanent) -> bool:
         card = self.semantics.get(permanent.oracle_id)
@@ -1614,7 +1679,7 @@ class Executor:
                     "bounce target must be green or white",
                 )
         if tgt in {"controlled_nonland", "target_nonland"}:
-            if self._is_land_permanent(bounced):
+            if self._is_land_permanent(bounced, state):
                 return ExecError(
                     VerificationStatus.ILLEGAL_TARGET,
                     "bounce target must be nonland",
@@ -1668,7 +1733,7 @@ class Executor:
                     continue
                 if ab.filter == "controlled_land" and (
                     subject.controller != "you"
-                    or not self._is_land_permanent(subject)
+                    or not self._is_land_permanent(subject, state)
                 ):
                     continue
                 if ab.filter == "controlled_artifact" and (

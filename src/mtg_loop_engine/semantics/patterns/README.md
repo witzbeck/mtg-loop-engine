@@ -99,6 +99,8 @@ graph TB;
 - `etb_other_green_put_p1p1_target` — Ivy Lane; green color filter on ETB subject.
 - `power_artifact_cost_reduction` — enchanted artifact activate −{N} (floor 1).
 - `spell_cost_reduction` — E55: spells/creature spells cost less; affinity artifacts; Temur power≥N; Animar p1p1 scale.
+- `static_cda_pt` / `nontoken_creatures_are_forests` — E56: */* CDAs; Ashaya Forests.
+- `dealt_damage_draw` — Body of Knowledge; DEALT_DAMAGE → draw that many.
 - `untap_mill_controller` — Mesmeric; UNTAP → self-mill.
 
 ## Main entry points

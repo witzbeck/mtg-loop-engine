@@ -60,6 +60,8 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
         r"Persist |"
         r"Activated abilities |"
         r"Protection |"
+        r"Encore |"
+        r"Nontoken creatures |"
         r"Put a |"
         r"Morph |"
         r"Eternalize |"
@@ -80,6 +82,8 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
         r"Activated abilities |"
         r"Whenever |When |At the beginning |"
         r"During your turn, |"
+        r"Nontoken creatures |"
+        r"Encore |"
         r"Protection "
         r")",
         re.IGNORECASE,
