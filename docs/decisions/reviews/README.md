@@ -18,7 +18,7 @@ graph TB;
 ## What belongs here
 
 - `*-review.md` matrices with dimensions, bundles, per-bundle findings, and final verdict
-- Campaign inventories that feed Proposed ADRs (e.g. [`corpus-provenance-inventory.md`](corpus-provenance-inventory.md))
+- Campaign inventories that feed Proposed ADRs / curriculum backlogs (e.g. [`corpus-provenance-inventory.md`](corpus-provenance-inventory.md), [`m5-gap-inventory.md`](m5-gap-inventory.md))
 - [`PROCESS.md`](PROCESS.md) — sole process home (workflow + agent task stubs)
 - This index README
 
