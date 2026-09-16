@@ -133,8 +133,10 @@ uv run python scripts/spellbook_absent_discovery.py
     `TriggerEvent.ATTACKS`; Traumatize / Fleet Swallower class.
 40. **E09 Aetherflux** ✓ — cast → life per `events.cast`; `PayLifeCost` → damage; compiler
     splits `Pay ` ability lines.
-41. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-42. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+41. **E10 multi land untap** ✓ — `UntapEffect.controlled_lands` + quantity (Drake/Palinchron/
+    Argothian); bounce-self; Cycling proof-irrelevant split.
+42. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+43. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 
