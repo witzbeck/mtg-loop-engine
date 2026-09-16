@@ -46,6 +46,7 @@ graph TB;
 - `cast_from_hand`: creature **or artifact** from `Zone.HAND` pays `CardSemantics.mana_cost`, or free under `FreeCastCreaturesByManaValue` (Aluren) when MV ≤ ceiling; bumps `events.cast`, sets `Permanent.was_cast`, queues `TriggerEvent.CAST`, then ETB. Artifacts are not summoning sick.
 - Intervening-if `cast` (Shard): queue/resolve ETB triggers only when `subject.was_cast` (CR 603.4 check at both times).
 - `LoseLifeEffect.half_life_rounded_up`: lose `ceil(life/2)`; following `GainLifeEffect(amount_from_trigger=True)` in the same ability uses that qty.
+- `MillEffect.half_library` (`up`/`down`): mill ⌈/⌊ half of `library_you`/`library_opponent`⌋ and shrink that counter (Traumatize / Fleet Swallower class); `TriggerEvent.ATTACKS` queues when tests/explorer declare attacks.
 - `activate_granted_tap_bounce` / `seed_grant_tap_bounce`: Instant grant `{T}`: bounce nonland (`Permanent.tap_bounce_nonland`, witness-persistent).
 - BF tapped→untapped via `_untap_permanent` queues `TriggerEvent.UNTAP` (Mesmeric Orb); self-mill bumps `events.mill` only.
 - Summoning sickness blocks `{T}` / `TapCost` even on mana abilities (CR 302.6); haste not modeled.

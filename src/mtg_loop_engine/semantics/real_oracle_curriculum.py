@@ -1077,4 +1077,49 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{2}{R}{R}",
         mana_value=4,
     ),
+    # M5 E08 — half-library mill
+    "Traumatize": RealOracleCurriculum(
+        name="Traumatize",
+        types=["Sorcery"],
+        oracle_text="Target player mills half their library, rounded down.",
+        notes="E08: half-library mill (modeled as once-per-turn activated for COMPLETE).",
+        colors=("U",),
+        mana_cost="{3}{U}{U}",
+        mana_value=5,
+    ),
+    "Fleet Swallower": RealOracleCurriculum(
+        name="Fleet Swallower",
+        types=["Creature", "Fish"],
+        oracle_text=(
+            "Whenever Fleet Swallower attacks, target player mills half their library, "
+            "rounded up."
+        ),
+        notes="E08: ATTACKS → half mill up.",
+        colors=("U",),
+        mana_cost="{5}{U}{U}",
+        mana_value=7,
+    ),
+    "Terisian Mindbreaker": RealOracleCurriculum(
+        name="Terisian Mindbreaker",
+        types=["Artifact", "Creature", "Juggernaut"],
+        oracle_text=(
+            "Whenever Terisian Mindbreaker attacks, defending player mills half their "
+            "library, rounded up."
+        ),
+        notes="E08: ATTACKS → half mill up (unearth deferred).",
+        mana_cost="{7}",
+        mana_value=7,
+    ),
+    "Lord Xander, the Collector": RealOracleCurriculum(
+        name="Lord Xander, the Collector",
+        types=["Creature", "Vampire", "Demon", "Noble"],
+        oracle_text=(
+            "Whenever Lord Xander attacks, defending player mills half their library, "
+            "rounded down."
+        ),
+        notes="E08: ATTACKS → half mill down (other clauses deferred in curriculum).",
+        colors=("U", "B", "R"),
+        mana_cost="{4}{U}{B}{R}",
+        mana_value=7,
+    ),
 }

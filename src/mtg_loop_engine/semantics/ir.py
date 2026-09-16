@@ -223,6 +223,8 @@ class MillEffect(BaseModel):
     kind: Literal["mill"] = "mill"
     amount: int = 1
     who: Literal["opponent", "you"] = "opponent"
+    # Traumatize / Fleet Swallower: mill ⌊/⌈ half library⌋ instead of fixed amount.
+    half_library: Literal[None, "up", "down"] = None
 
 
 class MoveToZoneEffect(BaseModel):

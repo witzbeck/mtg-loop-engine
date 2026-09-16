@@ -129,8 +129,10 @@ uv run python scripts/spellbook_absent_discovery.py
     `DAMAGE_OPPONENT`.
 38. **E06–E07 grants + Krenko** ✓ — `GrantActivatedAbility` (Cryptolith/Basal/Mentor); Krenko
     `{T}` X=Goblins + Intruder Alarm rediscovery.
-39. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-40. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+39. **E08 half-library mill** ✓ — `MillEffect.half_library` + synthetic `library_*` sizes;
+    `TriggerEvent.ATTACKS`; Traumatize / Fleet Swallower class.
+40. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+41. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 

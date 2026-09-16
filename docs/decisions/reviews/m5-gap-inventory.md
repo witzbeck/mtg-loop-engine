@@ -75,7 +75,7 @@ narrows mid-flight.
 
 | ID | Status | Epic | Disp | Est. cards | Sole-gap ≈ | Path-a | Primitive sketch |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| E08 | pending | Half-library mill | CLOSE_BUILD | 7 | 6 | maybe | Mill amount = ⌊/⌈ half library⌋ |
+| E08 | done | Half-library mill | CLOSE_BUILD | 7 | 6 | maybe | Mill amount = ⌊/⌈ half library⌋ |
 | E09 | pending | Aetherflux cast-life + pay-life | CLOSE_BUILD | 1 | 1 | yes | Cast-count life gain; Pay 50 → damage |
 | E10 | pending | Multi / targeted land untap | CLOSE_BUILD | 3 | 1 | yes | Untap N target lands |
 | E11 | pending | Scaled mana remainders | CLOSE_BUILD | 17 | 8 | yes | Power/toughness/land-count / entered-this-turn mana |
