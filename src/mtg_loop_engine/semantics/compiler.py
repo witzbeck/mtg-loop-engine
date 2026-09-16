@@ -26,6 +26,7 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
     _kw = (
         r"Flying|Flash|Haste|Vigilance|Trample|Lifelink|Deathtouch|Reach|Defender|"
         r"Menace|Hexproof|Shroud|Indestructible|First strike|Double strike|"
+        r"Split second(?: \([^)]+\))?|"
         r"Infect(?: \([^)]+\))?|Indestructible(?: \([^)]+\))?|Ward(?: \([^)]+\))?"
     )
     keyword_line = re.compile(
@@ -76,7 +77,7 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
     )
     # Same-line ability joins (Animar cast trigger + cost reduction).
     secondary_split = re.compile(
-        r"(?<=\.) (?="
+        r"(?:(?<=\.)|(?<=\.\))) (?="
         r"Creature spells you cast |"
         r"Spells you cast |"
         r"Activated abilities |"
@@ -84,6 +85,8 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
         r"During your turn, |"
         r"Nontoken creatures |"
         r"Encore |"
+        r"You can't |"
+        r"Until end of turn, |"
         r"Protection "
         r")",
         re.IGNORECASE,
@@ -109,7 +112,18 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
         clauses.append(buf.strip())
     out: list[str] = []
     for clause in clauses:
-        out.extend(p.strip() for p in secondary_split.split(clause) if p.strip())
+        parts = [
+            p.strip() for p in secondary_split.split(clause) if p.strip()
+        ]
+        # Keyword reminder close `.)` then Untap (Legolas); do not split
+        # mid-activated `. Untap Self` (Perpetual Apprentice).
+        refined: list[str] = []
+        reminder_untap = re.compile(r"(?<=\.\)) (?=Untap )", re.IGNORECASE)
+        for part in parts:
+            refined.extend(
+                p.strip() for p in reminder_untap.split(part) if p.strip()
+            )
+        out.extend(refined)
     return out
 
 

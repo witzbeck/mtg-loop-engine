@@ -2328,4 +2328,36 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{3}{U}{U}",
         mana_value=5,
     ),
+
+    # M5 E58 — Split second
+    "Angel's Grace": RealOracleCurriculum(
+        name="Angel's Grace",
+        types=["Instant"],
+        oracle_text=(
+            "Split second (As long as this spell is on the stack, players can't "
+            "cast spells or activate abilities that aren't mana abilities.) "
+            "You can't lose the game this turn and your opponents can't win the "
+            "game this turn. Until end of turn, damage that would reduce your "
+            "life total to less than 1 reduces it to 1 instead."
+        ),
+        notes="E58: Split second + one-shot can't-lose riders as PI.",
+        colors=("W",),
+        mana_cost="{W}",
+        mana_value=1,
+    ),
+    "Legolas's Quick Reflexes": RealOracleCurriculum(
+        name="Legolas's Quick Reflexes",
+        types=["Instant"],
+        oracle_text=(
+            "Split second (As long as this spell is on the stack, players can't "
+            "cast spells or activate abilities that aren't mana abilities.) "
+            "Untap target creature. Until end of turn, it gains reach, hexproof, "
+            'and "Whenever this creature becomes tapped, it deals damage equal '
+            'to its power to up to one target creature."'
+        ),
+        notes="E58: Split second; one-shot untap/grant PI.",
+        colors=("G",),
+        mana_cost="{G}",
+        mana_value=1,
+    ),
 }

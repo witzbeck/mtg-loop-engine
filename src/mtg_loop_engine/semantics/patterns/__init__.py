@@ -4477,6 +4477,46 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
     ):
         return _proof_irrelevant(clause)
 
+    # Split second — stack lockout not modeled in loop proofs.
+    if re.match(
+        r"^Split second(?: \([^)]+\))?\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    # Angel's Grace class — one-shot can't-lose / to-1 damage floor.
+    if re.match(
+        r"^You can't lose the game this turn and your opponents can't win "
+        r"the game this turn\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^Until end of turn, damage that would reduce your life total to less "
+        r"than 1 reduces it to 1 instead\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    # Legolas Quick Reflexes — one-shot untap + temporary grant.
+    if re.match(
+        r"^Untap target creature\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^Until end of turn, it gains .+\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
     if re.match(
         r"^Cycling (?:\{[^}]+\})+(?: \([^)]*\))?\.?$",
         clause,
