@@ -80,8 +80,9 @@ narrows mid-flight.
 | E10 | done | Multi / targeted land untap | CLOSE_BUILD | 3 | 1 | yes | Untap N target lands |
 | E11 | done | Scaled mana remainders | CLOSE_BUILD | 17 | 8 | yes | Power/toughness/land-count / entered-this-turn mana |
 | E12 | done | Cast-trigger family | CLOSE_BUILD | 33 | 15 | mixed | Parameterize CAST → effects |
-| E13 | pending | ETB-trigger remainders | CLOSE_BUILD | 141 | 58 | mixed | Split into sub-epics by effect shape |
+| E13 | pending | ETB-trigger remainders (umbrella) | CLOSE_BUILD | 141 | 58 | mixed | Split into sub-epics by effect shape |
 | E13a | done | Self-ETB power/devotion/artifact scale | CLOSE_BUILD | — | — | yes | Redcap / Fanatic / Gary / Edgar |
+| E13b | done | ETB untap / Warstorm / landfall / artifact-ETB | CLOSE_BUILD | 6 | — | yes | Blasting Station untap; Hyrax; Warstorm; Sporemound; Molten Gatekeeper; Yotian |
 | E14 | done | Dies-trigger remainders | CLOSE_BUILD | 29 | 9 | mixed | Parameterize DIES → effects |
 | E15 | pending | Attack-trigger remainders | CLOSE_BUILD | 52 | 21 | mixed | May need combat model slices |
 | E16 | done | Sac-outlet payoffs | CLOSE_BUILD | 29 | 14 | yes | Sac cost → mana/mill/damage |

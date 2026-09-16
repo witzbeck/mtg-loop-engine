@@ -76,6 +76,10 @@ graph TB;
 - `scaled_mana_remainders` — Magus/Selvala/Kydele/Alena/Arbor/Bighorner mana scales.
 - `cast_trigger_effects` — Birgi/Animar/Steam-Kin/Vivi/Forsaken CAST → effect family.
 - `self_etb_scaled` — Redcap/Fanatic/Gary/Edgar self-ETB scaled damage/life/draw.
+- `etb_untap_target` — Blasting Station may-untap-self; Hyrax untap target creature; Midnight Guard / Pestermite class.
+- `warstorm_etb_power_damage` — Warstorm Surge; ETB subject power damage.
+- `landfall_create_token` — Sporemound; controlled land ETB → token.
+- `artifact_etb_p1p1_target` — Yotian Dissident; artifact ETB → p1p1.
 - `dies_trigger_payoffs` — Plunderer/Sharpshooter/Teysa/Blood Artist/Pawn.
 - `sac_outlet_payoffs` — Bombardment/Blasting Station/Altar/Golem/Ayara.
 - `scaled_mill` — Keening / Mindcrank-scaled / Bruvac double mill.
