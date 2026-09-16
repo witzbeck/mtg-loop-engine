@@ -23,10 +23,13 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
     raw_lines = [ln.strip() for ln in text.split("\n")]
     clauses: list[str] = []
     buf = ""
-    keyword_line = re.compile(
-        r"^(Flying|Flash|Haste|Vigilance|Trample|Lifelink|Deathtouch|Reach|Defender|"
+    _kw = (
+        r"Flying|Flash|Haste|Vigilance|Trample|Lifelink|Deathtouch|Reach|Defender|"
         r"Menace|Hexproof|Shroud|Indestructible|First strike|Double strike|"
-        r"Infect(?: \([^)]+\))?|Indestructible(?: \([^)]+\))?|Ward(?: \([^)]+\))?)$",
+        r"Infect(?: \([^)]+\))?|Indestructible(?: \([^)]+\))?|Ward(?: \([^)]+\))?"
+    )
+    keyword_line = re.compile(
+        rf"^(?:{_kw})(?:, (?:{_kw}))*$",
         re.IGNORECASE,
     )
     ability_start = re.compile(
@@ -34,10 +37,13 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
         r"Whenever |When |At the beginning |If |You may cast |"
         r"Until end of turn, |"
         r"As long as |"
+        r"During your turn, |"
         r"Abilities you |"
         r"Enchantments you |"
         r"Colorless creatures |"
         r"Creatures you |"
+        r"Creature spells |"
+        r"Spells you cast |"
         r"Other |"
         r"You have |"
         r"Equipped |"
@@ -53,6 +59,7 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
         r"Cycling |Partner |"
         r"Persist |"
         r"Activated abilities |"
+        r"Protection |"
         r"Put a |"
         r"Morph |"
         r"Eternalize |"
@@ -64,6 +71,18 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
         r"Umbra armor |Warp |Annihilator |"
         # Ability words / named abilities (incl. ALL CAPS, ?, ! — Marvel style)
         r".{1,60}? — )"
+    )
+    # Same-line ability joins (Animar cast trigger + cost reduction).
+    secondary_split = re.compile(
+        r"(?<=\.) (?="
+        r"Creature spells you cast |"
+        r"Spells you cast |"
+        r"Activated abilities |"
+        r"Whenever |When |At the beginning |"
+        r"During your turn, |"
+        r"Protection "
+        r")",
+        re.IGNORECASE,
     )
     for line in raw_lines:
         if not line:
@@ -84,7 +103,10 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
             buf = f"{buf} {line}"
     if buf:
         clauses.append(buf.strip())
-    return clauses
+    out: list[str] = []
+    for clause in clauses:
+        out.extend(p.strip() for p in secondary_split.split(clause) if p.strip())
+    return out
 
 
 def compile_oracle_text(

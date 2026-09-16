@@ -1325,9 +1325,12 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         name="Animar, Soul of Elements",
         types=["Legendary", "Creature", "Elemental"],
         oracle_text=(
-            "Whenever you cast a creature spell, put a +1/+1 counter on Animar."
+            "Protection from white and from black\n"
+            "Whenever you cast a creature spell, put a +1/+1 counter on Animar. "
+            "Creature spells you cast cost {1} less to cast for each +1/+1 counter "
+            "on Animar."
         ),
-        notes="E12: cast creature → p1p1 (cost reduction deferred).",
+        notes="E12 cast→p1p1; E55 spell cost reduction scaled by p1p1; Protection PI.",
         colors=("G", "U", "R"),
         mana_cost="{U}{R}{G}",
         mana_value=3,
@@ -2226,5 +2229,41 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         notes="E68: self-ping + reflect; choose-player PI.",
         mana_cost="{5}",
         mana_value=5,
+    ),
+
+    # M5 E55 — spell / affinity cost reduction
+    "Temur Battlecrier": RealOracleCurriculum(
+        name="Temur Battlecrier",
+        types=["Creature", "Orc", "Ranger"],
+        oracle_text=(
+            "During your turn, spells you cast cost {1} less to cast for each "
+            "creature you control with power 4 or greater."
+        ),
+        notes="E55: scaled spell cost reduction (power ≥ 4).",
+        colors=("G", "U", "R"),
+        mana_cost="{1}{G}{U}{R}",
+        mana_value=4,
+    ),
+    "Sami, Wildcat Captain": RealOracleCurriculum(
+        name="Sami, Wildcat Captain",
+        types=["Legendary", "Creature", "Human", "Artificer", "Rogue"],
+        oracle_text=(
+            "Double strike, vigilance\n"
+            "Spells you cast have affinity for artifacts. "
+            "(They cost {1} less to cast for each artifact you control.)"
+        ),
+        notes="E55: spell affinity for artifacts; keyword PI.",
+        colors=("R", "W"),
+        mana_cost="{3}{R}{W}",
+        mana_value=5,
+    ),
+    "Marauding Raptor": RealOracleCurriculum(
+        name="Marauding Raptor",
+        types=["Creature", "Dinosaur"],
+        oracle_text="Creature spells you cast cost {1} less to cast.",
+        notes="E55: fixed creature-spell cost reduction (ETB payoff deferred).",
+        colors=("R",),
+        mana_cost="{1}{R}",
+        mana_value=2,
     ),
 }

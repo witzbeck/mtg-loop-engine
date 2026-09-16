@@ -1078,6 +1078,88 @@ def pat_power_artifact_cost_reduction(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_spell_cost_reduction(text: str, name: str) -> Ability | None:
+    """E55: spells / creature spells cost less (fixed or scaled)."""
+    clause = text.strip().rstrip(".")
+    # Affinity-style: Spells you cast have affinity for artifacts.
+    m = re.match(
+        r"^Spells you cast have affinity for artifacts"
+        r"\.?(?: \([^)]*\))?\.?$",
+        clause,
+        re.IGNORECASE,
+    )
+    if m:
+        return ContinuousCostReduction(
+            ability_id=_ability_id("spell-affinity-artifacts", text),
+            reduce_generic=1,
+            applies_to="spells_you_cast",
+            scale_by="artifacts_you_control",
+        )
+
+    # Temur Battlecrier: During your turn, spells cost {1} less for each power≥N creature.
+    m = re.match(
+        r"^During your turn, spells you cast cost \{(\d+)\} less to cast "
+        r"for each creature you control with power (\d+) or greater\.?$",
+        clause,
+        re.IGNORECASE,
+    )
+    if m:
+        return ContinuousCostReduction(
+            ability_id=_ability_id("spell-reduce-power-ge", text),
+            reduce_generic=int(m.group(1)),
+            applies_to="spells_you_cast",
+            scale_by="creatures_power_ge",
+            power_threshold=int(m.group(2)),
+            during_your_turn_only=True,
+        )
+
+    # Animar: Creature spells cost {1} less for each +1/+1 counter on ~.
+    short = name.split(",")[0].strip() if name else ""
+    name_alts = [re.escape(n) for n in {name, short} if n]
+    name_alt = "|".join(name_alts) if name_alts else r".+"
+    m = re.match(
+        rf"^Creature spells you cast cost \{{(\d+)\}} less to cast "
+        rf"for each \+1/\+1 counter on (?:{name_alt}|this creature|~)\.?$",
+        clause,
+        re.IGNORECASE,
+    )
+    if m:
+        return ContinuousCostReduction(
+            ability_id=_ability_id("creature-spell-reduce-p1p1", text),
+            reduce_generic=int(m.group(1)),
+            applies_to="creature_spells_you_cast",
+            scale_by="p1p1_on_source",
+        )
+
+    # Fixed: Creature spells you cast cost {N} less to cast.
+    m = re.match(
+        r"^Creature spells you cast cost \{(\d+)\} less to cast\.?$",
+        clause,
+        re.IGNORECASE,
+    )
+    if m:
+        return ContinuousCostReduction(
+            ability_id=_ability_id("creature-spell-reduce", text),
+            reduce_generic=int(m.group(1)),
+            applies_to="creature_spells_you_cast",
+        )
+
+    # Fixed: Spells you cast cost {N} less to cast.
+    m = re.match(
+        r"^Spells you cast cost \{(\d+)\} less to cast\.?$",
+        clause,
+        re.IGNORECASE,
+    )
+    if m:
+        return ContinuousCostReduction(
+            ability_id=_ability_id("spell-reduce", text),
+            reduce_generic=int(m.group(1)),
+            applies_to="spells_you_cast",
+        )
+
+    return None
+
+
 def pat_untap_mill_controller(text: str, name: str) -> Ability | None:
     """Mesmeric Orb: whenever a permanent becomes untapped, its controller mills."""
     m = re.match(
@@ -4256,6 +4338,11 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
     if words and all(word in _KEYWORD_ABILITIES for word in words):
         return _proof_irrelevant(clause)
 
+    # Comma-separated keyword lines (e.g. "Double strike, vigilance").
+    kw_parts = [p.strip().lower().rstrip(".") for p in clause.split(",") if p.strip()]
+    if len(kw_parts) >= 2 and all(p in _KEYWORD_ABILITIES for p in kw_parts):
+        return _proof_irrelevant(clause)
+
     # Keyword + reminder text (e.g. Lifelink (...)).
     kw_alt = "|".join(re.escape(k) for k in sorted(_KEYWORD_ABILITIES, key=len, reverse=True))
     if re.match(rf"^(?:{kw_alt})(?: \([^)]+\))?$", clause, re.IGNORECASE):
@@ -4554,6 +4641,16 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
     ):
         return _proof_irrelevant(clause)
 
+    # Protection from color(s) — not modeled in loop proofs.
+    if re.match(
+        r"^Protection from (?:white|blue|black|red|green|colorless)"
+        r"(?: and from (?:white|blue|black|red|green|colorless))*"
+        r"(?: \([^)]*\))?\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
     if re.match(
         r"^Indestructible\.?(?: \([^)]*\))?$",
         clause,
@@ -4734,6 +4831,7 @@ PATTERNS: list[Pattern] = [
     Pattern("cost_reduction", pat_cost_reduction),
     Pattern("zirda_cost_reduction", pat_zirda_cost_reduction),
     Pattern("power_artifact_cost_reduction", pat_power_artifact_cost_reduction),
+    Pattern("spell_cost_reduction", pat_spell_cost_reduction),
     Pattern("untap_mill_controller", pat_untap_mill_controller),
     Pattern("cant_block_this_turn", pat_cant_block_this_turn),
     Pattern("put_m1m1_untap_self", pat_put_m1m1_untap_self),

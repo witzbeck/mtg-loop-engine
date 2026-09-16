@@ -96,11 +96,11 @@ narrows mid-flight.
 | E22a | done | Eldrazi tokens + double-token siblings | CLOSE_BUILD | 5 | 3 | maybe | Brood/Hatcher/Spawnsire; Exalted; Ajani's Chosen |
 | E22b | done | Combat damage → Treasures | CLOSE_BUILD | 3 | 2 | maybe | Old Gnawbone / Hireling / Smaug |
 | E50 | done | Life replacement | CLOSE_BUILD | 7 | — | mixed | Twice life loss/gain; can’t-gain; Archive draw |
-| E51 | pending | Mill replacement | CLOSE_BUILD | 1 | — | maybe | Mill twice |
+| E51 | done | Mill replacement | CLOSE_BUILD | 1 | — | maybe | Covered by E17 Bruvac `ReplacementDoubleMill` |
 | E52 | done | Counter-put triggers | CLOSE_BUILD | 7 | — | maybe | All Will Be One; Flourishing Defenses |
 | E53 | done | Adapt / levelers | CLOSE_BUILD | 5 | — | mixed | Adapt N; Broodscale/Biomancer payoffs |
 | E54 | pending | Impulse / top-deck | CLOSE_BUILD | 8 | — | mixed | Reveal/exile top |
-| E55 | pending | Cost reduction / affinity | CLOSE_BUILD | 11 | — | mixed | Affinity; costs less |
+| E55 | done | Cost reduction / affinity | CLOSE_BUILD | 11 | — | mixed | Spell/affinity reduce; Animar/Sami/Temur/Raptor |
 | E56 | pending | P/T set equal to | CLOSE_BUILD | 5 | — | mixed | */* from lands/hand |
 | E57 | done | Indestructible grants | CLOSE_BUILD | 3 | — | mixed | Static/equipment grants as PI |
 | E58 | pending | Split second | CLOSE_BUILD | 2 | — | low | Stack lockout |
