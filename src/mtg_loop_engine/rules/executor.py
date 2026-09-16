@@ -641,6 +641,26 @@ class Executor:
                 if n:
                     state.bump("untap", n)
                 return None
+            if effect.target == "controlled_lands":
+                lands = [
+                    p
+                    for p in state.permanents.values()
+                    if p.zone == Zone.BATTLEFIELD
+                    and p.controller == "you"
+                    and self._is_land_permanent(p)
+                ]
+                # Combo-favorable: prefer tapped lands first.
+                lands.sort(key=lambda p: (not p.tapped, p.object_id))
+                limit = effect.quantity if effect.quantity is not None else len(lands)
+                n = 0
+                for perm in lands[: max(limit, 0)]:
+                    was_tapped = perm.tapped
+                    self._untap_permanent(state, perm)
+                    if was_tapped:
+                        n += 1
+                if n:
+                    state.bump("untap", n)
+                return None
             tid = source.object_id if effect.target == "self" else target_id
             if not tid or tid not in state.permanents:
                 return ExecError(VerificationStatus.ILLEGAL_TARGET, "untap target missing")
@@ -650,6 +670,12 @@ class Executor:
                     return ExecError(
                         VerificationStatus.ILLEGAL_TARGET,
                         "untap target must be a basic land",
+                    )
+            if effect.target == "target_land":
+                if not self._is_land_permanent(target_perm):
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_TARGET,
+                        "untap target must be a land",
                     )
             self._untap_permanent(state, target_perm)
             state.bump("untap")

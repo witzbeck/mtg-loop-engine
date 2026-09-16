@@ -147,9 +147,16 @@ class AddManaEffect(BaseModel):
 
 class UntapEffect(BaseModel):
     kind: Literal["untap"] = "untap"
-    target: Literal["self", "target_permanent", "target_basic_land", "all_creatures"] = (
-        "self"
-    )
+    target: Literal[
+        "self",
+        "target_permanent",
+        "target_basic_land",
+        "target_land",
+        "controlled_lands",
+        "all_creatures",
+    ] = ("self")
+    # Peregrine Drake / Argothian Elder: untap up to N lands (None = all controlled lands).
+    quantity: int | None = None
 
 
 class TapEffect(BaseModel):

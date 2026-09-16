@@ -2043,6 +2043,106 @@ def pat_cast_from_gy_if_zombie(text: str, name: str) -> Ability | None:
 
 
 
+
+def _parse_count_word(raw: str) -> int | None:
+    raw = (raw or "").strip().lower()
+    if raw.isdigit():
+        return int(raw)
+    return {
+        "one": 1,
+        "two": 2,
+        "three": 3,
+        "four": 4,
+        "five": 5,
+        "six": 6,
+        "seven": 7,
+    }.get(raw)
+
+
+def pat_etb_untap_up_to_lands(text: str, name: str) -> Ability | None:
+    """Palinchron / Peregrine Drake / Cloud of Faeries: ETB untap up to N lands."""
+    cleaned = _strip_ability_word(text)
+    short = name.split(",")[0].strip()
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^When (?:{name_alt}) enters(?: the battlefield)?, "
+        rf"untap up to (\d+|one|two|three|four|five|six|seven) lands?\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    qty = _parse_count_word(m.group(1))
+    if qty is None:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("etb-untap-lands", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="self",
+        effects=[UntapEffect(target="controlled_lands", quantity=qty)],
+    )
+
+
+def pat_tap_untap_n_lands(text: str, name: str) -> Ability | None:
+    """Argothian Elder / Ley Weaver: {T}: Untap two target lands."""
+    m = re.match(
+        r"^\{T\}: Untap (?:up to )?(\d+|one|two|three|four|five|six|seven) target lands?\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    qty = _parse_count_word(m.group(1))
+    if qty is None:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("tap-untap-lands", text),
+        costs=[TapCost()],
+        effects=[UntapEffect(target="controlled_lands", quantity=qty)],
+        uses_stack=False,
+        is_mana_ability=False,
+    )
+
+
+def pat_tap_untap_target_land(text: str, name: str) -> Ability | None:
+    """Krosan Restorer: {T}: Untap target land."""
+    m = re.match(r"^\{T\}: Untap target land\.?$", text, re.IGNORECASE)
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("tap-untap-land", text),
+        costs=[TapCost()],
+        effects=[UntapEffect(target="controlled_lands", quantity=1)],
+        uses_stack=False,
+        is_mana_ability=False,
+    )
+
+
+def pat_bounce_self_activated(text: str, name: str) -> Ability | None:
+    """Palinchron: paid return self to hand."""
+    short = name.split(",")[0].strip()
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^(\{{[^}}]+\}}(?:\{{[^}}]+\}})*): Return (?:{name_alt}) to (?:its|their) owner's hand\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    amount = _parse_mana_braces(m.group(1))
+    return ActivatedAbility(
+        ability_id=_ability_id("bounce-self", text),
+        costs=[ManaCost(amount=amount)],
+        effects=[MoveToZoneEffect(zone=Zone.HAND, target="self")],
+        uses_stack=True,
+        is_mana_ability=False,
+    )
+
+
 def pat_cast_gain_life_per_spell(text: str, name: str) -> Ability | None:
     """Aetherflux: cast → gain 1 life per spell cast this turn."""
     cleaned = _strip_ability_word(text)
@@ -2457,6 +2557,13 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
         return _proof_irrelevant(clause)
 
     if re.match(
+        r"^Cycling (?:\{[^}]+\})+(?: \([^)]*\))?\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
         r"^Devoid(?: \([^)]+\))?$",
         clause,
         re.IGNORECASE,
@@ -2633,6 +2740,10 @@ PATTERNS: list[Pattern] = [
     Pattern("mana_create_token", pat_mana_create_token),
     Pattern("hybrid_remove_m1m1_pump", pat_hybrid_remove_m1m1_pump),
     Pattern("tap_two_creatures_add_mana", pat_tap_two_creatures_add_mana),
+    Pattern("etb_untap_up_to_lands", pat_etb_untap_up_to_lands),
+    Pattern("tap_untap_n_lands", pat_tap_untap_n_lands),
+    Pattern("tap_untap_target_land", pat_tap_untap_target_land),
+    Pattern("bounce_self_activated", pat_bounce_self_activated),
     Pattern("cast_gain_life_per_spell", pat_cast_gain_life_per_spell),
     Pattern("pay_life_damage", pat_pay_life_damage),
     Pattern("attacks_half_mill", pat_attacks_half_mill),

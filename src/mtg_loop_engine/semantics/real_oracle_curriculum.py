@@ -1134,4 +1134,58 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{4}",
         mana_value=4,
     ),
+    # M5 E10 — multi / targeted land untap
+    "Palinchron": RealOracleCurriculum(
+        name="Palinchron",
+        types=["Creature", "Illusion"],
+        oracle_text=(
+            "Flying\n"
+            "When Palinchron enters the battlefield, untap up to seven lands.\n"
+            "{2}{U}{U}: Return Palinchron to its owner's hand."
+        ),
+        notes="E10: ETB untap up to 7 lands + bounce self.",
+        colors=("U",),
+        mana_cost="{5}{U}{U}",
+        mana_value=7,
+    ),
+    "Peregrine Drake": RealOracleCurriculum(
+        name="Peregrine Drake",
+        types=["Creature", "Drake"],
+        oracle_text="When this creature enters, untap up to five lands.",
+        notes="E10: ETB untap up to 5 lands.",
+        colors=("U",),
+        mana_cost="{4}{U}",
+        mana_value=5,
+    ),
+    "Cloud of Faeries": RealOracleCurriculum(
+        name="Cloud of Faeries",
+        types=["Creature", "Faerie"],
+        oracle_text=(
+            "Flying\n"
+            "When this creature enters, untap up to two lands.\n"
+            "Cycling {2} ({2}, Discard this card: Draw a card.)"
+        ),
+        notes="E10: ETB untap up to 2; cycling proof-irrelevant.",
+        colors=("U",),
+        mana_cost="{1}{U}",
+        mana_value=2,
+    ),
+    "Argothian Elder": RealOracleCurriculum(
+        name="Argothian Elder",
+        types=["Creature", "Elf", "Druid"],
+        oracle_text="{T}: Untap two target lands.",
+        notes="E10: tap untap two lands.",
+        colors=("G",),
+        mana_cost="{3}{G}",
+        mana_value=4,
+    ),
+    "Ley Weaver": RealOracleCurriculum(
+        name="Ley Weaver",
+        types=["Creature", "Human", "Druid"],
+        oracle_text="{T}: Untap two target lands.",
+        notes="E10: tap untap two lands (Partner ignored in curriculum).",
+        colors=("G",),
+        mana_cost="{3}{G}",
+        mana_value=4,
+    ),
 }
