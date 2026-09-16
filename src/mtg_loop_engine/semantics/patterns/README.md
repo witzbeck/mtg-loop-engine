@@ -87,6 +87,7 @@ graph TB;
 - `replacement_double_tokens` / `replacement_double_counters` — Parallel Lives / Doubling Season / Primal Vigor / Exalted Sunborn.
 - `replacement_double_life_gain` / `replacement_double_opponent_life_loss` / `replacement_double_draw` / `static_cant_gain_life` — Archive / Bloodletter / Torment.
 - `proliferate_activated` — Viral Drake paid Proliferate.
+- `discard_untap_target` / `discard_add_mana` / `discard_draw` / `discard_trigger_damage` — Mind Over Matter / Skirge / Glint-Horn.
 - `etb_create_eldrazi_tokens` / `mana_create_eldrazi_tokens` — Brood Monitor / Hatcher / Spawnsire.
 - `enchantment_etb_create_cat` — Ajani's Chosen.
 - `proliferate_activated` — Viral Drake paid Proliferate.

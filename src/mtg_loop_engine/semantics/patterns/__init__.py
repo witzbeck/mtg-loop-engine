@@ -28,6 +28,7 @@ from mtg_loop_engine.semantics.ir import (
     ManaCost,
     PayLifeCost,
     BounceControlledCost,
+    DiscardCost,
     MillEffect,
     MoveToZoneEffect,
     ProliferateEffect,
@@ -536,6 +537,86 @@ def pat_untap_target_artifact(text: str, name: str) -> Ability | None:
         ability_id=_ability_id("untap-artifact", text),
         costs=[ManaCost(amount=_parse_mana_braces(m.group(1)))],
         effects=[UntapEffect(target="target_artifact")],
+    )
+
+
+def pat_discard_untap_target(text: str, name: str) -> Ability | None:
+    """Mind Over Matter: Discard a card: may tap or untap target permanent."""
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
+    m = re.match(
+        r"^Discard a card: You may tap or untap target "
+        r"(?:artifact, creature, or land|permanent)\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("discard-untap", text),
+        costs=[DiscardCost()],
+        effects=[UntapEffect(target="target_permanent")],
+    )
+
+
+def pat_discard_add_mana(text: str, name: str) -> Ability | None:
+    """Skirge Familiar: Discard a card: Add {B} (or other single brace)."""
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
+    m = re.match(
+        r"^Discard a card: Add ((?:\{[^}]+\})+)\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("discard-mana", text),
+        costs=[DiscardCost()],
+        effects=[AddManaEffect(amount=_parse_mana_braces(m.group(1)))],
+    )
+
+
+def pat_discard_trigger_damage(text: str, name: str) -> Ability | None:
+    """Glint-Horn: Whenever you discard a card, deal N to each/target opponent."""
+    cleaned = _strip_ability_word(text)
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", cleaned).strip()
+    short = name.split(",")[0].strip()
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^Whenever you discard a card, (?:{name_alt}) deals (\d+) damage to "
+        rf"(?:each|target) opponent\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("discard-damage", text),
+        event=TriggerEvent.DISCARD,
+        filter="any",
+        effects=[DealDamageEffect(amount=int(m.group(1)), target="opponent")],
+    )
+
+
+def pat_discard_draw(text: str, name: str) -> Ability | None:
+    """Glint-Horn: mana + discard → draw (attacking restriction ignored for combo)."""
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
+    m = re.match(
+        r"^((?:\{[^}]+\})+), Discard a card: Draw a card"
+        r"(?:\. Activate only if this creature is attacking)?\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("discard-draw", text),
+        costs=[
+            ManaCost(amount=_parse_mana_braces(m.group(1))),
+            DiscardCost(),
+        ],
+        effects=[DrawEffect(amount=1)],
     )
 
 
@@ -4237,6 +4318,10 @@ PATTERNS: list[Pattern] = [
     Pattern("tap_each_player_draw", pat_tap_each_player_draw),
     Pattern("untap_target_artifact", pat_untap_target_artifact),
     Pattern("etb_untap_artifact_or_creature", pat_etb_untap_artifact_or_creature),
+    Pattern("discard_untap_target", pat_discard_untap_target),
+    Pattern("discard_add_mana", pat_discard_add_mana),
+    Pattern("discard_trigger_damage", pat_discard_trigger_damage),
+    Pattern("discard_draw", pat_discard_draw),
     Pattern("tap_artifacts_untap_artifact", pat_tap_artifacts_untap_artifact),
     Pattern("mana_untap_self", pat_mana_untap_self),
     Pattern("cost_reduction", pat_cost_reduction),

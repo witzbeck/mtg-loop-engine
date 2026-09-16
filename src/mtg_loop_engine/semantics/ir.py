@@ -119,6 +119,13 @@ class PayLifeCost(BaseModel):
     amount: int
 
 
+class DiscardCost(BaseModel):
+    """Discard a card from hand (Mind Over Matter / Skirge Familiar)."""
+
+    kind: Literal["discard"] = "discard"
+    quantity: int = 1
+
+
 class BounceControlledCost(BaseModel):
     """Return a controlled permanent to hand as a cost (Quirion / Wirewood / Meloku)."""
 
@@ -139,6 +146,7 @@ Cost = Annotated[
     | TapCreatureCost
     | TapArtifactCost
     | PayLifeCost
+    | DiscardCost
     | BounceControlledCost,
     Field(discriminator="kind"),
 ]

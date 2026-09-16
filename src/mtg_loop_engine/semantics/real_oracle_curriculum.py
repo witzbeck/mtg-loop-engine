@@ -2019,4 +2019,38 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{2}{B/R}",
         mana_value=3,
     ),
+
+    "Mind Over Matter": RealOracleCurriculum(
+        name="Mind Over Matter",
+        types=["Enchantment"],
+        oracle_text=(
+            "Discard a card: You may tap or untap target artifact, creature, or land."
+        ),
+        notes="E62: DiscardCost → untap target.",
+        colors=("U",),
+        mana_cost="{2}{U}{U}{U}{U}",
+        mana_value=6,
+    ),
+    "Skirge Familiar": RealOracleCurriculum(
+        name="Skirge Familiar",
+        types=["Creature", "Phyrexian", "Imp"],
+        oracle_text="Flying\nDiscard a card: Add {B}.",
+        notes="E62: DiscardCost → {B}; Flying PI.",
+        colors=("B",),
+        mana_cost="{4}{B}",
+        mana_value=5,
+    ),
+    "Glint-Horn Buccaneer": RealOracleCurriculum(
+        name="Glint-Horn Buccaneer",
+        types=["Creature", "Minotaur", "Pirate"],
+        oracle_text=(
+            "Haste\n"
+            "Whenever you discard a card, this creature deals 1 damage to each opponent.\n"
+            "{1}{R}, Discard a card: Draw a card. Activate only if this creature is attacking."
+        ),
+        notes="E62: discard → damage; discard+mana → draw.",
+        colors=("R",),
+        mana_cost="{2}{R}{R}",
+        mana_value=4,
+    ),
 }

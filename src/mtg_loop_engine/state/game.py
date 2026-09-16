@@ -93,6 +93,8 @@ class GameState:
     library_you: int = 60
     library_opponent: int = 60
     graveyard_opponent: int = 0
+    # Abstract hand size for DiscardCost outlets (Mind Over Matter class).
+    hand_you: int = 7
     life_you: int = 40
     life_opponent: int = 40
     event_counters: dict[str, int] = field(default_factory=dict)
@@ -140,6 +142,7 @@ class GameState:
             library_you=self.library_you,
             library_opponent=self.library_opponent,
             graveyard_opponent=self.graveyard_opponent,
+            hand_you=self.hand_you,
             life_you=self.life_you,
             life_opponent=self.life_opponent,
             event_counters=dict(self.event_counters),
