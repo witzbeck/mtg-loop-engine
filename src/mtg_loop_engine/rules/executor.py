@@ -13,6 +13,7 @@ from mtg_loop_engine.semantics.ir import (
     AddCounterEffect,
     AddManaEffect,
     AdditionalCombatEffect,
+    GetEnergyEffect,
     CardSemantics,
     ContinuousCostReduction,
     CopyPendingTriggerEffect,
@@ -33,6 +34,7 @@ from mtg_loop_engine.semantics.ir import (
     ManaCost,
     PayLifeCost,
     DiscardCost,
+    EnergyCost,
     MillEffect,
     MoveToZoneEffect,
     ProofIrrelevantStatic,
@@ -1345,6 +1347,21 @@ class Executor:
             state.bump("extra_combat")
             return None
 
+        if isinstance(effect, GetEnergyEffect):
+            qty = effect.amount
+            if effect.equal_to_controlled_creatures:
+                qty = sum(
+                    1
+                    for p in state.permanents.values()
+                    if p.zone == Zone.BATTLEFIELD
+                    and p.controller == "you"
+                    and p.is_creature
+                )
+            if qty > 0:
+                state.energy_you += qty
+                state.bump("energy", qty)
+            return None
+
         if isinstance(effect, DealDamageEffect):
             qty = effect.amount
             if effect.equal_to_source_power:
@@ -2508,6 +2525,14 @@ class Executor:
                     )
                 state.life_you -= cost.amount
                 state.bump("life_loss", cost.amount)
+            elif isinstance(cost, EnergyCost):
+                need = max(int(cost.amount), 1)
+                if state.energy_you < need:
+                    return ExecError(
+                        VerificationStatus.RESOURCE_DEFICIT, "insufficient energy"
+                    )
+                state.energy_you -= need
+                state.bump("energy_paid", need)
             elif isinstance(cost, DiscardCost):
                 qty = max(int(cost.quantity), 1)
                 if state.hand_you < qty:

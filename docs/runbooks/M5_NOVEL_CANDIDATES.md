@@ -176,8 +176,9 @@ uv run python scripts/spellbook_absent_discovery.py
 74. **E33a Isochron / spell copy** ✓ — Dramatic Reversal; Isochron imprint+cast; Dualcaster/Twincast last-cast copy.
 75. **E74 fight / enrage** ✓ — Polyraptor copy-token; Brash Taunter fight; Apex ETB fight.
 76. **E35 extra combat** ✓ — Aggravated Assault; Bloodthirster; Moraug landfall.
-77. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-78. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+77. **E38 energy** ✓ — Basker/Runner/Stone Idol `{E}` get/pay.
+78. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+79. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 

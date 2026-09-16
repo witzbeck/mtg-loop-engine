@@ -141,7 +141,7 @@ time (effect-shape slices) while keeping this parent ID as the inventory umbrell
 | E35 | done | Extra combat | CLOSE_BUILD | 3 | 2 | maybe | Aggravated Assault; Bloodthirster; Moraug |
 | E36 | pending | Extra turn | CLOSE_BUILD | 12 | 6 | low | Take an extra turn |
 | E37 | pending | Planeswalker loyalty | CLOSE_BUILD | 17 | 16 | mixed | +/−/0 loyalty abilities |
-| E38 | pending | Energy | CLOSE_BUILD | 6 | 3 | mixed | {E} counters |
+| E38 | done | Energy | CLOSE_BUILD | 3 | 3 | mixed | {E} get/pay; Basker/Runner/Stone Idol |
 | E39 | pending | Dice tables | CLOSE_BUILD | 3 | 3 | low | d20 outcomes |
 | E40 | pending | Modal choose-one | CLOSE_BUILD | 12 | 11 | mixed | Choose one modes |
 | E41 | pending | Saga lore | CLOSE_BUILD | 6 | 0 | mixed | Lore counters; chapters |
