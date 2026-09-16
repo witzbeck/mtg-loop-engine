@@ -1436,6 +1436,11 @@ class Executor:
                     not subject.is_creature or subject.controller != "you"
                 ):
                     continue
+                if ab.filter == "controlled_enchantment":
+                    if subject.controller != "you":
+                        continue
+                    if "enchantment" not in self._permanent_type_set(subject):
+                        continue
                 if ab.filter == "controlled_nonartifact":
                     if subject.controller != "you" or self._is_artifact_permanent(
                         subject

@@ -80,7 +80,9 @@ graph TB;
 - `sac_outlet_payoffs` — Bombardment/Blasting Station/Altar/Golem/Ayara.
 - `scaled_mill` — Keening / Mindcrank-scaled / Bruvac double mill.
 - `etb_return_from_gy_to_hand` / `gy_to_hand_activated` / `dies_to_hand` — Witness/Salvagers/Renewal.
-- `replacement_double_tokens` / `replacement_double_counters` — Parallel Lives / Doubling Season / Primal Vigor.
+- `replacement_double_tokens` / `replacement_double_counters` — Parallel Lives / Doubling Season / Primal Vigor / Exalted Sunborn.
+- `etb_create_eldrazi_tokens` / `mana_create_eldrazi_tokens` — Brood Monitor / Hatcher / Spawnsire.
+- `enchantment_etb_create_cat` — Ajani's Chosen.
 - `proliferate_activated` — Viral Drake paid Proliferate.
 - `etb_or_attacks_create_token` — Squirrel Girl; ETB create (attacks not modeled).
 - `mana_create_tokens_equal_subtype` — Squirrel Girl; `{cost}: Create X` equal to controlled subtype count.

@@ -147,8 +147,10 @@ uv run python scripts/spellbook_absent_discovery.py
 48. **E18 GY→hand** ✓ — Witness/Archaeomancer/Salvagers/Renewal; `ReturnFromGraveyardToHandEffect`.
 49. **E19–E21 bounce/counters/proliferate** ✓ — bounce-as-cost (Quirion/Wirewood/Meloku),
     `ReplacementDoubleCounters` (Doubling Season / Primal Vigor), `ProliferateEffect` (Viral Drake).
-50. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-51. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+50. **E22a Eldrazi tokens + Exalted/Chosen** ✓ — Spawn/Scion creates; Exalted double-tokens wording;
+    Ajani's Chosen enchantment-ETB Cat.
+51. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+52. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 

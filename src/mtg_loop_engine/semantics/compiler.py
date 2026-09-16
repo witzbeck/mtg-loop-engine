@@ -50,7 +50,7 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
         r"Cascade |Convoke |Delve |"
         r"Flying |Flash |Haste |Vigilance |Trample |Lifelink |Deathtouch |Reach |"
         r"Defender |Menace |Hexproof |Shroud |First strike |Double strike |Infect |"
-        r"Umbra armor |"
+        r"Umbra armor |Warp |Annihilator |"
         # Ability words / named abilities (incl. ALL CAPS, ?, ! — Marvel style)
         r".{1,60}? — )"
     )

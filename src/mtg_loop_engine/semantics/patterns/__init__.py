@@ -3110,10 +3110,108 @@ def pat_replacement_double_tokens(text: str, name: str) -> Ability | None:
             re.IGNORECASE,
         )
     if not m:
+        m = re.match(
+            r"^If one or more tokens would be created under your control, "
+            r"twice that many of those tokens are created instead\.?$",
+            text,
+            re.IGNORECASE,
+        )
+    if not m:
         return None
     return ReplacementDoubleTokens(
         ability_id=_ability_id("double-tokens", text),
         multiplier=2,
+    )
+
+
+def pat_etb_create_eldrazi_tokens(text: str, name: str) -> Ability | None:
+    """Brood Monitor / Emrakul's Hatcher: ETB create N Eldrazi Spawn/Scion."""
+    m = re.match(
+        r"^When (?:this creature|~|"
+        + re.escape(name)
+        + r") enters(?: the battlefield)?, create "
+        r"(one|two|three|\d+) "
+        r"(\d+)/(\d+) colorless Eldrazi (Spawn|Scion) creature tokens?\.?"
+        r"(?: They have \"[^\"]+\"\.?)?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    qty = _parse_count_word(m.group(1))
+    if qty is None:
+        return None
+    kind = m.group(4).title()
+    return TriggeredAbility(
+        ability_id=_ability_id("etb-eldrazi-tokens", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="self",
+        effects=[
+            CreateTokenEffect(
+                name=f"Eldrazi {kind}",
+                power=int(m.group(2)),
+                toughness=int(m.group(3)),
+                quantity=qty,
+                is_creature=True,
+            )
+        ],
+    )
+
+
+def pat_mana_create_eldrazi_tokens(text: str, name: str) -> Ability | None:
+    """Spawnsire: {N}: create two Eldrazi Spawn."""
+    m = re.match(
+        r"^\{(\d+)\}: Create (one|two|three|\d+) "
+        r"(\d+)/(\d+) colorless Eldrazi (Spawn|Scion) creature tokens?\.?"
+        r"(?: They have \"[^\"]+\"\.?)?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    qty = _parse_count_word(m.group(2))
+    if qty is None:
+        return None
+    kind = m.group(5).title()
+    return ActivatedAbility(
+        ability_id=_ability_id("mana-eldrazi-tokens", text),
+        costs=[ManaCost(amount=ManaAmount(generic=int(m.group(1))))],
+        effects=[
+            CreateTokenEffect(
+                name=f"Eldrazi {kind}",
+                power=int(m.group(3)),
+                toughness=int(m.group(4)),
+                quantity=qty,
+                is_creature=True,
+            )
+        ],
+    )
+
+
+def pat_enchantment_etb_create_cat(text: str, name: str) -> Ability | None:
+    """Ajani's Chosen: enchantment ETB → 2/2 Cat (Aura attach rider ignored)."""
+    m = re.match(
+        r"^Whenever an enchantment you control enters(?: the battlefield)?, "
+        r"create a (\d+)/(\d+) white Cat creature token\.?"
+        r"(?: If that enchantment is an Aura,.*)?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("enchantment-etb-cat", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="controlled_enchantment",
+        effects=[
+            CreateTokenEffect(
+                name="Cat",
+                power=int(m.group(1)),
+                toughness=int(m.group(2)),
+                quantity=1,
+                is_creature=True,
+            )
+        ],
     )
 
 
@@ -3373,6 +3471,28 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
         return _proof_irrelevant(clause)
 
     if re.match(
+        r"^Warp (?:\{[^}]+\})+(?: \([^)]*\))?\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^Annihilator \d+(?: \([^)]*\))?\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^Cast any number of Eldrazi spells from among cards you own outside the game"
+        r"(?: without paying their mana costs)?\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
         r"^This land enters(?: the battlefield)? tapped\.?$",
         clause,
         re.IGNORECASE,
@@ -3565,6 +3685,9 @@ PATTERNS: list[Pattern] = [
     Pattern("dealt_damage_reflect", pat_dealt_damage_reflect),
     Pattern("dealt_damage_gain_life", pat_dealt_damage_gain_life),
     Pattern("replacement_double_tokens", pat_replacement_double_tokens),
+    Pattern("etb_create_eldrazi_tokens", pat_etb_create_eldrazi_tokens),
+    Pattern("mana_create_eldrazi_tokens", pat_mana_create_eldrazi_tokens),
+    Pattern("enchantment_etb_create_cat", pat_enchantment_etb_create_cat),
     Pattern("replacement_double_counters", pat_replacement_double_counters),
     Pattern("proliferate_activated", pat_proliferate_activated),
     Pattern("bounce_cost_untap_creature", pat_bounce_cost_untap_creature),
