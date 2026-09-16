@@ -1122,4 +1122,16 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{4}{U}{B}{R}",
         mana_value=7,
     ),
+    # M5 E09 — Aetherflux cast-life + pay-life (sole-gap singleton family)
+    "Aetherflux Reservoir": RealOracleCurriculum(
+        name="Aetherflux Reservoir",
+        types=["Artifact"],
+        oracle_text=(
+            "Whenever you cast a spell, you gain 1 life for each spell you've cast this turn.\n"
+            "Pay 50 life: This Artifact deals 50 damage to any target."
+        ),
+        notes="E09: sole Spellbook sole-gap; cast-count life + PayLifeCost damage.",
+        mana_cost="{4}",
+        mana_value=4,
+    ),
 }

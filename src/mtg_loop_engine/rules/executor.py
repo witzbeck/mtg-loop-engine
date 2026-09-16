@@ -25,6 +25,7 @@ from mtg_loop_engine.semantics.ir import (
     LoseLifeEffect,
     ManaAmount,
     ManaCost,
+    PayLifeCost,
     MillEffect,
     MoveToZoneEffect,
     ProofIrrelevantStatic,
@@ -899,11 +900,14 @@ class Executor:
             return None
 
         if isinstance(effect, GainLifeEffect):
-            qty = (
-                trigger_amount
-                if effect.amount_from_trigger and trigger_amount is not None
-                else effect.amount
-            )
+            if effect.equal_to_spells_cast_this_turn:
+                qty = int(state.event_counters.get("cast", 0))
+            else:
+                qty = (
+                    trigger_amount
+                    if effect.amount_from_trigger and trigger_amount is not None
+                    else effect.amount
+                )
             if qty is None or qty <= 0:
                 return ExecError(VerificationStatus.ILLEGAL_ACTION, "gain life amount")
             state.life_you += qty
@@ -1608,6 +1612,17 @@ class Executor:
                 self._untap_permanent(state, untap_perm)
                 if not cost.source_self:
                     step = step.model_copy(update={"target": None})
+            elif isinstance(cost, PayLifeCost):
+                if cost.amount <= 0:
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_ACTION, "pay life amount"
+                    )
+                if state.life_you < cost.amount:
+                    return ExecError(
+                        VerificationStatus.RESOURCE_DEFICIT, "insufficient life"
+                    )
+                state.life_you -= cost.amount
+                state.bump("life_loss", cost.amount)
             elif isinstance(cost, SacrificeCost):
                 if cost.selector == "self":
                     if not self.matches_sacrifice_selector(perm, "self"):

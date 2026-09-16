@@ -131,8 +131,10 @@ uv run python scripts/spellbook_absent_discovery.py
     `{T}` X=Goblins + Intruder Alarm rediscovery.
 39. **E08 half-library mill** ✓ — `MillEffect.half_library` + synthetic `library_*` sizes;
     `TriggerEvent.ATTACKS`; Traumatize / Fleet Swallower class.
-40. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-41. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+40. **E09 Aetherflux** ✓ — cast → life per `events.cast`; `PayLifeCost` → damage; compiler
+    splits `Pay ` ability lines.
+41. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+42. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 
