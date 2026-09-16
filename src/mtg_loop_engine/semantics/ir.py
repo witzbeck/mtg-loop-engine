@@ -173,6 +173,7 @@ class UntapEffect(BaseModel):
     target: Literal[
         "self",
         "target_permanent",
+        "target_creature",
         "trigger_subject",
         "target_basic_land",
         "target_land",
@@ -253,6 +254,8 @@ class DealDamageEffect(BaseModel):
     amount_from_trigger: bool = False
     # Murderous Redcap: damage = source effective power.
     equal_to_source_power: bool = False
+    # Warstorm Surge: ETB creature ("it") deals damage equal to its power.
+    equal_to_trigger_subject_power: bool = False
     # Fanatic of Mogis: damage = devotion to a color.
     equal_to_devotion: Literal[None, "white", "blue", "black", "red", "green"] = None
     equal_to_sacrificed_power: bool = False
@@ -397,6 +400,8 @@ class TriggeredAbility(BaseModel):
         "token_creature",
         "self",
         "controlled_creature",
+        "controlled_land",
+        "controlled_artifact",
         "controlled_enchantment",
         "controlled_nonartifact",
         "other_controlled_creature",

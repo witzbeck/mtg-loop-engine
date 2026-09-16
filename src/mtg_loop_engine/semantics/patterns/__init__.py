@@ -803,6 +803,38 @@ def pat_etb_untap_target(text: str, name: str) -> Ability | None:
             filter="self",
             effects=[UntapEffect(target="target_permanent")],
         )
+    # Hyrax Tower Scout: When this creature enters, untap target creature.
+    m_hyrax = re.match(
+        r"^When (?:this creature|~|"
+        + re.escape(name)
+        + r") enters(?: the battlefield)?, "
+        r"untap target creature\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if m_hyrax:
+        return TriggeredAbility(
+            ability_id=_ability_id("etb-untap-target-creature", text),
+            event=TriggerEvent.ENTER_BATTLEFIELD,
+            filter="self",
+            effects=[UntapEffect(target="target_creature")],
+        )
+    # Blasting Station: Whenever a creature enters, you may untap this artifact.
+    m_may_self_art = re.match(
+        r"^Whenever a creature enters(?: the battlefield)?, "
+        r"you may untap (?:this artifact|~|"
+        + re.escape(name)
+        + r")\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if m_may_self_art:
+        return TriggeredAbility(
+            ability_id=_ability_id("etb-may-untap-self-artifact", text),
+            event=TriggerEvent.ENTER_BATTLEFIELD,
+            filter="creature",
+            effects=[UntapEffect(target="self")],
+        )
     # Midnight Guard: Whenever another creature enters, untap this creature.
     m_self = re.match(
         r"^Whenever another creature enters(?: the battlefield)?, "
@@ -812,13 +844,110 @@ def pat_etb_untap_target(text: str, name: str) -> Ability | None:
         text,
         re.IGNORECASE,
     )
-    if not m_self:
+    if m_self:
+        return TriggeredAbility(
+            ability_id=_ability_id("etb-untap-self", text),
+            event=TriggerEvent.ENTER_BATTLEFIELD,
+            filter="creature",
+            effects=[UntapEffect(target="self")],
+        )
+    # Variant without "another" / with "you may".
+    m_may_self = re.match(
+        r"^Whenever (?:a|another) creature enters(?: the battlefield)?, "
+        r"(?:you may )?untap (?:this creature|~|"
+        + re.escape(name)
+        + r")\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m_may_self:
         return None
     return TriggeredAbility(
         ability_id=_ability_id("etb-untap-self", text),
         event=TriggerEvent.ENTER_BATTLEFIELD,
         filter="creature",
         effects=[UntapEffect(target="self")],
+    )
+
+
+def pat_warstorm_etb_power_damage(text: str, name: str) -> Ability | None:
+    """Warstorm Surge: controlled creature ETB → it deals damage = its power."""
+    cleaned = _strip_ability_word(text)
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", cleaned).strip()
+    m = re.match(
+        r"^Whenever a creature you control enters(?: the battlefield)?, "
+        r"it deals damage equal to its power to any target\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("warstorm-etb-power", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="controlled_creature",
+        effects=[
+            DealDamageEffect(
+                equal_to_trigger_subject_power=True, target="any_target"
+            )
+        ],
+    )
+
+
+def pat_landfall_create_token(text: str, name: str) -> Ability | None:
+    """Sporemound-class: landfall → create a P/T … token."""
+    cleaned = _strip_ability_word(text)
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", cleaned).strip()
+    m = re.match(
+        r"^Whenever a land you control enters(?: the battlefield)?, "
+        r"create (?:a|one)(?: (\d+)/(\d+))? (.+?) creature token\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    power = int(m.group(1) or 1)
+    toughness = int(m.group(2) or 1)
+    token_name = m.group(3).strip()
+    return TriggeredAbility(
+        ability_id=_ability_id("landfall-create-token", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="controlled_land",
+        effects=[
+            CreateTokenEffect(
+                name=token_name,
+                power=power,
+                toughness=toughness,
+                quantity=1,
+                is_creature=True,
+            )
+        ],
+    )
+
+
+def pat_artifact_etb_p1p1_target(text: str, name: str) -> Ability | None:
+    """Yotian Dissident: artifact you control enters → +1/+1 on target creature."""
+    cleaned = _strip_ability_word(text)
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", cleaned).strip()
+    m = re.match(
+        r"^Whenever an artifact you control enters(?: the battlefield)?, "
+        r"put a \+1/\+1 counter on target creature you control\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("artifact-etb-p1p1", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="controlled_artifact",
+        effects=[
+            AddCounterEffect(
+                counter_type="p1p1",
+                quantity=1,
+                target="target_permanent",
+            )
+        ],
     )
 
 
@@ -1463,10 +1592,17 @@ def pat_etb_damage(text: str, name: str) -> Ability | None:
     )
     if not m:
         return None
+    filt = (
+        "other_controlled_creature"
+        if re.match(r"^Whenever another ", cleaned, re.IGNORECASE)
+        else "creature"
+    )
+    if re.search(r"creature you control", cleaned, re.IGNORECASE) and filt == "creature":
+        filt = "controlled_creature"
     return TriggeredAbility(
         ability_id=_ability_id("etb-damage", text),
         event=TriggerEvent.ENTER_BATTLEFIELD,
-        filter="creature",
+        filter=filt,
         effects=[DealDamageEffect(amount=int(m.group(1)))],
     )
 
@@ -3918,6 +4054,13 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
         return _proof_irrelevant(clause)
 
     if re.match(
+        r"^Unearth \{[^}]+\}(?: \([^)]*\))?\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
         r"^Partner(?: \([^)]*\))?\.?$",
         clause,
         re.IGNORECASE,
@@ -4021,6 +4164,9 @@ PATTERNS: list[Pattern] = [
     Pattern("m1m1_put_create_token", pat_m1m1_put_create_token),
     Pattern("counters_put_may_create_token", pat_counters_put_may_create_token),
     Pattern("etb_untap_target", pat_etb_untap_target),
+    Pattern("warstorm_etb_power_damage", pat_warstorm_etb_power_damage),
+    Pattern("landfall_create_token", pat_landfall_create_token),
+    Pattern("artifact_etb_p1p1_target", pat_artifact_etb_p1p1_target),
     Pattern("sac_creature_add_mana", pat_sac_creature_add_mana),
     Pattern("sac_creature_outlet", pat_sac_creature_outlet),
     Pattern("sac_self", pat_sac_self),

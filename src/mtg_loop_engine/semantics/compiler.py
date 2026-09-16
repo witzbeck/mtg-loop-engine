@@ -50,6 +50,7 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
         r"Put a |"
         r"Morph |"
         r"Eternalize |"
+        r"Unearth |"
         r"Cascade |Convoke |Delve |"
         r"Flying |Flash |Haste |Vigilance |Trample |Lifelink |Deathtouch |Reach |"
         r"Defender |Menace |Hexproof |Shroud |First strike |Double strike |Infect |"

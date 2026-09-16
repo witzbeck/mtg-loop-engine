@@ -1475,8 +1475,11 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
     "Blasting Station": RealOracleCurriculum(
         name="Blasting Station",
         types=["Artifact"],
-        oracle_text="{T}, Sacrifice a creature: This artifact deals 1 damage to any target.",
-        notes="E16: tap+sac → 1 damage.",
+        oracle_text=(
+            "{T}, Sacrifice a creature: This artifact deals 1 damage to any target.\n"
+            "Whenever a creature enters, you may untap this artifact."
+        ),
+        notes="E16 sac damage + E13b ETB untap self.",
         mana_cost="{3}",
         mana_value=3,
     ),
@@ -1912,5 +1915,66 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         notes="E67a: tap two artifacts → untap artifact.",
         mana_cost="{4}",
         mana_value=4,
+    ),
+
+    "Hyrax Tower Scout": RealOracleCurriculum(
+        name="Hyrax Tower Scout",
+        types=["Creature", "Human", "Scout"],
+        oracle_text="When this creature enters, untap target creature.",
+        notes="E13b: self-ETB untap target creature.",
+        colors=("G",),
+        mana_cost="{2}{G}",
+        mana_value=3,
+    ),
+    "Warstorm Surge": RealOracleCurriculum(
+        name="Warstorm Surge",
+        types=["Enchantment"],
+        oracle_text=(
+            "Whenever a creature you control enters, "
+            "it deals damage equal to its power to any target."
+        ),
+        notes="E13b: controlled creature ETB → subject power damage.",
+        colors=("R",),
+        mana_cost="{3}{R}",
+        mana_value=4,
+    ),
+    "Sporemound": RealOracleCurriculum(
+        name="Sporemound",
+        types=["Creature", "Fungus"],
+        oracle_text=(
+            "Landfall — Whenever a land you control enters, "
+            "create a 1/1 green Saproling creature token."
+        ),
+        notes="E13b: landfall create Saproling.",
+        colors=("G",),
+        mana_cost="{3}{G}",
+        mana_value=4,
+    ),
+    "Molten Gatekeeper": RealOracleCurriculum(
+        name="Molten Gatekeeper",
+        types=["Artifact", "Creature", "Golem"],
+        oracle_text=(
+            "Whenever another creature you control enters, "
+            "this creature deals 1 damage to each opponent.\n"
+            "Unearth {R} ({R}: Return this card from your graveyard to the "
+            "battlefield. It gains haste. Exile it at the beginning of the next "
+            "end step or if it would leave the battlefield. Unearth only as a sorcery.)"
+        ),
+        notes="E13b: ETB damage; unearth proof-irrelevant.",
+        colors=("R",),
+        mana_cost="{2}",
+        mana_value=2,
+    ),
+    "Yotian Dissident": RealOracleCurriculum(
+        name="Yotian Dissident",
+        types=["Creature", "Human", "Artificer"],
+        oracle_text=(
+            "Whenever an artifact you control enters, "
+            "put a +1/+1 counter on target creature you control."
+        ),
+        notes="E13b: artifact ETB → p1p1 target.",
+        colors=("G", "W"),
+        mana_cost="{G}{W}",
+        mana_value=2,
     ),
 }

@@ -155,8 +155,9 @@ uv run python scripts/spellbook_absent_discovery.py
 53. **E22b combat Treasures** ✓ — Old Gnawbone / Hireling / Smaug; `quantity_from_trigger` tokens.
 54. **E52 counter-put triggers** ✓ — All Will Be One damage; Flourishing Defenses m1m1→token.
 55. **E67a artifact untap** ✓ — Filigree Sages; Corridor Monitor; Clock of Omens (`TapArtifactCost`).
-56. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-57. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+56. **E13b ETB remainders** ✓ — Blasting Station untap; Hyrax; Warstorm Surge; Sporemound landfall; Molten Gatekeeper; Yotian Dissident.
+57. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+58. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 

@@ -54,7 +54,7 @@ graph TB;
 - `UntapEffect.target=controlled_lands` + `quantity` (Peregrine Drake / Argothian Elder): untap up to N controlled lands (tapped-first).
 - Mana scales: `CONTROLLED_SWAMPS`, `GREATEST_POWER_CONTROLLED`, `GREATEST_TOUGHNESS_OTHER`, `CARDS_DRAWN_THIS_TURN`, `GREATEST_POWER_ENTERED_THIS_TURN`; `Permanent.entered_this_turn` set on ETB.
 - CAST trigger filters `cast_creature` / `cast_noncreature` / `cast_colorless` / `cast_red` / `cast_artifact`; intervening-if `fewer_than_three_p1p1` (Steam-Kin).
-- `DealDamageEffect.equal_to_source_power` / `equal_to_devotion`; `LoseLifeEffect.equal_to_devotion` + following gain; `DrawEffect.equal_to_controlled_artifacts`; generalized `_devotion` for card mana costs (distinct from `DEVOTION_GREEN` activated-cost scale).
+- `DealDamageEffect.equal_to_source_power` / `equal_to_trigger_subject_power` / `equal_to_devotion`; `LoseLifeEffect.equal_to_devotion` + following gain; `DrawEffect.equal_to_controlled_artifacts`; generalized `_devotion` for card mana costs (distinct from `DEVOTION_GREEN` activated-cost scale).
 - Sac outlets: clear fodder `target` after sacrifice so damage defaults to opponent; `MillEffect.amount_from_sacrificed_power` via `GameState.last_sacrificed_power`.
 - `MillEffect.amount_from_opponent_graveyard` / `amount_from_trigger`; `ReplacementDoubleMill` (Bruvac); `graveyard_opponent` counter.
 - `ReturnFromGraveyardToHandEffect` (Witness/Salvagers); `MoveToZoneEffect.target=trigger_subject` (Enduring Renewal).
@@ -73,7 +73,7 @@ graph TB;
 - Power-scaled tap mana (`equal_to_source_power`) uses `Permanent.effective_power()` (printed ± counters).
 - `AddCounterEffect.amount_from_trigger` + `target=enchanted_creature`: Sunbond / Light of Promise put that many +1/+1 on the host creature (explorer supplies the host target; no attachment graph yet).
 - `AddCounterEffect.target=each_controlled_creature`: Archangel / Cathars mass +1/+1 puts (per-creature `COUNTER_ADDED` triggers).
-- Trigger filters `controlled_creature` / `other_controlled_creature` / `other_controlled_human` / `other_controlled_green` for ETB subject gates.
+- Trigger filters `controlled_creature` / `controlled_land` / `controlled_artifact` / `other_controlled_creature` / `other_controlled_human` / `other_controlled_green` for ETB subject gates.
 
 ## Non-responsibilities
 

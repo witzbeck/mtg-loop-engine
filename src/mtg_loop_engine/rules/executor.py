@@ -802,6 +802,12 @@ class Executor:
                         VerificationStatus.ILLEGAL_TARGET,
                         "untap target must be an artifact",
                     )
+            if effect.target == "target_creature":
+                if not target_perm.is_creature:
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_TARGET,
+                        "untap target must be a creature",
+                    )
             self._untap_permanent(state, target_perm)
             state.bump("untap")
             return None
@@ -1049,6 +1055,18 @@ class Executor:
             qty = effect.amount
             if effect.equal_to_source_power:
                 qty = int(source.effective_power() or 0)
+            elif effect.equal_to_trigger_subject_power:
+                if (
+                    not trigger_subject_id
+                    or trigger_subject_id not in state.permanents
+                ):
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_TARGET,
+                        "damage equal_to_trigger_subject_power needs subject",
+                    )
+                qty = int(
+                    state.permanents[trigger_subject_id].effective_power() or 0
+                )
             elif effect.equal_to_sacrificed_power:
                 qty = int(state.last_sacrificed_power)
             elif effect.equal_to_devotion:
@@ -1448,6 +1466,16 @@ class Executor:
                     continue
                 if ab.filter == "controlled_creature" and (
                     not subject.is_creature or subject.controller != "you"
+                ):
+                    continue
+                if ab.filter == "controlled_land" and (
+                    subject.controller != "you"
+                    or not self._is_land_permanent(subject)
+                ):
+                    continue
+                if ab.filter == "controlled_artifact" and (
+                    subject.controller != "you"
+                    or not self._is_artifact_permanent(subject)
                 ):
                     continue
                 if ab.filter == "controlled_enchantment":
