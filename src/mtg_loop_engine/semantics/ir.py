@@ -248,6 +248,12 @@ class GetEnergyEffect(BaseModel):
     equal_to_controlled_creatures: bool = False
 
 
+class ExtraTurnEffect(BaseModel):
+    """Take an extra turn after this one (combo-favorable: bump counter)."""
+
+    kind: Literal["extra_turn"] = "extra_turn"
+
+
 class TapEffect(BaseModel):
     kind: Literal["tap"] = "tap"
     target: Literal["self", "target_permanent"] = "self"
@@ -458,6 +464,7 @@ Effect = Annotated[
     | FightEffect
     | AdditionalCombatEffect
     | GetEnergyEffect
+    | ExtraTurnEffect
     | DealDamageEffect
     | GainLifeEffect
     | DrawEffect

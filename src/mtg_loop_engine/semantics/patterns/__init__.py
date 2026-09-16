@@ -60,6 +60,7 @@ from mtg_loop_engine.semantics.ir import (
     FightEffect,
     AdditionalCombatEffect,
     GetEnergyEffect,
+    ExtraTurnEffect,
     ImprintInstantFromHandEffect,
     SacrificeCost,
     TapCost,
@@ -4628,6 +4629,61 @@ def pat_pay_energy_pump_pi(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_extra_turn_spell(text: str, name: str) -> Ability | None:
+    """Time Warp / Temporal Manipulation / Capture of Jingzhou."""
+    m = re.match(
+        r"^(?:Target player takes|Take) an extra turn after this one\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("spell-extra-turn", text),
+        costs=[],
+        effects=[ExtraTurnEffect()],
+    )
+
+
+def pat_remove_charge_extra_turn(text: str, name: str) -> Ability | None:
+    """Magistrate's Scepter: tap, remove 3 charge → extra turn."""
+    m = re.match(
+        r"^\{T\}, [Rr]emove three charge counters from (?:this artifact|~|"
+        + re.escape(name)
+        + r"): [Tt]ake an extra turn after this one\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("charge-extra-turn", text),
+        costs=[
+            TapCost(),
+            RemoveCounterCost(counter_type="charge", quantity=3, selector="self"),
+        ],
+        effects=[ExtraTurnEffect()],
+    )
+
+
+def pat_mana_tap_put_charge_self(text: str, name: str) -> Ability | None:
+    """Magistrate's Scepter: {4}, {T}: put a charge counter on this artifact."""
+    m = re.match(
+        r"^((?:\{[^}]+\})+), \{T\}: Put a charge counter on (?:this artifact|~|"
+        + re.escape(name)
+        + r")\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("mana-tap-put-charge-self", text),
+        costs=[ManaCost(amount=_parse_mana_braces(m.group(1))), TapCost()],
+        effects=[AddCounterEffect(counter_type="charge", quantity=1, target="self")],
+    )
+
+
 def pat_tap_damage_self(text: str, name: str) -> Ability | None:
     """Stuffy Doll: {T}: This creature deals 1 damage to itself."""
     cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
@@ -5624,6 +5680,9 @@ PATTERNS: list[Pattern] = [
     Pattern("pay_energy_untap_all", pat_pay_energy_untap_all),
     Pattern("tap_pay_energy_create_token", pat_tap_pay_energy_create_token),
     Pattern("pay_energy_pump_pi", pat_pay_energy_pump_pi),
+    Pattern("extra_turn_spell", pat_extra_turn_spell),
+    Pattern("remove_charge_extra_turn", pat_remove_charge_extra_turn),
+    Pattern("mana_tap_put_charge_self", pat_mana_tap_put_charge_self),
     Pattern("tap_damage_self", pat_tap_damage_self),
     Pattern("dealt_damage_gain_life", pat_dealt_damage_gain_life),
     Pattern("dealt_damage_draw", pat_dealt_damage_draw),

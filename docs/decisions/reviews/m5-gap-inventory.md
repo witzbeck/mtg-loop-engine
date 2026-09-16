@@ -139,7 +139,7 @@ time (effect-shape slices) while keeping this parent ID as the inventory umbrell
 | E33a | done | Isochron / Dualcaster / Twincast | CLOSE_BUILD | 4 | — | yes | Imprint cast; last-cast copy; DR untap-nonlands |
 | E34 | pending | Clone / enter as copy | CLOSE_BUILD | 26 | 24 | mixed | Enter as copy of |
 | E35 | done | Extra combat | CLOSE_BUILD | 3 | 2 | maybe | Aggravated Assault; Bloodthirster; Moraug |
-| E36 | pending | Extra turn | CLOSE_BUILD | 12 | 6 | low | Take an extra turn |
+| E36 | done | Extra turn | CLOSE_BUILD | 3 | 6 | low | Time Warp; Temporal Manipulation; Magistrate's Scepter |
 | E37 | pending | Planeswalker loyalty | CLOSE_BUILD | 17 | 16 | mixed | +/−/0 loyalty abilities |
 | E38 | done | Energy | CLOSE_BUILD | 3 | 3 | mixed | {E} get/pay; Basker/Runner/Stone Idol |
 | E39 | REJECT | Dice tables | REJECT | 3 | 3 | low | See R06 |

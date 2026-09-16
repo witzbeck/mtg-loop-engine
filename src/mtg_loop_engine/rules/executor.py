@@ -14,6 +14,7 @@ from mtg_loop_engine.semantics.ir import (
     AddManaEffect,
     AdditionalCombatEffect,
     GetEnergyEffect,
+    ExtraTurnEffect,
     CardSemantics,
     ContinuousCostReduction,
     CopyPendingTriggerEffect,
@@ -1360,6 +1361,10 @@ class Executor:
             if qty > 0:
                 state.energy_you += qty
                 state.bump("energy", qty)
+            return None
+
+        if isinstance(effect, ExtraTurnEffect):
+            state.bump("extra_turn")
             return None
 
         if isinstance(effect, DealDamageEffect):
