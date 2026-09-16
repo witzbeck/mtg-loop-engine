@@ -398,7 +398,7 @@ class Executor:
         ability: ActivatedAbility | None = None,
         actor: Permanent | None = None,
     ) -> tuple[int, int]:
-        """Return (generic_reduction, min_mana_remaining floor)."""
+        """Return (generic_reduction, min_mana_remaining floor) for activated abilities."""
         reduction = 0
         floor = 0
         for perm in state.permanents.values():
@@ -409,6 +409,11 @@ class Executor:
                 continue
             for ab in card.abilities:
                 if not isinstance(ab, ContinuousCostReduction):
+                    continue
+                if ab.applies_to not in (
+                    "activated_abilities_you_control",
+                    "enchanted_artifact_activated",
+                ):
                     continue
                 if (
                     ab.exclude_mana_abilities
@@ -428,6 +433,54 @@ class Executor:
                 reduction += ab.reduce_generic
                 floor = max(floor, ab.min_mana_remaining)
         return reduction, floor
+
+    def spell_cost_reduction(
+        self, state: GameState, *, card: CardSemantics, source: Permanent | None = None
+    ) -> int:
+        """Generic mana reduction when casting ``card`` from hand."""
+        is_creature = any(t.casefold() == "creature" for t in (card.types or []))
+        reduction = 0
+        for perm in state.permanents.values():
+            if perm.zone != Zone.BATTLEFIELD or perm.controller != "you":
+                continue
+            host = self.semantics.get(perm.oracle_id)
+            if not host:
+                continue
+            for ab in host.abilities:
+                if not isinstance(ab, ContinuousCostReduction):
+                    continue
+                if ab.applies_to == "creature_spells_you_cast":
+                    if not is_creature:
+                        continue
+                elif ab.applies_to == "spells_you_cast":
+                    pass
+                else:
+                    continue
+                units = 1
+                if ab.scale_by == "artifacts_you_control":
+                    units = sum(
+                        1
+                        for p in state.permanents.values()
+                        if p.zone == Zone.BATTLEFIELD
+                        and p.controller == "you"
+                        and p.is_artifact
+                    )
+                elif ab.scale_by == "creatures_power_ge":
+                    units = 0
+                    for p in state.permanents.values():
+                        if (
+                            p.zone != Zone.BATTLEFIELD
+                            or p.controller != "you"
+                            or not p.is_creature
+                        ):
+                            continue
+                        pw = p.effective_power()
+                        if pw is not None and pw >= ab.power_threshold:
+                            units += 1
+                elif ab.scale_by == "p1p1_on_source":
+                    units = perm.counters.get("p1p1", 0)
+                reduction += ab.reduce_generic * units
+        return reduction
 
     def has_exile_on_death(self, state: GameState) -> bool:
         for perm in state.permanents.values():
@@ -2631,7 +2684,10 @@ class Executor:
         free_max = self.free_cast_max_mv(state)
         free = free_max is not None and card.mana_value <= free_max
         if not free:
-            err = self.pay_mana(state, card.mana_cost)
+            need = card.mana_cost.model_copy(deep=True)
+            reduced = min(self.spell_cost_reduction(state, card=card), need.generic)
+            need.generic -= reduced
+            err = self.pay_mana(state, need)
             if err:
                 return err
         perm.zone = Zone.BATTLEFIELD

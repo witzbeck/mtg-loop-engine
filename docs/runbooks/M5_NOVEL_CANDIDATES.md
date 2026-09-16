@@ -163,8 +163,10 @@ uv run python scripts/spellbook_absent_discovery.py
 61. **E53 Adapt** ✓ — Adapt N (`only_if_none`); Broodscale Spawn; Biomancer draw.
 62. **E31a token-copy haste** ✓ — Kiki-Jiki; Splinter Twin grant (`CreateTokenEffect.copy_target`).
 63. **E68 dealt-damage reflect** ✓ — Mogg Maniac; Stuffy Doll self-ping + reflect.
-64. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-65. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+64. **E51 mill replacement** ✓ — already closed by E17 Bruvac `ReplacementDoubleMill`.
+65. **E55 spell cost reduction** ✓ — Temur/Sami/Animar/Raptor; affinity + scaled reduce on cast.
+66. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+67. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 

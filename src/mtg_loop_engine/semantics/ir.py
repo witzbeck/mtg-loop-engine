@@ -447,10 +447,22 @@ class ContinuousCostReduction(BaseModel):
     applies_to: Literal[
         "activated_abilities_you_control",
         "enchanted_artifact_activated",
+        "spells_you_cast",
+        "creature_spells_you_cast",
     ] = "activated_abilities_you_control"
     # Zirda: ignore mana abilities; leave at least one mana in the cost.
     exclude_mana_abilities: bool = False
     min_mana_remaining: int = 0
+    # Scaled spell reduction (affinity / Temur / Animar).
+    scale_by: Literal[
+        None,
+        "artifacts_you_control",
+        "creatures_power_ge",
+        "p1p1_on_source",
+    ] = None
+    power_threshold: int = 4
+    # Temur: only during your turn (combo model is always your turn).
+    during_your_turn_only: bool = False
     supported: bool = True
 
 

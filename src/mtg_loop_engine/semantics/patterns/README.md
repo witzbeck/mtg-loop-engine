@@ -98,6 +98,7 @@ graph TB;
 - `instant_grant_tap_bounce` — Banishing Knack / Retraction Helix Instant grant.
 - `etb_other_green_put_p1p1_target` — Ivy Lane; green color filter on ETB subject.
 - `power_artifact_cost_reduction` — enchanted artifact activate −{N} (floor 1).
+- `spell_cost_reduction` — E55: spells/creature spells cost less; affinity artifacts; Temur power≥N; Animar p1p1 scale.
 - `untap_mill_controller` — Mesmeric; UNTAP → self-mill.
 
 ## Main entry points
