@@ -152,6 +152,7 @@ class UntapEffect(BaseModel):
     target: Literal[
         "self",
         "target_permanent",
+        "trigger_subject",
         "target_basic_land",
         "target_land",
         "controlled_lands",
@@ -200,6 +201,19 @@ class RemoveCounterEffect(BaseModel):
     counter_type: str = "p1p1"
     quantity: int = 1
     target: Literal["self"] = "self"
+
+
+class ReturnFromGraveyardToHandEffect(BaseModel):
+    """Eternal Witness / Archaeomancer: GY → hand."""
+
+    kind: Literal["return_gy_to_hand"] = "return_gy_to_hand"
+    selector: Literal[
+        "any",
+        "instant_or_sorcery",
+        "creature",
+        "artifact",
+        "artifact_mv_leq_1",
+    ] = "any"
 
 
 class ReturnToBattlefieldEffect(BaseModel):
@@ -282,6 +296,7 @@ class MoveToZoneEffect(BaseModel):
         "other_controlled_sharing_type",
         "target_nonland",
         "target_permanent",
+        "trigger_subject",
     ] = "self"
 
 
@@ -309,6 +324,7 @@ Effect = Annotated[
     | CreateTokenEffect
     | AddCounterEffect
     | RemoveCounterEffect
+    | ReturnFromGraveyardToHandEffect
     | ReturnToBattlefieldEffect
     | DealDamageEffect
     | GainLifeEffect

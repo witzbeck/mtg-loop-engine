@@ -39,6 +39,7 @@ from mtg_loop_engine.semantics.ir import (
     ReplacementMultiplyTapMana,
     ReplacementReduceM1M1Counters,
     ProofIrrelevantStatic,
+    ReturnFromGraveyardToHandEffect,
     ReturnToBattlefieldEffect,
     SacrificeCost,
     TapCost,
@@ -2066,6 +2067,80 @@ def _parse_count_word(raw: str) -> int | None:
 
 
 
+
+def pat_etb_return_from_gy_to_hand(text: str, name: str) -> Ability | None:
+    """Eternal Witness / Archaeomancer: ETB return from GY to hand."""
+    cleaned = _strip_ability_word(text)
+    short = name.split(",")[0].strip()
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^When (?:{name_alt}) enters(?: the battlefield)?, "
+        rf"(?:you may )?return target card from your graveyard to your hand\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("etb-witness", text),
+            event=TriggerEvent.ENTER_BATTLEFIELD,
+            filter="self",
+            effects=[ReturnFromGraveyardToHandEffect(selector="any")],
+        )
+    m = re.match(
+        rf"^When (?:{name_alt}) enters(?: the battlefield)?, "
+        rf"return target instant or sorcery card from your graveyard to your hand\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("etb-archaeomancer", text),
+            event=TriggerEvent.ENTER_BATTLEFIELD,
+            filter="self",
+            effects=[ReturnFromGraveyardToHandEffect(selector="instant_or_sorcery")],
+        )
+    return None
+
+
+def pat_gy_to_hand_activated(text: str, name: str) -> Ability | None:
+    """Auriok Salvagers: paid return artifact MV≤1 from GY to hand."""
+    m = re.match(
+        r"^((?:\{[^}]+\})+): Return target artifact card with mana value 1 or less "
+        r"from your graveyard to your hand\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("salvagers", text),
+        costs=[ManaCost(amount=_parse_mana_braces(m.group(1)))],
+        effects=[ReturnFromGraveyardToHandEffect(selector="artifact_mv_leq_1")],
+        uses_stack=True,
+        is_mana_ability=False,
+    )
+
+
+def pat_dies_to_hand(text: str, name: str) -> Ability | None:
+    """Enduring Renewal: creature BF→GY → hand."""
+    m = re.match(
+        r"^Whenever a creature is put into your graveyard from the battlefield, "
+        r"return it to your hand\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("renewal", text),
+        event=TriggerEvent.DIES,
+        filter="controlled_creature",
+        effects=[MoveToZoneEffect(zone=Zone.HAND, target="trigger_subject")],
+    )
+
+
 def pat_scaled_mill(text: str, name: str) -> Ability | None:
     """E17: GY-count mill, life-loss mill, Bruvac double mill."""
     cleaned = _strip_ability_word(text)
@@ -3327,6 +3402,9 @@ PATTERNS: list[Pattern] = [
     Pattern("mana_create_token", pat_mana_create_token),
     Pattern("hybrid_remove_m1m1_pump", pat_hybrid_remove_m1m1_pump),
     Pattern("tap_two_creatures_add_mana", pat_tap_two_creatures_add_mana),
+    Pattern("etb_return_from_gy_to_hand", pat_etb_return_from_gy_to_hand),
+    Pattern("gy_to_hand_activated", pat_gy_to_hand_activated),
+    Pattern("dies_to_hand", pat_dies_to_hand),
     Pattern("scaled_mill", pat_scaled_mill),
     Pattern("sac_outlet_payoffs", pat_sac_outlet_payoffs),
     Pattern("dies_trigger_payoffs", pat_dies_trigger_payoffs),
