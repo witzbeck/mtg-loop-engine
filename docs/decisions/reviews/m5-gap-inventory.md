@@ -99,7 +99,7 @@ narrows mid-flight.
 | E51 | done | Mill replacement | CLOSE_BUILD | 1 | — | maybe | Covered by E17 Bruvac `ReplacementDoubleMill` |
 | E52 | done | Counter-put triggers | CLOSE_BUILD | 7 | — | maybe | All Will Be One; Flourishing Defenses |
 | E53 | done | Adapt / levelers | CLOSE_BUILD | 5 | — | mixed | Adapt N; Broodscale/Biomancer payoffs |
-| E54 | pending | Impulse / top-deck | CLOSE_BUILD | 8 | — | mixed | Reveal/exile top |
+| E54 | done | Impulse / top-deck | CLOSE_BUILD | 8 | — | mixed | Top rearrange PI + draw/library; Harnfel impulse; Elven Chorus PI |
 | E55 | done | Cost reduction / affinity | CLOSE_BUILD | 11 | — | mixed | Spell/affinity reduce; Animar/Sami/Temur/Raptor |
 | E56 | done | P/T set equal to | CLOSE_BUILD | 5 | — | mixed | CDA lands/hand/life/devotion; Ashaya Forests |
 | E57 | done | Indestructible grants | CLOSE_BUILD | 3 | — | mixed | Static/equipment grants as PI |

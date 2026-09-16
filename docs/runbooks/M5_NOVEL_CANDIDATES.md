@@ -170,8 +170,9 @@ uv run python scripts/spellbook_absent_discovery.py
 68. **E30a blink** ✓ — Emiel / Eldrazi Displacer / Felidar; `BlinkEffect` exile→return + ETB.
 69. **E31b tap-copy siblings** ✓ — Reflection / Orthion / Myr Propagator paid tap-copy.
 70. **Low Path-a REJECT batch** ✓ — E63 destroy/wrath, E71 skip, E72 counterspell, E73 rituals → R02–R05.
-71. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-72. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+71. **E54 impulse / top-deck** ✓ — Sensei's Top; Harnfel discard-impulse→draw; Elven Chorus PI.
+72. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+73. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 
