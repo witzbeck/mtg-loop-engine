@@ -2473,4 +2473,47 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{3}{G}",
         mana_value=4,
     ),
+
+    # M5 E59 — buyback / kicker shells (cast riders PI)
+    "Searing Touch": RealOracleCurriculum(
+        name="Searing Touch",
+        types=["Instant"],
+        oracle_text=(
+            "Buyback {4} (You may pay an additional {4} as you cast this spell. "
+            "If you do, put this card into your hand as it resolves.) "
+            "Searing Touch deals 1 damage to any target."
+        ),
+        notes="E59: Buyback + one-shot damage PI.",
+        colors=("R",),
+        mana_cost="{R}",
+        mana_value=1,
+    ),
+    "Clockspinning": RealOracleCurriculum(
+        name="Clockspinning",
+        types=["Instant"],
+        oracle_text=(
+            "Buyback {3} (You may pay an additional {3} as you cast this spell. "
+            "If you do, put this card into your hand as it resolves.) "
+            "Choose a counter on target permanent or suspended card. Remove that "
+            "counter from that permanent or card or put another of those counters "
+            "on it."
+        ),
+        notes="E59: Buyback + counter-spin PI.",
+        colors=("U",),
+        mana_cost="{U}",
+        mana_value=1,
+    ),
+    "Sprout Swarm": RealOracleCurriculum(
+        name="Sprout Swarm",
+        types=["Instant"],
+        oracle_text=(
+            "Buyback {3} (You may pay an additional {3} as you cast this spell. "
+            "If you do, put this card into your hand as it resolves.) "
+            "Create a 1/1 green Saproling creature token."
+        ),
+        notes="E59: Buyback PI; Saproling create via spell-create pattern.",
+        colors=("G",),
+        mana_cost="{1}{G}",
+        mana_value=2,
+    ),
 }

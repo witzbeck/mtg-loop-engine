@@ -1351,6 +1351,29 @@ def pat_exile_top_may_play(text: str, name: str) -> Ability | None:
     return None
 
 
+def pat_spell_create_creature_token(text: str, name: str) -> Ability | None:
+    """Instant/sorcery: Create a P/T color Type creature token."""
+    m = re.match(
+        r"^Create a (\d+)/(\d+) (\w+) (.+?) creature token\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("spell-create-token", text),
+        costs=[],
+        effects=[
+            CreateTokenEffect(
+                name=m.group(4).strip(),
+                power=int(m.group(1)),
+                toughness=int(m.group(2)),
+                quantity=1,
+            )
+        ],
+    )
+
+
 def pat_untap_mill_controller(text: str, name: str) -> Ability | None:
     """Mesmeric Orb: whenever a permanent becomes untapped, its controller mills."""
     m = re.match(
@@ -4926,6 +4949,59 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
     ):
         return _proof_irrelevant(clause)
 
+    # Buyback / Kicker / Casualty — additional cast costs; not modeled for loops.
+    if re.match(
+        r"^Convoke(?: \([^)]*\))?\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^Storm(?: \([^)]*\))?\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^Buyback (?:\{[^}]+\})+(?: \([^)]*\))?\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^Kicker (?:\{[^}]+\}|—.+?)(?: \([^)]*\))?\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^Casualty \d+(?: \([^)]*\))?\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    # One-shot Instant damage line (buyback shells) — not costed abilities.
+    if ":" not in clause and re.match(
+        r"^.+ deals \d+ damage to any target\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^Choose a counter on target permanent or suspended card\. "
+        r"Remove that counter from that permanent or card or put another of "
+        r"those counters on it\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
     # Serra Avatar / library shuffle from GY — not modeled loop physics.
     if re.match(
         r"^When .+ is put into a graveyard from anywhere, "
@@ -5124,6 +5200,7 @@ PATTERNS: list[Pattern] = [
     Pattern("tap_draw_put_on_library", pat_tap_draw_put_on_library),
     Pattern("look_top_rearrange", pat_look_top_rearrange),
     Pattern("exile_top_may_play", pat_exile_top_may_play),
+    Pattern("spell_create_creature_token", pat_spell_create_creature_token),
     Pattern("untap_mill_controller", pat_untap_mill_controller),
     Pattern("cant_block_this_turn", pat_cant_block_this_turn),
     Pattern("put_m1m1_untap_self", pat_put_m1m1_untap_self),
