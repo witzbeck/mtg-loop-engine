@@ -1977,4 +1977,46 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{G}{W}",
         mana_value=2,
     ),
+
+    "Bloodletter of Aclazotz": RealOracleCurriculum(
+        name="Bloodletter of Aclazotz",
+        types=["Creature", "Vampire", "Demon"],
+        oracle_text=(
+            "Flying\n"
+            "If an opponent would lose life during your turn, "
+            "they lose twice that much life instead. "
+            "(Damage causes loss of life.)"
+        ),
+        notes="E50: double opponent life loss; Flying PI.",
+        colors=("B",),
+        mana_cost="{1}{B}{B}{B}",
+        mana_value=4,
+    ),
+    "Alhammarret's Archive": RealOracleCurriculum(
+        name="Alhammarret's Archive",
+        types=["Legendary", "Artifact"],
+        oracle_text=(
+            "If you would gain life, you gain twice that much life instead.\n"
+            "If you would draw a card except the first one you draw in each of "
+            "your draw steps, draw two cards instead."
+        ),
+        notes="E50: double life gain + double draw.",
+        mana_cost="{5}",
+        mana_value=5,
+    ),
+    "Everlasting Torment": RealOracleCurriculum(
+        name="Everlasting Torment",
+        types=["Enchantment"],
+        oracle_text=(
+            "Players can't gain life.\n"
+            "Damage can't be prevented.\n"
+            "All damage is dealt as though its source had wither. "
+            "(A source with wither deals damage to creatures in the form of "
+            "-1/-1 counters.)"
+        ),
+        notes="E50: can't-gain; prevent/wither PI.",
+        colors=("B", "R"),
+        mana_cost="{2}{B/R}",
+        mana_value=3,
+    ),
 }
