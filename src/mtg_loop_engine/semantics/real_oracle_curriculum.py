@@ -2128,4 +2128,47 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{2}{W}{W}{U}{U}",
         mana_value=6,
     ),
+
+    "Basking Broodscale": RealOracleCurriculum(
+        name="Basking Broodscale",
+        types=["Creature", "Eldrazi", "Lizard"],
+        oracle_text=(
+            "Devoid (This card has no color.)\n"
+            "{1}{G}: Adapt 1. (If this creature has no +1/+1 counters on it, "
+            "put a +1/+1 counter on it.)\n"
+            "Whenever one or more +1/+1 counters are put on this creature, "
+            'you may create a 0/1 colorless Eldrazi Spawn creature token with '
+            '"Sacrifice this token: Add {C}."'
+        ),
+        notes="E53: Adapt + p1p1→Spawn.",
+        colors=(),
+        mana_cost="{1}{G}",
+        mana_value=2,
+    ),
+    "Benthic Biomancer": RealOracleCurriculum(
+        name="Benthic Biomancer",
+        types=["Creature", "Merfolk", "Wizard"],
+        oracle_text=(
+            "{1}{U}: Adapt 1. (If this creature has no +1/+1 counters on it, "
+            "put a +1/+1 counter on it.)\n"
+            "Whenever one or more +1/+1 counters are put on this creature, "
+            "draw a card, then discard a card."
+        ),
+        notes="E53: Adapt + p1p1→draw (discard omitted combo-favorable).",
+        colors=("U",),
+        mana_cost="{U}",
+        mana_value=1,
+    ),
+    "Incubation Druid": RealOracleCurriculum(
+        name="Incubation Druid",
+        types=["Creature", "Elf", "Druid"],
+        oracle_text=(
+            "{3}{G}{G}: Adapt 3. (If this creature has no +1/+1 counters on it, "
+            "put three +1/+1 counters on it.)"
+        ),
+        notes="E53: Adapt 3 only (land-produce tap deferred).",
+        colors=("G",),
+        mana_cost="{1}{G}",
+        mana_value=2,
+    ),
 }

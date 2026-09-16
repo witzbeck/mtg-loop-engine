@@ -1046,6 +1046,8 @@ class Executor:
                         "counter amount_from_trigger needs trigger amount",
                     )
                 qty = trigger_amount
+            if effect.only_if_none and p.counters.get(effect.counter_type, 0) > 0:
+                return None
             if effect.counter_type in {"m1m1", "-1/-1"}:
                 qty = self.m1m1_put_quantity(state, qty)
                 qty = self.counter_put_multiplier(

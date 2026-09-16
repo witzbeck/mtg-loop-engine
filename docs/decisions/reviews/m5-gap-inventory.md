@@ -98,7 +98,7 @@ narrows mid-flight.
 | E50 | done | Life replacement | CLOSE_BUILD | 7 | — | mixed | Twice life loss/gain; can’t-gain; Archive draw |
 | E51 | pending | Mill replacement | CLOSE_BUILD | 1 | — | maybe | Mill twice |
 | E52 | done | Counter-put triggers | CLOSE_BUILD | 7 | — | maybe | All Will Be One; Flourishing Defenses |
-| E53 | pending | Adapt / levelers | CLOSE_BUILD | 5 | — | mixed | Adapt N; level up |
+| E53 | done | Adapt / levelers | CLOSE_BUILD | 5 | — | mixed | Adapt N; Broodscale/Biomancer payoffs |
 | E54 | pending | Impulse / top-deck | CLOSE_BUILD | 8 | — | mixed | Reveal/exile top |
 | E55 | pending | Cost reduction / affinity | CLOSE_BUILD | 11 | — | mixed | Affinity; costs less |
 | E56 | pending | P/T set equal to | CLOSE_BUILD | 5 | — | mixed | */* from lands/hand |
