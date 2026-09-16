@@ -76,6 +76,7 @@ graph TB;
 - `dies_trigger_payoffs` — Plunderer/Sharpshooter/Teysa/Blood Artist/Pawn.
 - `sac_outlet_payoffs` — Bombardment/Blasting Station/Altar/Golem/Ayara.
 - `scaled_mill` — Keening / Mindcrank-scaled / Bruvac double mill.
+- `etb_return_from_gy_to_hand` / `gy_to_hand_activated` / `dies_to_hand` — Witness/Salvagers/Renewal.
 - `etb_or_attacks_create_token` — Squirrel Girl; ETB create (attacks not modeled).
 - `mana_create_tokens_equal_subtype` — Squirrel Girl; `{cost}: Create X` equal to controlled subtype count.
 - Wirewood Channeler matches scaled `BATTLEFIELD_ELF` any-color (slice-9 sibling).

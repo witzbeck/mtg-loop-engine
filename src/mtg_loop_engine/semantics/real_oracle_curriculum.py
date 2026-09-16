@@ -1507,4 +1507,53 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{B}{B}{B}",
         mana_value=3,
     ),
+# M5 E18 — GY → hand recursion
+    "Eternal Witness": RealOracleCurriculum(
+        name="Eternal Witness",
+        types=["Creature", "Human", "Shaman"],
+        oracle_text=(
+            "When this creature enters, you may return target card from your graveyard "
+            "to your hand."
+        ),
+        notes="E18: ETB GY→hand.",
+        colors=("G",),
+        mana_cost="{1}{G}{G}",
+        mana_value=3,
+    ),
+    "Archaeomancer": RealOracleCurriculum(
+        name="Archaeomancer",
+        types=["Creature", "Human", "Wizard"],
+        oracle_text=(
+            "When this creature enters, return target instant or sorcery card from your "
+            "graveyard to your hand."
+        ),
+        notes="E18: ETB instant/sorcery GY→hand.",
+        colors=("U",),
+        mana_cost="{2}{U}{U}",
+        mana_value=4,
+    ),
+    "Auriok Salvagers": RealOracleCurriculum(
+        name="Auriok Salvagers",
+        types=["Creature", "Human", "Soldier"],
+        oracle_text=(
+            "{1}{W}: Return target artifact card with mana value 1 or less from your "
+            "graveyard to your hand."
+        ),
+        notes="E18: Salvagers loop piece.",
+        colors=("W",),
+        mana_cost="{3}{W}",
+        mana_value=4,
+    ),
+    "Enduring Renewal": RealOracleCurriculum(
+        name="Enduring Renewal",
+        types=["Enchantment"],
+        oracle_text=(
+            "Whenever a creature is put into your graveyard from the battlefield, "
+            "return it to your hand."
+        ),
+        notes="E18: dies → hand (Renewal).",
+        colors=("W",),
+        mana_cost="{2}{W}{W}",
+        mana_value=4,
+    ),
 }

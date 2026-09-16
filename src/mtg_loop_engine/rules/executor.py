@@ -38,6 +38,7 @@ from mtg_loop_engine.semantics.ir import (
     ReplacementDoubleMill,
     GrantActivatedAbility,
     ReplacementReduceM1M1Counters,
+    ReturnFromGraveyardToHandEffect,
     ReturnToBattlefieldEffect,
     SacrificeCost,
     TapCost,
@@ -926,6 +927,41 @@ class Executor:
             p.counters[effect.counter_type] = have - effect.quantity
             return None
 
+        if isinstance(effect, ReturnFromGraveyardToHandEffect):
+            candidates = []
+            for p in state.permanents.values():
+                if p.zone != Zone.GRAVEYARD or p.controller != "you":
+                    continue
+                card = self.semantics.get(p.oracle_id)
+                types = {t.casefold() for t in (card.types if card else [])}
+                mv = int(card.mana_value) if card else 0
+                sel = effect.selector
+                if sel == "creature" and not p.is_creature and "creature" not in types:
+                    continue
+                if sel == "artifact" and not p.is_artifact and "artifact" not in types:
+                    continue
+                if sel == "artifact_mv_leq_1":
+                    if not (p.is_artifact or "artifact" in types) or mv > 1:
+                        continue
+                if sel == "instant_or_sorcery":
+                    if "instant" not in types and "sorcery" not in types:
+                        continue
+                candidates.append(p)
+            if not candidates:
+                return None  # "you may" — empty GY is a no-op
+            # Prefer explicit step.target when legal.
+            chosen = None
+            if target_id and target_id in state.permanents:
+                cand = state.permanents[target_id]
+                if cand in candidates:
+                    chosen = cand
+            if chosen is None:
+                chosen = sorted(candidates, key=lambda p: p.object_id)[0]
+            chosen.zone = Zone.HAND
+            chosen.tapped = False
+            state.bump("return_from_gy")
+            return None
+
         if isinstance(effect, ReturnToBattlefieldEffect):
             source.zone = Zone.BATTLEFIELD
             source.tapped = False
@@ -1114,6 +1150,17 @@ class Executor:
         if isinstance(effect, MoveToZoneEffect):
             if effect.target == "self":
                 source.zone = effect.zone
+                return None
+            if effect.target == "trigger_subject":
+                tid = trigger_subject_id or target_id
+                if not tid or tid not in state.permanents:
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_TARGET,
+                        "trigger subject missing for zone move",
+                    )
+                state.permanents[tid].zone = effect.zone
+                state.permanents[tid].tapped = False
+                state.bump("return_from_gy")
                 return None
             if effect.target in {
                 "controlled_creature",

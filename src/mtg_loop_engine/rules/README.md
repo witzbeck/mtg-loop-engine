@@ -54,6 +54,7 @@ graph TB;
 - `DealDamageEffect.equal_to_source_power` / `equal_to_devotion`; `LoseLifeEffect.equal_to_devotion` + following gain; `DrawEffect.equal_to_controlled_artifacts`; generalized `_devotion` for card mana costs (distinct from `DEVOTION_GREEN` activated-cost scale).
 - Sac outlets: clear fodder `target` after sacrifice so damage defaults to opponent; `MillEffect.amount_from_sacrificed_power` via `GameState.last_sacrificed_power`.
 - `MillEffect.amount_from_opponent_graveyard` / `amount_from_trigger`; `ReplacementDoubleMill` (Bruvac); `graveyard_opponent` counter.
+- `ReturnFromGraveyardToHandEffect` (Witness/Salvagers); `MoveToZoneEffect.target=trigger_subject` (Enduring Renewal).
 - `activate_granted_tap_bounce` / `seed_grant_tap_bounce`: Instant grant `{T}`: bounce nonland (`Permanent.tap_bounce_nonland`, witness-persistent).
 - BF tapped→untapped via `_untap_permanent` queues `TriggerEvent.UNTAP` (Mesmeric Orb); self-mill bumps `events.mill` only.
 - Summoning sickness blocks `{T}` / `TapCost` even on mana abilities (CR 302.6); haste not modeled.
