@@ -2565,6 +2565,49 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_value=9,
     ),
 
+    # M5 E35 — extra combat
+    "Aggravated Assault": RealOracleCurriculum(
+        name="Aggravated Assault",
+        types=["Enchantment"],
+        oracle_text=(
+            "{3}{R}{R}: Untap all creatures you control. After this main phase, "
+            "there is an additional combat phase followed by an additional main "
+            "phase."
+        ),
+        notes="E35: activated untap-all + additional combat.",
+        colors=("R",),
+        mana_cost="{2}{R}",
+        mana_value=3,
+    ),
+    "Bloodthirster": RealOracleCurriculum(
+        name="Bloodthirster",
+        types=["Creature", "Demon"],
+        oracle_text=(
+            "Flying, trample\n"
+            "Whenever this creature deals combat damage to a player, untap it. "
+            "After this phase, there is an additional combat phase."
+        ),
+        notes="E35: combat-damage untap + extra combat; keywords PI.",
+        colors=("B",),
+        mana_cost="{5}{B}",
+        mana_value=6,
+    ),
+    "Moraug, Fury of Akoum": RealOracleCurriculum(
+        name="Moraug, Fury of Akoum",
+        types=["Legendary", "Creature", "Minotaur", "Warrior"],
+        oracle_text=(
+            "Each creature you control gets +1/+0 for each time it has attacked "
+            "this turn.\n"
+            "Landfall — Whenever a land you control enters, if it's your main "
+            "phase, there's an additional combat phase after this phase. At the "
+            "beginning of that combat, untap all creatures you control."
+        ),
+        notes="E35: landfall extra combat + untap; attack anthem PI.",
+        colors=("R",),
+        mana_cost="{4}{R}{R}",
+        mana_value=6,
+    ),
+
     # M5 E54 — impulse / top-deck
     "Sensei's Divining Top": RealOracleCurriculum(
         name="Sensei's Divining Top",

@@ -138,7 +138,7 @@ time (effect-shape slices) while keeping this parent ID as the inventory umbrell
 | E33 | pending | Spell copy / storm (umbrella) | CLOSE_BUILD | 17 | 12 | mixed | Split E33a+ |
 | E33a | done | Isochron / Dualcaster / Twincast | CLOSE_BUILD | 4 | — | yes | Imprint cast; last-cast copy; DR untap-nonlands |
 | E34 | pending | Clone / enter as copy | CLOSE_BUILD | 26 | 24 | mixed | Enter as copy of |
-| E35 | pending | Extra combat | CLOSE_BUILD | 4 | 2 | maybe | Additional combat phase |
+| E35 | done | Extra combat | CLOSE_BUILD | 3 | 2 | maybe | Aggravated Assault; Bloodthirster; Moraug |
 | E36 | pending | Extra turn | CLOSE_BUILD | 12 | 6 | low | Take an extra turn |
 | E37 | pending | Planeswalker loyalty | CLOSE_BUILD | 17 | 16 | mixed | +/−/0 loyalty abilities |
 | E38 | pending | Energy | CLOSE_BUILD | 6 | 3 | mixed | {E} counters |

@@ -105,6 +105,7 @@ graph TB;
 - `copy_activated_ability` / `copy_pending_trigger` — E32 Rings / Bracers / Strionic.
 - `untap_all_nonlands` / `imprint_instant_etb` / `cast_imprinted_spell` / `copy_instant_or_sorcery_spell` — E33a Isochron / Dualcaster / Twincast.
 - `dealt_damage_create_copy` / `fight_activated` / `etb_fight` — E74 Polyraptor / Brash / Apex.
+- `additional_combat_untap_activated` / `combat_damage_untap_extra_combat` / `landfall_extra_combat` — E35 extra combat.
 - `untap_mill_controller` — Mesmeric; UNTAP → self-mill.
 
 ## Main entry points
