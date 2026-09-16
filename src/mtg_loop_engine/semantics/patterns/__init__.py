@@ -3843,7 +3843,7 @@ def pat_dealt_damage_reflect(text: str, name: str) -> Ability | None:
     m = re.match(
         rf"^(?:Enrage — )?Whenever (?:{name_alt}|this creature) is dealt damage, "
         rf"(?:it|(?:{name_alt})) deals that much damage to "
-        rf"(any target|target opponent|each player|each opponent)\.?$",
+        rf"(any target|target opponent(?: or planeswalker)?|the chosen player|each player|each opponent)\.?$",
         text,
         re.IGNORECASE,
     )
@@ -3863,6 +3863,27 @@ def pat_dealt_damage_reflect(text: str, name: str) -> Ability | None:
         effects=[
             DealDamageEffect(amount=1, target=target, amount_from_trigger=True)  # type: ignore[arg-type]
         ],
+    )
+
+
+def pat_tap_damage_self(text: str, name: str) -> Ability | None:
+    """Stuffy Doll: {T}: This creature deals 1 damage to itself."""
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
+    short = name.split(",")[0].strip()
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^\{{\s*T\s*\}}: (?:{name_alt}) deals (\d+) damage to itself\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("tap-damage-self", text),
+        costs=[TapCost()],
+        effects=[DealDamageEffect(amount=int(m.group(1)), target="any_target")],
     )
 
 
@@ -4556,6 +4577,15 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
         return _proof_irrelevant(clause)
 
     if re.match(
+        r"^As (?:this creature|~|"
+        + re.escape(name)
+        + r") enters, choose a player\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
         r"^This artifact enters with X charge counters on it\.?$",
         clause,
         re.IGNORECASE,
@@ -4651,6 +4681,7 @@ PATTERNS: list[Pattern] = [
     Pattern("damage_opponent_create_treasures", pat_damage_opponent_create_treasures),
     Pattern("dealt_damage_create_treasures", pat_dealt_damage_create_treasures),
     Pattern("dealt_damage_reflect", pat_dealt_damage_reflect),
+    Pattern("tap_damage_self", pat_tap_damage_self),
     Pattern("dealt_damage_gain_life", pat_dealt_damage_gain_life),
     Pattern("replacement_double_tokens", pat_replacement_double_tokens),
     Pattern("etb_create_eldrazi_tokens", pat_etb_create_eldrazi_tokens),

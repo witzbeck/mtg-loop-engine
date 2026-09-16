@@ -2200,4 +2200,31 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{2}{R}{R}",
         mana_value=4,
     ),
+
+    "Mogg Maniac": RealOracleCurriculum(
+        name="Mogg Maniac",
+        types=["Creature", "Goblin"],
+        oracle_text=(
+            "Whenever this creature is dealt damage, it deals that much damage "
+            "to target opponent or planeswalker."
+        ),
+        notes="E68: dealt-damage reflect to opponent.",
+        colors=("R",),
+        mana_cost="{1}{R}",
+        mana_value=2,
+    ),
+    "Stuffy Doll": RealOracleCurriculum(
+        name="Stuffy Doll",
+        types=["Artifact", "Creature", "Construct"],
+        oracle_text=(
+            "Indestructible\n"
+            "As this creature enters, choose a player.\n"
+            "Whenever this creature is dealt damage, it deals that much damage "
+            "to the chosen player.\n"
+            "{T}: This creature deals 1 damage to itself."
+        ),
+        notes="E68: self-ping + reflect; choose-player PI.",
+        mana_cost="{5}",
+        mana_value=5,
+    ),
 }
