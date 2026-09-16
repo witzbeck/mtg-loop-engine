@@ -861,4 +861,88 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{2}{G}",
         mana_value=3,
     ),
+    # M5 E02 — damage-dealt reflect
+    "Spitemare": RealOracleCurriculum(
+        name="Spitemare",
+        types=["Creature", "Elemental"],
+        oracle_text=(
+            "Whenever Spitemare is dealt damage, it deals that much damage to any target."
+        ),
+        notes="E02: DEALT_DAMAGE reflect to any target.",
+        colors=("R", "W"),
+        mana_cost="{2}{R/W}{R/W}",
+        mana_value=4,
+    ),
+    "Boros Reckoner": RealOracleCurriculum(
+        name="Boros Reckoner",
+        types=["Creature", "Minotaur", "Wizard"],
+        oracle_text=(
+            "First strike\n"
+            "Whenever Boros Reckoner is dealt damage, it deals that much damage to any target."
+        ),
+        notes="E02: reflect; first strike proof-irrelevant.",
+        colors=("R", "W"),
+        mana_cost="{1}{R/W}{R/W}{R/W}",
+        mana_value=4,
+    ),
+    "Coalhauler Swine": RealOracleCurriculum(
+        name="Coalhauler Swine",
+        types=["Creature", "Boar"],
+        oracle_text=(
+            "Whenever Coalhauler Swine is dealt damage, it deals that much damage to each player."
+        ),
+        notes="E02: reflect to each player.",
+        colors=("R",),
+        mana_cost="{4}{R}{R}",
+        mana_value=6,
+    ),
+    "Brash Taunter": RealOracleCurriculum(
+        name="Brash Taunter",
+        types=["Creature", "Goblin"],
+        oracle_text=(
+            "Indestructible\n"
+            "Whenever Brash Taunter is dealt damage, it deals that much damage to target opponent."
+        ),
+        notes="E02: reflect to opponent (fight arm deferred).",
+        colors=("R",),
+        mana_cost="{4}{R}",
+        mana_value=5,
+    ),
+    "Metropolis Reformer": RealOracleCurriculum(
+        name="Metropolis Reformer",
+        types=["Creature", "Angel", "Cleric"],
+        oracle_text=(
+            "Flying, vigilance\n"
+            "Whenever Metropolis Reformer is dealt damage, you gain that much life."
+        ),
+        notes="E02: dealt damage → gain life (hexproof rider deferred).",
+        colors=("W",),
+        mana_cost="{2}{W}",
+        mana_value=3,
+    ),
+    # M5 E03 — token create ×2
+    "Parallel Lives": RealOracleCurriculum(
+        name="Parallel Lives",
+        types=["Enchantment"],
+        oracle_text=(
+            "If an effect would create one or more tokens under your control, "
+            "it creates twice that many of those tokens instead."
+        ),
+        notes="E03: ReplacementDoubleTokens.",
+        colors=("G",),
+        mana_cost="{3}{G}",
+        mana_value=4,
+    ),
+    "Anointed Procession": RealOracleCurriculum(
+        name="Anointed Procession",
+        types=["Enchantment"],
+        oracle_text=(
+            "If an effect would create one or more tokens under your control, "
+            "it creates twice that many of those tokens instead."
+        ),
+        notes="E03: ReplacementDoubleTokens (same text as Parallel Lives).",
+        colors=("W",),
+        mana_cost="{3}{W}",
+        mana_value=4,
+    ),
 }

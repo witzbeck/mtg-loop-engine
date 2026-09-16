@@ -31,6 +31,7 @@ from mtg_loop_engine.semantics.ir import (
     RemoveCounterCost,
     RemoveCounterEffect,
     ReplacementAmplifyP1P1Counters,
+    ReplacementDoubleTokens,
     ReplacementExileInsteadOfGraveyard,
     ReplacementMultiplyTapMana,
     ReplacementReduceM1M1Counters,
@@ -1996,6 +1997,78 @@ def pat_cast_from_gy_if_zombie(text: str, name: str) -> Ability | None:
     )
 
 
+
+def pat_dealt_damage_reflect(text: str, name: str) -> Ability | None:
+    """Spitemare / Reckoner class: dealt damage → that much damage elsewhere."""
+    short = name.split("//")[0].strip()
+    short = short.split(",")[0].strip()
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^(?:Enrage — )?Whenever (?:{name_alt}|this creature) is dealt damage, "
+        rf"(?:it|(?:{name_alt})) deals that much damage to "
+        rf"(any target|target opponent|each player|each opponent)\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    dest = m.group(m.lastindex).lower()
+    if dest in {"any target"}:
+        target = "any_target"
+    elif dest in {"each player"}:
+        target = "each_player"
+    else:
+        target = "opponent"
+    return TriggeredAbility(
+        ability_id=_ability_id("dealt-damage-reflect", text),
+        event=TriggerEvent.DEALT_DAMAGE,
+        filter="self",
+        effects=[
+            DealDamageEffect(amount=1, target=target, amount_from_trigger=True)  # type: ignore[arg-type]
+        ],
+    )
+
+
+def pat_dealt_damage_gain_life(text: str, name: str) -> Ability | None:
+    """Metropolis Reformer: dealt damage → gain that much life."""
+    short = name.split(",")[0].strip()
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^Whenever (?:{name_alt}|this creature) is dealt damage, "
+        rf"you gain that much life\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("dealt-damage-gain-life", text),
+        event=TriggerEvent.DEALT_DAMAGE,
+        filter="self",
+        effects=[GainLifeEffect(amount=1, amount_from_trigger=True)],
+    )
+
+
+def pat_replacement_double_tokens(text: str, name: str) -> Ability | None:
+    """Parallel Lives / Anointed Procession."""
+    m = re.match(
+        r"^If an effect would create one or more tokens under your control, "
+        r"it creates twice that many of those tokens instead\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ReplacementDoubleTokens(
+        ability_id=_ability_id("double-tokens", text),
+        multiplier=2,
+    )
+
+
 def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
     """Match Oracle clauses that do not participate in modeled loop proofs."""
     clause = text.strip().rstrip(".")
@@ -2249,6 +2322,9 @@ PATTERNS: list[Pattern] = [
     Pattern("mana_create_token", pat_mana_create_token),
     Pattern("hybrid_remove_m1m1_pump", pat_hybrid_remove_m1m1_pump),
     Pattern("tap_two_creatures_add_mana", pat_tap_two_creatures_add_mana),
+    Pattern("dealt_damage_reflect", pat_dealt_damage_reflect),
+    Pattern("dealt_damage_gain_life", pat_dealt_damage_gain_life),
+    Pattern("replacement_double_tokens", pat_replacement_double_tokens),
     Pattern("tap_add_mana", pat_tap_add_mana),
     Pattern("mana_untap_enchanted", pat_mana_untap_enchanted),
     Pattern("mana_tap_enchanted", pat_mana_tap_enchanted),
