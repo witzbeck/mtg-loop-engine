@@ -113,7 +113,7 @@ narrows mid-flight.
 | E66 | pending | Equipment remainders | CLOSE_BUILD | 13 | — | mixed | Beyond Mantle |
 | E67 | pending | Untap remainders (umbrella) | CLOSE_BUILD | 29 | — | yes | Extra-combat untaps → E35; else E67a+ |
 | E67a | done | Artifact untap | CLOSE_BUILD | 3 | — | yes | Filigree / Corridor / Clock of Omens |
-| E68 | pending | Damage-to-you payoffs | CLOSE_BUILD | 2 | — | maybe | Auntie Blyte-class |
+| E68 | done | Damage-to-you payoffs | CLOSE_BUILD | 2 | — | maybe | Stuffy Doll / Mogg Maniac reflect |
 | E69 | pending | Prepared / MDFC convert | CLOSE_BUILD | 2 | — | mixed | Cast converted |
 | E70 | pending | Beginning-of-step triggers | CLOSE_BUILD | 32 | — | mixed | End step / upkeep |
 | E71 | pending | Skip step | CLOSE_BUILD | 1 | — | low | Skip untap |
