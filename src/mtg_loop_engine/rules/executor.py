@@ -924,6 +924,8 @@ class Executor:
             qty = effect.amount
             if effect.equal_to_source_power:
                 qty = int(source.effective_power() or 0)
+            elif effect.equal_to_sacrificed_power:
+                qty = int(state.last_sacrificed_power)
             elif effect.equal_to_devotion:
                 qty = _devotion(state, self.semantics, effect.equal_to_devotion)
             elif effect.amount_from_trigger:
@@ -1059,6 +1061,8 @@ class Executor:
 
         if isinstance(effect, MillEffect):
             qty = effect.amount
+            if effect.amount_from_sacrificed_power:
+                qty = int(state.last_sacrificed_power)
             if effect.half_library is not None:
                 lib = (
                     state.library_opponent
@@ -1782,9 +1786,12 @@ class Executor:
                             VerificationStatus.RESOURCE_DEFICIT,
                             "self not on battlefield",
                         )
+                    state.last_sacrificed_power = int(perm.effective_power() or 0)
                     self.sacrifice(state, perm)
                 else:
-                    fodder_id = step.target
+                    fodder_id = step.cost_target
+                    if not fodder_id and step.target and step.target in state.permanents:
+                        fodder_id = step.target
                     if fodder_id:
                         err = self._validate_explicit_sacrifice(
                             state, fodder_id, cost.selector
@@ -1799,7 +1806,11 @@ class Executor:
                                 "no sacrifice fodder",
                             )
                     fodder = state.permanents[fodder_id]
+                    state.last_sacrificed_power = int(fodder.effective_power() or 0)
                     self.sacrifice(state, fodder)
+                    # Do not forward fodder id as effect target (Bombardment damage).
+                    if step.target == fodder_id:
+                        step = step.model_copy(update={"target": None})
             elif isinstance(cost, TapCreatureCost):
                 need = max(int(cost.quantity or 1), 1)
                 tapped_ids: list[str] = []
