@@ -47,6 +47,7 @@ from mtg_loop_engine.semantics.ir import (
     SacrificeCost,
     TapCost,
     TapCreatureCost,
+    TapArtifactCost,
     TapEffect,
     TriggeredAbility,
     UntapEffect,
@@ -514,6 +515,61 @@ def pat_tap_each_player_draw(text: str, name: str) -> Ability | None:
         ability_id=_ability_id("tap-each-draw", text),
         costs=[TapCost()],
         effects=[DrawEffect(amount=1)],
+    )
+
+
+
+def pat_untap_target_artifact(text: str, name: str) -> Ability | None:
+    """Filigree Sages: {N}{U}: untap target artifact."""
+    m = re.match(
+        r"^((?:\{[^}]+\})+): Untap target artifact\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("untap-artifact", text),
+        costs=[ManaCost(amount=_parse_mana_braces(m.group(1)))],
+        effects=[UntapEffect(target="target_artifact")],
+    )
+
+
+def pat_etb_untap_artifact_or_creature(text: str, name: str) -> Ability | None:
+    """Corridor Monitor: ETB untap target artifact or creature you control."""
+    m = re.match(
+        r"^When (?:this creature|~|"
+        + re.escape(name)
+        + r") enters(?: the battlefield)?, "
+        r"untap target artifact or creature you control\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("etb-untap-artifact-creature", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="self",
+        effects=[UntapEffect(target="target_permanent")],
+    )
+
+
+def pat_tap_artifacts_untap_artifact(text: str, name: str) -> Ability | None:
+    """Clock of Omens: tap two untapped artifacts: untap target artifact."""
+    m = re.match(
+        r"^Tap (one|two|three|\d+) untapped artifacts? you control: "
+        r"Untap target artifact\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    qty = _parse_count_word(m.group(1)) or 1
+    return ActivatedAbility(
+        ability_id=_ability_id("tap-artifacts-untap", text),
+        costs=[TapArtifactCost(quantity=qty, allow_source=True)],
+        effects=[UntapEffect(target="target_artifact")],
     )
 
 
@@ -3936,6 +3992,9 @@ PATTERNS: list[Pattern] = [
     Pattern("mana_tap_draw", pat_mana_tap_draw),
     Pattern("tap_creature_subtype_draw", pat_tap_creature_subtype_draw),
     Pattern("tap_each_player_draw", pat_tap_each_player_draw),
+    Pattern("untap_target_artifact", pat_untap_target_artifact),
+    Pattern("etb_untap_artifact_or_creature", pat_etb_untap_artifact_or_creature),
+    Pattern("tap_artifacts_untap_artifact", pat_tap_artifacts_untap_artifact),
     Pattern("mana_untap_self", pat_mana_untap_self),
     Pattern("cost_reduction", pat_cost_reduction),
     Pattern("zirda_cost_reduction", pat_zirda_cost_reduction),

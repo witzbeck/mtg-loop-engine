@@ -109,7 +109,8 @@ narrows mid-flight.
 | E63 | pending | Destroy / wrath | CLOSE_BUILD | 11 | — | low | One-shotish; Path-a rare |
 | E65 | done | Protection / hexproof | CLOSE_BUILD | 7 | — | low | Equipped/static keyword PI |
 | E66 | pending | Equipment remainders | CLOSE_BUILD | 13 | — | mixed | Beyond Mantle |
-| E67 | pending | Untap remainders | CLOSE_BUILD | 29 | — | yes | Non-land / modified untap |
+| E67 | pending | Untap remainders (umbrella) | CLOSE_BUILD | 29 | — | yes | Extra-combat untaps → E35; else E67a+ |
+| E67a | done | Artifact untap | CLOSE_BUILD | 3 | — | yes | Filigree / Corridor / Clock of Omens |
 | E68 | pending | Damage-to-you payoffs | CLOSE_BUILD | 2 | — | maybe | Auntie Blyte-class |
 | E69 | pending | Prepared / MDFC convert | CLOSE_BUILD | 2 | — | mixed | Cast converted |
 | E70 | pending | Beginning-of-step triggers | CLOSE_BUILD | 32 | — | mixed | End step / upkeep |
