@@ -37,6 +37,8 @@ class Permanent:
     # True iff this permanent entered via cast_from_hand (Shard intervening-if).
     was_cast: bool = False
     entered_this_turn: bool = False
+    # Isochron Scepter: oracle_id of the imprinted instant (exile modeled as field).
+    imprinted_oracle_id: str | None = None
 
     def effective_power(self) -> int | None:
         """Power after +1/+1 and -1/-1 counters. None if no printed power."""
@@ -81,6 +83,7 @@ class Permanent:
             tap_bounce_nonland=self.tap_bounce_nonland,
             was_cast=self.was_cast,
             entered_this_turn=self.entered_this_turn,
+            imprinted_oracle_id=self.imprinted_oracle_id,
         )
 
 
@@ -101,6 +104,8 @@ class GameState:
     pending_triggers: list[dict[str, Any]] = field(default_factory=list)
     _token_seq: int = 0
     last_sacrificed_power: int = 0
+    # Last instant/sorcery cast (Isochron / Dualcaster / Twincast copy source).
+    last_cast_spell_oracle_id: str | None = None
 
     @classmethod
     def from_spec(cls, spec: InitialStateSpec) -> GameState:
@@ -149,6 +154,7 @@ class GameState:
             pending_triggers=deepcopy(self.pending_triggers),
             _token_seq=self._token_seq,
             last_sacrificed_power=self.last_sacrificed_power,
+            last_cast_spell_oracle_id=self.last_cast_spell_oracle_id,
         )
 
     def bump(self, key: str, n: int = 1) -> None:

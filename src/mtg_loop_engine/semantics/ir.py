@@ -191,10 +191,30 @@ class UntapEffect(BaseModel):
         "target_land",
         "target_artifact",
         "controlled_lands",
+        "controlled_nonlands",
         "all_creatures",
     ] = ("self")
     # Peregrine Drake / Argothian Elder: untap up to N lands (None = all controlled lands).
     quantity: int | None = None
+
+
+class ImprintInstantFromHandEffect(BaseModel):
+    """Isochron: exile an instant with mana value ≤ N from hand onto this permanent."""
+
+    kind: Literal["imprint_instant_from_hand"] = "imprint_instant_from_hand"
+    max_mana_value: int = 2
+
+
+class CastImprintedSpellEffect(BaseModel):
+    """Isochron: cast a copy of the imprinted instant without paying its mana cost."""
+
+    kind: Literal["cast_imprinted_spell"] = "cast_imprinted_spell"
+
+
+class CopyLastCastSpellEffect(BaseModel):
+    """Twincast / Dualcaster: re-apply the last cast instant/sorcery's effects."""
+
+    kind: Literal["copy_last_cast_spell"] = "copy_last_cast_spell"
 
 
 class TapEffect(BaseModel):
@@ -401,6 +421,9 @@ Effect = Annotated[
     | ReturnToBattlefieldEffect
     | BlinkEffect
     | CopyPendingTriggerEffect
+    | ImprintInstantFromHandEffect
+    | CastImprintedSpellEffect
+    | CopyLastCastSpellEffect
     | DealDamageEffect
     | GainLifeEffect
     | DrawEffect

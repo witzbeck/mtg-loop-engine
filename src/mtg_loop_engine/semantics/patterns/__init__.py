@@ -54,6 +54,9 @@ from mtg_loop_engine.semantics.ir import (
     ReturnToBattlefieldEffect,
     BlinkEffect,
     CopyPendingTriggerEffect,
+    CastImprintedSpellEffect,
+    CopyLastCastSpellEffect,
+    ImprintInstantFromHandEffect,
     SacrificeCost,
     TapCost,
     TapCreatureCost,
@@ -1300,6 +1303,94 @@ def pat_copy_pending_trigger(text: str, name: str) -> Ability | None:
         costs=[ManaCost(amount=_parse_mana_braces(m.group(1))), TapCost()],
         effects=[CopyPendingTriggerEffect()],
     )
+
+
+def pat_untap_all_nonlands(text: str, name: str) -> Ability | None:
+    """Dramatic Reversal: Untap all nonland permanents you control."""
+    m = re.match(
+        r"^Untap all nonland permanents you control\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("spell-untap-nonlands", text),
+        costs=[],
+        effects=[UntapEffect(target="controlled_nonlands")],
+    )
+
+
+def pat_imprint_instant_etb(text: str, name: str) -> Ability | None:
+    """Isochron imprint: ETB exile instant MV≤N from hand."""
+    short = name.split(",")[0].strip() if name else ""
+    name_alts = [re.escape(n) for n in {name, short, "this artifact"} if n]
+    name_alt = "|".join(name_alts)
+    m = re.match(
+        rf"^(?:Imprint — )?When (?:{name_alt}) enters(?: the battlefield)?, "
+        rf"you may exile an instant card with mana value (\d+) or less from your hand\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("imprint-instant", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="self",
+        effects=[ImprintInstantFromHandEffect(max_mana_value=int(m.group(1)))],
+    )
+
+
+def pat_cast_imprinted_spell(text: str, name: str) -> Ability | None:
+    """Isochron: {2}, {T}: cast copy of exiled card."""
+    m = re.match(
+        r"^((?:\{[^}]+\})+), \{T\}: You may copy the exiled card\. "
+        r"If you do, you may cast the copy without paying its mana cost\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("cast-imprinted", text),
+        costs=[ManaCost(amount=_parse_mana_braces(m.group(1))), TapCost()],
+        effects=[CastImprintedSpellEffect()],
+    )
+
+
+def pat_copy_instant_or_sorcery_spell(text: str, name: str) -> Ability | None:
+    """Twincast / Reverberate spell body, or Dualcaster ETB copy."""
+    clause = text.strip()
+    m_etb = re.match(
+        r"^When (?:this creature|~|"
+        + re.escape(name)
+        + r") enters(?: the battlefield)?, "
+        r"copy target instant or sorcery spell(?: you control)?\. "
+        r"You may choose new targets for the copy\.?$",
+        clause,
+        re.IGNORECASE,
+    )
+    if m_etb:
+        return TriggeredAbility(
+            ability_id=_ability_id("etb-copy-spell", text),
+            event=TriggerEvent.ENTER_BATTLEFIELD,
+            filter="self",
+            effects=[CopyLastCastSpellEffect()],
+        )
+    m_spell = re.match(
+        r"^Copy target instant or sorcery spell(?: you control)?\. "
+        r"You may choose new targets for the copy\.?$",
+        clause,
+        re.IGNORECASE,
+    )
+    if m_spell:
+        return ActivatedAbility(
+            ability_id=_ability_id("spell-copy-spell", text),
+            costs=[],
+            effects=[CopyLastCastSpellEffect()],
+        )
+    return None
 
 
 def pat_blink_activated(text: str, name: str) -> Ability | None:
@@ -5251,6 +5342,10 @@ PATTERNS: list[Pattern] = [
     Pattern("nontoken_creatures_are_forests", pat_nontoken_creatures_are_forests),
     Pattern("copy_activated_ability", pat_copy_activated_ability),
     Pattern("copy_pending_trigger", pat_copy_pending_trigger),
+    Pattern("untap_all_nonlands", pat_untap_all_nonlands),
+    Pattern("imprint_instant_etb", pat_imprint_instant_etb),
+    Pattern("cast_imprinted_spell", pat_cast_imprinted_spell),
+    Pattern("copy_instant_or_sorcery_spell", pat_copy_instant_or_sorcery_spell),
     Pattern("blink_activated", pat_blink_activated),
     Pattern("blink_etb", pat_blink_etb),
     Pattern("tap_draw_put_on_library", pat_tap_draw_put_on_library),

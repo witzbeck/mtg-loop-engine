@@ -16,6 +16,8 @@ from mtg_loop_engine.semantics.ir import (
     ContinuousCostReduction,
     CopyPendingTriggerEffect,
     CreateTokenEffect,
+    CastImprintedSpellEffect,
+    CopyLastCastSpellEffect,
     DealDamageEffect,
     DrawEffect,
     FreeCastCreaturesByManaValue,
@@ -23,6 +25,7 @@ from mtg_loop_engine.semantics.ir import (
     GrantLifelinkEffect,
     GrantTapBounceNonlandEffect,
     HybridManaCost,
+    ImprintInstantFromHandEffect,
     LoseLifeEffect,
     ManaAmount,
     ManaCost,
@@ -947,6 +950,23 @@ class Executor:
                 if n:
                     state.bump("untap", n)
                 return None
+            if effect.target == "controlled_nonlands":
+                nonlands = [
+                    p
+                    for p in state.permanents.values()
+                    if p.zone == Zone.BATTLEFIELD
+                    and p.controller == "you"
+                    and not self._is_land_permanent(p, state)
+                ]
+                n = 0
+                for perm in nonlands:
+                    was_tapped = perm.tapped
+                    self._untap_permanent(state, perm)
+                    if was_tapped:
+                        n += 1
+                if n:
+                    state.bump("untap", n)
+                return None
             tid = source.object_id if effect.target == "self" else target_id
             if not tid or tid not in state.permanents:
                 return ExecError(VerificationStatus.ILLEGAL_TARGET, "untap target missing")
@@ -1274,6 +1294,17 @@ class Executor:
             state.pending_triggers.append(deepcopy(state.pending_triggers[0]))
             state.bump("ability_copy")
             return None
+
+        if isinstance(effect, ImprintInstantFromHandEffect):
+            return self._imprint_instant_from_hand(
+                state, source, max_mana_value=effect.max_mana_value
+            )
+
+        if isinstance(effect, CastImprintedSpellEffect):
+            return self._cast_imprinted_spell(state, source)
+
+        if isinstance(effect, CopyLastCastSpellEffect):
+            return self._copy_last_cast_spell(state, source, target_id=target_id)
 
         if isinstance(effect, DealDamageEffect):
             qty = effect.amount
@@ -1942,6 +1973,120 @@ class Executor:
                         continue
                 best = ab.pay_generic if best is None else min(best, ab.pay_generic)
         return best
+
+    def _spell_body_abilities(self, card: CardSemantics) -> list[ActivatedAbility]:
+        """Instant/sorcery bodies are empty-cost ActivatedAbility clauses."""
+        out: list[ActivatedAbility] = []
+        for ab in card.abilities:
+            if not isinstance(ab, ActivatedAbility):
+                continue
+            if ab.is_mana_ability:
+                continue
+            if ab.costs:
+                continue
+            out.append(ab)
+        return out
+
+    def _apply_spell_body(
+        self,
+        state: GameState,
+        *,
+        spell_oracle_id: str,
+        source: Permanent,
+        target_id: str | None = None,
+        was_cast: bool = False,
+        count_as_copy: bool = False,
+    ) -> ExecError | None:
+        card = self.semantics.get(spell_oracle_id)
+        if card is None:
+            return ExecError(
+                VerificationStatus.ILLEGAL_ACTION, "spell semantics missing"
+            )
+        bodies = self._spell_body_abilities(card)
+        if not bodies:
+            return ExecError(
+                VerificationStatus.UNSUPPORTED_SEMANTICS,
+                "no spell body to resolve",
+            )
+        for ab in bodies:
+            err = self.apply_effects(state, source, ab.effects, target_id)
+            if err:
+                return err
+        if was_cast:
+            state.last_cast_spell_oracle_id = spell_oracle_id
+            state.bump("cast")
+            self._queue_triggers(state, TriggerEvent.CAST, source)
+        if count_as_copy:
+            state.bump("spell_copy")
+        return None
+
+    def _imprint_instant_from_hand(
+        self, state: GameState, source: Permanent, *, max_mana_value: int
+    ) -> ExecError | None:
+        candidates = [
+            p
+            for p in state.permanents.values()
+            if p.zone == Zone.HAND
+            and p.controller == "you"
+            and p.object_id != source.object_id
+        ]
+        legal: list[Permanent] = []
+        for p in candidates:
+            card = self.semantics.get(p.oracle_id)
+            if card is None:
+                continue
+            types = {t.casefold() for t in card.types}
+            if "instant" not in types:
+                continue
+            if card.mana_value > max_mana_value:
+                continue
+            legal.append(p)
+        if not legal:
+            return ExecError(
+                VerificationStatus.RESOURCE_DEFICIT,
+                "no imprintable instant in hand",
+            )
+        # Combo-favorable: lowest object_id among legal.
+        legal.sort(key=lambda p: p.object_id)
+        chosen = legal[0]
+        chosen.zone = Zone.EXILE
+        source.imprinted_oracle_id = chosen.oracle_id
+        state.bump("imprint")
+        return None
+
+    def _cast_imprinted_spell(
+        self, state: GameState, source: Permanent
+    ) -> ExecError | None:
+        oid = source.imprinted_oracle_id
+        if not oid:
+            return ExecError(
+                VerificationStatus.RESOURCE_DEFICIT, "no imprinted spell"
+            )
+        # CR: casting the copy counts as casting the spell.
+        return self._apply_spell_body(
+            state, spell_oracle_id=oid, source=source, was_cast=True
+        )
+
+    def _copy_last_cast_spell(
+        self,
+        state: GameState,
+        source: Permanent,
+        *,
+        target_id: str | None,
+    ) -> ExecError | None:
+        oid = state.last_cast_spell_oracle_id
+        if not oid:
+            return ExecError(
+                VerificationStatus.ILLEGAL_ACTION, "no spell to copy"
+            )
+        # Copies are not cast (no storm / CAST triggers).
+        return self._apply_spell_body(
+            state,
+            spell_oracle_id=oid,
+            source=source,
+            target_id=target_id,
+            count_as_copy=True,
+        )
 
     def die(self, state: GameState, permanent: Permanent) -> None:
         # CR 700.4: "dies" means BF→GY for any permanent.

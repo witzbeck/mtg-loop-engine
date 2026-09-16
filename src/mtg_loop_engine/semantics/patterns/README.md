@@ -103,6 +103,7 @@ graph TB;
 - `dealt_damage_draw` — Body of Knowledge; DEALT_DAMAGE → draw that many.
 - `blink_activated` / `blink_etb` — E30a Emiel / Displacer / Felidar exile→return.
 - `copy_activated_ability` / `copy_pending_trigger` — E32 Rings / Bracers / Strionic.
+- `untap_all_nonlands` / `imprint_instant_etb` / `cast_imprinted_spell` / `copy_instant_or_sorcery_spell` — E33a Isochron / Dualcaster / Twincast.
 - `untap_mill_controller` — Mesmeric; UNTAP → self-mill.
 
 ## Main entry points
