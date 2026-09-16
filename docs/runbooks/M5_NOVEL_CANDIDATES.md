@@ -172,8 +172,9 @@ uv run python scripts/spellbook_absent_discovery.py
 70. **Low Path-a REJECT batch** ✓ — E63 destroy/wrath, E71 skip, E72 counterspell, E73 rituals → R02–R05.
 71. **E54 impulse / top-deck** ✓ — Sensei's Top; Harnfel discard-impulse→draw; Elven Chorus PI.
 72. **E59 buyback/kicker** ✓ — Buyback reminder split + PI; Searing Touch / Clockspinning / Sprout Swarm.
-73. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-74. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+73. **E32 ability copy** ✓ — Rings pay-{2}; Bracers free equipped; Strionic copy pending trigger.
+74. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+75. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 

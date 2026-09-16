@@ -14,6 +14,7 @@ from mtg_loop_engine.semantics.ir import (
     AddManaEffect,
     CardSemantics,
     ContinuousCostReduction,
+    CopyPendingTriggerEffect,
     CreateTokenEffect,
     DealDamageEffect,
     DrawEffect,
@@ -44,6 +45,7 @@ from mtg_loop_engine.semantics.ir import (
     StaticCantGainLife,
     StaticCdaPT,
     StaticNontokenCreaturesAreForests,
+    StaticCopyActivatedAbility,
     ProliferateEffect,
     BounceControlledCost,
     GrantActivatedAbility,
@@ -1261,6 +1263,18 @@ class Executor:
                 target_id=target_id,
             )
 
+        if isinstance(effect, CopyPendingTriggerEffect):
+            if not state.pending_triggers:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_ACTION,
+                    "no pending trigger to copy",
+                )
+            from copy import deepcopy
+
+            state.pending_triggers.append(deepcopy(state.pending_triggers[0]))
+            state.bump("ability_copy")
+            return None
+
         if isinstance(effect, DealDamageEffect):
             qty = effect.amount
             if effect.equal_to_source_power:
@@ -1898,6 +1912,37 @@ class Executor:
         self._on_etb(state, victim)
         return None
 
+    def _copy_activated_payment(
+        self,
+        state: GameState,
+        *,
+        ability: ActivatedAbility,
+        actor: Permanent,
+    ) -> int | None:
+        """Return generic mana to pay for a Rings/Bracers copy, or None if no copy."""
+        if ability.is_mana_ability:
+            return None
+        best: int | None = None
+        for perm in state.permanents.values():
+            if perm.zone != Zone.BATTLEFIELD or perm.controller != "you":
+                continue
+            card = self.semantics.get(perm.oracle_id)
+            if not card:
+                continue
+            for ab in card.abilities:
+                if not isinstance(ab, StaticCopyActivatedAbility):
+                    continue
+                if ab.exclude_mana_abilities and ability.is_mana_ability:
+                    continue
+                if ab.only_other_creatures:
+                    if (
+                        not actor.is_creature
+                        or actor.object_id == perm.object_id
+                    ):
+                        continue
+                best = ab.pay_generic if best is None else min(best, ab.pay_generic)
+        return best
+
     def die(self, state: GameState, permanent: Permanent) -> None:
         # CR 700.4: "dies" means BF→GY for any permanent.
         # Engine ``events.death`` / OutputType.DEATH count *creature* deaths only
@@ -2435,6 +2480,16 @@ class Executor:
         err = self.apply_effects(state, perm, ab.effects, step.target)
         if err:
             return err
+        # Rings / Bracers: combo-favorable copy of non-mana activations.
+        copy_pay = self._copy_activated_payment(state, ability=ab, actor=perm)
+        if copy_pay is not None:
+            need = ManaAmount(generic=copy_pay)
+            pay_err = self.pay_mana(state, need, allow_activate_only=True)
+            if pay_err is None:
+                err = self.apply_effects(state, perm, ab.effects, step.target)
+                if err:
+                    return err
+                state.bump("ability_copy")
         if ab.once_per_turn:
             perm.once_per_turn_used.add(ab.ability_id)
         return None

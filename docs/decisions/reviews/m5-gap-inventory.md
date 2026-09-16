@@ -134,7 +134,7 @@ time (effect-shape slices) while keeping this parent ID as the inventory umbrell
 | E31 | pending | Token-copy (+haste) (umbrella) | CLOSE_BUILD | 40 | 25 | yes | Kiki/Twin-class |
 | E31a | done | Tap-copy with haste | CLOSE_BUILD | 2 | — | yes | Kiki-Jiki; Splinter Twin grant |
 | E31b | done | Paid tap-copy siblings | CLOSE_BUILD | 3 | — | yes | Reflection of Kiki-Jiki; Orthion; Myr Propagator |
-| E32 | pending | Ability copy | CLOSE_BUILD | 3 | 3 | yes | Rings/Bracers-class |
+| E32 | done | Ability copy | CLOSE_BUILD | 3 | 3 | yes | Rings/Bracers/Strionic |
 | E33 | pending | Spell copy / storm | CLOSE_BUILD | 17 | 12 | mixed | Copy spell; storm |
 | E34 | pending | Clone / enter as copy | CLOSE_BUILD | 26 | 24 | mixed | Enter as copy of |
 | E35 | pending | Extra combat | CLOSE_BUILD | 4 | 2 | maybe | Additional combat phase |

@@ -2436,6 +2436,44 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_value=3,
     ),
 
+    # M5 E32 — ability / trigger copy
+    "Rings of Brighthearth": RealOracleCurriculum(
+        name="Rings of Brighthearth",
+        types=["Artifact"],
+        oracle_text=(
+            "Whenever you activate an ability, if it isn't a mana ability, "
+            "you may pay {2}. If you do, copy that ability. "
+            "You may choose new targets for the copy."
+        ),
+        notes="E32: pay-{2} copy non-mana activated abilities.",
+        mana_cost="{3}",
+        mana_value=3,
+    ),
+    "Illusionist's Bracers": RealOracleCurriculum(
+        name="Illusionist's Bracers",
+        types=["Artifact", "Equipment"],
+        oracle_text=(
+            "Whenever an ability of equipped creature is activated, "
+            "if it isn't a mana ability, copy that ability. "
+            "You may choose new targets for the copy.\n"
+            "Equip {3}"
+        ),
+        notes="E32: free copy of equipped creature non-mana activations.",
+        mana_cost="{2}",
+        mana_value=2,
+    ),
+    "Strionic Resonator": RealOracleCurriculum(
+        name="Strionic Resonator",
+        types=["Artifact"],
+        oracle_text=(
+            "{2}, {T}: Copy target triggered ability you control. "
+            "You may choose new targets for the copy."
+        ),
+        notes="E32: copy pending triggered ability.",
+        mana_cost="{2}",
+        mana_value=2,
+    ),
+
     # M5 E54 — impulse / top-deck
     "Sensei's Divining Top": RealOracleCurriculum(
         name="Sensei's Divining Top",

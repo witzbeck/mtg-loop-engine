@@ -276,6 +276,12 @@ class BlinkEffect(BaseModel):
     return_tapped: bool = False
 
 
+class CopyPendingTriggerEffect(BaseModel):
+    """Strionic Resonator: copy a pending triggered ability you control."""
+
+    kind: Literal["copy_pending_trigger"] = "copy_pending_trigger"
+
+
 class DealDamageEffect(BaseModel):
     kind: Literal["deal_damage"] = "deal_damage"
     amount: int = 1
@@ -394,6 +400,7 @@ Effect = Annotated[
     | ReturnFromGraveyardToHandEffect
     | ReturnToBattlefieldEffect
     | BlinkEffect
+    | CopyPendingTriggerEffect
     | DealDamageEffect
     | GainLifeEffect
     | DrawEffect
@@ -626,6 +633,17 @@ class StaticNontokenCreaturesAreForests(BaseModel):
     supported: bool = True
 
 
+class StaticCopyActivatedAbility(BaseModel):
+    """Rings of Brighthearth: may pay {N} to copy non-mana activated abilities."""
+
+    kind: Literal["static_copy_activated"] = "static_copy_activated"
+    ability_id: str
+    pay_generic: int = 2
+    exclude_mana_abilities: bool = True
+    only_other_creatures: bool = False
+    supported: bool = True
+
+
 class GrantActivatedAbility(BaseModel):
     """Cryptolith Rite / Basal Sliver: grant an activated ability to matching hosts."""
 
@@ -687,6 +705,7 @@ Ability = Annotated[
     | StaticCantGainLife
     | StaticCdaPT
     | StaticNontokenCreaturesAreForests
+    | StaticCopyActivatedAbility
     | GrantActivatedAbility
     | FreeCastCreaturesByManaValue
     | InstantGrantTapBounce
