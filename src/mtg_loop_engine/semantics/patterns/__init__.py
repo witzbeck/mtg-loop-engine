@@ -747,9 +747,9 @@ def pat_sac_put_charge_target_artifact(text: str, name: str) -> Ability | None:
 
 
 def pat_tap_copy_creature_haste(text: str, name: str) -> Ability | None:
-    """Kiki-Jiki: {T}: create token copy of target nonlegendary creature with haste."""
+    """Kiki-Jiki / Reflection / Orthion: tap (optional mana) create token copy with haste."""
     cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
-    # Drop end-step sacrifice rider (combo-favorable deferred).
+    # Drop end-step sacrifice / exile riders (combo-favorable deferred).
     cleaned = re.sub(
         r"\s*Sacrifice it at the beginning of the next end step\.?$",
         "",
@@ -762,17 +762,46 @@ def pat_tap_copy_creature_haste(text: str, name: str) -> Ability | None:
         cleaned,
         flags=re.IGNORECASE,
     )
+    cleaned = re.sub(
+        r"\s*Exile it at the beginning of the next end step\.?$",
+        "",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    # Optional mana before {T}.
     m = re.match(
-        r"^\{T\}: Create a token that's a copy of target nonlegendary creature "
-        r"you control(?:, except it has haste)?\.?$",
+        r"^(?:((?:\{[^}]+\})+), )?\{T\}: Create a token that's a copy of "
+        r"(?:another )?target (?:nonlegendary )?creature you control"
+        r"(?:, except it has haste)?(?:\. It gains haste)?\.?$",
         cleaned,
         re.IGNORECASE,
     )
     if not m:
-        return None
+        # Myr Propagator: copy of this creature (no haste required).
+        m2 = re.match(
+            r"^(?:((?:\{[^}]+\})+), )?\{T\}: Create a token that's a copy of "
+            r"this creature\.?$",
+            cleaned,
+            re.IGNORECASE,
+        )
+        if not m2:
+            return None
+        costs = []
+        if m2.group(1):
+            costs.append(ManaCost(amount=_parse_mana_braces(m2.group(1))))
+        costs.append(TapCost())
+        return ActivatedAbility(
+            ability_id=_ability_id("tap-copy-self", text),
+            costs=costs,
+            effects=[CreateTokenEffect(copy_target=True, haste=False)],
+        )
+    costs = []
+    if m.group(1):
+        costs.append(ManaCost(amount=_parse_mana_braces(m.group(1))))
+    costs.append(TapCost())
     return ActivatedAbility(
         ability_id=_ability_id("tap-copy-haste", text),
-        costs=[TapCost()],
+        costs=costs,
         effects=[CreateTokenEffect(copy_target=True, haste=True)],
     )
 
