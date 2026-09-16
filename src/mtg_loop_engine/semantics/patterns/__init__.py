@@ -33,6 +33,7 @@ from mtg_loop_engine.semantics.ir import (
     RemoveCounterEffect,
     ReplacementAmplifyP1P1Counters,
     ReplacementDoubleTokens,
+    ReplacementDoubleMill,
     GrantActivatedAbility,
     ReplacementExileInsteadOfGraveyard,
     ReplacementMultiplyTapMana,
@@ -2064,6 +2065,56 @@ def _parse_count_word(raw: str) -> int | None:
 
 
 
+
+def pat_scaled_mill(text: str, name: str) -> Ability | None:
+    """E17: GY-count mill, life-loss mill, Bruvac double mill."""
+    cleaned = _strip_ability_word(text)
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", cleaned).strip()
+
+    m = re.match(
+        r"^\{(\d+)\}, \{T\}: Target player mills X cards, where X is the number of cards in that player's graveyard\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return ActivatedAbility(
+            ability_id=_ability_id("keening-mill", text),
+            costs=[
+                ManaCost(amount=ManaAmount(generic=int(m.group(1)))),
+                TapCost(),
+            ],
+            effects=[MillEffect(who="opponent", amount_from_opponent_graveyard=True)],
+            uses_stack=True,
+            is_mana_ability=False,
+        )
+
+    m = re.match(
+        r"^Whenever an opponent loses life, that player mills that many cards\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("mindcrank-mill", text),
+            event=TriggerEvent.OPPONENT_LOSE_LIFE,
+            filter="any",
+            effects=[MillEffect(who="opponent", amount_from_trigger=True)],
+        )
+
+    m = re.match(
+        r"^If an opponent would mill one or more cards, they mill twice that many cards instead\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return ReplacementDoubleMill(
+            ability_id=_ability_id("bruvac-double-mill", text),
+            multiplier=2,
+        )
+
+    return None
+
+
 def pat_sac_outlet_payoffs(text: str, name: str) -> Ability | None:
     """E16: sac outlet → damage / mill / mana / draw."""
     cleaned = _strip_ability_word(text)
@@ -3276,6 +3327,7 @@ PATTERNS: list[Pattern] = [
     Pattern("mana_create_token", pat_mana_create_token),
     Pattern("hybrid_remove_m1m1_pump", pat_hybrid_remove_m1m1_pump),
     Pattern("tap_two_creatures_add_mana", pat_tap_two_creatures_add_mana),
+    Pattern("scaled_mill", pat_scaled_mill),
     Pattern("sac_outlet_payoffs", pat_sac_outlet_payoffs),
     Pattern("dies_trigger_payoffs", pat_dies_trigger_payoffs),
     Pattern("self_etb_scaled", pat_self_etb_scaled),

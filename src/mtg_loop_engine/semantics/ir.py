@@ -255,6 +255,9 @@ class MillEffect(BaseModel):
     half_library: Literal[None, "up", "down"] = None
     # Altar of Dementia: mill = sacrificed creature's power.
     amount_from_sacrificed_power: bool = False
+    # Keening Stone: mill = cards in that player's graveyard (opponent GY count).
+    amount_from_opponent_graveyard: bool = False
+    amount_from_trigger: bool = False
 
 
 class MoveToZoneEffect(BaseModel):
@@ -427,6 +430,15 @@ class ReplacementDoubleTokens(BaseModel):
     supported: bool = True
 
 
+class ReplacementDoubleMill(BaseModel):
+    """Bruvac: if an opponent would mill, they mill twice that many instead."""
+
+    kind: Literal["replacement_double_mill"] = "replacement_double_mill"
+    ability_id: str
+    multiplier: int = 2
+    supported: bool = True
+
+
 class GrantActivatedAbility(BaseModel):
     """Cryptolith Rite / Basal Sliver: grant an activated ability to matching hosts."""
 
@@ -479,6 +491,7 @@ Ability = Annotated[
     | ReplacementAmplifyP1P1Counters
     | ReplacementMultiplyTapMana
     | ReplacementDoubleTokens
+    | ReplacementDoubleMill
     | GrantActivatedAbility
     | FreeCastCreaturesByManaValue
     | InstantGrantTapBounce

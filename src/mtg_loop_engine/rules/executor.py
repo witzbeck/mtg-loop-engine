@@ -35,6 +35,7 @@ from mtg_loop_engine.semantics.ir import (
     ReplacementExileInsteadOfGraveyard,
     ReplacementMultiplyTapMana,
     ReplacementDoubleTokens,
+    ReplacementDoubleMill,
     GrantActivatedAbility,
     ReplacementReduceM1M1Counters,
     ReturnToBattlefieldEffect,
@@ -275,6 +276,20 @@ class Executor:
 
     def __init__(self, semantics: dict[str, CardSemantics]):
         self.semantics = semantics  # keyed by oracle_id
+
+    def _mill_multiplier(self, state: GameState) -> int:
+        mult = 1
+        for perm in state.permanents.values():
+            if perm.zone != Zone.BATTLEFIELD or perm.controller != "you":
+                continue
+            card = self.semantics.get(perm.oracle_id)
+            if not card:
+                continue
+            for ab in card.abilities:
+                if isinstance(ab, ReplacementDoubleMill) and ab.supported:
+                    mult *= max(int(ab.multiplier), 1)
+        return mult
+
 
     def cost_reduction(
         self,
@@ -1063,6 +1078,10 @@ class Executor:
             qty = effect.amount
             if effect.amount_from_sacrificed_power:
                 qty = int(state.last_sacrificed_power)
+            elif effect.amount_from_opponent_graveyard:
+                qty = int(state.graveyard_opponent)
+            elif effect.amount_from_trigger and trigger_amount is not None:
+                qty = int(trigger_amount)
             if effect.half_library is not None:
                 lib = (
                     state.library_opponent
@@ -1076,7 +1095,10 @@ class Executor:
             if qty <= 0:
                 return None
             if effect.who == "opponent":
+                mult = self._mill_multiplier(state)
+                qty = qty * mult
                 state.library_opponent = max(0, state.library_opponent - qty)
+                state.graveyard_opponent += qty
                 state.bump("mill", qty)
                 for _ in range(qty):
                     self._queue_triggers(
