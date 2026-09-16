@@ -37,6 +37,10 @@ from mtg_loop_engine.semantics.ir import (
     ReplacementDoubleTokens,
     ReplacementDoubleMill,
     ReplacementDoubleCounters,
+    ReplacementDoubleLifeGain,
+    ReplacementDoubleOpponentLifeLoss,
+    ReplacementDoubleDraw,
+    StaticCantGainLife,
     ProliferateEffect,
     BounceControlledCost,
     GrantActivatedAbility,
@@ -294,6 +298,96 @@ class Executor:
                 if isinstance(ab, ReplacementDoubleMill) and ab.supported:
                     mult *= max(int(ab.multiplier), 1)
         return mult
+
+    def _life_gain_multiplier(self, state: GameState) -> int:
+        mult = 1
+        for perm in state.permanents.values():
+            if perm.zone != Zone.BATTLEFIELD or perm.controller != "you":
+                continue
+            card = self.semantics.get(perm.oracle_id)
+            if not card:
+                continue
+            for ab in card.abilities:
+                if isinstance(ab, ReplacementDoubleLifeGain) and ab.supported:
+                    mult *= max(int(ab.multiplier), 1)
+        return mult
+
+    def _opponent_life_loss_multiplier(self, state: GameState) -> int:
+        mult = 1
+        for perm in state.permanents.values():
+            if perm.zone != Zone.BATTLEFIELD or perm.controller != "you":
+                continue
+            card = self.semantics.get(perm.oracle_id)
+            if not card:
+                continue
+            for ab in card.abilities:
+                if (
+                    isinstance(ab, ReplacementDoubleOpponentLifeLoss)
+                    and ab.supported
+                ):
+                    mult *= max(int(ab.multiplier), 1)
+        return mult
+
+    def _draw_multiplier(self, state: GameState) -> int:
+        mult = 1
+        for perm in state.permanents.values():
+            if perm.zone != Zone.BATTLEFIELD or perm.controller != "you":
+                continue
+            card = self.semantics.get(perm.oracle_id)
+            if not card:
+                continue
+            for ab in card.abilities:
+                if isinstance(ab, ReplacementDoubleDraw) and ab.supported:
+                    mult *= max(int(ab.multiplier), 1)
+        return mult
+
+    def _you_can_gain_life(self, state: GameState) -> bool:
+        for perm in state.permanents.values():
+            if perm.zone != Zone.BATTLEFIELD:
+                continue
+            card = self.semantics.get(perm.oracle_id)
+            if not card:
+                continue
+            for ab in card.abilities:
+                if not isinstance(ab, StaticCantGainLife) or not ab.supported:
+                    continue
+                if ab.who in {"players", "you"}:
+                    return False
+                # opponents-only does not block your gain
+        return True
+
+    def _apply_opponent_life_loss(
+        self, state: GameState, source: Permanent, qty: int
+    ) -> int:
+        """Apply Bloodletter-class doubling; return effective qty lost."""
+        effective = int(qty) * self._opponent_life_loss_multiplier(state)
+        if effective <= 0:
+            return 0
+        state.life_opponent -= effective
+        self._queue_triggers(
+            state,
+            TriggerEvent.OPPONENT_LOSE_LIFE,
+            source,
+            amount=effective,
+        )
+        state.bump("life_loss", effective)
+        return effective
+
+    def _apply_you_gain_life(
+        self, state: GameState, source: Permanent, qty: int
+    ) -> int:
+        """Apply can't-gain + Archive doubling; return effective qty gained (0 if blocked)."""
+        if not self._you_can_gain_life(state):
+            return 0
+        effective = int(qty) * self._life_gain_multiplier(state)
+        if effective <= 0:
+            return 0
+        state.life_you += effective
+        state.bump("life_gain", effective)
+        self._queue_triggers(
+            state, TriggerEvent.GAIN_LIFE, source, amount=effective
+        )
+        return effective
 
 
     def cost_reduction(
@@ -1080,26 +1174,14 @@ class Executor:
                 qty = trigger_amount
             if effect.target == "each_player":
                 state.life_you -= qty
-                state.life_opponent -= qty
-                self._queue_triggers(
-                    state,
-                    TriggerEvent.OPPONENT_LOSE_LIFE,
-                    source,
-                    amount=qty,
-                )
+                self._apply_opponent_life_loss(state, source, qty)
             else:
                 to_opponent = effect.target == "opponent" or (
                     effect.target == "any_target"
                     and target_id in (None, "opponent")
                 )
                 if to_opponent:
-                    state.life_opponent -= qty
-                    self._queue_triggers(
-                        state,
-                        TriggerEvent.OPPONENT_LOSE_LIFE,
-                        source,
-                        amount=qty,
-                    )
+                    self._apply_opponent_life_loss(state, source, qty)
                     self._queue_triggers(
                         state,
                         TriggerEvent.DAMAGE_OPPONENT,
@@ -1132,11 +1214,7 @@ class Executor:
                     )
             state.bump("damage", qty)
             if source.lifelink and qty > 0:
-                state.life_you += qty
-                state.bump("life_gain", qty)
-                self._queue_triggers(
-                    state, TriggerEvent.GAIN_LIFE, source, amount=qty
-                )
+                self._apply_you_gain_life(state, source, qty)
             return None
 
         if isinstance(effect, GainLifeEffect):
@@ -1150,9 +1228,7 @@ class Executor:
                 )
             if qty is None or qty <= 0:
                 return ExecError(VerificationStatus.ILLEGAL_ACTION, "gain life amount")
-            state.life_you += qty
-            state.bump("life_gain", qty)
-            self._queue_triggers(state, TriggerEvent.GAIN_LIFE, source, amount=qty)
+            self._apply_you_gain_life(state, source, qty)
             return None
 
         if isinstance(effect, DrawEffect):
@@ -1168,7 +1244,8 @@ class Executor:
                         or "artifact" in self._permanent_type_set(p)
                     )
                 )
-            for _ in range(max(int(qty), 0)):
+            draw_events = max(int(qty), 0) * self._draw_multiplier(state)
+            for _ in range(draw_events):
                 state.bump("draw", 1)
                 self._queue_triggers(state, TriggerEvent.DRAW, source, amount=1)
             return None
@@ -1190,16 +1267,10 @@ class Executor:
             if qty is None or qty <= 0:
                 return ExecError(VerificationStatus.ILLEGAL_ACTION, "lose life amount")
             if effect.who == "opponent":
-                state.life_opponent -= qty
-                self._queue_triggers(
-                    state,
-                    TriggerEvent.OPPONENT_LOSE_LIFE,
-                    source,
-                    amount=qty,
-                )
+                self._apply_opponent_life_loss(state, source, qty)
             else:
                 state.life_you -= qty
-            state.bump("life_loss", qty)
+                state.bump("life_loss", qty)
             return None
 
         if isinstance(effect, MillEffect):
@@ -2329,30 +2400,24 @@ class Executor:
         if op == "seed_gain_life":
             # Explicit Path-b generic life-gain seed (ADR 0002 fodder-style).
             qty = 1
-            state.life_you += qty
-            state.bump("life_gain", qty)
             source = state.permanents.get(step.actor) if step.actor else None
             if source is None:
                 return ExecError(
                     VerificationStatus.ILLEGAL_ACTION,
                     "seed_gain_life needs actor with GAIN_LIFE triggers",
                 )
-            self._queue_triggers(state, TriggerEvent.GAIN_LIFE, source, amount=qty)
+            self._apply_you_gain_life(state, source, qty)
             return None
         if op == "seed_lose_life":
             # Path-b generic opponent life-loss seed (Mindcrank / Bloodchief class).
             qty = self._graveyard_drain_seed_amount()
-            state.life_opponent -= qty
-            state.bump("life_loss", qty)
             source = state.permanents.get(step.actor) if step.actor else None
             if source is None:
                 return ExecError(
                     VerificationStatus.ILLEGAL_ACTION,
                     "seed_lose_life needs actor with OPPONENT_LOSE_LIFE triggers",
                 )
-            self._queue_triggers(
-                state, TriggerEvent.OPPONENT_LOSE_LIFE, source, amount=qty
-            )
+            self._apply_opponent_life_loss(state, source, qty)
             return None
         if op == "seed_create_token":
             # Generic token-create seed for CREATE_TOKEN feedback loops (Rosie class).

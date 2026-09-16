@@ -506,6 +506,47 @@ class ReplacementDoubleCounters(BaseModel):
     supported: bool = True
 
 
+class ReplacementDoubleLifeGain(BaseModel):
+    """Alhammarret's Archive: if you would gain life, gain twice that much instead."""
+
+    kind: Literal["replacement_double_life_gain"] = "replacement_double_life_gain"
+    ability_id: str
+    multiplier: int = 2
+    supported: bool = True
+
+
+class ReplacementDoubleOpponentLifeLoss(BaseModel):
+    """Bloodletter: if an opponent would lose life, they lose twice that much instead."""
+
+    kind: Literal["replacement_double_opponent_life_loss"] = (
+        "replacement_double_opponent_life_loss"
+    )
+    ability_id: str
+    multiplier: int = 2
+    # Oracle often restricts to your turn; combo model is always your turn.
+    during_your_turn_only: bool = True
+    supported: bool = True
+
+
+class ReplacementDoubleDraw(BaseModel):
+    """Alhammarret's Archive: if you would draw (except first draw-step card), draw two."""
+
+    kind: Literal["replacement_double_draw"] = "replacement_double_draw"
+    ability_id: str
+    multiplier: int = 2
+    # Combo model: all draws are non-draw-step draws.
+    supported: bool = True
+
+
+class StaticCantGainLife(BaseModel):
+    """Everlasting Torment / Archfiend: players or opponents can't gain life."""
+
+    kind: Literal["static_cant_gain_life"] = "static_cant_gain_life"
+    ability_id: str
+    who: Literal["players", "opponents", "you"] = "players"
+    supported: bool = True
+
+
 class GrantActivatedAbility(BaseModel):
     """Cryptolith Rite / Basal Sliver: grant an activated ability to matching hosts."""
 
@@ -560,6 +601,10 @@ Ability = Annotated[
     | ReplacementDoubleTokens
     | ReplacementDoubleMill
     | ReplacementDoubleCounters
+    | ReplacementDoubleLifeGain
+    | ReplacementDoubleOpponentLifeLoss
+    | ReplacementDoubleDraw
+    | StaticCantGainLife
     | GrantActivatedAbility
     | FreeCastCreaturesByManaValue
     | InstantGrantTapBounce

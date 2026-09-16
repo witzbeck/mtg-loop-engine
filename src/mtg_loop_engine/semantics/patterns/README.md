@@ -85,6 +85,8 @@ graph TB;
 - `scaled_mill` — Keening / Mindcrank-scaled / Bruvac double mill.
 - `etb_return_from_gy_to_hand` / `gy_to_hand_activated` / `dies_to_hand` — Witness/Salvagers/Renewal.
 - `replacement_double_tokens` / `replacement_double_counters` — Parallel Lives / Doubling Season / Primal Vigor / Exalted Sunborn.
+- `replacement_double_life_gain` / `replacement_double_opponent_life_loss` / `replacement_double_draw` / `static_cant_gain_life` — Archive / Bloodletter / Torment.
+- `proliferate_activated` — Viral Drake paid Proliferate.
 - `etb_create_eldrazi_tokens` / `mana_create_eldrazi_tokens` — Brood Monitor / Hatcher / Spawnsire.
 - `enchantment_etb_create_cat` — Ajani's Chosen.
 - `proliferate_activated` — Viral Drake paid Proliferate.

@@ -37,6 +37,10 @@ from mtg_loop_engine.semantics.ir import (
     ReplacementDoubleTokens,
     ReplacementDoubleMill,
     ReplacementDoubleCounters,
+    ReplacementDoubleLifeGain,
+    ReplacementDoubleOpponentLifeLoss,
+    ReplacementDoubleDraw,
+    StaticCantGainLife,
     GrantActivatedAbility,
     ReplacementExileInsteadOfGraveyard,
     ReplacementMultiplyTapMana,
@@ -3618,6 +3622,80 @@ def pat_replacement_double_counters(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_replacement_double_life_gain(text: str, name: str) -> Ability | None:
+    """Alhammarret's Archive: if you would gain life, gain twice that much instead."""
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
+    m = re.match(
+        r"^If you would gain life, you gain twice that much life instead\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ReplacementDoubleLifeGain(
+        ability_id=_ability_id("double-life-gain", text),
+        multiplier=2,
+    )
+
+
+def pat_replacement_double_opponent_life_loss(text: str, name: str) -> Ability | None:
+    """Bloodletter: opponent life loss is doubled (during your turn)."""
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
+    m = re.match(
+        r"^If an opponent would lose life(?: during your turn)?, "
+        r"they lose twice that much life instead\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ReplacementDoubleOpponentLifeLoss(
+        ability_id=_ability_id("double-opp-life-loss", text),
+        multiplier=2,
+        during_your_turn_only="during your turn" in cleaned.casefold(),
+    )
+
+
+def pat_replacement_double_draw(text: str, name: str) -> Ability | None:
+    """Alhammarret's Archive draw half (combo: all draws double)."""
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
+    m = re.match(
+        r"^If you would draw a card(?: except the first one you draw in each of "
+        r"your draw steps)?, draw two cards instead\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ReplacementDoubleDraw(
+        ability_id=_ability_id("double-draw", text),
+        multiplier=2,
+    )
+
+
+def pat_static_cant_gain_life(text: str, name: str) -> Ability | None:
+    """Everlasting Torment / Archfiend / Grievous Wound can't-gain statics."""
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
+    m = re.match(
+        r"^(Players|Your opponents|Opponents|Enchanted player) can't gain life\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    who_raw = m.group(1).casefold()
+    if who_raw.startswith("player"):
+        who = "players"
+    elif "enchanted" in who_raw:
+        who = "opponents"  # combo model: enchanted is the opponent
+    else:
+        who = "opponents"
+    return StaticCantGainLife(
+        ability_id=_ability_id("cant-gain-life", text),
+        who=who,  # type: ignore[arg-type]
+    )
+
+
 def pat_proliferate_activated(text: str, name: str) -> Ability | None:
     """Viral Drake / Lulu: paid Proliferate."""
     m = re.match(
@@ -4061,6 +4139,21 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
         return _proof_irrelevant(clause)
 
     if re.match(
+        r"^Damage can't be prevented\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^All damage is dealt as though its source had wither"
+        r"\.?(?: \([^)]*\))?\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
         r"^Partner(?: \([^)]*\))?\.?$",
         clause,
         re.IGNORECASE,
@@ -4119,6 +4212,13 @@ PATTERNS: list[Pattern] = [
     Pattern("mana_create_eldrazi_tokens", pat_mana_create_eldrazi_tokens),
     Pattern("enchantment_etb_create_cat", pat_enchantment_etb_create_cat),
     Pattern("replacement_double_counters", pat_replacement_double_counters),
+    Pattern("replacement_double_life_gain", pat_replacement_double_life_gain),
+    Pattern(
+        "replacement_double_opponent_life_loss",
+        pat_replacement_double_opponent_life_loss,
+    ),
+    Pattern("replacement_double_draw", pat_replacement_double_draw),
+    Pattern("static_cant_gain_life", pat_static_cant_gain_life),
     Pattern("proliferate_activated", pat_proliferate_activated),
     Pattern("bounce_cost_untap_creature", pat_bounce_cost_untap_creature),
     Pattern("bounce_land_create_illusion", pat_bounce_land_create_illusion),

@@ -156,8 +156,9 @@ uv run python scripts/spellbook_absent_discovery.py
 54. **E52 counter-put triggers** ✓ — All Will Be One damage; Flourishing Defenses m1m1→token.
 55. **E67a artifact untap** ✓ — Filigree Sages; Corridor Monitor; Clock of Omens (`TapArtifactCost`).
 56. **E13b ETB remainders** ✓ — Blasting Station untap; Hyrax; Warstorm Surge; Sporemound landfall; Molten Gatekeeper; Yotian Dissident.
-57. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-58. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+57. **E50 life replacement** ✓ — Bloodletter double loss; Archive double gain/draw; Everlasting Torment can't-gain.
+58. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+59. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 
