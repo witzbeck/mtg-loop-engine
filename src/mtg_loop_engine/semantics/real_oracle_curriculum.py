@@ -2090,4 +2090,42 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{2}",
         mana_value=2,
     ),
+
+    "Bear Umbra": RealOracleCurriculum(
+        name="Bear Umbra",
+        types=["Enchantment", "Aura"],
+        oracle_text=(
+            "Enchant creature\n"
+            'Enchanted creature gets +2/+2 and has '
+            '"Whenever this creature attacks, untap all lands you control."\n'
+            "Umbra armor (If enchanted creature would be destroyed, instead "
+            "remove all damage from it and destroy this Aura.)"
+        ),
+        notes="E15a: attacks → untap lands (Curiosity-style controlled_creature approx).",
+        colors=("G",),
+        mana_cost="{2}{G}{G}",
+        mana_value=4,
+    ),
+    "Caltrops": RealOracleCurriculum(
+        name="Caltrops",
+        types=["Artifact"],
+        oracle_text="Whenever a creature attacks, this artifact deals 1 damage to it.",
+        notes="E15a: attacks → damage trigger subject.",
+        mana_cost="{3}",
+        mana_value=3,
+    ),
+    "Dream Trawler": RealOracleCurriculum(
+        name="Dream Trawler",
+        types=["Creature", "Sphinx"],
+        oracle_text=(
+            "Flying, lifelink\n"
+            "Whenever you draw a card, this creature gets +1/+0 until end of turn.\n"
+            "Whenever this creature attacks, draw a card.\n"
+            "Discard a card: This creature gains hexproof until end of turn. Tap it."
+        ),
+        notes="E15a: attacks → draw; other clauses PI.",
+        colors=("W", "U"),
+        mana_cost="{2}{W}{W}{U}{U}",
+        mana_value=6,
+    ),
 }

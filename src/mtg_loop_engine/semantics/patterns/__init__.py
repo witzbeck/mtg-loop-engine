@@ -594,6 +594,87 @@ def pat_remove_charge_add_mana(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_attacks_untap_lands(text: str, name: str) -> Ability | None:
+    """Bear Umbra grant / self: attacks → untap all lands you control."""
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
+    # Aura grant form
+    m_grant = re.match(
+        r'^Enchanted creature gets [+-]\d+/[+-]\d+ and has '
+        r'"Whenever this creature attacks, untap all lands you control\."\.?$',
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m_grant:
+        return TriggeredAbility(
+            ability_id=_ability_id("attacks-untap-lands", text),
+            event=TriggerEvent.ATTACKS,
+            filter="controlled_creature",
+            effects=[UntapEffect(target="controlled_lands")],
+        )
+    m_self = re.match(
+        r"^Whenever (?:this creature|~|"
+        + re.escape(name)
+        + r") attacks, untap all lands(?: you control)?\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m_self:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("attacks-untap-lands-self", text),
+        event=TriggerEvent.ATTACKS,
+        filter="self",
+        effects=[UntapEffect(target="controlled_lands")],
+    )
+
+
+def pat_attacks_damage_attacker(text: str, name: str) -> Ability | None:
+    """Caltrops: Whenever a creature attacks, this deals N damage to it."""
+    cleaned = _strip_ability_word(text)
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", cleaned).strip()
+    short = name.split(",")[0].strip()
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this artifact", "~", "it"])
+    )
+    m = re.match(
+        rf"^Whenever a creature attacks, (?:{name_alt}) deals (\d+) damage to it\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("attacks-damage-attacker", text),
+        event=TriggerEvent.ATTACKS,
+        filter="creature",
+        effects=[
+            DealDamageEffect(amount=int(m.group(1)), target="trigger_subject")
+        ],
+    )
+
+
+def pat_attacks_draw(text: str, name: str) -> Ability | None:
+    """Self-attacks → draw a card."""
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
+    short = name.split(",")[0].strip()
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^Whenever (?:{name_alt}) attacks, draw a card\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("attacks-draw", text),
+        event=TriggerEvent.ATTACKS,
+        filter="self",
+        effects=[DrawEffect(amount=1)],
+    )
+
+
 def pat_attacks_put_charge(text: str, name: str) -> Ability | None:
     """Druids' Repository: Whenever a creature you control attacks, put a charge counter."""
     cleaned = _strip_ability_word(text)
@@ -4342,6 +4423,20 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
         return _proof_irrelevant(clause)
 
     if re.match(
+        r"^Whenever you draw a card, .+ gets [+-]\d+/[+-]\d+ until end of turn\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^Discard a card: .+ gains hexproof until end of turn\. Tap it\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
         r"^Unearth \{[^}]+\}(?: \([^)]*\))?\.?$",
         clause,
         re.IGNORECASE,
@@ -4453,6 +4548,9 @@ PATTERNS: list[Pattern] = [
     Pattern("discard_draw", pat_discard_draw),
     Pattern("remove_charge_add_mana", pat_remove_charge_add_mana),
     Pattern("attacks_put_charge", pat_attacks_put_charge),
+    Pattern("attacks_untap_lands", pat_attacks_untap_lands),
+    Pattern("attacks_damage_attacker", pat_attacks_damage_attacker),
+    Pattern("attacks_draw", pat_attacks_draw),
     Pattern("tap_put_charge_target_artifact", pat_tap_put_charge_target_artifact),
     Pattern("sac_put_charge_target_artifact", pat_sac_put_charge_target_artifact),
     Pattern("tap_artifacts_untap_artifact", pat_tap_artifacts_untap_artifact),

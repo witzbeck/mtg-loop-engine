@@ -261,7 +261,9 @@ class ReturnToBattlefieldEffect(BaseModel):
 class DealDamageEffect(BaseModel):
     kind: Literal["deal_damage"] = "deal_damage"
     amount: int = 1
-    target: Literal["opponent", "any_target", "each_player"] = "opponent"
+    target: Literal["opponent", "any_target", "each_player", "trigger_subject"] = (
+        "opponent"
+    )
     # When True, use the pending trigger's recorded amount (Shalai / "that much").
     amount_from_trigger: bool = False
     # Murderous Redcap: damage = source effective power.

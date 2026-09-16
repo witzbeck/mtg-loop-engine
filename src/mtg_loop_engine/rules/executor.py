@@ -1200,6 +1200,28 @@ class Executor:
                         source,
                         amount=qty,
                     )
+                elif effect.target == "trigger_subject":
+                    if (
+                        not trigger_subject_id
+                        or trigger_subject_id not in state.permanents
+                    ):
+                        return ExecError(
+                            VerificationStatus.ILLEGAL_TARGET,
+                            "damage trigger_subject missing",
+                        )
+                    victim = state.permanents[trigger_subject_id]
+                    if victim.zone != Zone.BATTLEFIELD or not victim.is_creature:
+                        return ExecError(
+                            VerificationStatus.ILLEGAL_TARGET,
+                            "damage trigger_subject must be a BF creature",
+                        )
+                    victim.damage_marked += qty
+                    self._queue_triggers(
+                        state,
+                        TriggerEvent.DEALT_DAMAGE,
+                        victim,
+                        amount=qty,
+                    )
                 elif effect.target == "any_target" and target_id is not None:
                     # CR 702.92 / Triskelion-class: any-target may include the source.
                     victim = state.permanents.get(target_id)
