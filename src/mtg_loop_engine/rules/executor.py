@@ -809,6 +809,13 @@ class Executor:
 
         if isinstance(effect, CreateTokenEffect):
             qty = effect.quantity
+            if effect.quantity_from_trigger:
+                if trigger_amount is None or trigger_amount <= 0:
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_ACTION,
+                        "token quantity_from_trigger needs trigger amount",
+                    )
+                qty = trigger_amount
             if effect.quantity_equal_to_controlled_subtype:
                 subtype = effect.quantity_equal_to_controlled_subtype.casefold()
                 qty = sum(

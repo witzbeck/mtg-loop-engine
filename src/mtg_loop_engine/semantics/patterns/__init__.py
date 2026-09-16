@@ -3079,6 +3079,93 @@ def pat_curiosity_draw(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_damage_opponent_create_treasures(text: str, name: str) -> Ability | None:
+    """Old Gnawbone / Grim Hireling: damage opponent → Treasure(s)."""
+    m = re.match(
+        r"^Whenever a creature you control deals combat damage to a player, "
+        r"create that many Treasure tokens\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("combat-damage-treasures", text),
+            event=TriggerEvent.DAMAGE_OPPONENT,
+            filter="controlled_creature",
+            effects=[
+                CreateTokenEffect(
+                    name="Treasure",
+                    power=0,
+                    toughness=0,
+                    quantity=1,
+                    quantity_from_trigger=True,
+                    is_creature=False,
+                    is_artifact=True,
+                    treasure=True,
+                )
+            ],
+        )
+    m = re.match(
+        r"^Whenever one or more creatures you control deal combat damage to a player, "
+        r"create (two|one|\d+) Treasure tokens?\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    qty = _parse_count_word(m.group(1)) or 1
+    return TriggeredAbility(
+        ability_id=_ability_id("combat-damage-fixed-treasures", text),
+        event=TriggerEvent.DAMAGE_OPPONENT,
+        filter="controlled_creature",
+        effects=[
+            CreateTokenEffect(
+                name="Treasure",
+                power=0,
+                toughness=0,
+                quantity=qty,
+                is_creature=False,
+                is_artifact=True,
+                treasure=True,
+            )
+        ],
+    )
+
+
+def pat_dealt_damage_create_treasures(text: str, name: str) -> Ability | None:
+    """Smaug: noncombat damage → that many Treasures."""
+    short = name.split(",")[0].strip()
+    first = short.split()[0]
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, first, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^Whenever (?:{name_alt}) is dealt noncombat damage, "
+        rf"create that many Treasure tokens\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("dealt-damage-treasures", text),
+        event=TriggerEvent.DEALT_DAMAGE,
+        filter="self",
+        effects=[
+            CreateTokenEffect(
+                name="Treasure",
+                power=0,
+                toughness=0,
+                quantity=1,
+                quantity_from_trigger=True,
+                is_creature=False,
+                is_artifact=True,
+                treasure=True,
+            )
+        ],
+    )
+
+
 def pat_dealt_damage_reflect(text: str, name: str) -> Ability | None:
     """Spitemare / Reckoner class: dealt damage → that much damage elsewhere."""
     short = name.split("//")[0].strip()
@@ -3777,6 +3864,8 @@ PATTERNS: list[Pattern] = [
     Pattern("grant_activated", pat_grant_activated),
     Pattern("draw_trigger_effect", pat_draw_trigger_effect),
     Pattern("curiosity_draw", pat_curiosity_draw),
+    Pattern("damage_opponent_create_treasures", pat_damage_opponent_create_treasures),
+    Pattern("dealt_damage_create_treasures", pat_dealt_damage_create_treasures),
     Pattern("dealt_damage_reflect", pat_dealt_damage_reflect),
     Pattern("dealt_damage_gain_life", pat_dealt_damage_gain_life),
     Pattern("replacement_double_tokens", pat_replacement_double_tokens),
