@@ -263,6 +263,17 @@ class ExtraTurnEffect(BaseModel):
     kind: Literal["extra_turn"] = "extra_turn"
 
 
+class BecomeCopyEffect(BaseModel):
+    """Clone / Spark Double: become a copy of another permanent (printed P/T/name)."""
+
+    kind: Literal["become_copy"] = "become_copy"
+    target: Literal[
+        "target_creature",
+        "target_permanent",
+        "controlled_creature",
+    ] = "target_creature"
+
+
 class TapEffect(BaseModel):
     kind: Literal["tap"] = "tap"
     target: Literal["self", "target_permanent"] = "self"
@@ -474,6 +485,7 @@ Effect = Annotated[
     | AdditionalCombatEffect
     | GetEnergyEffect
     | ExtraTurnEffect
+    | BecomeCopyEffect
     | DealDamageEffect
     | GainLifeEffect
     | DrawEffect

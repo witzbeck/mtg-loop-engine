@@ -62,6 +62,7 @@ from mtg_loop_engine.semantics.ir import (
     AdditionalCombatEffect,
     GetEnergyEffect,
     ExtraTurnEffect,
+    BecomeCopyEffect,
     ImprintInstantFromHandEffect,
     SacrificeCost,
     TapCost,
@@ -4735,6 +4736,41 @@ def pat_loyalty_blink_own(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_enter_as_copy(text: str, name: str) -> Ability | None:
+    """Clone / Spark Double / Mirror Image enter-as-copy (modeled as ETB become)."""
+    clause = text.strip()
+    m = re.match(
+        r"^You may have (?:this creature|this artifact|this enchantment|~|"
+        + re.escape(name)
+        + r") enter as a copy of "
+        r"(any creature on the battlefield|"
+        r"a creature you control|"
+        r"any nonland permanent on the battlefield|"
+        r"any artifact on the battlefield|"
+        r"a creature or planeswalker you control)"
+        r"(?:, except .*)?\.?$",
+        clause,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    scope = m.group(1).lower()
+    if "you control" in scope and "planeswalker" not in scope:
+        target = "controlled_creature"
+    elif "artifact" in scope and "creature" not in scope:
+        target = "target_permanent"
+    elif "nonland" in scope:
+        target = "target_permanent"
+    else:
+        target = "target_creature"
+    return TriggeredAbility(
+        ability_id=_ability_id("enter-as-copy", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="self",
+        effects=[BecomeCopyEffect(target=target)],  # type: ignore[arg-type]
+    )
+
+
 def pat_tap_damage_self(text: str, name: str) -> Ability | None:
     """Stuffy Doll: {T}: This creature deals 1 damage to itself."""
     cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
@@ -5737,6 +5773,7 @@ PATTERNS: list[Pattern] = [
     Pattern("loyalty_untap_permanents", pat_loyalty_untap_permanents),
     Pattern("loyalty_create_copy", pat_loyalty_create_copy),
     Pattern("loyalty_blink_own", pat_loyalty_blink_own),
+    Pattern("enter_as_copy", pat_enter_as_copy),
     Pattern("tap_damage_self", pat_tap_damage_self),
     Pattern("dealt_damage_gain_life", pat_dealt_damage_gain_life),
     Pattern("dealt_damage_draw", pat_dealt_damage_draw),

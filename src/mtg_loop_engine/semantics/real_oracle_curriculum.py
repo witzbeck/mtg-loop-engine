@@ -2720,6 +2720,42 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_value=3,
     ),
 
+    # M5 E34 — enter as copy
+    "Clone": RealOracleCurriculum(
+        name="Clone",
+        types=["Creature", "Shapeshifter"],
+        oracle_text=(
+            "You may have this creature enter as a copy of any creature on the "
+            "battlefield."
+        ),
+        notes="E34: enter-as-copy (ETB become).",
+        colors=("U",),
+        mana_cost="{3}{U}",
+        mana_value=4,
+    ),
+    "Mirror Image": RealOracleCurriculum(
+        name="Mirror Image",
+        types=["Creature", "Shapeshifter"],
+        oracle_text=(
+            "You may have this creature enter as a copy of a creature you control."
+        ),
+        notes="E34: enter-as-copy controlled creature.",
+        colors=("U",),
+        mana_cost="{2}{U}",
+        mana_value=3,
+    ),
+    "Sculpting Steel": RealOracleCurriculum(
+        name="Sculpting Steel",
+        types=["Artifact"],
+        oracle_text=(
+            "You may have this artifact enter as a copy of any artifact on the "
+            "battlefield."
+        ),
+        notes="E34: enter-as-copy artifact.",
+        mana_cost="{3}",
+        mana_value=3,
+    ),
+
     # M5 E54 — impulse / top-deck
     "Sensei's Divining Top": RealOracleCurriculum(
         name="Sensei's Divining Top",
