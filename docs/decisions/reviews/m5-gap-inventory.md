@@ -140,7 +140,8 @@ time (effect-shape slices) while keeping this parent ID as the inventory umbrell
 | E34 | pending | Clone / enter as copy | CLOSE_BUILD | 26 | 24 | mixed | Enter as copy of |
 | E35 | done | Extra combat | CLOSE_BUILD | 3 | 2 | maybe | Aggravated Assault; Bloodthirster; Moraug |
 | E36 | done | Extra turn | CLOSE_BUILD | 3 | 6 | low | Time Warp; Temporal Manipulation; Magistrate's Scepter |
-| E37 | pending | Planeswalker loyalty | CLOSE_BUILD | 17 | 16 | mixed | +/−/0 loyalty abilities |
+| E37 | pending | Planeswalker loyalty (umbrella) | CLOSE_BUILD | 17 | 16 | mixed | Split E37a+ |
+| E37a | done | Loyalty untap / copy / blink | CLOSE_BUILD | 3 | — | yes | Teferi +1 untap; Saheeli −2 copy; Aminatou −1 blink |
 | E38 | done | Energy | CLOSE_BUILD | 3 | 3 | mixed | {E} get/pay; Basker/Runner/Stone Idol |
 | E39 | REJECT | Dice tables | REJECT | 3 | 3 | low | See R06 |
 | E40 | pending | Modal choose-one | CLOSE_BUILD | 12 | 11 | mixed | Choose one modes |

@@ -179,8 +179,9 @@ uv run python scripts/spellbook_absent_discovery.py
 77. **E38 energy** ✓ — Basker/Runner/Stone Idol `{E}` get/pay.
 78. **E39 dice REJECT** ✓ — d20 tables → R06 (ADR 0003 deterministic VERIFIED).
 79. **E36 extra turn** ✓ — Time Warp / Temporal Manipulation / Magistrate's Scepter.
-80. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-81. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+80. **E37a planeswalker loyalty** ✓ — Teferi +1 untap; Saheeli −2 copy; Aminatou −1 blink.
+81. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+82. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 
