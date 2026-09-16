@@ -126,6 +126,14 @@ class EnergyCost(BaseModel):
     amount: int = 1
 
 
+class LoyaltyCost(BaseModel):
+    """Pay a planeswalker loyalty ability cost (+N or −N)."""
+
+    kind: Literal["loyalty"] = "loyalty"
+    # Positive adds loyalty; negative removes |delta| loyalty.
+    delta: int = 1
+
+
 class DiscardCost(BaseModel):
     """Discard a card from hand (Mind Over Matter / Skirge Familiar)."""
 
@@ -154,6 +162,7 @@ Cost = Annotated[
     | TapArtifactCost
     | PayLifeCost
     | EnergyCost
+    | LoyaltyCost
     | DiscardCost
     | BounceControlledCost,
     Field(discriminator="kind"),

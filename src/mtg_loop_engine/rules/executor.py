@@ -36,6 +36,7 @@ from mtg_loop_engine.semantics.ir import (
     PayLifeCost,
     DiscardCost,
     EnergyCost,
+    LoyaltyCost,
     MillEffect,
     MoveToZoneEffect,
     ProofIrrelevantStatic,
@@ -2538,6 +2539,20 @@ class Executor:
                     )
                 state.energy_you -= need
                 state.bump("energy_paid", need)
+            elif isinstance(cost, LoyaltyCost):
+                loyalty = int(perm.counters.get("loyalty", 0))
+                if cost.delta >= 0:
+                    perm.counters["loyalty"] = loyalty + cost.delta
+                    state.bump("loyalty", cost.delta)
+                else:
+                    need = -cost.delta
+                    if loyalty < need:
+                        return ExecError(
+                            VerificationStatus.RESOURCE_DEFICIT,
+                            "insufficient loyalty",
+                        )
+                    perm.counters["loyalty"] = loyalty - need
+                    state.bump("loyalty_paid", need)
             elif isinstance(cost, DiscardCost):
                 qty = max(int(cost.quantity), 1)
                 if state.hand_you < qty:

@@ -2683,6 +2683,43 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_value=3,
     ),
 
+    # M5 E37 — planeswalker loyalty (slice)
+    "Teferi, Who Slows the Sunset": RealOracleCurriculum(
+        name="Teferi, Who Slows the Sunset",
+        types=["Legendary", "Planeswalker", "Teferi"],
+        oracle_text=(
+            "+1: Choose up to one target artifact, up to one target creature, "
+            "and up to one target land. Untap the chosen permanents."
+        ),
+        notes="E37a: +1 untap (other loyalty abilities deferred).",
+        colors=("W", "U"),
+        mana_cost="{2}{W}{U}",
+        mana_value=4,
+    ),
+    "Saheeli Rai": RealOracleCurriculum(
+        name="Saheeli Rai",
+        types=["Legendary", "Planeswalker", "Saheeli"],
+        oracle_text=(
+            "−2: Create a token that's a copy of target artifact or creature."
+        ),
+        notes="E37a: −2 token copy (other loyalty deferred).",
+        colors=("U", "R"),
+        mana_cost="{1}{U}{R}",
+        mana_value=3,
+    ),
+    "Aminatou, the Fateshifter": RealOracleCurriculum(
+        name="Aminatou, the Fateshifter",
+        types=["Legendary", "Planeswalker", "Aminatou"],
+        oracle_text=(
+            "−1: Exile another target permanent you own, then return it to the "
+            "battlefield under your control."
+        ),
+        notes="E37a: −1 blink own permanent (other loyalty deferred).",
+        colors=("W", "U", "B"),
+        mana_cost="{W}{U}{B}",
+        mana_value=3,
+    ),
+
     # M5 E54 — impulse / top-deck
     "Sensei's Divining Top": RealOracleCurriculum(
         name="Sensei's Divining Top",

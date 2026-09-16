@@ -30,6 +30,7 @@ from mtg_loop_engine.semantics.ir import (
     BounceControlledCost,
     DiscardCost,
     EnergyCost,
+    LoyaltyCost,
     MillEffect,
     MoveToZoneEffect,
     ProliferateEffect,
@@ -4684,6 +4685,56 @@ def pat_mana_tap_put_charge_self(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_loyalty_untap_permanents(text: str, name: str) -> Ability | None:
+    """Teferi Who Slows the Sunset +1: untap chosen permanents (combo: one target)."""
+    m = re.match(
+        r"^\+1: Choose up to one target artifact, up to one target creature, "
+        r"and up to one target land\. Untap the chosen permanents\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("loyalty-untap", text),
+        costs=[LoyaltyCost(delta=1)],
+        effects=[UntapEffect(target="target_permanent")],
+    )
+
+
+def pat_loyalty_create_copy(text: str, name: str) -> Ability | None:
+    """Saheeli −2: create a token copy of target artifact or creature."""
+    m = re.match(
+        r"^[−\-]2: Create a token that's a copy of target artifact or creature\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("loyalty-copy", text),
+        costs=[LoyaltyCost(delta=-2)],
+        effects=[CreateTokenEffect(copy_target=True, haste=False)],
+    )
+
+
+def pat_loyalty_blink_own(text: str, name: str) -> Ability | None:
+    """Aminatou −1: exile another permanent you own, then return it."""
+    m = re.match(
+        r"^[−\-]1: Exile another target permanent you own, then return it to the "
+        r"battlefield under your control\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("loyalty-blink", text),
+        costs=[LoyaltyCost(delta=-1)],
+        effects=[BlinkEffect(target="target_permanent_you_control")],
+    )
+
+
 def pat_tap_damage_self(text: str, name: str) -> Ability | None:
     """Stuffy Doll: {T}: This creature deals 1 damage to itself."""
     cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
@@ -5683,6 +5734,9 @@ PATTERNS: list[Pattern] = [
     Pattern("extra_turn_spell", pat_extra_turn_spell),
     Pattern("remove_charge_extra_turn", pat_remove_charge_extra_turn),
     Pattern("mana_tap_put_charge_self", pat_mana_tap_put_charge_self),
+    Pattern("loyalty_untap_permanents", pat_loyalty_untap_permanents),
+    Pattern("loyalty_create_copy", pat_loyalty_create_copy),
+    Pattern("loyalty_blink_own", pat_loyalty_blink_own),
     Pattern("tap_damage_self", pat_tap_damage_self),
     Pattern("dealt_damage_gain_life", pat_dealt_damage_gain_life),
     Pattern("dealt_damage_draw", pat_dealt_damage_draw),
