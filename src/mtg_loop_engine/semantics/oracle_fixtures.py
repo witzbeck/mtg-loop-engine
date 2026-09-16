@@ -374,15 +374,14 @@ GOLD_ORACLE_FIXTURES: dict[str, OracleFixture] = {
 
 
 UNSUPPORTED_FIXTURE = OracleFixture(
-    oracle_id="oracle:isochron-scepter",
-    name="Isochron Scepter",
-    types=["Artifact"],
-    type_line="Artifact",
+    oracle_id="oracle:grapeshot",
+    name="Grapeshot",
+    types=["Sorcery"],
+    type_line="Sorcery",
     oracle_text=(
-        "Imprint — When Isochron Scepter enters, you may exile an instant card "
-        "with mana value 2 or less from your hand.\n"
-        "{2}, {T}: You may copy the exiled card. If you do, you may cast the copy "
-        "without paying its mana cost."
+        "Grapeshot deals 1 damage to any target.\n"
+        "Storm (When you cast this spell, copy it for each spell cast before it "
+        "this turn. You may choose new targets for the copies.)"
     ),
-    provenance=Provenance.ORACLE_DIVERGENT,
+    provenance=Provenance.ORACLE_EXACT,
 )

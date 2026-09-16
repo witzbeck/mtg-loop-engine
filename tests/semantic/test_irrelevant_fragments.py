@@ -55,7 +55,7 @@ def test_lifelink_with_reminder_is_proof_irrelevant():
     assert any(a.kind == "proof_irrelevant_static" for a in report.semantics.abilities)
 
 
-def test_unsupported_scepter_still_fail_closed():
+def test_unsupported_storm_still_fail_closed():
     fix = UNSUPPORTED_FIXTURE
     report = compile_oracle_text(
         oracle_id=fix.oracle_id,
