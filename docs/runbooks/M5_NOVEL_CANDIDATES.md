@@ -167,8 +167,9 @@ uv run python scripts/spellbook_absent_discovery.py
 65. **E55 spell cost reduction** ✓ — Temur/Sami/Animar/Raptor; affinity + scaled reduce on cast.
 66. **E56 P/T CDA** ✓ — Ashaya Forests + land CDA; Psychosis/Soul/Renata/Body; dealt-damage draw.
 67. **E58 Split second** ✓ — Angel's Grace / Legolas; reminder split + one-shot riders PI.
-68. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-69. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+68. **E30a blink** ✓ — Emiel / Eldrazi Displacer / Felidar; `BlinkEffect` exile→return + ETB.
+69. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+70. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 

@@ -129,7 +129,8 @@ time (effect-shape slices) while keeping this parent ID as the inventory umbrell
 
 | ID | Status | Epic | Disp | Est. cards | Sole-gap ≈ | Path-a | Primitive sketch |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| E30 | pending | Blink / exile-return | CLOSE_BUILD | 30 | 22 | maybe | Exile until leaves / return BF |
+| E30 | pending | Blink / exile-return (umbrella) | CLOSE_BUILD | 30 | 22 | maybe | Split E30a+ |
+| E30a | done | Activated / ETB blink | CLOSE_BUILD | 3 | — | yes | Emiel; Eldrazi Displacer; Felidar Guardian |
 | E31 | pending | Token-copy (+haste) (umbrella) | CLOSE_BUILD | 40 | 25 | yes | Kiki/Twin-class |
 | E31a | done | Tap-copy with haste | CLOSE_BUILD | 2 | — | yes | Kiki-Jiki; Splinter Twin grant |
 | E32 | pending | Ability copy | CLOSE_BUILD | 3 | 3 | yes | Rings/Bracers-class |

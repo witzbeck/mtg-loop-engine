@@ -263,6 +263,19 @@ class ReturnToBattlefieldEffect(BaseModel):
     target: Literal["self"] = "self"
 
 
+class BlinkEffect(BaseModel):
+    """Exile then immediately return to battlefield (Cloudshift / Emiel / Felidar)."""
+
+    kind: Literal["blink"] = "blink"
+    target: Literal[
+        "self",
+        "another_creature_you_control",
+        "target_creature_you_control",
+        "target_permanent_you_control",
+    ] = "another_creature_you_control"
+    return_tapped: bool = False
+
+
 class DealDamageEffect(BaseModel):
     kind: Literal["deal_damage"] = "deal_damage"
     amount: int = 1
@@ -380,6 +393,7 @@ Effect = Annotated[
     | RemoveCounterEffect
     | ReturnFromGraveyardToHandEffect
     | ReturnToBattlefieldEffect
+    | BlinkEffect
     | DealDamageEffect
     | GainLifeEffect
     | DrawEffect

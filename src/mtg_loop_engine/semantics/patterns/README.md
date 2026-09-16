@@ -101,6 +101,7 @@ graph TB;
 - `spell_cost_reduction` — E55: spells/creature spells cost less; affinity artifacts; Temur power≥N; Animar p1p1 scale.
 - `static_cda_pt` / `nontoken_creatures_are_forests` — E56: */* CDAs; Ashaya Forests.
 - `dealt_damage_draw` — Body of Knowledge; DEALT_DAMAGE → draw that many.
+- `blink_activated` / `blink_etb` — E30a Emiel / Displacer / Felidar exile→return.
 - `untap_mill_controller` — Mesmeric; UNTAP → self-mill.
 
 ## Main entry points
