@@ -1556,4 +1556,98 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{2}{W}{W}",
         mana_value=4,
     ),
+    "Doubling Season": RealOracleCurriculum(
+        name="Doubling Season",
+        types=["Enchantment"],
+        oracle_text=(
+            "If an effect would create one or more tokens under your control, "
+            "it creates twice that many of those tokens instead.\n"
+            "If an effect would put one or more counters on a permanent you control, "
+            "it puts twice that many of those counters on that permanent instead."
+        ),
+        notes="E20: token + counter doubling.",
+        colors=("G",),
+        mana_cost="{4}{G}",
+        mana_value=5,
+    ),
+    "Primal Vigor": RealOracleCurriculum(
+        name="Primal Vigor",
+        types=["Enchantment"],
+        oracle_text=(
+            "If one or more tokens would be created, "
+            "twice that many of those tokens are created instead.\n"
+            "If one or more +1/+1 counters would be put on a creature, "
+            "twice that many +1/+1 counters are put on that creature instead."
+        ),
+        notes="E20: Primal Vigor token + p1p1 double.",
+        colors=("G",),
+        mana_cost="{4}{G}",
+        mana_value=5,
+    ),
+    "Viral Drake": RealOracleCurriculum(
+        name="Viral Drake",
+        types=["Creature", "Phyrexian", "Drake"],
+        oracle_text=(
+            "Flying\n"
+            "Infect (This creature deals damage to creatures in the form of -1/-1 "
+            "counters and to players in the form of poison counters.)\n"
+            "{3}{U}: Proliferate. (Choose any number of permanents and/or players, "
+            "then give each another counter of each kind already there.)"
+        ),
+        notes="E21: proliferate; infect is proof-irrelevant.",
+        colors=("U",),
+        mana_cost="{2}{U}",
+        mana_value=3,
+    ),
+    "Quirion Ranger": RealOracleCurriculum(
+        name="Quirion Ranger",
+        types=["Creature", "Elf", "Ranger"],
+        oracle_text=(
+            "Return a Forest you control to its owner's hand: Untap target creature. "
+            "Activate only once each turn."
+        ),
+        notes="E19: bounce Forest cost → untap.",
+        colors=("G",),
+        mana_cost="{G}",
+        mana_value=1,
+    ),
+    "Wirewood Symbiote": RealOracleCurriculum(
+        name="Wirewood Symbiote",
+        types=["Creature", "Insect"],
+        oracle_text=(
+            "Return an Elf you control to its owner's hand: Untap target creature. "
+            "Activate only once each turn."
+        ),
+        notes="E19: bounce Elf cost → untap.",
+        colors=("G",),
+        mana_cost="{G}",
+        mana_value=1,
+    ),
+    "Meloku the Clouded Mirror": RealOracleCurriculum(
+        name="Meloku the Clouded Mirror",
+        types=["Legendary", "Creature", "Moonfolk", "Wizard"],
+        oracle_text=(
+            "Flying\n"
+            "{1}, Return a land you control to its owner's hand: "
+            "Create a 1/1 blue Illusion creature token with flying."
+        ),
+        notes="E19: bounce land cost → Illusion token.",
+        colors=("U",),
+        mana_cost="{4}{U}",
+        mana_value=5,
+    ),
+    "Chulane, Teller of Tales": RealOracleCurriculum(
+        name="Chulane, Teller of Tales",
+        types=["Legendary", "Creature", "Human", "Druid"],
+        oracle_text=(
+            "Vigilance\n"
+            "{3}, {T}: Return target creature you control to its owner's hand."
+        ),
+        notes=(
+            "E19: activated bounce only (cast→draw/land put deferred)."
+        ),
+        colors=("G", "W", "U"),
+        mana_cost="{2}{G}{W}{U}",
+        mana_value=5,
+    ),
 }

@@ -27,13 +27,16 @@ from mtg_loop_engine.semantics.ir import (
     ManaAmount,
     ManaCost,
     PayLifeCost,
+    BounceControlledCost,
     MillEffect,
     MoveToZoneEffect,
+    ProliferateEffect,
     RemoveCounterCost,
     RemoveCounterEffect,
     ReplacementAmplifyP1P1Counters,
     ReplacementDoubleTokens,
     ReplacementDoubleMill,
+    ReplacementDoubleCounters,
     GrantActivatedAbility,
     ReplacementExileInsteadOfGraveyard,
     ReplacementMultiplyTapMana,
@@ -3092,7 +3095,7 @@ def pat_dealt_damage_gain_life(text: str, name: str) -> Ability | None:
 
 
 def pat_replacement_double_tokens(text: str, name: str) -> Ability | None:
-    """Parallel Lives / Anointed Procession."""
+    """Parallel Lives / Anointed Procession / Primal Vigor token half."""
     m = re.match(
         r"^If an effect would create one or more tokens under your control, "
         r"it creates twice that many of those tokens instead\.?$",
@@ -3100,10 +3103,136 @@ def pat_replacement_double_tokens(text: str, name: str) -> Ability | None:
         re.IGNORECASE,
     )
     if not m:
+        m = re.match(
+            r"^If one or more tokens would be created, "
+            r"twice that many of those tokens are created instead\.?$",
+            text,
+            re.IGNORECASE,
+        )
+    if not m:
         return None
     return ReplacementDoubleTokens(
         ability_id=_ability_id("double-tokens", text),
         multiplier=2,
+    )
+
+
+def pat_replacement_double_counters(text: str, name: str) -> Ability | None:
+    """Doubling Season (all counters) / Primal Vigor (+1/+1 only)."""
+    m = re.match(
+        r"^If an effect would put one or more counters on a permanent you control, "
+        r"it puts twice that many of those counters on that permanent instead\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if m:
+        return ReplacementDoubleCounters(
+            ability_id=_ability_id("double-counters", text),
+            multiplier=2,
+            applies_to="permanents_you_control",
+            only_p1p1=False,
+        )
+    m = re.match(
+        r"^If one or more \+1/\+1 counters would be put on a "
+        r"(permanent|creature)(?: you control)?, "
+        r"twice that many \+1/\+1 counters are put on that \1 instead\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    applies = (
+        "creatures_you_control"
+        if m.group(1).casefold() == "creature"
+        else "permanents_you_control"
+    )
+    return ReplacementDoubleCounters(
+        ability_id=_ability_id("double-counters-p1p1", text),
+        multiplier=2,
+        applies_to=applies,  # type: ignore[arg-type]
+        only_p1p1=True,
+    )
+
+
+def pat_proliferate_activated(text: str, name: str) -> Ability | None:
+    """Viral Drake / Lulu: paid Proliferate."""
+    m = re.match(
+        r"^((?:\{[^}]+\})+): Proliferate\.?(?: \([^)]*\))?\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("proliferate", text),
+        costs=[ManaCost(amount=_parse_mana_braces(m.group(1)))],
+        effects=[ProliferateEffect()],
+    )
+
+
+def pat_bounce_cost_untap_creature(text: str, name: str) -> Ability | None:
+    """Quirion Ranger / Wirewood Symbiote: bounce Forest/Elf → untap creature."""
+    m = re.match(
+        r"^Return (?:a|an) (Forest|Elf) you control to (?:its|their) owner's hand: "
+        r"Untap target creature\.(?: Activate only once each turn\.)?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    kind = m.group(1).casefold()
+    selector = "forest_controlled" if kind == "forest" else "elf_controlled"
+    once = "activate only once each turn" in text.casefold()
+    return ActivatedAbility(
+        ability_id=_ability_id("bounce-cost-untap", text),
+        costs=[BounceControlledCost(selector=selector)],  # type: ignore[arg-type]
+        effects=[UntapEffect(target="target_permanent")],
+        once_per_turn=once,
+    )
+
+
+def pat_bounce_land_create_illusion(text: str, name: str) -> Ability | None:
+    """Meloku: {1}, return a land → Illusion token."""
+    m = re.match(
+        r"^((?:\{[^}]+\})+), Return a land you control to (?:its|their) owner's hand: "
+        r"Create a 1/1 blue Illusion creature token with flying\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("bounce-land-token", text),
+        costs=[
+            ManaCost(amount=_parse_mana_braces(m.group(1))),
+            BounceControlledCost(selector="land_controlled"),
+        ],
+        effects=[
+            CreateTokenEffect(
+                name="Illusion",
+                power=1,
+                toughness=1,
+                quantity=1,
+                is_creature=True,
+            )
+        ],
+    )
+
+
+def pat_activated_bounce_controlled_creature(text: str, name: str) -> Ability | None:
+    """Chulane: {3}, {T}: return target creature you control to hand."""
+    m = re.match(
+        r"^((?:\{[^}]+\})+), \{T\}: Return target creature you control to "
+        r"(?:its|their) owner's hand\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("activated-bounce-controlled", text),
+        costs=[ManaCost(amount=_parse_mana_braces(m.group(1))), TapCost()],
+        effects=[MoveToZoneEffect(zone=Zone.HAND, target="controlled_creature")],
     )
 
 
@@ -3143,6 +3272,17 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
     # Keyword + reminder text (e.g. Lifelink (...)).
     kw_alt = "|".join(re.escape(k) for k in sorted(_KEYWORD_ABILITIES, key=len, reverse=True))
     if re.match(rf"^(?:{kw_alt})(?: \([^)]+\))?$", clause, re.IGNORECASE):
+        return _proof_irrelevant(clause)
+
+    # Infect reminder (Viral Drake): damage-as-counters not modeled; proliferate is.
+    if re.match(r"^Infect(?: \([^)]+\))?$", clause, re.IGNORECASE):
+        return _proof_irrelevant(clause)
+    # Soft-wrap join: "Flying Infect (...)" when Infect lacked a splitter.
+    if re.match(
+        r"^(?:Flying )?Infect(?: \([^)]+\))?$",
+        clause,
+        re.IGNORECASE,
+    ):
         return _proof_irrelevant(clause)
 
     if re.match(r"^Ward \{[^}]+\}(?: \([^)]+\))?$", clause, re.IGNORECASE):
@@ -3425,6 +3565,14 @@ PATTERNS: list[Pattern] = [
     Pattern("dealt_damage_reflect", pat_dealt_damage_reflect),
     Pattern("dealt_damage_gain_life", pat_dealt_damage_gain_life),
     Pattern("replacement_double_tokens", pat_replacement_double_tokens),
+    Pattern("replacement_double_counters", pat_replacement_double_counters),
+    Pattern("proliferate_activated", pat_proliferate_activated),
+    Pattern("bounce_cost_untap_creature", pat_bounce_cost_untap_creature),
+    Pattern("bounce_land_create_illusion", pat_bounce_land_create_illusion),
+    Pattern(
+        "activated_bounce_controlled_creature",
+        pat_activated_bounce_controlled_creature,
+    ),
     Pattern("tap_add_mana", pat_tap_add_mana),
     Pattern("mana_untap_enchanted", pat_mana_untap_enchanted),
     Pattern("mana_tap_enchanted", pat_mana_tap_enchanted),

@@ -109,6 +109,15 @@ class PayLifeCost(BaseModel):
     amount: int
 
 
+class BounceControlledCost(BaseModel):
+    """Return a controlled permanent to hand as a cost (Quirion / Wirewood / Meloku)."""
+
+    kind: Literal["bounce_controlled"] = "bounce_controlled"
+    selector: Literal["forest_controlled", "elf_controlled", "land_controlled"] = (
+        "land_controlled"
+    )
+
+
 Cost = Annotated[
     TapCost
     | ManaCost
@@ -118,7 +127,8 @@ Cost = Annotated[
     | RemoveCounterCost
     | UntapSymbolCost
     | TapCreatureCost
-    | PayLifeCost,
+    | PayLifeCost
+    | BounceControlledCost,
     Field(discriminator="kind"),
 ]
 
@@ -317,6 +327,12 @@ class GrantTapBounceNonlandEffect(BaseModel):
     target: Literal["target_creature"] = "target_creature"
 
 
+class ProliferateEffect(BaseModel):
+    """Viral Drake / Lulu: give each permanent another counter of each kind it has."""
+
+    kind: Literal["proliferate"] = "proliferate"
+
+
 Effect = Annotated[
     AddManaEffect
     | UntapEffect
@@ -331,6 +347,7 @@ Effect = Annotated[
     | DrawEffect
     | LoseLifeEffect
     | MillEffect
+    | ProliferateEffect
     | MoveToZoneEffect
     | GrantLifelinkEffect
     | GrantTapBounceNonlandEffect,
@@ -455,6 +472,20 @@ class ReplacementDoubleMill(BaseModel):
     supported: bool = True
 
 
+class ReplacementDoubleCounters(BaseModel):
+    """Doubling Season / Primal Vigor: double counters put on your permanents/creatures."""
+
+    kind: Literal["replacement_double_counters"] = "replacement_double_counters"
+    ability_id: str
+    multiplier: int = 2
+    applies_to: Literal["permanents_you_control", "creatures_you_control"] = (
+        "permanents_you_control"
+    )
+    # Primal Vigor: only +1/+1 counters.
+    only_p1p1: bool = False
+    supported: bool = True
+
+
 class GrantActivatedAbility(BaseModel):
     """Cryptolith Rite / Basal Sliver: grant an activated ability to matching hosts."""
 
@@ -508,6 +539,7 @@ Ability = Annotated[
     | ReplacementMultiplyTapMana
     | ReplacementDoubleTokens
     | ReplacementDoubleMill
+    | ReplacementDoubleCounters
     | GrantActivatedAbility
     | FreeCastCreaturesByManaValue
     | InstantGrantTapBounce

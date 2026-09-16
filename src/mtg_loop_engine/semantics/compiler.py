@@ -25,8 +25,8 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
     buf = ""
     keyword_line = re.compile(
         r"^(Flying|Flash|Haste|Vigilance|Trample|Lifelink|Deathtouch|Reach|Defender|"
-        r"Menace|Hexproof|Shroud|Indestructible|First strike|Double strike|Ward"
-        r"(?: \([^)]+\))?)$",
+        r"Menace|Hexproof|Shroud|Indestructible|First strike|Double strike|"
+        r"Infect(?: \([^)]+\))?|Ward(?: \([^)]+\))?)$",
         re.IGNORECASE,
     )
     ability_start = re.compile(
@@ -49,7 +49,7 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
         r"Eternalize |"
         r"Cascade |Convoke |Delve |"
         r"Flying |Flash |Haste |Vigilance |Trample |Lifelink |Deathtouch |Reach |"
-        r"Defender |Menace |Hexproof |Shroud |First strike |Double strike |"
+        r"Defender |Menace |Hexproof |Shroud |First strike |Double strike |Infect |"
         r"Umbra armor |"
         # Ability words / named abilities (incl. ALL CAPS, ?, ! — Marvel style)
         r".{1,60}? — )"

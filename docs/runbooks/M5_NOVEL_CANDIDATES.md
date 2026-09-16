@@ -145,8 +145,10 @@ uv run python scripts/spellbook_absent_discovery.py
 46. **E16 sac-outlet payoffs** ✓ — Bombardment / Altar / Golem / Ayara; `last_sacrificed_power`.
 47. **E17 scaled mill** ✓ — Keening GY-count; Mindcrank scaled; Bruvac `ReplacementDoubleMill`.
 48. **E18 GY→hand** ✓ — Witness/Archaeomancer/Salvagers/Renewal; `ReturnFromGraveyardToHandEffect`.
-49. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-50. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+49. **E19–E21 bounce/counters/proliferate** ✓ — bounce-as-cost (Quirion/Wirewood/Meloku),
+    `ReplacementDoubleCounters` (Doubling Season / Primal Vigor), `ProliferateEffect` (Viral Drake).
+50. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+51. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 

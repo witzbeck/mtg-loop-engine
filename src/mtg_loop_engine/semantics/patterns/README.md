@@ -58,6 +58,9 @@ graph TB;
 - `etb_bounce_controlled_permanent` — Dream Stalker; bounce any controlled permanent.
 - `etb_bounce_controlled_nonland` — Ancestral Statue; bounce controlled nonland.
 - `activated_bounce_other_creature` — Temur; paid bounce another creature (indestructible rider matched, proof-irrelevant).
+- `activated_bounce_controlled_creature` — Chulane; `{N}, {T}` bounce controlled creature.
+- `bounce_cost_untap_creature` — Quirion / Wirewood; bounce Forest/Elf cost → untap.
+- `bounce_land_create_illusion` — Meloku; `{1}` + bounce land → Illusion token.
 - `etb_bounce_sharing_type` — Cloudstone; nonartifact ETB → bounce another sharing a permanent type.
 - `etb_mana_sharing_creature_type` — Mana Echoes; creature ETB → `{C}` × controlled sharing creature type.
 - `earthcraft_tap_untap_basic` — Earthcraft; tap controlled creature → untap basic land.
@@ -77,6 +80,8 @@ graph TB;
 - `sac_outlet_payoffs` — Bombardment/Blasting Station/Altar/Golem/Ayara.
 - `scaled_mill` — Keening / Mindcrank-scaled / Bruvac double mill.
 - `etb_return_from_gy_to_hand` / `gy_to_hand_activated` / `dies_to_hand` — Witness/Salvagers/Renewal.
+- `replacement_double_tokens` / `replacement_double_counters` — Parallel Lives / Doubling Season / Primal Vigor.
+- `proliferate_activated` — Viral Drake paid Proliferate.
 - `etb_or_attacks_create_token` — Squirrel Girl; ETB create (attacks not modeled).
 - `mana_create_tokens_equal_subtype` — Squirrel Girl; `{cost}: Create X` equal to controlled subtype count.
 - Wirewood Channeler matches scaled `BATTLEFIELD_ELF` any-color (slice-9 sibling).

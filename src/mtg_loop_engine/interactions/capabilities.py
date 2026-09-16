@@ -30,11 +30,15 @@ from mtg_loop_engine.semantics.ir import (
     ReplacementReduceM1M1Counters,
     ReturnToBattlefieldEffect,
     SacrificeCost,
+    BounceControlledCost,
     TapCost,
     TapCreatureCost,
     TriggeredAbility,
     UntapEffect,
     UntapSymbolCost,
+    ProliferateEffect,
+    ReplacementDoubleCounters,
+    ReplacementDoubleTokens,
 )
 
 
@@ -98,6 +102,12 @@ def extract_capabilities(card: CardSemantics) -> CardCapabilities:
         if isinstance(ab, ReplacementAmplifyP1P1Counters):
             caps.modifies.add("amplify_p1p1")
             continue
+        if isinstance(ab, ReplacementDoubleCounters):
+            caps.modifies.add("double_counters")
+            continue
+        if isinstance(ab, ReplacementDoubleTokens):
+            caps.modifies.add("double_tokens")
+            continue
         if isinstance(ab, ReplacementMultiplyTapMana):
             caps.modifies.add("multiply_tap_mana")
             continue
@@ -134,6 +144,9 @@ def extract_capabilities(card: CardSemantics) -> CardCapabilities:
                         caps.requires.add("sac_token")
                     else:
                         caps.requires.add("sac_creature")
+                elif isinstance(cost, BounceControlledCost):
+                    caps.requires.add(f"bounce_{cost.selector}")
+                    caps.produces.add("bounce_to_hand")
                 elif isinstance(cost, AddCounterCost) and cost.counter_type in {
                     "m1m1",
                     "-1/-1",
@@ -186,6 +199,9 @@ def _effects(effects: list, caps: CardCapabilities) -> None:
             caps.produces.add("create_token")
         elif isinstance(effect, AddCounterEffect):
             caps.produces.add("add_counter")
+        elif isinstance(effect, ProliferateEffect):
+            caps.produces.add("add_counter")
+            caps.produces.add("proliferate")
         elif isinstance(effect, DealDamageEffect):
             caps.produces.add("damage")
         elif isinstance(effect, GainLifeEffect):
