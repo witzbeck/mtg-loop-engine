@@ -130,7 +130,8 @@ time (effect-shape slices) while keeping this parent ID as the inventory umbrell
 | ID | Status | Epic | Disp | Est. cards | Sole-gap ≈ | Path-a | Primitive sketch |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | E30 | pending | Blink / exile-return | CLOSE_BUILD | 30 | 22 | maybe | Exile until leaves / return BF |
-| E31 | pending | Token-copy (+haste) | CLOSE_BUILD | 40 | 25 | yes | Kiki/Twin-class |
+| E31 | pending | Token-copy (+haste) (umbrella) | CLOSE_BUILD | 40 | 25 | yes | Kiki/Twin-class |
+| E31a | done | Tap-copy with haste | CLOSE_BUILD | 2 | — | yes | Kiki-Jiki; Splinter Twin grant |
 | E32 | pending | Ability copy | CLOSE_BUILD | 3 | 3 | yes | Rings/Bracers-class |
 | E33 | pending | Spell copy / storm | CLOSE_BUILD | 17 | 12 | mixed | Copy spell; storm |
 | E34 | pending | Clone / enter as copy | CLOSE_BUILD | 26 | 24 | mixed | Enter as copy of |

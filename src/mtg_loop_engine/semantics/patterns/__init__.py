@@ -743,6 +743,65 @@ def pat_sac_put_charge_target_artifact(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_tap_copy_creature_haste(text: str, name: str) -> Ability | None:
+    """Kiki-Jiki: {T}: create token copy of target nonlegendary creature with haste."""
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
+    # Drop end-step sacrifice rider (combo-favorable deferred).
+    cleaned = re.sub(
+        r"\s*Sacrifice it at the beginning of the next end step\.?$",
+        "",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r"\s*Exile that token at the beginning of the next end step\.?$",
+        "",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    m = re.match(
+        r"^\{T\}: Create a token that's a copy of target nonlegendary creature "
+        r"you control(?:, except it has haste)?\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("tap-copy-haste", text),
+        costs=[TapCost()],
+        effects=[CreateTokenEffect(copy_target=True, haste=True)],
+    )
+
+
+def pat_splinter_twin_grant(text: str, name: str) -> Ability | None:
+    """Splinter Twin: enchanted creature has Kiki tap-copy."""
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
+    m = re.match(
+        r'^Enchanted creature has "\{T\}: Create a token that\'s a copy of this '
+        r'creature, except it has haste\. Exile that token at the beginning of '
+        r'the next end step\."\.?$',
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        # Alternate wording without exile rider on grant text
+        m = re.match(
+            r'^Enchanted creature has "\{T\}: Create a token that\'s a copy of '
+            r'this creature, except it has haste\."\.?$',
+            cleaned,
+            re.IGNORECASE,
+        )
+    if not m:
+        return None
+    return GrantActivatedAbility(
+        ability_id=_ability_id("grant-twin-copy", text),
+        host_filter="enchanted_creature",
+        costs=[TapCost()],
+        effects=[CreateTokenEffect(copy_target=True, haste=True)],
+    )
+
+
 def pat_adapt(text: str, name: str) -> Ability | None:
     """Adapt N: if no +1/+1 counters, put N +1/+1 counters."""
     cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
@@ -4625,6 +4684,8 @@ PATTERNS: list[Pattern] = [
     Pattern("etb_untap_artifact_or_creature", pat_etb_untap_artifact_or_creature),
     Pattern("discard_untap_target", pat_discard_untap_target),
     Pattern("adapt", pat_adapt),
+    Pattern("tap_copy_creature_haste", pat_tap_copy_creature_haste),
+    Pattern("splinter_twin_grant", pat_splinter_twin_grant),
     Pattern("p1p1_put_draw_discard", pat_p1p1_put_draw_discard),
     Pattern("p1p1_put_create_eldrazi_spawn", pat_p1p1_put_create_eldrazi_spawn),
     Pattern("discard_add_mana", pat_discard_add_mana),

@@ -216,6 +216,9 @@ class CreateTokenEffect(BaseModel):
     is_creature: bool = True
     is_artifact: bool = False
     treasure: bool = False
+    # Kiki/Twin: copy target creature's printed P/T/name; haste skips sickness.
+    copy_target: bool = False
+    haste: bool = False
 
 
 class AddCounterEffect(BaseModel):
@@ -572,6 +575,7 @@ class GrantActivatedAbility(BaseModel):
         "creatures_you_control",
         "slivers_you_control",
         "white_creatures_you_control",
+        "enchanted_creature",
     ] = "creatures_you_control"
     costs: list[Cost] = Field(default_factory=list)
     effects: list[Effect] = Field(default_factory=list)

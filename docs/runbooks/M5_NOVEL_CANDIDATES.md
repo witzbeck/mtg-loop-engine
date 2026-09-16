@@ -161,8 +161,9 @@ uv run python scripts/spellbook_absent_discovery.py
 59. **E61 charge counters** ✓ — Astral Cornucopia; Druids' Repository; Coretapper.
 60. **E15a attack triggers** ✓ — Bear Umbra untap lands; Caltrops damage attacker; Dream Trawler draw.
 61. **E53 Adapt** ✓ — Adapt N (`only_if_none`); Broodscale Spawn; Biomancer draw.
-62. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-63. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+62. **E31a token-copy haste** ✓ — Kiki-Jiki; Splinter Twin grant (`CreateTokenEffect.copy_target`).
+63. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+64. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 

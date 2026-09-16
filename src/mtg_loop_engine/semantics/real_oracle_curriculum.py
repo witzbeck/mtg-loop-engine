@@ -2171,4 +2171,33 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{1}{G}",
         mana_value=2,
     ),
+
+    "Kiki-Jiki, Mirror Breaker": RealOracleCurriculum(
+        name="Kiki-Jiki, Mirror Breaker",
+        types=["Legendary", "Creature", "Goblin", "Shaman"],
+        oracle_text=(
+            "Haste\n"
+            "{T}: Create a token that's a copy of target nonlegendary creature "
+            "you control, except it has haste. Sacrifice it at the beginning of "
+            "the next end step."
+        ),
+        notes="E31a: tap-copy with haste; end-step sac deferred.",
+        colors=("R",),
+        mana_cost="{2}{R}{R}{R}",
+        mana_value=5,
+    ),
+    "Splinter Twin": RealOracleCurriculum(
+        name="Splinter Twin",
+        types=["Enchantment", "Aura"],
+        oracle_text=(
+            "Enchant creature\n"
+            'Enchanted creature has "{T}: Create a token that\'s a copy of this '
+            'creature, except it has haste. Exile that token at the beginning of '
+            'the next end step."'
+        ),
+        notes="E31a: grant tap-copy haste.",
+        colors=("R",),
+        mana_cost="{2}{R}{R}",
+        mana_value=4,
+    ),
 }

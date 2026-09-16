@@ -599,6 +599,9 @@ class Executor:
             return False
         if grant.host_filter == "creatures_you_control":
             return host.is_creature
+        if grant.host_filter == "enchanted_creature":
+            # Aura attachment not modeled; any controlled creature may be the host.
+            return host.is_creature
         if grant.host_filter == "white_creatures_you_control":
             return host.is_creature and "W" in (host.colors or [])
         if grant.host_filter == "slivers_you_control":
@@ -948,20 +951,55 @@ class Executor:
             qty *= self.token_create_multiplier(state)
             if qty <= 0:
                 return None
+            template: Permanent | None = None
+            if effect.copy_target:
+                tid = target_id or source.object_id
+                if not tid or tid not in state.permanents:
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_TARGET,
+                        "copy token needs creature target",
+                    )
+                template = state.permanents[tid]
+                if (
+                    template.zone != Zone.BATTLEFIELD
+                    or not template.is_creature
+                    or template.controller != "you"
+                ):
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_TARGET,
+                        "copy token target must be your BF creature",
+                    )
             for _ in range(qty):
                 oid = state.next_token_id()
-                tok = Permanent(
-                    object_id=oid,
-                    oracle_id=f"token:{effect.name}",
-                    name=effect.name,
-                    controller="you",
-                    zone=Zone.BATTLEFIELD,
-                    is_token=True,
-                    is_creature=effect.is_creature,
-                    is_artifact=effect.is_artifact or effect.treasure,
-                    power=effect.power,
-                    toughness=effect.toughness,
-                )
+                if template is not None:
+                    tok = Permanent(
+                        object_id=oid,
+                        oracle_id=template.oracle_id,
+                        name=template.name,
+                        controller="you",
+                        zone=Zone.BATTLEFIELD,
+                        is_token=True,
+                        is_creature=True,
+                        is_artifact=template.is_artifact,
+                        power=template.power,
+                        toughness=template.toughness,
+                        colors=list(template.colors),
+                        summoning_sick=not effect.haste,
+                    )
+                else:
+                    tok = Permanent(
+                        object_id=oid,
+                        oracle_id=f"token:{effect.name}",
+                        name=effect.name,
+                        controller="you",
+                        zone=Zone.BATTLEFIELD,
+                        is_token=True,
+                        is_creature=effect.is_creature,
+                        is_artifact=effect.is_artifact or effect.treasure,
+                        power=effect.power,
+                        toughness=effect.toughness,
+                        summoning_sick=not effect.haste,
+                    )
                 state.permanents[oid] = tok
                 state.bump("token")
                 self._on_etb(state, tok)
