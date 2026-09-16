@@ -188,6 +188,8 @@ class CreateTokenEffect(BaseModel):
     # When set, create that many tokens equal to controlled creatures with this
     # subtype (Squirrel Girl X = Squirrels; token names infer subtype).
     quantity_equal_to_controlled_subtype: str | None = None
+    # Old Gnawbone: create that many treasures from trigger damage amount.
+    quantity_from_trigger: bool = False
     is_creature: bool = True
     is_artifact: bool = False
     treasure: bool = False

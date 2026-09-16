@@ -1820,4 +1820,42 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{5}",
         mana_value=5,
     ),
+
+    "Old Gnawbone": RealOracleCurriculum(
+        name="Old Gnawbone",
+        types=["Legendary", "Creature", "Dragon"],
+        oracle_text=(
+            "Flying\n"
+            "Whenever a creature you control deals combat damage to a player, "
+            "create that many Treasure tokens."
+        ),
+        notes="E22b: combat damage → that many Treasures.",
+        colors=("G",),
+        mana_cost="{5}{G}{G}",
+        mana_value=7,
+    ),
+    "Grim Hireling": RealOracleCurriculum(
+        name="Grim Hireling",
+        types=["Creature", "Tiefling", "Rogue"],
+        oracle_text=(
+            "Whenever one or more creatures you control deal combat damage to a player, "
+            "create two Treasure tokens."
+        ),
+        notes="E22b: combat damage → two Treasures.",
+        colors=("B",),
+        mana_cost="{3}{B}",
+        mana_value=4,
+    ),
+    "Smaug the Impenetrable": RealOracleCurriculum(
+        name="Smaug the Impenetrable",
+        types=["Legendary", "Creature", "Dragon"],
+        oracle_text=(
+            "Flying\n"
+            "Whenever Smaug is dealt noncombat damage, create that many Treasure tokens."
+        ),
+        notes="E22b: dealt damage → Treasures (noncombat gate not modeled).",
+        colors=("R",),
+        mana_cost="{5}{R}",
+        mana_value=6,
+    ),
 }

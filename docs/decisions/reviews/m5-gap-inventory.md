@@ -92,6 +92,7 @@ narrows mid-flight.
 | E21 | done | Proliferate | CLOSE_BUILD | 3 | 0 | yes | Viral Drake proliferate (infect PI) |
 | E22 | pending | Token-create variants (umbrella) | CLOSE_BUILD | 125 | 65 | mixed | Split into E22a+; copy tokens → E34 |
 | E22a | done | Eldrazi tokens + double-token siblings | CLOSE_BUILD | 5 | 3 | maybe | Brood/Hatcher/Spawnsire; Exalted; Ajani's Chosen |
+| E22b | done | Combat damage → Treasures | CLOSE_BUILD | 3 | 2 | maybe | Old Gnawbone / Hireling / Smaug |
 | E50 | pending | Life replacement | CLOSE_BUILD | 7 | — | mixed | Twice life loss/gain; can’t-gain |
 | E51 | pending | Mill replacement | CLOSE_BUILD | 1 | — | maybe | Mill twice |
 | E52 | pending | Counter-put triggers | CLOSE_BUILD | 7 | — | maybe | All Will Be One-class |
