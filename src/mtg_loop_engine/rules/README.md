@@ -82,6 +82,7 @@ graph TB;
 | Model | Source of truth | Typical consumers |
 | --- | --- | --- |
 | **Payment** | `ManaAmount` WUBRG + `any_color` | Cost payment (`pay_mana`) |
+| **Activate-only** | `GameState.mana_activate_only` | Omen Hawker-class; activations may spend it, casts may not |
 | **Permanent / card colors** | `Permanent.colors` (fallback `CardSemantics.colors`) | Subject filters (`other_controlled_green`) |
 | **Vivid / devotion proxies** | Mana symbols on **activated costs** among controlled permanents | `VIVID_PERMANENT_COLORS`, `DEVOTION_GREEN` scales |
 

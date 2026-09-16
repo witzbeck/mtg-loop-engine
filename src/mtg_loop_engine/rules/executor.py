@@ -189,6 +189,12 @@ def _scaled_mana_quantity(
         return _devotion_green(state, semantics)
     if scale is ManaScaleKind.VIVID_PERMANENT_COLORS:
         return len(_colors_among_controlled(state, semantics))
+    if scale is ManaScaleKind.HAND_ARTIFACTS:
+        return sum(
+            1
+            for p in state.permanents.values()
+            if p.zone == Zone.HAND and p.controller == "you" and p.is_artifact
+        )
     return 0
 
 
@@ -322,46 +328,85 @@ class Executor:
                 return ab  # type: ignore[return-value]
         return None
 
-    def pay_mana(self, state: GameState, amount: ManaAmount) -> ExecError | None:
+    def pay_mana(
+        self,
+        state: GameState,
+        amount: ManaAmount,
+        *,
+        allow_activate_only: bool = False,
+    ) -> ExecError | None:
         # Colors exact, then any_color may cover remaining colored needs.
         # Generic paid from colorless, then colored, then any_color.
-        pool = state.mana
+        # Unrestricted pool first; activate-only pool only when allowed.
+        pools = [state.mana]
+        if allow_activate_only:
+            pools.append(state.mana_activate_only)
         need = amount.model_copy(deep=True)
 
         for color in ("white", "blue", "black", "red", "green", "colorless"):
             n = getattr(need, color)
             if not n:
                 continue
-            avail = getattr(pool, color)
-            use = min(avail, n)
-            if use:
-                setattr(pool, color, avail - use)
-                setattr(need, color, n - use)
-            remaining = getattr(need, color)
+            remaining = n
+            for pool in pools:
+                if remaining <= 0:
+                    break
+                avail = getattr(pool, color)
+                use = min(avail, remaining)
+                if use:
+                    setattr(pool, color, avail - use)
+                    remaining -= use
             if remaining:
-                if pool.any_color < remaining:
-                    return ExecError(
-                        VerificationStatus.MANA_RESTRICTION, f"need {color} {n}"
-                    )
-                pool.any_color -= remaining
-                setattr(need, color, 0)
+                for pool in pools:
+                    if remaining <= 0:
+                        break
+                    if pool.any_color < remaining:
+                        use = pool.any_color
+                    else:
+                        use = remaining
+                    if use:
+                        pool.any_color -= use
+                        remaining -= use
+            if remaining:
+                return ExecError(
+                    VerificationStatus.MANA_RESTRICTION, f"need {color} {n}"
+                )
+            setattr(need, color, 0)
 
         generic = need.generic
-        while generic > 0 and pool.colorless > 0:
-            pool.colorless -= 1
-            generic -= 1
-        for color in ("white", "blue", "black", "red", "green"):
-            while generic > 0 and getattr(pool, color) > 0:
-                setattr(pool, color, getattr(pool, color) - 1)
+        for pool in pools:
+            while generic > 0 and pool.colorless > 0:
+                pool.colorless -= 1
                 generic -= 1
-        while generic > 0 and pool.any_color > 0:
-            pool.any_color -= 1
-            generic -= 1
+            for color in ("white", "blue", "black", "red", "green"):
+                while generic > 0 and getattr(pool, color) > 0:
+                    setattr(pool, color, getattr(pool, color) - 1)
+                    generic -= 1
+            while generic > 0 and pool.any_color > 0:
+                pool.any_color -= 1
+                generic -= 1
         if generic > 0:
             return ExecError(
                 VerificationStatus.RESOURCE_DEFICIT, f"cannot pay generic {need.generic}"
             )
         return None
+
+    def _credit_mana(
+        self,
+        state: GameState,
+        effect: AddManaEffect,
+        color: str,
+        qty: int,
+    ) -> None:
+        if qty <= 0:
+            return
+        pool = (
+            state.mana_activate_only
+            if effect.spend_only == "activate_abilities"
+            else state.mana
+        )
+        setattr(pool, color, getattr(pool, color) + qty)
+        state.bump("mana", qty)
 
     def apply_effects(
         self,
@@ -411,13 +456,7 @@ class Executor:
                     state, source, max(int(power or 0), 0)
                 )
                 if qty > 0:
-                    color = effect.equal_to_source_power
-                    setattr(
-                        state.mana,
-                        color,
-                        getattr(state.mana, color) + qty,
-                    )
-                    state.bump("mana", qty)
+                    self._credit_mana(state, effect, effect.equal_to_source_power, qty)
                 return None
             if effect.equal_to_source_p1p1_counters:
                 qty = self._effective_tap_mana_qty(
@@ -426,25 +465,15 @@ class Executor:
                     max(int(source.counters.get("p1p1", 0)), 0),
                 )
                 if qty > 0:
-                    color = effect.equal_to_source_p1p1_counters
-                    setattr(
-                        state.mana,
-                        color,
-                        getattr(state.mana, color) + qty,
+                    self._credit_mana(
+                        state, effect, effect.equal_to_source_p1p1_counters, qty
                     )
-                    state.bump("mana", qty)
                 return None
             if effect.mana_scale is not None:
                 if effect.mana_scale is ManaScaleKind.VIVID_PERMANENT_COLORS:
                     colors = _colors_among_controlled(state, self.semantics)
                     for color in colors:
-                        setattr(
-                            state.mana,
-                            color,
-                            getattr(state.mana, color) + mult,
-                        )
-                    if colors:
-                        state.bump("mana", len(colors) * mult)
+                        self._credit_mana(state, effect, color, mult)
                     return None
                 if (
                     effect.mana_scale
@@ -469,32 +498,20 @@ class Executor:
                         and (self._creature_subtypes(p) & subtypes)
                     )
                     if qty > 0:
-                        color = effect.scale_color
-                        setattr(
-                            state.mana,
-                            color,
-                            getattr(state.mana, color) + qty,
-                        )
-                        state.bump("mana", qty)
+                        self._credit_mana(state, effect, effect.scale_color, qty)
                     return None
+                base = max(
+                    _scaled_mana_quantity(effect, state, source, self.semantics),
+                    0,
+                )
                 qty = self._effective_tap_mana_qty(
                     state,
                     source,
-                    max(
-                        _scaled_mana_quantity(effect, state, source, self.semantics),
-                        0,
-                    ),
+                    base * max(int(effect.scale_multiplier or 1), 1),
                 )
                 if qty > 0:
-                    color = effect.scale_color
-                    setattr(
-                        state.mana,
-                        color,
-                        getattr(state.mana, color) + qty,
-                    )
-                    state.bump("mana", qty)
+                    self._credit_mana(state, effect, effect.scale_color, qty)
                 return None
-            added = 0
             for color in (
                 "white",
                 "blue",
@@ -507,14 +524,7 @@ class Executor:
             ):
                 delta = getattr(effect.amount, color) * mult
                 if delta:
-                    setattr(
-                        state.mana,
-                        color,
-                        getattr(state.mana, color) + delta,
-                    )
-                    added += delta
-            if added:
-                state.bump("mana", added)
+                    self._credit_mana(state, effect, color, delta)
             return None
 
         if isinstance(effect, UntapEffect):
@@ -1243,6 +1253,28 @@ class Executor:
             )
         return None
 
+
+    def _controls_metalcraft(self, state: GameState) -> bool:
+        n = sum(
+            1
+            for p in state.permanents.values()
+            if p.zone == Zone.BATTLEFIELD
+            and p.controller == "you"
+            and p.is_artifact
+        )
+        return n >= 3
+
+    def _has_controlled_power_at_least(self, state: GameState, need: int) -> bool:
+        for p in state.permanents.values():
+            if p.zone != Zone.BATTLEFIELD or p.controller != "you":
+                continue
+            if not p.is_creature:
+                continue
+            power = p.effective_power()
+            if power is not None and power >= need:
+                return True
+        return False
+
     def _controls_zombie(self, state: GameState) -> bool:
         for perm in state.permanents.values():
             if perm.zone != Zone.BATTLEFIELD or not perm.is_creature:
@@ -1300,6 +1332,17 @@ class Executor:
             return ExecError(VerificationStatus.ILLEGAL_ACTION, "return ability needs GY")
         if ab.requires_zombie and not self._controls_zombie(state):
             return ExecError(VerificationStatus.ILLEGAL_ACTION, "need a Zombie")
+        if ab.requires_metalcraft and not self._controls_metalcraft(state):
+            return ExecError(
+                VerificationStatus.ILLEGAL_ACTION, "need metalcraft (3+ artifacts)"
+            )
+        if ab.requires_controlled_power_at_least is not None:
+            need = ab.requires_controlled_power_at_least
+            if not self._has_controlled_power_at_least(state, need):
+                return ExecError(
+                    VerificationStatus.ILLEGAL_ACTION,
+                    f"need controlled creature power {need}+",
+                )
         if ab.once_per_turn and ab.ability_id in perm.once_per_turn_used:
             return ExecError(VerificationStatus.ONCE_PER_TURN_LIMIT, ab.ability_id)
 
@@ -1342,7 +1385,7 @@ class Executor:
                     current = need.total()
                     if current < mana_floor:
                         need.generic += mana_floor - current
-                err = self.pay_mana(state, need)
+                err = self.pay_mana(state, need, allow_activate_only=True)
                 if err:
                     return err
             elif isinstance(cost, HybridManaCost):
@@ -1352,7 +1395,7 @@ class Executor:
                         continue
                     if getattr(state.mana, color) <= 0 and state.mana.any_color <= 0:
                         continue
-                    err = self.pay_mana(state, ManaAmount(**{color: 1}))
+                    err = self.pay_mana(state, ManaAmount(**{color: 1}), allow_activate_only=True)
                     if err is None:
                         paid = True
                         break
@@ -1457,8 +1500,9 @@ class Executor:
                     fodder = state.permanents[fodder_id]
                     self.sacrifice(state, fodder)
             elif isinstance(cost, TapCreatureCost):
-                tapped_id = None
-                if step.cost_target:
+                need = max(int(cost.quantity or 1), 1)
+                tapped_ids: list[str] = []
+                if step.cost_target and need == 1:
                     cand = state.permanents.get(step.cost_target)
                     if (
                         cand is not None
@@ -1468,28 +1512,33 @@ class Executor:
                         and not cand.tapped
                         and (cost.allow_source or cand.object_id != perm.object_id)
                     ):
-                        tapped_id = cand.object_id
+                        tapped_ids.append(cand.object_id)
                     else:
                         return ExecError(
                             VerificationStatus.ILLEGAL_TARGET,
                             "tap-creature cost_target illegal",
                         )
-                if tapped_id is None:
-                    tapped_id = self._pick_tap_creature(
-                        state, source=perm, allow_source=cost.allow_source
+                while len(tapped_ids) < need:
+                    picked = self._pick_tap_creature(
+                        state,
+                        source=perm,
+                        allow_source=cost.allow_source,
+                        exclude=set(tapped_ids),
                     )
-                if not tapped_id:
-                    return ExecError(
-                        VerificationStatus.RESOURCE_DEFICIT,
-                        "no untapped creature to tap for cost",
-                    )
-                tap_perm = state.permanents[tapped_id]
-                if tap_perm.tapped:
-                    return ExecError(
-                        VerificationStatus.ILLEGAL_ACTION, "already tapped"
-                    )
-                # Not {T} on the creature — summoning sickness does not apply (CR 302.6).
-                tap_perm.tapped = True
+                    if not picked:
+                        return ExecError(
+                            VerificationStatus.RESOURCE_DEFICIT,
+                            "no untapped creature to tap for cost",
+                        )
+                    tapped_ids.append(picked)
+                for tapped_id in tapped_ids:
+                    tap_perm = state.permanents[tapped_id]
+                    if tap_perm.tapped:
+                        return ExecError(
+                            VerificationStatus.ILLEGAL_ACTION, "already tapped"
+                        )
+                    # Not {T} on the creature — summoning sickness does not apply (CR 302.6).
+                    tap_perm.tapped = True
 
         err = self.apply_effects(state, perm, ab.effects, step.target)
         if err:
@@ -1518,6 +1567,7 @@ class Executor:
         *,
         source: Permanent,
         allow_source: bool,
+        exclude: set[str] | None = None,
     ) -> str | None:
         """Pick an untapped controlled creature to tap for Earthcraft-class costs.
 
@@ -1525,8 +1575,11 @@ class Executor:
         Prefer creatures with self ``{Q}`` costs (Patrol Signaler) so Earthcraft can
         set up untap-symbol activations; among others prefer tokens (Nest squirrels).
         """
+        skip = exclude or set()
         candidates: list[Permanent] = []
         for p in state.permanents.values():
+            if p.object_id in skip:
+                continue
             if p.zone != Zone.BATTLEFIELD or p.controller != "you":
                 continue
             if not p.is_creature or p.tapped:

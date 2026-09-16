@@ -266,8 +266,14 @@ AURA_HOST_ORACLE_ID = "setup:aura-host"
 CREATURE_MANA_SEED_ORACLE_ID = "scaled-mana:creature-seed"
 ELF_MANA_SEED_ORACLE_ID = "scaled-mana:elf-seed"
 DEFENDER_MANA_SEED_ORACLE_ID = "scaled-mana:defender-seed"
+HAND_ARTIFACT_SEED_ORACLE_ID = "gated-mana:hand-artifact-seed"
+METALCRAFT_ARTIFACT_SEED_ORACLE_ID = "gated-mana:metalcraft-artifact-seed"
+FEROCIOUS_CREATURE_SEED_ORACLE_ID = "gated-mana:ferocious-creature-seed"
+TAP_PAIR_CREATURE_SEED_ORACLE_ID = "gated-mana:tap-pair-creature-seed"
 
 _SCALED_MANA_SEED_COUNT = 3
+_HAND_ARTIFACT_SEED_COUNT = 3
+_METALCRAFT_EXTRA_ARTIFACTS = 2
 
 
 def _scaled_mana_seed_semantics() -> dict[str, CardSemantics]:
@@ -298,6 +304,34 @@ def _scaled_mana_seed_semantics() -> dict[str, CardSemantics]:
                     clause="Defender",
                 )
             ],
+            coverage=SemanticCoverage.COMPLETE,
+        ),
+        HAND_ARTIFACT_SEED_ORACLE_ID: CardSemantics(
+            oracle_id=HAND_ARTIFACT_SEED_ORACLE_ID,
+            name="Seed Hand Artifact",
+            types=["Artifact"],
+            abilities=[],
+            coverage=SemanticCoverage.COMPLETE,
+        ),
+        METALCRAFT_ARTIFACT_SEED_ORACLE_ID: CardSemantics(
+            oracle_id=METALCRAFT_ARTIFACT_SEED_ORACLE_ID,
+            name="Seed Metalcraft Artifact",
+            types=["Artifact"],
+            abilities=[],
+            coverage=SemanticCoverage.COMPLETE,
+        ),
+        FEROCIOUS_CREATURE_SEED_ORACLE_ID: CardSemantics(
+            oracle_id=FEROCIOUS_CREATURE_SEED_ORACLE_ID,
+            name="Seed Ferocious Creature",
+            types=["Creature"],
+            abilities=[],
+            coverage=SemanticCoverage.COMPLETE,
+        ),
+        TAP_PAIR_CREATURE_SEED_ORACLE_ID: CardSemantics(
+            oracle_id=TAP_PAIR_CREATURE_SEED_ORACLE_ID,
+            name="Seed Tap-Pair Creature",
+            types=["Creature"],
+            abilities=[],
             coverage=SemanticCoverage.COMPLETE,
         ),
     }
@@ -759,6 +793,52 @@ def default_initial_state(a: CardSemantics, b: CardSemantics) -> InitialStateSpe
                     toughness=4,
                 )
             )
+    if any(c.needs_hand_artifact_mana_seed() for c in pair_caps):
+        for i in range(_HAND_ARTIFACT_SEED_COUNT):
+            permanents.append(
+                bf(
+                    f"hand_artifact_{i}",
+                    HAND_ARTIFACT_SEED_ORACLE_ID,
+                    "Seed Hand Artifact",
+                    is_creature=False,
+                    is_artifact=True,
+                    zone=Zone.HAND,
+                )
+            )
+    if any(c.needs_metalcraft_seed() for c in pair_caps):
+        have = sum(1 for p in permanents if p.is_artifact and p.zone == Zone.BATTLEFIELD)
+        for i in range(max(0, 3 - have)):
+            permanents.append(
+                bf(
+                    f"metalcraft_artifact_{i}",
+                    METALCRAFT_ARTIFACT_SEED_ORACLE_ID,
+                    "Seed Metalcraft Artifact",
+                    is_creature=False,
+                    is_artifact=True,
+                )
+            )
+    if any(c.needs_ferocious_seed() for c in pair_caps):
+        permanents.append(
+            bf(
+                "ferocious_creature",
+                FEROCIOUS_CREATURE_SEED_ORACLE_ID,
+                "Seed Ferocious Creature",
+                is_creature=True,
+                power=4,
+                toughness=4,
+            )
+        )
+    if any(c.needs_tap_creature_pair_seed() for c in pair_caps):
+        permanents.append(
+            bf(
+                "tap_pair_creature",
+                TAP_PAIR_CREATURE_SEED_ORACLE_ID,
+                "Seed Tap-Pair Creature",
+                is_creature=True,
+                power=1,
+                toughness=1,
+            )
+        )
     mana = ManaAmount()
     for card in ordered:
         for seed_fn in (_mana_for_grant_lifelink, _mana_for_subtype_scaled_create):
@@ -1444,6 +1524,36 @@ def build_witness(
                     "generic board-scaled mana fodder "
                     "(creature / elf / defender identity irrelevant)"
                 ),
+            )
+        )
+    if any(p.oracle_id == HAND_ARTIFACT_SEED_ORACLE_ID for p in spec.permanents):
+        generic.append(
+            Prerequisite(
+                kind="board",
+                description="hand artifact cards for Metalworker scale (identity irrelevant)",
+            )
+        )
+    if any(
+        p.oracle_id == METALCRAFT_ARTIFACT_SEED_ORACLE_ID for p in spec.permanents
+    ):
+        generic.append(
+            Prerequisite(
+                kind="board",
+                description="generic artifacts for metalcraft (identity irrelevant)",
+            )
+        )
+    if any(p.oracle_id == FEROCIOUS_CREATURE_SEED_ORACLE_ID for p in spec.permanents):
+        generic.append(
+            Prerequisite(
+                kind="board",
+                description="generic power-4+ creature for ferocious (identity irrelevant)",
+            )
+        )
+    if any(p.oracle_id == TAP_PAIR_CREATURE_SEED_ORACLE_ID for p in spec.permanents):
+        generic.append(
+            Prerequisite(
+                kind="board",
+                description="generic creature to tap with Supportive Parents (identity irrelevant)",
             )
         )
     setup = setup_actions or []

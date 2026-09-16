@@ -104,6 +104,8 @@ class ManaScaleKind(StrEnum):
     VIVID_PERMANENT_COLORS = "vivid_permanent_colors"
     # Mana Echoes: count controlled creatures sharing a creature type with trigger subject.
     CONTROLLED_SHARING_CREATURE_TYPE = "controlled_sharing_creature_type"
+    # Metalworker: artifact cards in hand (combo player reveals all).
+    HAND_ARTIFACTS = "hand_artifacts"
 
 
 class TriggerEvent(StrEnum):

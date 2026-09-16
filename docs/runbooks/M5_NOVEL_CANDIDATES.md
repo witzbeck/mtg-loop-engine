@@ -121,8 +121,10 @@ uv run python scripts/spellbook_absent_discovery.py
     (CLOSE_NOW / CLOSE_BUILD / REJECT / OOS; autonomous IR-family PRs; end cleanup).
     Path **a** preference remains; cite live P0/P1. Walk the inventory’s first undone
     epic — do not chase singleton curriculum rank (Storm Herd stays REJECT). Ritual below.
-35. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-36. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+35. **E01 gated tap-mana** ✓ — metalcraft / ferocious gates; Metalworker hand-artifact scale;
+    Omen Hawker spend-only activate pool; Supportive Parents tap-two; Staff/Freed rediscovery.
+36. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+37. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 

@@ -93,11 +93,13 @@ class UntapSymbolCost(BaseModel):
 
 
 class TapCreatureCost(BaseModel):
-    """Earthcraft: tap an untapped creature you control (not the source by default)."""
+    """Earthcraft / Supportive Parents: tap untapped creature(s) you control."""
 
     kind: Literal["tap_creature"] = "tap_creature"
     # Prefer non-source creatures; explorer/executor auto-pick when step has no fodder id.
     allow_source: bool = False
+    # Supportive Parents: tap two untapped creatures.
+    quantity: int = 1
 
 
 Cost = Annotated[
@@ -129,6 +131,10 @@ class AddManaEffect(BaseModel):
     # Also Mana Echoes ETB → colorless × sharing creature type (trigger subject).
     mana_scale: ManaScaleKind | None = None
     scale_color: Literal["green", "any_color", "colorless"] = "green"
+    # Metalworker: each hand artifact adds this many of scale_color (usually 2×{C}).
+    scale_multiplier: int = 1
+    # Omen Hawker: mana may only pay activated abilities (not casts).
+    spend_only: Literal[None, "activate_abilities"] = None
 
 
 class UntapEffect(BaseModel):
@@ -292,6 +298,10 @@ class ActivatedAbility(BaseModel):
     supported: bool = True
     # Cast-from-GY style gates (Gravecrawler): need a Zombie on battlefield.
     requires_zombie: bool = False
+    # Mox Opal metalcraft: ≥3 controlled artifacts on the battlefield.
+    requires_metalcraft: bool = False
+    # Fanatic ferocious: controlled creature with effective power ≥ N.
+    requires_controlled_power_at_least: int | None = None
 
 
 class TriggeredAbility(BaseModel):
