@@ -894,6 +894,7 @@ def _effect_needs_permanent_target(ability: ActivatedAbility) -> bool:
         if getattr(effect, "target", None) in {
             "target_permanent",
             "target_basic_land",
+            "target_artifact",
             "target_other_creature",
             "other_controlled_creature",
             "other_controlled_sharing_type",

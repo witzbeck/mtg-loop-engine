@@ -46,6 +46,7 @@ from mtg_loop_engine.semantics.ir import (
     SacrificeCost,
     TapCost,
     TapCreatureCost,
+    TapArtifactCost,
     TapEffect,
     TriggeredAbility,
     UntapEffect,
@@ -794,6 +795,12 @@ class Executor:
                     return ExecError(
                         VerificationStatus.ILLEGAL_TARGET,
                         "untap target must be a land",
+                    )
+            if effect.target == "target_artifact":
+                if not self._is_artifact_permanent(target_perm):
+                    return ExecError(
+                        VerificationStatus.ILLEGAL_TARGET,
+                        "untap target must be an artifact",
                     )
             self._untap_permanent(state, target_perm)
             state.bump("untap")
@@ -2037,6 +2044,30 @@ class Executor:
                         )
                     # Not {T} on the creature — summoning sickness does not apply (CR 302.6).
                     tap_perm.tapped = True
+            elif isinstance(cost, TapArtifactCost):
+                need = max(int(cost.quantity or 1), 1)
+                tapped_ids: list[str] = []
+                while len(tapped_ids) < need:
+                    picked = None
+                    for p in state.permanents.values():
+                        if p.object_id in tapped_ids:
+                            continue
+                        if p.zone != Zone.BATTLEFIELD or p.controller != "you":
+                            continue
+                        if p.tapped or not self._is_artifact_permanent(p):
+                            continue
+                        if not cost.allow_source and p.object_id == perm.object_id:
+                            continue
+                        picked = p.object_id
+                        break
+                    if not picked:
+                        return ExecError(
+                            VerificationStatus.RESOURCE_DEFICIT,
+                            "no untapped artifact to tap for cost",
+                        )
+                    tapped_ids.append(picked)
+                for tapped_id in tapped_ids:
+                    state.permanents[tapped_id].tapped = True
 
         err = self.apply_effects(state, perm, ab.effects, step.target)
         if err:

@@ -104,6 +104,14 @@ class TapCreatureCost(BaseModel):
     subtype: str | None = None
 
 
+class TapArtifactCost(BaseModel):
+    """Clock of Omens: tap untapped artifacts you control."""
+
+    kind: Literal["tap_artifact"] = "tap_artifact"
+    quantity: int = 1
+    allow_source: bool = True
+
+
 class PayLifeCost(BaseModel):
     """Pay N life (Aetherflux Reservoir class)."""
 
@@ -129,6 +137,7 @@ Cost = Annotated[
     | RemoveCounterCost
     | UntapSymbolCost
     | TapCreatureCost
+    | TapArtifactCost
     | PayLifeCost
     | BounceControlledCost,
     Field(discriminator="kind"),
@@ -167,6 +176,7 @@ class UntapEffect(BaseModel):
         "trigger_subject",
         "target_basic_land",
         "target_land",
+        "target_artifact",
         "controlled_lands",
         "all_creatures",
     ] = ("self")

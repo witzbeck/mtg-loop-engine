@@ -1884,4 +1884,33 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{1}{G}",
         mana_value=2,
     ),
+
+    "Filigree Sages": RealOracleCurriculum(
+        name="Filigree Sages",
+        types=["Artifact", "Creature", "Vedalken", "Artificer"],
+        oracle_text="{2}{U}: Untap target artifact.",
+        notes="E67a: untap target artifact.",
+        colors=("U",),
+        mana_cost="{3}{U}",
+        mana_value=4,
+    ),
+    "Corridor Monitor": RealOracleCurriculum(
+        name="Corridor Monitor",
+        types=["Artifact", "Creature", "Construct"],
+        oracle_text=(
+            "When this creature enters, untap target artifact or creature you control."
+        ),
+        notes="E67a: ETB untap artifact/creature.",
+        colors=("U",),
+        mana_cost="{1}{U}",
+        mana_value=2,
+    ),
+    "Clock of Omens": RealOracleCurriculum(
+        name="Clock of Omens",
+        types=["Artifact"],
+        oracle_text="Tap two untapped artifacts you control: Untap target artifact.",
+        notes="E67a: tap two artifacts → untap artifact.",
+        mana_cost="{4}",
+        mana_value=4,
+    ),
 }
