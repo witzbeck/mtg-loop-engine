@@ -1909,7 +1909,7 @@ def pat_create_token_put_p1p1_other(text: str, name: str) -> Ability | None:
 
 
 def pat_counters_put_damage_opponent(text: str, name: str) -> Ability | None:
-    """Shalai and Hallar: counters put on a creature you control → that much damage."""
+    """Shalai and Hallar / All Will Be One: counters put → that much damage."""
     short = name.split(",")[0].strip() if "," in name else name
     name_alt = "|".join(
         re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
@@ -1920,14 +1920,61 @@ def pat_counters_put_damage_opponent(text: str, name: str) -> Ability | None:
         text,
         re.IGNORECASE,
     )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("counters-damage-opponent", text),
+            event=TriggerEvent.COUNTER_ADDED,
+            filter="controlled_creature",
+            effects=[
+                DealDamageEffect(amount=1, target="opponent", amount_from_trigger=True)
+            ],
+        )
+    m = re.match(
+        r"^Whenever you put one or more counters on a permanent or player, "
+        r"(?:this enchantment|~|"
+        + re.escape(name)
+        + r"|it) deals that much damage to "
+        r"(?:target opponent|target opponent, creature an opponent controls, "
+        r"or planeswalker an opponent controls)\.?$",
+        text,
+        re.IGNORECASE,
+    )
     if not m:
         return None
     return TriggeredAbility(
-        ability_id=_ability_id("counters-damage-opponent", text),
+        ability_id=_ability_id("counters-damage-any", text),
         event=TriggerEvent.COUNTER_ADDED,
-        filter="controlled_creature",
+        filter="any",
         effects=[
             DealDamageEffect(amount=1, target="opponent", amount_from_trigger=True)
+        ],
+    )
+
+
+def pat_m1m1_put_create_token(text: str, name: str) -> Ability | None:
+    """Flourishing Defenses: -1/-1 put → create token."""
+    m = re.match(
+        r"^Whenever a -1/-1 counter is put on a creature, "
+        r"(?:you may )?create a (\d+)/(\d+) "
+        r"(?:(?:white|blue|black|red|green|colorless) )?"
+        r"(.+?) creature token\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("m1m1-put-token", text),
+        event=TriggerEvent.COUNTER_ADDED,
+        filter="creature",
+        effects=[
+            CreateTokenEffect(
+                name=m.group(3).strip(),
+                power=int(m.group(1)),
+                toughness=int(m.group(2)),
+                quantity=1,
+                is_creature=True,
+            )
         ],
     )
 
@@ -3912,6 +3959,7 @@ PATTERNS: list[Pattern] = [
     Pattern("instant_grant_tap_bounce", pat_instant_grant_tap_bounce),
     Pattern("create_token_put_p1p1_other", pat_create_token_put_p1p1_other),
     Pattern("counters_put_damage_opponent", pat_counters_put_damage_opponent),
+    Pattern("m1m1_put_create_token", pat_m1m1_put_create_token),
     Pattern("counters_put_may_create_token", pat_counters_put_may_create_token),
     Pattern("etb_untap_target", pat_etb_untap_target),
     Pattern("sac_creature_add_mana", pat_sac_creature_add_mana),

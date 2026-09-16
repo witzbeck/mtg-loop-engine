@@ -95,7 +95,7 @@ narrows mid-flight.
 | E22b | done | Combat damage → Treasures | CLOSE_BUILD | 3 | 2 | maybe | Old Gnawbone / Hireling / Smaug |
 | E50 | pending | Life replacement | CLOSE_BUILD | 7 | — | mixed | Twice life loss/gain; can’t-gain |
 | E51 | pending | Mill replacement | CLOSE_BUILD | 1 | — | maybe | Mill twice |
-| E52 | pending | Counter-put triggers | CLOSE_BUILD | 7 | — | maybe | All Will Be One-class |
+| E52 | done | Counter-put triggers | CLOSE_BUILD | 7 | — | maybe | All Will Be One; Flourishing Defenses |
 | E53 | pending | Adapt / levelers | CLOSE_BUILD | 5 | — | mixed | Adapt N; level up |
 | E54 | pending | Impulse / top-deck | CLOSE_BUILD | 8 | — | mixed | Reveal/exile top |
 | E55 | pending | Cost reduction / affinity | CLOSE_BUILD | 11 | — | mixed | Affinity; costs less |
