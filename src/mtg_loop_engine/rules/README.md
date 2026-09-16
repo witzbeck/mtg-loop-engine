@@ -77,6 +77,7 @@ graph TB;
 - `CopyLastCastSpellEffect` (Dualcaster / Twincast): re-apply `last_cast_spell_oracle_id` effects without counting as cast.
 - `UntapEffect(controlled_nonlands)` (Dramatic Reversal).
 - `FightEffect` (Brash / Apex): mutual power damage + `DEALT_DAMAGE` triggers; hard-negative self-fight.
+- `AdditionalCombatEffect`: bumps `extra_combat` (paired with untap on Assault / Moraug / Bloodthirster).
 - `ReplacementAmplifyP1P1Counters` (Kami / Hardened Scales): +1/+1 puts become that many plus one; creature vs permanent scope; multiple sources stack.
 - Power-scaled tap mana (`equal_to_source_power`) uses `Permanent.effective_power()` (printed ± counters).
 - `AddCounterEffect.amount_from_trigger` + `target=enchanted_creature`: Sunbond / Light of Promise put that many +1/+1 on the host creature (explorer supplies the host target; no attachment graph yet).
