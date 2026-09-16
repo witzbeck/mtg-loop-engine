@@ -119,6 +119,13 @@ class PayLifeCost(BaseModel):
     amount: int
 
 
+class EnergyCost(BaseModel):
+    """Pay N energy counters ({E})."""
+
+    kind: Literal["energy"] = "energy"
+    amount: int = 1
+
+
 class DiscardCost(BaseModel):
     """Discard a card from hand (Mind Over Matter / Skirge Familiar)."""
 
@@ -146,6 +153,7 @@ Cost = Annotated[
     | TapCreatureCost
     | TapArtifactCost
     | PayLifeCost
+    | EnergyCost
     | DiscardCost
     | BounceControlledCost,
     Field(discriminator="kind"),
@@ -229,6 +237,15 @@ class AdditionalCombatEffect(BaseModel):
     """Schedule an extra combat (combo-favorable: also untap is separate)."""
 
     kind: Literal["additional_combat"] = "additional_combat"
+
+
+class GetEnergyEffect(BaseModel):
+    """You get {E} (energy counters)."""
+
+    kind: Literal["get_energy"] = "get_energy"
+    amount: int = 1
+    # When True, amount *= count of controlled creatures.
+    equal_to_controlled_creatures: bool = False
 
 
 class TapEffect(BaseModel):
@@ -440,6 +457,7 @@ Effect = Annotated[
     | CopyLastCastSpellEffect
     | FightEffect
     | AdditionalCombatEffect
+    | GetEnergyEffect
     | DealDamageEffect
     | GainLifeEffect
     | DrawEffect

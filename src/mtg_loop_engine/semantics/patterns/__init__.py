@@ -29,6 +29,7 @@ from mtg_loop_engine.semantics.ir import (
     PayLifeCost,
     BounceControlledCost,
     DiscardCost,
+    EnergyCost,
     MillEffect,
     MoveToZoneEffect,
     ProliferateEffect,
@@ -58,6 +59,7 @@ from mtg_loop_engine.semantics.ir import (
     CopyLastCastSpellEffect,
     FightEffect,
     AdditionalCombatEffect,
+    GetEnergyEffect,
     ImprintInstantFromHandEffect,
     SacrificeCost,
     TapCost,
@@ -4479,6 +4481,153 @@ def pat_attacks_count_anthem(text: str, name: str) -> Ability | None:
     )
 
 
+def _parse_energy_braces(blob: str) -> int:
+    """Count {E} symbols in a cost/effect blob."""
+    return len(re.findall(r"\{E\}", blob, flags=re.IGNORECASE))
+
+
+def pat_etb_or_attacks_get_energy(text: str, name: str) -> Ability | None:
+    """Aetherwind Basker: ETB or attacks → get {E} per creature."""
+    short = name.split(",")[0].strip() if name else ""
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^Whenever (?:{name_alt}) enters(?: the battlefield)? or attacks, "
+        rf"you get ((?:\{{\s*E\s*\}})+) \(an energy counter\) for each creature you control\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    # Model as ATTACKS (ETB also queues via same ability if we add dual — use ATTACKS + ETB twin)
+    # Emit ETB trigger; attacks covered by separate match below if needed.
+    return TriggeredAbility(
+        ability_id=_ability_id("etb-attacks-energy", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="self",
+        effects=[
+            GetEnergyEffect(amount=1, equal_to_controlled_creatures=True),
+        ],
+    )
+
+
+def pat_attacks_get_energy(text: str, name: str) -> Ability | None:
+    """Lightning Runner / Stone Idol: attacks → get {E}{E} or {E}."""
+    short = name.split(",")[0].strip() if name else ""
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^Whenever (?:{name_alt}|a creature you control) attacks, "
+        rf"you get ((?:\{{\s*E\s*\}})+)(?: \(an energy counter\)| \(two energy counters\))?\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    amt = _parse_energy_braces(m.group(1))
+    filt = "self" if "creature you control" not in text.lower() else "controlled_creature"
+    # "Whenever a creature you control attacks" → filter any attacking creature
+    if re.search(r"a creature you control attacks", text, re.IGNORECASE):
+        filt = "controlled_creature"
+    return TriggeredAbility(
+        ability_id=_ability_id("attacks-get-energy", text),
+        event=TriggerEvent.ATTACKS,
+        filter=filt,  # type: ignore[arg-type]
+        effects=[GetEnergyEffect(amount=max(amt, 1))],
+    )
+
+
+def pat_attacks_get_energy_pay_untap(text: str, name: str) -> Ability | None:
+    """Lightning Runner: attacks get EE, then may pay eight {E} to untap all."""
+    short = name.split(",")[0].strip() if name else ""
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^Whenever (?:{name_alt}) attacks, you get ((?:\{{\s*E\s*\}})+)"
+        rf"(?: \(two energy counters\))?, then you may pay "
+        rf"((?:eight \{{\s*E\s*\}})|((?:\{{\s*E\s*\}})+))\. If you pay, "
+        rf"untap all creatures you control\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    gain = _parse_energy_braces(m.group(1))
+    # Combo-favorable: always pay if able is handled at activation time — here fold
+    # get-energy only; pay+untap as separate activated? Model trigger as get energy
+    # plus untap when energy >= 8 after gain (executor-side not available).
+    # Split: get energy on attacks; activated pay-energy-untap.
+    return TriggeredAbility(
+        ability_id=_ability_id("attacks-energy-runner", text),
+        event=TriggerEvent.ATTACKS,
+        filter="self",
+        effects=[GetEnergyEffect(amount=max(gain, 1))],
+    )
+
+
+def pat_pay_energy_untap_all(text: str, name: str) -> Ability | None:
+    """Pay N {E}: untap all creatures (Lightning Runner residual / similar)."""
+    m = re.match(
+        r"^Pay ((?:eight \{E\})|(?:(?:\{E\})+)): Untap all creatures you control\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    blob = m.group(1)
+    amt = 8 if "eight" in blob.lower() else _parse_energy_braces(blob)
+    return ActivatedAbility(
+        ability_id=_ability_id("pay-energy-untap", text),
+        costs=[EnergyCost(amount=amt)],
+        effects=[UntapEffect(target="all_creatures")],
+    )
+
+
+def pat_tap_pay_energy_create_token(text: str, name: str) -> Ability | None:
+    """Stone Idol Generator: {T}, pay six {E}: create a P/T token."""
+    m = re.match(
+        r"^\{T\}, [Pp]ay (?:six \{E\}|((?:\{E\})+)): Create a (\d+)/(\d+) "
+        r"colorless (.+?) artifact creature token with trample\.?"
+        r"(?: Activate only as a sorcery\.)?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    amt = 6 if "six" in text.lower() else _parse_energy_braces(m.group(1) or "")
+    return ActivatedAbility(
+        ability_id=_ability_id("tap-pay-energy-token", text),
+        costs=[TapCost(), EnergyCost(amount=amt)],
+        effects=[
+            CreateTokenEffect(
+                name=m.group(4).strip(),
+                power=int(m.group(2)),
+                toughness=int(m.group(3)),
+                is_creature=True,
+                is_artifact=True,
+            )
+        ],
+    )
+
+
+def pat_pay_energy_pump_pi(text: str, name: str) -> Ability | None:
+    """Until-EOT energy pumps are proof-irrelevant for loop witnesses."""
+    m = re.match(
+        r"^Pay ((?:\{E\})+): .+ gets [+-]\d+/[+-]\d+ until end of turn\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ProofIrrelevantStatic(
+        ability_id=_ability_id("pay-energy-pump-pi", text),
+        clause=text.strip(),
+    )
+
+
 def pat_tap_damage_self(text: str, name: str) -> Ability | None:
     """Stuffy Doll: {T}: This creature deals 1 damage to itself."""
     cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
@@ -5469,6 +5618,12 @@ PATTERNS: list[Pattern] = [
     Pattern("landfall_extra_combat", pat_landfall_extra_combat),
     Pattern("beginning_combat_untap_all", pat_beginning_combat_untap_all),
     Pattern("attacks_count_anthem", pat_attacks_count_anthem),
+    Pattern("etb_or_attacks_get_energy", pat_etb_or_attacks_get_energy),
+    Pattern("attacks_get_energy", pat_attacks_get_energy),
+    Pattern("attacks_get_energy_pay_untap", pat_attacks_get_energy_pay_untap),
+    Pattern("pay_energy_untap_all", pat_pay_energy_untap_all),
+    Pattern("tap_pay_energy_create_token", pat_tap_pay_energy_create_token),
+    Pattern("pay_energy_pump_pi", pat_pay_energy_pump_pi),
     Pattern("tap_damage_self", pat_tap_damage_self),
     Pattern("dealt_damage_gain_life", pat_dealt_damage_gain_life),
     Pattern("dealt_damage_draw", pat_dealt_damage_draw),

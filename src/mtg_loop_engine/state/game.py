@@ -106,6 +106,8 @@ class GameState:
     last_sacrificed_power: int = 0
     # Last instant/sorcery cast (Isochron / Dualcaster / Twincast copy source).
     last_cast_spell_oracle_id: str | None = None
+    # Energy counters you control ({E}).
+    energy_you: int = 0
 
     @classmethod
     def from_spec(cls, spec: InitialStateSpec) -> GameState:
@@ -155,6 +157,7 @@ class GameState:
             _token_seq=self._token_seq,
             last_sacrificed_power=self.last_sacrificed_power,
             last_cast_spell_oracle_id=self.last_cast_spell_oracle_id,
+            energy_you=self.energy_you,
         )
 
     def bump(self, key: str, n: int = 1) -> None:

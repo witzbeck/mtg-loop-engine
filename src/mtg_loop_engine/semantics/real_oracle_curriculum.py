@@ -2608,6 +2608,49 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_value=6,
     ),
 
+    # M5 E38 — energy
+    "Lightning Runner": RealOracleCurriculum(
+        name="Lightning Runner",
+        types=["Creature", "Human", "Warrior"],
+        oracle_text=(
+            "Double strike, haste\n"
+            "Whenever this creature attacks, you get {E}{E} "
+            "(two energy counters).\n"
+            "Pay eight {E}: Untap all creatures you control."
+        ),
+        notes="E38: attacks get energy; pay-8 untap.",
+        colors=("R",),
+        mana_cost="{3}{R}{R}",
+        mana_value=5,
+    ),
+    "Aetherwind Basker": RealOracleCurriculum(
+        name="Aetherwind Basker",
+        types=["Creature", "Lizard"],
+        oracle_text=(
+            "Trample\n"
+            "Whenever this creature enters or attacks, you get {E} "
+            "(an energy counter) for each creature you control.\n"
+            "Pay {E}: This creature gets +1/+1 until end of turn."
+        ),
+        notes="E38: ETB energy scaled; pump PI.",
+        colors=("G",),
+        mana_cost="{4}{G}{G}{G}",
+        mana_value=7,
+    ),
+    "Stone Idol Generator": RealOracleCurriculum(
+        name="Stone Idol Generator",
+        types=["Artifact"],
+        oracle_text=(
+            "Whenever a creature you control attacks, you get {E} "
+            "(an energy counter).\n"
+            "{T}, Pay six {E}: Create a 6/12 colorless Construct artifact "
+            "creature token with trample. Activate only as a sorcery."
+        ),
+        notes="E38: attack energy; tap+pay create token.",
+        mana_cost="{5}",
+        mana_value=5,
+    ),
+
     # M5 E54 — impulse / top-deck
     "Sensei's Divining Top": RealOracleCurriculum(
         name="Sensei's Divining Top",
