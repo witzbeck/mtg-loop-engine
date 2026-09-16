@@ -366,3 +366,475 @@ def test_meloku_creates_token_after_land_bounce():
     tokens = [p for p in state.permanents.values() if p.is_token]
     assert len(tokens) == 1
     assert tokens[0].name == "Illusion"
+
+
+def test_meloku_accepts_target_as_bounce_fodder():
+    """When effects need no permanent target, step.target may be the land cost."""
+    meloku = _compile("Meloku the Clouded Mirror").semantics
+    island = CardSemantics(
+        oracle_id="oracle:island",
+        name="Island",
+        types=["Basic", "Land", "Island"],
+        abilities=[],
+        coverage=SemanticCoverage.COMPLETE,
+    )
+    ex = Executor({meloku.oracle_id: meloku, island.oracle_id: island})
+    state = GameState(
+        permanents={
+            "m": Permanent(
+                object_id="m",
+                oracle_id=meloku.oracle_id,
+                name=meloku.name,
+                is_creature=True,
+            ),
+            "i": Permanent(
+                object_id="i",
+                oracle_id=island.oracle_id,
+                name="Island",
+            ),
+        },
+        mana=ManaAmount(colorless=1),
+    )
+    ab = next(a for a in meloku.abilities if isinstance(a, ActivatedAbility))
+    assert (
+        ex.activate(
+            state,
+            ActionStep(
+                op="activate",
+                actor="m",
+                ability_id=ab.ability_id,
+                target="i",
+            ),
+        )
+        is None
+    )
+    assert state.permanents["i"].zone == Zone.HAND
+
+
+def test_bounce_cost_auto_picks_fodder_and_hard_negatives():
+    quirion = _compile("Quirion Ranger").semantics
+    forest = CardSemantics(
+        oracle_id="oracle:forest",
+        name="Forest",
+        types=["Basic", "Land", "Forest"],
+        abilities=[],
+        coverage=SemanticCoverage.COMPLETE,
+    )
+    target = CardSemantics(
+        oracle_id="oracle:tapme",
+        name="Tapme",
+        types=["Creature"],
+        abilities=[],
+        coverage=SemanticCoverage.COMPLETE,
+    )
+    ex = Executor(
+        {
+            quirion.oracle_id: quirion,
+            forest.oracle_id: forest,
+            target.oracle_id: target,
+        }
+    )
+    state = GameState(
+        permanents={
+            "q": Permanent(
+                object_id="q",
+                oracle_id=quirion.oracle_id,
+                name=quirion.name,
+                is_creature=True,
+            ),
+            "f": Permanent(
+                object_id="f",
+                oracle_id=forest.oracle_id,
+                name="Forest",
+            ),
+            "t": Permanent(
+                object_id="t",
+                oracle_id=target.oracle_id,
+                name="Tapme",
+                is_creature=True,
+                tapped=True,
+            ),
+        },
+        mana=ManaAmount(),
+    )
+    ab = next(a for a in quirion.abilities if isinstance(a, ActivatedAbility))
+    assert (
+        ex.activate(
+            state,
+            ActionStep(op="activate", actor="q", ability_id=ab.ability_id, target="t"),
+        )
+        is None
+    )
+    assert state.permanents["f"].zone == Zone.HAND
+
+    empty = GameState(
+        permanents={
+            "q": Permanent(
+                object_id="q",
+                oracle_id=quirion.oracle_id,
+                name=quirion.name,
+                is_creature=True,
+            ),
+            "t": Permanent(
+                object_id="t",
+                oracle_id=target.oracle_id,
+                name="Tapme",
+                is_creature=True,
+                tapped=True,
+            ),
+        },
+        mana=ManaAmount(),
+    )
+    err = ex.activate(
+        empty,
+        ActionStep(op="activate", actor="q", ability_id=ab.ability_id, target="t"),
+    )
+    assert err is not None
+    assert err.status.value == "resource_deficit"
+
+
+def test_doubling_season_doubles_non_p1p1_counters():
+    season = _compile("Doubling Season").semantics
+    putter = CardSemantics(
+        oracle_id="oracle:putter",
+        name="Putter",
+        types=["Creature"],
+        abilities=[
+            ActivatedAbility(
+                ability_id="put",
+                costs=[TapCost()],
+                effects=[
+                    AddCounterEffect(
+                        counter_type="charge", quantity=1, target="self"
+                    )
+                ],
+            )
+        ],
+        coverage=SemanticCoverage.COMPLETE,
+    )
+    ex = Executor({season.oracle_id: season, putter.oracle_id: putter})
+    state = GameState(
+        permanents={
+            "season": Permanent(
+                object_id="season",
+                oracle_id=season.oracle_id,
+                name=season.name,
+            ),
+            "putter": Permanent(
+                object_id="putter",
+                oracle_id=putter.oracle_id,
+                name="Putter",
+                is_creature=True,
+            ),
+        },
+        mana=ManaAmount(),
+    )
+    assert (
+        ex.activate(
+            state, ActionStep(op="activate", actor="putter", ability_id="put")
+        )
+        is None
+    )
+    assert state.permanents["putter"].counters.get("charge") == 2
+
+
+def test_explorer_emits_bounce_cost_steps():
+    from mtg_loop_engine.search.explorer import legal_steps
+
+    quirion = _compile("Quirion Ranger").semantics
+    forest = CardSemantics(
+        oracle_id="oracle:forest",
+        name="Forest",
+        types=["Basic", "Land", "Forest"],
+        abilities=[],
+        coverage=SemanticCoverage.COMPLETE,
+    )
+    target = CardSemantics(
+        oracle_id="oracle:tapme",
+        name="Tapme",
+        types=["Creature"],
+        abilities=[],
+        coverage=SemanticCoverage.COMPLETE,
+    )
+    ex = Executor(
+        {
+            quirion.oracle_id: quirion,
+            forest.oracle_id: forest,
+            target.oracle_id: target,
+        }
+    )
+    state = GameState(
+        permanents={
+            "q": Permanent(
+                object_id="q",
+                oracle_id=quirion.oracle_id,
+                name=quirion.name,
+                is_creature=True,
+            ),
+            "f": Permanent(
+                object_id="f",
+                oracle_id=forest.oracle_id,
+                name="Forest",
+            ),
+            "t": Permanent(
+                object_id="t",
+                oracle_id=target.oracle_id,
+                name="Tapme",
+                is_creature=True,
+                tapped=True,
+            ),
+        },
+        mana=ManaAmount(),
+    )
+    steps = legal_steps(ex, state)
+    ab = next(a for a in quirion.abilities if isinstance(a, ActivatedAbility))
+    bounce_steps = [
+        s
+        for s in steps
+        if s.op == "activate" and s.ability_id == ab.ability_id and s.cost_target == "f"
+    ]
+    assert bounce_steps
+
+    meloku = _compile("Meloku the Clouded Mirror").semantics
+    island = CardSemantics(
+        oracle_id="oracle:island",
+        name="Island",
+        types=["Basic", "Land", "Island"],
+        abilities=[],
+        coverage=SemanticCoverage.COMPLETE,
+    )
+    ex2 = Executor({meloku.oracle_id: meloku, island.oracle_id: island})
+    state2 = GameState(
+        permanents={
+            "m": Permanent(
+                object_id="m",
+                oracle_id=meloku.oracle_id,
+                name=meloku.name,
+                is_creature=True,
+            ),
+            "i": Permanent(
+                object_id="i",
+                oracle_id=island.oracle_id,
+                name="Island",
+            ),
+        },
+        mana=ManaAmount(colorless=1),
+    )
+    steps2 = legal_steps(ex2, state2)
+    ab2 = next(a for a in meloku.abilities if isinstance(a, ActivatedAbility))
+    assert any(
+        s.op == "activate" and s.ability_id == ab2.ability_id and s.cost_target == "i"
+        for s in steps2
+    )
+
+
+def test_capabilities_mark_double_counters_and_bounce_cost():
+    from mtg_loop_engine.interactions.capabilities import extract_capabilities
+
+    season = extract_capabilities(_compile("Doubling Season").semantics)
+    assert "double_counters" in season.modifies
+    assert "double_tokens" in season.modifies
+    quirion = extract_capabilities(_compile("Quirion Ranger").semantics)
+    assert "bounce_to_hand" in quirion.produces
+    assert "bounce_forest_controlled" in quirion.requires
+    drake = extract_capabilities(_compile("Viral Drake").semantics)
+    assert "proliferate" in drake.produces
+
+
+def test_wirewood_bounces_elf_and_proliferate_with_m1m1():
+    wirewood = _compile("Wirewood Symbiote").semantics
+    elf = CardSemantics(
+        oracle_id="oracle:elf",
+        name="Llanowar Elves",
+        types=["Creature", "Elf", "Druid"],
+        abilities=[],
+        coverage=SemanticCoverage.COMPLETE,
+    )
+    target = CardSemantics(
+        oracle_id="oracle:tapme",
+        name="Tapme",
+        types=["Creature"],
+        abilities=[],
+        coverage=SemanticCoverage.COMPLETE,
+    )
+    ex = Executor(
+        {
+            wirewood.oracle_id: wirewood,
+            elf.oracle_id: elf,
+            target.oracle_id: target,
+        }
+    )
+    state = GameState(
+        permanents={
+            "w": Permanent(
+                object_id="w",
+                oracle_id=wirewood.oracle_id,
+                name=wirewood.name,
+                is_creature=True,
+            ),
+            "e": Permanent(
+                object_id="e",
+                oracle_id=elf.oracle_id,
+                name="Llanowar Elves",
+                is_creature=True,
+            ),
+            "t": Permanent(
+                object_id="t",
+                oracle_id=target.oracle_id,
+                name="Tapme",
+                is_creature=True,
+                tapped=True,
+            ),
+        },
+        mana=ManaAmount(),
+    )
+    ab = next(a for a in wirewood.abilities if isinstance(a, ActivatedAbility))
+    assert (
+        ex.activate(
+            state,
+            ActionStep(
+                op="activate",
+                actor="w",
+                ability_id=ab.ability_id,
+                target="t",
+                cost_target="e",
+            ),
+        )
+        is None
+    )
+    assert state.permanents["e"].zone == Zone.HAND
+
+    drake = _compile("Viral Drake").semantics
+    host = CardSemantics(
+        oracle_id="oracle:host",
+        name="Host",
+        types=["Creature"],
+        abilities=[],
+        coverage=SemanticCoverage.COMPLETE,
+    )
+    ex2 = Executor({drake.oracle_id: drake, host.oracle_id: host})
+    state2 = GameState(
+        permanents={
+            "drake": Permanent(
+                object_id="drake",
+                oracle_id=drake.oracle_id,
+                name=drake.name,
+                is_creature=True,
+            ),
+            "host": Permanent(
+                object_id="host",
+                oracle_id=host.oracle_id,
+                name="Host",
+                is_creature=True,
+                counters={"m1m1": 1},
+            ),
+            "hand": Permanent(
+                object_id="hand",
+                oracle_id=host.oracle_id,
+                name="Hand Card",
+                zone=Zone.HAND,
+                counters={"p1p1": 3},
+            ),
+        },
+        mana=ManaAmount(colorless=3, blue=1),
+    )
+    ab2 = next(a for a in drake.abilities if isinstance(a, ActivatedAbility))
+    assert (
+        ex2.activate(
+            state2,
+            ActionStep(op="activate", actor="drake", ability_id=ab2.ability_id),
+        )
+        is None
+    )
+    assert state2.permanents["host"].counters["m1m1"] == 2
+    assert state2.permanents["hand"].counters["p1p1"] == 3
+
+
+def test_chulane_bounce_and_each_creature_counter_double():
+    chulane = _compile("Chulane, Teller of Tales").semantics
+    buddy = CardSemantics(
+        oracle_id="oracle:buddy",
+        name="Buddy",
+        types=["Creature"],
+        abilities=[],
+        coverage=SemanticCoverage.COMPLETE,
+    )
+    ex = Executor({chulane.oracle_id: chulane, buddy.oracle_id: buddy})
+    state = GameState(
+        permanents={
+            "c": Permanent(
+                object_id="c",
+                oracle_id=chulane.oracle_id,
+                name=chulane.name,
+                is_creature=True,
+            ),
+            "b": Permanent(
+                object_id="b",
+                oracle_id=buddy.oracle_id,
+                name="Buddy",
+                is_creature=True,
+            ),
+        },
+        mana=ManaAmount(colorless=3),
+    )
+    ab = next(a for a in chulane.abilities if isinstance(a, ActivatedAbility))
+    assert (
+        ex.activate(
+            state,
+            ActionStep(op="activate", actor="c", ability_id=ab.ability_id, target="b"),
+        )
+        is None
+    )
+    assert state.permanents["b"].zone == Zone.HAND
+
+    season = _compile("Doubling Season").semantics
+    putter = CardSemantics(
+        oracle_id="oracle:mass",
+        name="Mass",
+        types=["Creature"],
+        abilities=[
+            ActivatedAbility(
+                ability_id="mass",
+                costs=[TapCost()],
+                effects=[
+                    AddCounterEffect(
+                        counter_type="charge",
+                        quantity=1,
+                        target="each_controlled_creature",
+                    )
+                ],
+            )
+        ],
+        coverage=SemanticCoverage.COMPLETE,
+    )
+    ex2 = Executor({season.oracle_id: season, putter.oracle_id: putter, buddy.oracle_id: buddy})
+    state2 = GameState(
+        permanents={
+            "season": Permanent(
+                object_id="season",
+                oracle_id=season.oracle_id,
+                name=season.name,
+            ),
+            "putter": Permanent(
+                object_id="putter",
+                oracle_id=putter.oracle_id,
+                name="Mass",
+                is_creature=True,
+            ),
+            "b": Permanent(
+                object_id="b",
+                oracle_id=buddy.oracle_id,
+                name="Buddy",
+                is_creature=True,
+            ),
+        },
+        mana=ManaAmount(),
+    )
+    assert (
+        ex2.activate(
+            state2, ActionStep(op="activate", actor="putter", ability_id="mass")
+        )
+        is None
+    )
+    assert state2.permanents["putter"].counters.get("charge") == 2
+    assert state2.permanents["b"].counters.get("charge") == 2
