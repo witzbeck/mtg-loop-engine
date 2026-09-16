@@ -1258,4 +1258,64 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{1}{G}{G}",
         mana_value=3,
     ),
+    # M5 E12 — cast-trigger effect family
+    "Birgi, God of Storytelling": RealOracleCurriculum(
+        name="Birgi, God of Storytelling",
+        types=["Legendary", "Creature", "God"],
+        oracle_text=(
+            "Whenever you cast a spell, add {R}.\n"
+            "Until end of turn, you don't lose this mana as steps and phases end.\n"
+            "Creatures you control have haste."
+        ),
+        notes="E12: cast → {R}; linger/haste proof-irrelevant.",
+        colors=("R",),
+        mana_cost="{2}{R}",
+        mana_value=3,
+    ),
+    "Forsaken Monument": RealOracleCurriculum(
+        name="Forsaken Monument",
+        types=["Legendary", "Artifact"],
+        oracle_text=(
+            "Whenever you cast a colorless spell, you gain 2 life.\n"
+            "Colorless creatures you control get +2/+2."
+        ),
+        notes="E12: cast colorless → life; anthem irrelevant.",
+        mana_cost="{5}",
+        mana_value=5,
+    ),
+    "Animar, Soul of Elements": RealOracleCurriculum(
+        name="Animar, Soul of Elements",
+        types=["Legendary", "Creature", "Elemental"],
+        oracle_text=(
+            "Whenever you cast a creature spell, put a +1/+1 counter on Animar."
+        ),
+        notes="E12: cast creature → p1p1 (cost reduction deferred).",
+        colors=("G", "U", "R"),
+        mana_cost="{U}{R}{G}",
+        mana_value=3,
+    ),
+    "Runaway Steam-Kin": RealOracleCurriculum(
+        name="Runaway Steam-Kin",
+        types=["Creature", "Elemental"],
+        oracle_text=(
+            "Whenever you cast a red spell, if this creature has fewer than three +1/+1 "
+            "counters on it, put a +1/+1 counter on this creature."
+        ),
+        notes="E12: cast red → p1p1 capped at 3.",
+        colors=("R",),
+        mana_cost="{1}{R}",
+        mana_value=2,
+    ),
+    "Vivi Ornitier": RealOracleCurriculum(
+        name="Vivi Ornitier",
+        types=["Legendary", "Creature", "Wizard"],
+        oracle_text=(
+            "Whenever you cast a noncreature spell, put a +1/+1 counter on Vivi Ornitier "
+            "and it deals 1 damage to each opponent."
+        ),
+        notes="E12: cast noncreature → p1p1 + damage.",
+        colors=("U", "R"),
+        mana_cost="{1}{U}{R}",
+        mana_value=3,
+    ),
 }

@@ -137,8 +137,10 @@ uv run python scripts/spellbook_absent_discovery.py
     Argothian); bounce-self; Cycling proof-irrelevant split.
 42. **E11 scaled mana remainders** ✓ — swamp-count / greatest power-toughness / drawn /
     entered-this-turn mana scales; Partner irrelevant.
-43. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-44. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+43. **E12 cast-trigger family** ✓ — CAST filters (creature/noncreature/colorless/red) →
+    mana/life/p1p1/damage; Birgi/Animar/Steam-Kin/Vivi/Forsaken.
+44. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+45. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 

@@ -32,9 +32,12 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
     ability_start = re.compile(
         r"^(\{|"
         r"Whenever |When |At the beginning |If |You may cast |"
+        r"Until end of turn, |"
         r"As long as |"
         r"Abilities you |"
         r"Enchantments you |"
+        r"Colorless creatures |"
+        r"Creatures you |"
         r"Enchanted |Enchant |Equip |Flashback |Kicker |"
         r"Sacrifice |Remove a |"
         r"Pay |"

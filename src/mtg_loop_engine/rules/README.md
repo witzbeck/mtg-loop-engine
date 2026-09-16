@@ -50,6 +50,7 @@ graph TB;
 - `PayLifeCost` + `GainLifeEffect.equal_to_spells_cast_this_turn` (Aetherflux): pay life as cost; cast trigger gains life equal to `events.cast`.
 - `UntapEffect.target=controlled_lands` + `quantity` (Peregrine Drake / Argothian Elder): untap up to N controlled lands (tapped-first).
 - Mana scales: `CONTROLLED_SWAMPS`, `GREATEST_POWER_CONTROLLED`, `GREATEST_TOUGHNESS_OTHER`, `CARDS_DRAWN_THIS_TURN`, `GREATEST_POWER_ENTERED_THIS_TURN`; `Permanent.entered_this_turn` set on ETB.
+- CAST trigger filters `cast_creature` / `cast_noncreature` / `cast_colorless` / `cast_red` / `cast_artifact`; intervening-if `fewer_than_three_p1p1` (Steam-Kin).
 - `activate_granted_tap_bounce` / `seed_grant_tap_bounce`: Instant grant `{T}`: bounce nonland (`Permanent.tap_bounce_nonland`, witness-persistent).
 - BF tapped→untapped via `_untap_permanent` queues `TriggerEvent.UNTAP` (Mesmeric Orb); self-mill bumps `events.mill` only.
 - Summoning sickness blocks `{T}` / `TapCost` even on mana abilities (CR 302.6); haste not modeled.

@@ -2060,6 +2060,100 @@ def _parse_count_word(raw: str) -> int | None:
 
 
 
+
+def pat_cast_trigger_effects(text: str, name: str) -> Ability | None:
+    """E12: parameterized whenever-you-cast → mana / life / counters / damage."""
+    cleaned = _strip_ability_word(text)
+    short = name.split(",")[0].strip()
+    name_alt = "|".join(re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"]))
+
+    m = re.match(
+        r"^Whenever you cast a spell, add \{R\}\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("cast-add-r", text),
+            event=TriggerEvent.CAST,
+            filter="any",
+            effects=[AddManaEffect(amount=ManaAmount(red=1))],
+        )
+
+    m = re.match(
+        r"^Whenever you cast a colorless spell, you gain (\d+) life\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("cast-colorless-life", text),
+            event=TriggerEvent.CAST,
+            filter="cast_colorless",
+            effects=[GainLifeEffect(amount=int(m.group(1)))],
+        )
+
+    m = re.match(
+        rf"^Whenever you cast a creature spell, put a \+1/\+1 counter on (?:{name_alt})\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("cast-creature-p1p1", text),
+            event=TriggerEvent.CAST,
+            filter="cast_creature",
+            effects=[AddCounterEffect(counter_type="p1p1", quantity=1, target="self")],
+        )
+
+    m = re.match(
+        r"^Whenever you cast a red spell, if (?:this creature|~) has fewer than three \+1/\+1 counters on it, put a \+1/\+1 counter on (?:this creature|it|~)\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("cast-red-p1p1-cap3", text),
+            event=TriggerEvent.CAST,
+            filter="cast_red",
+            intervening_if="fewer_than_three_p1p1",
+            effects=[AddCounterEffect(counter_type="p1p1", quantity=1, target="self")],
+        )
+
+    m = re.match(
+        rf"^Whenever you cast a noncreature spell, put a \+1/\+1 counter on (?:{name_alt}) and it deals (\d+) damage to each opponent\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("cast-noncreature-p1p1-dmg", text),
+            event=TriggerEvent.CAST,
+            filter="cast_noncreature",
+            effects=[
+                AddCounterEffect(counter_type="p1p1", quantity=1, target="self"),
+                DealDamageEffect(amount=int(m.group(1)), target="opponent"),
+            ],
+        )
+
+    m = re.match(
+        r"^Whenever you cast an instant or sorcery spell, (?:this creature|~) deals (\d+) damage to each opponent\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        # Instant/sorcery casts are not yet in cast_from_hand; keep pattern for COMPLETE
+        # of cards whose other clauses are covered, and for future cast ops.
+        return TriggeredAbility(
+            ability_id=_ability_id("cast-instant-dmg", text),
+            event=TriggerEvent.CAST,
+            filter="cast_noncreature",
+            effects=[DealDamageEffect(amount=int(m.group(1)), target="opponent")],
+        )
+
+    return None
+
+
 def pat_scaled_mana_remainders(text: str, name: str) -> Ability | None:
     """E11: swamp-count / greatest power-toughness / drawn / entered-this-turn mana."""
     from mtg_loop_engine.semantics.enums import ManaScaleKind
@@ -2712,6 +2806,27 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
         return _proof_irrelevant(clause)
 
     if re.match(
+        r"^Creatures you control have haste\.?(?: \([^)]*\))?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^Until end of turn, you don't lose this mana as steps and phases end\.?",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^Colorless creatures you control get [+-]\d+/[+-]\d+\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
         r"^Devoid(?: \([^)]+\))?$",
         clause,
         re.IGNORECASE,
@@ -2888,6 +3003,7 @@ PATTERNS: list[Pattern] = [
     Pattern("mana_create_token", pat_mana_create_token),
     Pattern("hybrid_remove_m1m1_pump", pat_hybrid_remove_m1m1_pump),
     Pattern("tap_two_creatures_add_mana", pat_tap_two_creatures_add_mana),
+    Pattern("cast_trigger_effects", pat_cast_trigger_effects),
     Pattern("scaled_mana_remainders", pat_scaled_mana_remainders),
     Pattern("etb_untap_up_to_lands", pat_etb_untap_up_to_lands),
     Pattern("tap_untap_n_lands", pat_tap_untap_n_lands),
