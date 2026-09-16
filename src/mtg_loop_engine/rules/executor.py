@@ -26,6 +26,7 @@ from mtg_loop_engine.semantics.ir import (
     ManaAmount,
     ManaCost,
     PayLifeCost,
+    DiscardCost,
     MillEffect,
     MoveToZoneEffect,
     ProofIrrelevantStatic,
@@ -2026,6 +2027,17 @@ class Executor:
                     )
                 state.life_you -= cost.amount
                 state.bump("life_loss", cost.amount)
+            elif isinstance(cost, DiscardCost):
+                qty = max(int(cost.quantity), 1)
+                if state.hand_you < qty:
+                    return ExecError(
+                        VerificationStatus.RESOURCE_DEFICIT, "insufficient hand cards"
+                    )
+                state.hand_you -= qty
+                state.bump("discard", qty)
+                self._queue_triggers(
+                    state, TriggerEvent.DISCARD, perm, amount=qty
+                )
             elif isinstance(cost, SacrificeCost):
                 if cost.selector == "self":
                     if not self.matches_sacrifice_selector(perm, "self"):

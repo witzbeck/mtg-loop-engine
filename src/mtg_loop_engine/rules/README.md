@@ -41,6 +41,7 @@ graph TB;
 - Life gain/loss and draw apply `ReplacementDoubleLifeGain` / `ReplacementDoubleOpponentLifeLoss` / `ReplacementDoubleDraw`; `StaticCantGainLife` blocks your gains.
 - `ProliferateEffect` adds one counter of each existing kind on controlled permanents (Doubling Season applies).
 - `BounceControlledCost` returns a Forest/Elf/land to hand as a cost (Quirion / Wirewood / Meloku).
+- `DiscardCost` decrements `GameState.hand_you` and queues `TriggerEvent.DISCARD` (Mind Over Matter / Glint-Horn).
 - `MoveToZoneEffect` bounce targets: `controlled_creature`, `controlled_creature_green_or_white`, `controlled_permanent`, `controlled_nonland`, `other_controlled_creature` (Temur), `other_controlled_sharing_type` (Cloudstone; needs trigger subject), `target_nonland` (Knack/Helix).
 - `TriggeredAbility.filter` includes `controlled_nonartifact` (Cloudstone).
 - Mana Echoes: `AddManaEffect` `CONTROLLED_SHARING_CREATURE_TYPE` counts controlled creatures sharing a creature subtype with the trigger subject (token names infer subtypes when unregistered).

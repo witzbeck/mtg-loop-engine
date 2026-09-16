@@ -128,6 +128,7 @@ class TriggerEvent(StrEnum):
     CAST = "cast"
     DEALT_DAMAGE = "dealt_damage"
     DRAW = "draw"
+    DISCARD = "discard"
     DAMAGE_OPPONENT = "damage_opponent"
     ATTACKS = "attacks"
 
