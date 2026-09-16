@@ -383,6 +383,7 @@ class TriggeredAbility(BaseModel):
         "token_creature",
         "self",
         "controlled_creature",
+        "controlled_enchantment",
         "controlled_nonartifact",
         "other_controlled_creature",
         "other_controlled_human",

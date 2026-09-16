@@ -1650,4 +1650,71 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{2}{G}{W}{U}",
         mana_value=5,
     ),
+    "Brood Monitor": RealOracleCurriculum(
+        name="Brood Monitor",
+        types=["Creature", "Eldrazi", "Drone"],
+        oracle_text=(
+            "Devoid (This card has no color.)\n"
+            "When this creature enters, create three 1/1 colorless Eldrazi Scion "
+            'creature tokens. They have "Sacrifice this token: Add {C}."'
+        ),
+        notes="E22a: ETB Eldrazi Scions.",
+        colors=(),
+        mana_cost="{4}{G}{G}",
+        mana_value=6,
+    ),
+    "Emrakul's Hatcher": RealOracleCurriculum(
+        name="Emrakul's Hatcher",
+        types=["Creature", "Eldrazi", "Drone"],
+        oracle_text=(
+            "When this creature enters, create three 0/1 colorless Eldrazi Spawn "
+            'creature tokens. They have "Sacrifice this token: Add {C}."'
+        ),
+        notes="E22a: ETB Eldrazi Spawn.",
+        colors=("R",),
+        mana_cost="{4}{R}",
+        mana_value=5,
+    ),
+    "Spawnsire of Ulamog": RealOracleCurriculum(
+        name="Spawnsire of Ulamog",
+        types=["Creature", "Eldrazi"],
+        oracle_text=(
+            "Annihilator 1 (Whenever this creature attacks, defending player "
+            "sacrifices a permanent of their choice.)\n"
+            '{4}: Create two 0/1 colorless Eldrazi Spawn creature tokens. They have '
+            '"Sacrifice this token: Add {C}."'
+        ),
+        notes="E22a: activated Eldrazi Spawn (outside-game clause omitted).",
+        colors=(),
+        mana_cost="{10}",
+        mana_value=10,
+    ),
+    "Exalted Sunborn": RealOracleCurriculum(
+        name="Exalted Sunborn",
+        types=["Creature", "Angel", "Wizard"],
+        oracle_text=(
+            "Flying, lifelink\n"
+            "If one or more tokens would be created under your control, "
+            "twice that many of those tokens are created instead.\n"
+            "Warp {1}{W} (You may cast this card from your hand for its warp cost. "
+            "Exile this creature at the beginning of the next end step, then you may "
+            "cast it from exile on a later turn.)"
+        ),
+        notes="E22a: double-tokens sibling (Exalted wording).",
+        colors=("W",),
+        mana_cost="{3}{W}{W}",
+        mana_value=5,
+    ),
+    "Ajani's Chosen": RealOracleCurriculum(
+        name="Ajani's Chosen",
+        types=["Creature", "Cat", "Soldier"],
+        oracle_text=(
+            "Whenever an enchantment you control enters, create a 2/2 white Cat "
+            "creature token. If that enchantment is an Aura, you may attach it to the token."
+        ),
+        notes="E22a: enchantment ETB → Cat (Aura attach ignored).",
+        colors=("W",),
+        mana_cost="{2}{W}{W}",
+        mana_value=4,
+    ),
 }

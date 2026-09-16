@@ -90,7 +90,8 @@ narrows mid-flight.
 | E19 | done | Bounce remainders | CLOSE_BUILD | 24 | 14 | yes | Bounce-as-cost Forest/Elf/land; Chulane activated bounce |
 | E20 | done | Counter doubling | CLOSE_BUILD | 3 | 0 | yes | Doubling Season / Primal Vigor |
 | E21 | done | Proliferate | CLOSE_BUILD | 3 | 0 | yes | Viral Drake proliferate (infect PI) |
-| E22 | pending | Token-create variants | CLOSE_BUILD | 125 | 65 | mixed | Subtype/color/X-create family; split as needed |
+| E22 | pending | Token-create variants (umbrella) | CLOSE_BUILD | 125 | 65 | mixed | Split into E22a+; copy tokens → E34 |
+| E22a | done | Eldrazi tokens + double-token siblings | CLOSE_BUILD | 5 | 3 | maybe | Brood/Hatcher/Spawnsire; Exalted; Ajani's Chosen |
 | E50 | pending | Life replacement | CLOSE_BUILD | 7 | — | mixed | Twice life loss/gain; can’t-gain |
 | E51 | pending | Mill replacement | CLOSE_BUILD | 1 | — | maybe | Mill twice |
 | E52 | pending | Counter-put triggers | CLOSE_BUILD | 7 | — | maybe | All Will Be One-class |
