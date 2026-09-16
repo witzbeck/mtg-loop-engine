@@ -119,7 +119,7 @@ narrows mid-flight.
 | E71 | REJECT | Skip step | REJECT | 1 | — | low | See R04 |
 | E72 | REJECT | Counterspell | REJECT | 4 | — | low | See R05 |
 | E73 | REJECT | Mana rituals | REJECT | 7 | — | low | Covered by R02 |
-| E74 | pending | Fight / enrage | CLOSE_BUILD | 4 | — | mixed | Fight target |
+| E74 | done | Fight / enrage | CLOSE_BUILD | 3 | — | mixed | Polyraptor copy; Brash fight; Apex ETB fight |
 | E75 | pending | Aura attach remainders | CLOSE_BUILD | 4 | — | mixed | Attach / enchanted |
 
 Large rows (**E13**, **E15**, **E22**) **must split** into sub-epics at implementation

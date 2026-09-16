@@ -56,6 +56,7 @@ from mtg_loop_engine.semantics.ir import (
     CopyPendingTriggerEffect,
     CastImprintedSpellEffect,
     CopyLastCastSpellEffect,
+    FightEffect,
     ImprintInstantFromHandEffect,
     SacrificeCost,
     TapCost,
@@ -4307,6 +4308,70 @@ def pat_dealt_damage_reflect(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_dealt_damage_create_copy(text: str, name: str) -> Ability | None:
+    """Polyraptor: Enrage — dealt damage → create a token copy of this creature."""
+    short = name.split(",")[0].strip() if name else ""
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^(?:Enrage — )?Whenever (?:{name_alt}|this creature) is dealt damage, "
+        rf"create a token that's a copy of (?:this creature|{name_alt})\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("dealt-damage-create-copy", text),
+        event=TriggerEvent.DEALT_DAMAGE,
+        filter="self",
+        effects=[CreateTokenEffect(copy_target=True, haste=False)],
+    )
+
+
+def pat_fight_activated(text: str, name: str) -> Ability | None:
+    """Brash Taunter: {cost}, {T}: this creature fights another target creature."""
+    short = name.split(",")[0].strip() if name else ""
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^((?:\{{[^}}]+\}})+), \{{T\}}: (?:{name_alt}) fights another target creature\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("fight-activated", text),
+        costs=[ManaCost(amount=_parse_mana_braces(m.group(1))), TapCost()],
+        effects=[FightEffect(target="another_creature")],
+    )
+
+
+def pat_etb_fight(text: str, name: str) -> Ability | None:
+    """Apex Altisaur: ETB fights up to one target creature you don't control."""
+    short = name.split(",")[0].strip() if name else ""
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^When (?:{name_alt}) enters(?: the battlefield)?, "
+        rf"it fights up to one target creature you don't control\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("etb-fight", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="self",
+        effects=[FightEffect(target="target_creature")],
+    )
+
+
 def pat_tap_damage_self(text: str, name: str) -> Ability | None:
     """Stuffy Doll: {T}: This creature deals 1 damage to itself."""
     cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
@@ -5283,6 +5348,9 @@ PATTERNS: list[Pattern] = [
     Pattern("damage_opponent_create_treasures", pat_damage_opponent_create_treasures),
     Pattern("dealt_damage_create_treasures", pat_dealt_damage_create_treasures),
     Pattern("dealt_damage_reflect", pat_dealt_damage_reflect),
+    Pattern("dealt_damage_create_copy", pat_dealt_damage_create_copy),
+    Pattern("fight_activated", pat_fight_activated),
+    Pattern("etb_fight", pat_etb_fight),
     Pattern("tap_damage_self", pat_tap_damage_self),
     Pattern("dealt_damage_gain_life", pat_dealt_damage_gain_life),
     Pattern("dealt_damage_draw", pat_dealt_damage_draw),

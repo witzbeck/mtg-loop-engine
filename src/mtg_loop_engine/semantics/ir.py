@@ -217,6 +217,14 @@ class CopyLastCastSpellEffect(BaseModel):
     kind: Literal["copy_last_cast_spell"] = "copy_last_cast_spell"
 
 
+class FightEffect(BaseModel):
+    """Each creature deals damage equal to its power to the other."""
+
+    kind: Literal["fight"] = "fight"
+    # Actor fights step.target; "another_creature" requires a distinct BF creature.
+    target: Literal["another_creature", "target_creature"] = "another_creature"
+
+
 class TapEffect(BaseModel):
     kind: Literal["tap"] = "tap"
     target: Literal["self", "target_permanent"] = "self"
@@ -424,6 +432,7 @@ Effect = Annotated[
     | ImprintInstantFromHandEffect
     | CastImprintedSpellEffect
     | CopyLastCastSpellEffect
+    | FightEffect
     | DealDamageEffect
     | GainLifeEffect
     | DrawEffect

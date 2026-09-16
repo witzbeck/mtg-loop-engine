@@ -2523,6 +2523,48 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_value=2,
     ),
 
+    # M5 E74 — fight / enrage
+    "Polyraptor": RealOracleCurriculum(
+        name="Polyraptor",
+        types=["Creature", "Dinosaur"],
+        oracle_text=(
+            "Enrage — Whenever this creature is dealt damage, create a token "
+            "that's a copy of this creature."
+        ),
+        notes="E74: enrage create token copy.",
+        colors=("G",),
+        mana_cost="{6}{G}{G}",
+        mana_value=8,
+    ),
+    "Brash Taunter": RealOracleCurriculum(
+        name="Brash Taunter",
+        types=["Creature", "Goblin"],
+        oracle_text=(
+            "Indestructible\n"
+            "Whenever this creature is dealt damage, it deals that much damage "
+            "to any target.\n"
+            "{2}{R}, {T}: This creature fights another target creature."
+        ),
+        notes="E74: fight + reflect; Indestructible PI.",
+        colors=("R",),
+        mana_cost="{4}{R}",
+        mana_value=5,
+    ),
+    "Apex Altisaur": RealOracleCurriculum(
+        name="Apex Altisaur",
+        types=["Creature", "Dinosaur"],
+        oracle_text=(
+            "When this creature enters, it fights up to one target creature you "
+            "don't control.\n"
+            "Enrage — Whenever this creature is dealt damage, it deals that much "
+            "damage to any target."
+        ),
+        notes="E74: ETB fight; enrage reflect (any target).",
+        colors=("G",),
+        mana_cost="{7}{G}{G}",
+        mana_value=9,
+    ),
+
     # M5 E54 — impulse / top-deck
     "Sensei's Divining Top": RealOracleCurriculum(
         name="Sensei's Divining Top",
