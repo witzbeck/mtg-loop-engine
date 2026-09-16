@@ -3680,6 +3680,61 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
     ):
         return _proof_irrelevant(clause)
 
+
+    # E57/E65: static keyword grants that do not participate in modeled proofs.
+    if re.match(
+        r"^Equipped creature has (?:haste and )?(?:shroud|hexproof|indestructible)"
+        r"(?: and (?:haste|shroud|hexproof|indestructible))*"
+        r"\.?(?: \([^)]*\))?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^(?:Other )?permanents you control have indestructible\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^You have hexproof\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^Indestructible\.?(?: \([^)]*\))?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^During your turn, commanders you control have indestructible"
+        r"\.?(?: \([^)]*\))?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^Myr creatures get [+-]\d+/[+-]\d+\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^Partner(?: \([^)]*\))?\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+
     return None
 
 
