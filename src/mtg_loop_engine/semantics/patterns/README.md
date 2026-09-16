@@ -75,6 +75,7 @@ graph TB;
 - `self_etb_scaled` — Redcap/Fanatic/Gary/Edgar self-ETB scaled damage/life/draw.
 - `dies_trigger_payoffs` — Plunderer/Sharpshooter/Teysa/Blood Artist/Pawn.
 - `sac_outlet_payoffs` — Bombardment/Blasting Station/Altar/Golem/Ayara.
+- `scaled_mill` — Keening / Mindcrank-scaled / Bruvac double mill.
 - `etb_or_attacks_create_token` — Squirrel Girl; ETB create (attacks not modeled).
 - `mana_create_tokens_equal_subtype` — Squirrel Girl; `{cost}: Create X` equal to controlled subtype count.
 - Wirewood Channeler matches scaled `BATTLEFIELD_ELF` any-color (slice-9 sibling).

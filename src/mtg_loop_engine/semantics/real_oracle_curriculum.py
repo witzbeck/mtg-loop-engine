@@ -145,7 +145,44 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         name="Mindcrank",
         types=["Artifact"],
         oracle_text="Whenever an opponent loses life, that player mills a card.",
-        notes="Loss-to-mill feedback with Bloodchief Ascension.",
+        notes="Loss-to-mill feedback with Bloodchief Ascension (1-card model for Path-a).",
+        mana_cost="{2}",
+        mana_value=2,
+    ),
+    "Mindcrank Scaled": RealOracleCurriculum(
+        name="Mindcrank",
+        types=["Artifact"],
+        oracle_text=(
+            "Whenever an opponent loses life, that player mills that many cards. "
+            "(Damage causes loss of life.)"
+        ),
+        notes="E17: scaled life-loss mill (Spellbook Oracle wording).",
+        mana_cost="{2}",
+        mana_value=2,
+    ),
+    "Keening Stone": RealOracleCurriculum(
+        name="Keening Stone",
+        types=["Artifact"],
+        oracle_text=(
+            "{5}, {T}: Target player mills X cards, where X is the number of cards in that "
+            "player's graveyard."
+        ),
+        notes="E17: mill = opponent GY count.",
+        mana_cost="{6}",
+        mana_value=6,
+    ),
+    "Bruvac the Grandiloquent": RealOracleCurriculum(
+        name="Bruvac the Grandiloquent",
+        types=["Legendary", "Creature", "Human", "Advisor"],
+        oracle_text=(
+            "If an opponent would mill one or more cards, they mill twice that many cards "
+            "instead. (To mill a card, a player puts the top card of their library into "
+            "their graveyard.)"
+        ),
+        notes="E17: ReplacementDoubleMill.",
+        colors=("U",),
+        mana_cost="{2}{U}",
+        mana_value=3,
     ),
     "Vito, Thorn of the Dusk Rose": RealOracleCurriculum(
         name="Vito, Thorn of the Dusk Rose",

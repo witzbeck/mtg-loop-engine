@@ -143,8 +143,9 @@ uv run python scripts/spellbook_absent_discovery.py
     (Redcap / Fanatic / Gary / Edgar); Persist split.
 45. **E14 dies-trigger payoffs** ✓ — Treasure / untap / Spirit / Blood Artist / Spawn.
 46. **E16 sac-outlet payoffs** ✓ — Bombardment / Altar / Golem / Ayara; `last_sacrificed_power`.
-47. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-48. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+47. **E17 scaled mill** ✓ — Keening GY-count; Mindcrank scaled; Bruvac `ReplacementDoubleMill`.
+48. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+49. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 

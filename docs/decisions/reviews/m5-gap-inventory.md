@@ -85,7 +85,7 @@ narrows mid-flight.
 | E14 | done | Dies-trigger remainders | CLOSE_BUILD | 29 | 9 | mixed | Parameterize DIES → effects |
 | E15 | pending | Attack-trigger remainders | CLOSE_BUILD | 52 | 21 | mixed | May need combat model slices |
 | E16 | done | Sac-outlet payoffs | CLOSE_BUILD | 29 | 14 | yes | Sac cost → mana/mill/damage |
-| E17 | pending | Scaled mill | CLOSE_BUILD | 3 | 1 | yes | Mill = power / count |
+| E17 | done | Scaled mill | CLOSE_BUILD | 3 | 1 | yes | Mill = power / GY count / life-loss; Bruvac ×2 |
 | E18 | pending | GY → hand / BF | CLOSE_BUILD | 17 | 8 | maybe | Recursion effects |
 | E19 | pending | Bounce remainders | CLOSE_BUILD | 24 | 14 | yes | Target-filter variants on existing bounce |
 | E20 | pending | Counter doubling | CLOSE_BUILD | 3 | 0 | yes | Doubling Season counter half |
