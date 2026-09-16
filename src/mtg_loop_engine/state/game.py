@@ -36,6 +36,7 @@ class Permanent:
     tap_bounce_nonland: bool = False
     # True iff this permanent entered via cast_from_hand (Shard intervening-if).
     was_cast: bool = False
+    entered_this_turn: bool = False
 
     def effective_power(self) -> int | None:
         """Power after +1/+1 and -1/-1 counters. None if no printed power."""
@@ -79,6 +80,7 @@ class Permanent:
             colors=list(self.colors),
             tap_bounce_nonland=self.tap_bounce_nonland,
             was_cast=self.was_cast,
+            entered_this_turn=self.entered_this_turn,
         )
 
 

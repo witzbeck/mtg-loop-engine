@@ -198,6 +198,41 @@ def _scaled_mana_quantity(
             for p in state.permanents.values()
             if p.zone == Zone.HAND and p.controller == "you" and p.is_artifact
         )
+    if scale is ManaScaleKind.CONTROLLED_SWAMPS:
+        n = 0
+        for p in _controlled_permanents(state):
+            sem = _semantics_for(semantics, p)
+            types = {t.casefold() for t in (sem.types if sem else [])}
+            name = p.name.casefold()
+            if "swamp" in types or name == "swamp" or " swamp" in f" {name}":
+                n += 1
+            elif "land" in types and "swamp" in name:
+                n += 1
+        return n
+    if scale is ManaScaleKind.GREATEST_POWER_CONTROLLED:
+        powers = [
+            int(p.effective_power() or 0)
+            for p in _controlled_permanents(state)
+            if p.is_creature
+        ]
+        return max(powers) if powers else 0
+    if scale is ManaScaleKind.GREATEST_TOUGHNESS_OTHER:
+        toughs = [
+            int(p.effective_toughness() or 0)
+            for p in _controlled_permanents(state)
+            if p.is_creature and p.object_id != source.object_id
+        ]
+        return max(toughs) if toughs else 0
+    if scale is ManaScaleKind.CARDS_DRAWN_THIS_TURN:
+        return int(state.event_counters.get("draw", 0))
+    if scale is ManaScaleKind.GREATEST_POWER_ENTERED_THIS_TURN:
+        powers = [
+            int(p.effective_power() or 0)
+            for p in _controlled_permanents(state)
+            if p.is_creature and p.entered_this_turn
+        ]
+        return max(powers) if powers else 0
+
     return 0
 
 
@@ -1182,6 +1217,7 @@ class Executor:
 
     def _on_etb(self, state: GameState, permanent: Permanent) -> None:
         state.bump("etb")
+        permanent.entered_this_turn = True
         self._queue_triggers(state, TriggerEvent.ENTER_BATTLEFIELD, permanent)
 
     def _untap_permanent(self, state: GameState, permanent: Permanent) -> bool:

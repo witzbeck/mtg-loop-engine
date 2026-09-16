@@ -2059,6 +2059,147 @@ def _parse_count_word(raw: str) -> int | None:
     }.get(raw)
 
 
+
+def pat_scaled_mana_remainders(text: str, name: str) -> Ability | None:
+    """E11: swamp-count / greatest power-toughness / drawn / entered-this-turn mana."""
+    from mtg_loop_engine.semantics.enums import ManaScaleKind
+
+    cleaned = _strip_ability_word(text)
+    # Magus of the Coffers
+    m = re.match(
+        r"^\{(\d+)\}, \{T\}: Add \{B\} for each Swamp you control\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return ActivatedAbility(
+            ability_id=_ability_id("swamp-mana", text),
+            costs=[
+                ManaCost(amount=ManaAmount(generic=int(m.group(1)))),
+                TapCost(),
+            ],
+            effects=[
+                AddManaEffect(
+                    mana_scale=ManaScaleKind.CONTROLLED_SWAMPS,
+                    scale_color="black",
+                )
+            ],
+            is_mana_ability=True,
+            uses_stack=False,
+        )
+    # Bighorner / Legend: greatest power → G or any
+    m = re.match(
+        r"^\{T\}: Add an amount of \{G\} equal to the greatest power among creatures you control\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return ActivatedAbility(
+            ability_id=_ability_id("greatest-power-g", text),
+            costs=[TapCost()],
+            effects=[
+                AddManaEffect(
+                    mana_scale=ManaScaleKind.GREATEST_POWER_CONTROLLED,
+                    scale_color="green",
+                )
+            ],
+            is_mana_ability=True,
+            uses_stack=False,
+        )
+    m = re.match(
+        r"^\{T\}: Add X mana of any one color, where X is the greatest power among creatures you control\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return ActivatedAbility(
+            ability_id=_ability_id("greatest-power-any", text),
+            costs=[TapCost()],
+            effects=[
+                AddManaEffect(
+                    mana_scale=ManaScaleKind.GREATEST_POWER_CONTROLLED,
+                    scale_color="any_color",
+                )
+            ],
+            is_mana_ability=True,
+            uses_stack=False,
+        )
+    m = re.match(
+        r"^\{G\}, \{T\}: Add X mana in any combination of colors, where X is the greatest power among creatures you control\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        # Model as any_color pool equal to greatest power (combo-favorable).
+        return ActivatedAbility(
+            ability_id=_ability_id("selvala-power", text),
+            costs=[ManaCost(amount=ManaAmount(green=1)), TapCost()],
+            effects=[
+                AddManaEffect(
+                    mana_scale=ManaScaleKind.GREATEST_POWER_CONTROLLED,
+                    scale_color="any_color",
+                )
+            ],
+            is_mana_ability=True,
+            uses_stack=False,
+        )
+    m = re.match(
+        r"^\{T\}: Add X mana of any one color, where X is the greatest toughness among other creatures you control\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return ActivatedAbility(
+            ability_id=_ability_id("greatest-tough-other", text),
+            costs=[TapCost()],
+            effects=[
+                AddManaEffect(
+                    mana_scale=ManaScaleKind.GREATEST_TOUGHNESS_OTHER,
+                    scale_color="any_color",
+                )
+            ],
+            is_mana_ability=True,
+            uses_stack=False,
+        )
+    m = re.match(
+        r"^\{T\}: Add \{C\} for each card you've drawn this turn\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return ActivatedAbility(
+            ability_id=_ability_id("drawn-mana", text),
+            costs=[TapCost()],
+            effects=[
+                AddManaEffect(
+                    mana_scale=ManaScaleKind.CARDS_DRAWN_THIS_TURN,
+                    scale_color="colorless",
+                )
+            ],
+            is_mana_ability=True,
+            uses_stack=False,
+        )
+    m = re.match(
+        r"^\{T\}: Add an amount of \{R\} equal to the greatest power among creatures you control that entered this turn\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return ActivatedAbility(
+            ability_id=_ability_id("entered-power-r", text),
+            costs=[TapCost()],
+            effects=[
+                AddManaEffect(
+                    mana_scale=ManaScaleKind.GREATEST_POWER_ENTERED_THIS_TURN,
+                    scale_color="red",
+                )
+            ],
+            is_mana_ability=True,
+            uses_stack=False,
+        )
+    return None
+
+
 def pat_etb_untap_up_to_lands(text: str, name: str) -> Ability | None:
     """Palinchron / Peregrine Drake / Cloud of Faeries: ETB untap up to N lands."""
     cleaned = _strip_ability_word(text)
@@ -2564,6 +2705,13 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
         return _proof_irrelevant(clause)
 
     if re.match(
+        r"^Partner(?: \([^)]*\))?\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
         r"^Devoid(?: \([^)]+\))?$",
         clause,
         re.IGNORECASE,
@@ -2740,6 +2888,7 @@ PATTERNS: list[Pattern] = [
     Pattern("mana_create_token", pat_mana_create_token),
     Pattern("hybrid_remove_m1m1_pump", pat_hybrid_remove_m1m1_pump),
     Pattern("tap_two_creatures_add_mana", pat_tap_two_creatures_add_mana),
+    Pattern("scaled_mana_remainders", pat_scaled_mana_remainders),
     Pattern("etb_untap_up_to_lands", pat_etb_untap_up_to_lands),
     Pattern("tap_untap_n_lands", pat_tap_untap_n_lands),
     Pattern("tap_untap_target_land", pat_tap_untap_target_land),
