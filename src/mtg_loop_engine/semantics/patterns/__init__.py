@@ -2062,6 +2062,116 @@ def _parse_count_word(raw: str) -> int | None:
 
 
 
+
+def pat_dies_trigger_payoffs(text: str, name: str) -> Ability | None:
+    """E14: dies → treasure / untap / spirit / drain."""
+    cleaned = _strip_ability_word(text)
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", cleaned).strip()
+    short = name.split(",")[0].strip()
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+
+    m = re.match(
+        r"^Whenever another creature you control dies, create a [Tt]reasure token\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("dies-treasure", text),
+            event=TriggerEvent.DIES,
+            filter="other_controlled_creature",
+            effects=[
+                CreateTokenEffect(
+                    name="Treasure",
+                    power=0,
+                    toughness=0,
+                    quantity=1,
+                    is_creature=False,
+                    is_artifact=True,
+                    treasure=True,
+                )
+            ],
+        )
+
+    m = re.match(
+        rf"^Whenever a creature dies, untap (?:{name_alt})\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("dies-untap-self", text),
+            event=TriggerEvent.DIES,
+            filter="creature",
+            effects=[UntapEffect(target="self")],
+        )
+
+    m = re.match(
+        r"^Whenever another black creature you control dies, "
+        r"create a 1/1 white Spirit creature token with flying\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("dies-spirit", text),
+            event=TriggerEvent.DIES,
+            filter="other_controlled_black_creature",
+            effects=[
+                CreateTokenEffect(
+                    name="Spirit",
+                    power=1,
+                    toughness=1,
+                    quantity=1,
+                    is_creature=True,
+                )
+            ],
+        )
+
+    m = re.match(
+        rf"^Whenever (?:this creature or another creature|{name_alt} or another creature) dies, "
+        rf"target player loses (\d+) life and you gain (\d+) life\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("dies-artist", text),
+            event=TriggerEvent.DIES,
+            filter="creature",
+            effects=[
+                LoseLifeEffect(who="opponent", amount=int(m.group(1))),
+                GainLifeEffect(amount=int(m.group(2))),
+            ],
+        )
+
+    m = re.match(
+        r"^Whenever this creature or another nontoken creature you control dies, "
+        r"you may create a 0/1 colorless Eldrazi Spawn creature token\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("dies-spawn", text),
+            event=TriggerEvent.DIES,
+            filter="controlled_nontoken_creature",
+            effects=[
+                CreateTokenEffect(
+                    name="Eldrazi Spawn",
+                    power=0,
+                    toughness=1,
+                    quantity=1,
+                    is_creature=True,
+                )
+            ],
+        )
+
+    return None
+
+
 def pat_self_etb_scaled(text: str, name: str) -> Ability | None:
     """E13a: self-ETB damage/life/draw scaled by power, devotion, or artifacts."""
     cleaned = _strip_ability_word(text)
@@ -3083,6 +3193,7 @@ PATTERNS: list[Pattern] = [
     Pattern("mana_create_token", pat_mana_create_token),
     Pattern("hybrid_remove_m1m1_pump", pat_hybrid_remove_m1m1_pump),
     Pattern("tap_two_creatures_add_mana", pat_tap_two_creatures_add_mana),
+    Pattern("dies_trigger_payoffs", pat_dies_trigger_payoffs),
     Pattern("self_etb_scaled", pat_self_etb_scaled),
     Pattern("cast_trigger_effects", pat_cast_trigger_effects),
     Pattern("scaled_mana_remainders", pat_scaled_mana_remainders),

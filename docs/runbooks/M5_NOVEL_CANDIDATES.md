@@ -141,8 +141,9 @@ uv run python scripts/spellbook_absent_discovery.py
     mana/life/p1p1/damage; Birgi/Animar/Steam-Kin/Vivi/Forsaken.
 44. **E13a self-ETB scaled** ✓ — power damage, devotion damage/drain, artifact-count draw
     (Redcap / Fanatic / Gary / Edgar); Persist split.
-45. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-46. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+45. **E14 dies-trigger payoffs** ✓ — Treasure / untap / Spirit / Blood Artist / Spawn.
+46. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+47. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 

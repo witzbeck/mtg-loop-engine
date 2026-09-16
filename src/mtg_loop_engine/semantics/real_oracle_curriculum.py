@@ -1366,4 +1366,62 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{4}{U}",
         mana_value=5,
     ),
+    # M5 E14 — dies-trigger payoffs
+    "Pitiless Plunderer": RealOracleCurriculum(
+        name="Pitiless Plunderer",
+        types=["Creature", "Human", "Pirate"],
+        oracle_text=(
+            "Whenever another creature you control dies, create a Treasure token. "
+            '(It\'s an artifact with "{T}, Sacrifice this token: Add one mana of any color.")'
+        ),
+        notes="E14: dies → Treasure.",
+        colors=("B",),
+        mana_cost="{3}{B}",
+        mana_value=4,
+    ),
+    "Goblin Sharpshooter": RealOracleCurriculum(
+        name="Goblin Sharpshooter",
+        types=["Creature", "Goblin"],
+        oracle_text="Whenever a creature dies, untap this creature.",
+        notes="E14: dies → untap self (tap-damage deferred).",
+        colors=("R",),
+        mana_cost="{2}{R}",
+        mana_value=3,
+    ),
+    "Teysa, Orzhov Scion": RealOracleCurriculum(
+        name="Teysa, Orzhov Scion",
+        types=["Legendary", "Creature", "Human", "Advisor"],
+        oracle_text=(
+            "Whenever another black creature you control dies, create a 1/1 white Spirit "
+            "creature token with flying."
+        ),
+        notes="E14: black dies → Spirit (exile outlet deferred).",
+        colors=("W", "B"),
+        mana_cost="{1}{W}{B}",
+        mana_value=3,
+    ),
+    "Blood Artist": RealOracleCurriculum(
+        name="Blood Artist",
+        types=["Creature", "Vampire"],
+        oracle_text=(
+            "Whenever this creature or another creature dies, target player loses 1 life "
+            "and you gain 1 life."
+        ),
+        notes="E14: dies drain.",
+        colors=("B",),
+        mana_cost="{1}{B}",
+        mana_value=2,
+    ),
+    "Pawn of Ulamog": RealOracleCurriculum(
+        name="Pawn of Ulamog",
+        types=["Creature", "Vampire", "Shaman"],
+        oracle_text=(
+            "Whenever this creature or another nontoken creature you control dies, you may "
+            "create a 0/1 colorless Eldrazi Spawn creature token."
+        ),
+        notes="E14: nontoken dies → Spawn.",
+        colors=("B",),
+        mana_cost="{1}{B}{B}",
+        mana_value=3,
+    ),
 }
