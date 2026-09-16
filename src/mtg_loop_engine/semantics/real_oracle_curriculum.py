@@ -2399,4 +2399,40 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{3}{W}",
         mana_value=4,
     ),
+
+    # M5 E31b — tap-copy siblings
+    "Reflection of Kiki-Jiki": RealOracleCurriculum(
+        name="Reflection of Kiki-Jiki",
+        types=["Enchantment", "Creature", "Goblin", "Shaman"],
+        oracle_text=(
+            "{1}, {T}: Create a token that's a copy of another target nonlegendary "
+            "creature you control, except it has haste. Sacrifice it at the "
+            "beginning of the next end step."
+        ),
+        notes="E31b: paid tap-copy haste (Fable back face).",
+        colors=("R",),
+        mana_cost="",
+        mana_value=0,
+    ),
+    "Orthion, Hero of Lavabrink": RealOracleCurriculum(
+        name="Orthion, Hero of Lavabrink",
+        types=["Legendary", "Creature", "Human", "Soldier"],
+        oracle_text=(
+            "{1}{R}, {T}: Create a token that's a copy of another target creature "
+            "you control. It gains haste. Sacrifice it at the beginning of the "
+            "next end step."
+        ),
+        notes="E31b: paid tap-copy haste.",
+        colors=("R",),
+        mana_cost="{3}{R}",
+        mana_value=4,
+    ),
+    "Myr Propagator": RealOracleCurriculum(
+        name="Myr Propagator",
+        types=["Artifact", "Creature", "Myr"],
+        oracle_text="{3}, {T}: Create a token that's a copy of this creature.",
+        notes="E31b: tap-copy self.",
+        mana_cost="{3}",
+        mana_value=3,
+    ),
 }
