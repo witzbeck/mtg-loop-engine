@@ -57,6 +57,7 @@ from mtg_loop_engine.semantics.ir import (
     CastImprintedSpellEffect,
     CopyLastCastSpellEffect,
     FightEffect,
+    AdditionalCombatEffect,
     ImprintInstantFromHandEffect,
     SacrificeCost,
     TapCost,
@@ -4372,6 +4373,112 @@ def pat_etb_fight(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_additional_combat_untap_activated(text: str, name: str) -> Ability | None:
+    """Aggravated Assault: pay → untap all creatures + additional combat."""
+    m = re.match(
+        r"^((?:\{[^}]+\})+): Untap all creatures you control\. "
+        r"After this main phase, there is an additional combat phase "
+        r"followed by an additional main phase\.?(?: Activate only as a sorcery\.)?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("extra-combat-untap", text),
+        costs=[ManaCost(amount=_parse_mana_braces(m.group(1)))],
+        effects=[
+            UntapEffect(target="all_creatures"),
+            AdditionalCombatEffect(),
+        ],
+    )
+
+
+def pat_combat_damage_untap_extra_combat(text: str, name: str) -> Ability | None:
+    """Bloodthirster: combat damage to player → untap + additional combat."""
+    short = name.split(",")[0].strip() if name else ""
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^Whenever (?:{name_alt}) deals combat damage to a player, "
+        rf"untap it\. After this phase, there is an additional combat phase\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("combat-dmg-extra-combat", text),
+        event=TriggerEvent.DAMAGE_OPPONENT,
+        filter="self",
+        effects=[
+            UntapEffect(target="self"),
+            AdditionalCombatEffect(),
+        ],
+    )
+
+
+def pat_landfall_extra_combat(text: str, name: str) -> Ability | None:
+    """Moraug: landfall → additional combat (untap creatures at that combat)."""
+    m = re.match(
+        r"^Landfall — Whenever a land you control enters(?: the battlefield)?, "
+        r"if it's your main phase, there's an additional combat phase after this phase\. "
+        r"At the beginning of that combat, untap all creatures you control\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        # Split oracle may drop the second sentence onto its own clause.
+        m = re.match(
+            r"^Landfall — Whenever a land you control enters(?: the battlefield)?, "
+            r"if it's your main phase, there's an additional combat phase after this phase\.?$",
+            text.strip(),
+            re.IGNORECASE,
+        )
+        if not m:
+            return None
+    return TriggeredAbility(
+        ability_id=_ability_id("landfall-extra-combat", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="controlled_land",
+        effects=[
+            UntapEffect(target="all_creatures"),
+            AdditionalCombatEffect(),
+        ],
+    )
+
+
+def pat_beginning_combat_untap_all(text: str, name: str) -> Ability | None:
+    """Trailing Moraug clause after split: treat as PI (folded into landfall)."""
+    m = re.match(
+        r"^At the beginning of that combat, untap all creatures you control\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ProofIrrelevantStatic(
+        ability_id=_ability_id("begin-combat-untap-pi", text),
+        clause=text.strip(),
+    )
+
+
+def pat_attacks_count_anthem(text: str, name: str) -> Ability | None:
+    """Moraug attack-count anthem — proof-irrelevant for loop witnesses."""
+    m = re.match(
+        r"^Each creature you control gets \+1/\+0 for each time it has attacked this turn\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ProofIrrelevantStatic(
+        ability_id=_ability_id("attacks-count-anthem-pi", text),
+        clause=text.strip(),
+    )
+
+
 def pat_tap_damage_self(text: str, name: str) -> Ability | None:
     """Stuffy Doll: {T}: This creature deals 1 damage to itself."""
     cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
@@ -5351,6 +5458,17 @@ PATTERNS: list[Pattern] = [
     Pattern("dealt_damage_create_copy", pat_dealt_damage_create_copy),
     Pattern("fight_activated", pat_fight_activated),
     Pattern("etb_fight", pat_etb_fight),
+    Pattern(
+        "additional_combat_untap_activated",
+        pat_additional_combat_untap_activated,
+    ),
+    Pattern(
+        "combat_damage_untap_extra_combat",
+        pat_combat_damage_untap_extra_combat,
+    ),
+    Pattern("landfall_extra_combat", pat_landfall_extra_combat),
+    Pattern("beginning_combat_untap_all", pat_beginning_combat_untap_all),
+    Pattern("attacks_count_anthem", pat_attacks_count_anthem),
     Pattern("tap_damage_self", pat_tap_damage_self),
     Pattern("dealt_damage_gain_life", pat_dealt_damage_gain_life),
     Pattern("dealt_damage_draw", pat_dealt_damage_draw),

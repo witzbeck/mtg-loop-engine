@@ -225,6 +225,12 @@ class FightEffect(BaseModel):
     target: Literal["another_creature", "target_creature"] = "another_creature"
 
 
+class AdditionalCombatEffect(BaseModel):
+    """Schedule an extra combat (combo-favorable: also untap is separate)."""
+
+    kind: Literal["additional_combat"] = "additional_combat"
+
+
 class TapEffect(BaseModel):
     kind: Literal["tap"] = "tap"
     target: Literal["self", "target_permanent"] = "self"
@@ -433,6 +439,7 @@ Effect = Annotated[
     | CastImprintedSpellEffect
     | CopyLastCastSpellEffect
     | FightEffect
+    | AdditionalCombatEffect
     | DealDamageEffect
     | GainLifeEffect
     | DrawEffect

@@ -12,6 +12,7 @@ from mtg_loop_engine.semantics.ir import (
     UntapSymbolCost,
     AddCounterEffect,
     AddManaEffect,
+    AdditionalCombatEffect,
     CardSemantics,
     ContinuousCostReduction,
     CopyPendingTriggerEffect,
@@ -1338,6 +1339,10 @@ class Executor:
                 )
                 state.bump("damage", oth_pwr)
             state.bump("fight")
+            return None
+
+        if isinstance(effect, AdditionalCombatEffect):
+            state.bump("extra_combat")
             return None
 
         if isinstance(effect, DealDamageEffect):
