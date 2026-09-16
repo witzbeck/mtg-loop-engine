@@ -87,9 +87,9 @@ narrows mid-flight.
 | E16 | done | Sac-outlet payoffs | CLOSE_BUILD | 29 | 14 | yes | Sac cost → mana/mill/damage |
 | E17 | done | Scaled mill | CLOSE_BUILD | 3 | 1 | yes | Mill = power / GY count / life-loss; Bruvac ×2 |
 | E18 | done | GY → hand / BF | CLOSE_BUILD | 17 | 8 | maybe | Recursion effects |
-| E19 | pending | Bounce remainders | CLOSE_BUILD | 24 | 14 | yes | Target-filter variants on existing bounce |
-| E20 | pending | Counter doubling | CLOSE_BUILD | 3 | 0 | yes | Doubling Season counter half |
-| E21 | pending | Proliferate | CLOSE_BUILD | 3 | 0 | yes | Proliferate action |
+| E19 | done | Bounce remainders | CLOSE_BUILD | 24 | 14 | yes | Bounce-as-cost Forest/Elf/land; Chulane activated bounce |
+| E20 | done | Counter doubling | CLOSE_BUILD | 3 | 0 | yes | Doubling Season / Primal Vigor |
+| E21 | done | Proliferate | CLOSE_BUILD | 3 | 0 | yes | Viral Drake proliferate (infect PI) |
 | E22 | pending | Token-create variants | CLOSE_BUILD | 125 | 65 | mixed | Subtype/color/X-create family; split as needed |
 | E50 | pending | Life replacement | CLOSE_BUILD | 7 | — | mixed | Twice life loss/gain; can’t-gain |
 | E51 | pending | Mill replacement | CLOSE_BUILD | 1 | — | maybe | Mill twice |

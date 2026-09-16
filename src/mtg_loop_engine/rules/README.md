@@ -37,6 +37,9 @@ graph TB;
 - Exact pending-trigger match when `actor` / `ability_id` are supplied (no silent idx-0 fallback).
 - Exile-on-death replacements suppress death events and `DIES` triggers (CR 700.4); sacrifice events still fire.
 - Creature `DIES` queues carry subject `effective_toughness()` as trigger `amount` when > 0 (South Wind Avatar class).
+- Counter put path applies `ReplacementAmplifyP1P1Counters` then `ReplacementDoubleCounters` (Doubling Season / Primal Vigor).
+- `ProliferateEffect` adds one counter of each existing kind on controlled permanents (Doubling Season applies).
+- `BounceControlledCost` returns a Forest/Elf/land to hand as a cost (Quirion / Wirewood / Meloku).
 - `MoveToZoneEffect` bounce targets: `controlled_creature`, `controlled_creature_green_or_white`, `controlled_permanent`, `controlled_nonland`, `other_controlled_creature` (Temur), `other_controlled_sharing_type` (Cloudstone; needs trigger subject), `target_nonland` (Knack/Helix).
 - `TriggeredAbility.filter` includes `controlled_nonartifact` (Cloudstone).
 - Mana Echoes: `AddManaEffect` `CONTROLLED_SHARING_CREATURE_TYPE` counts controlled creatures sharing a creature subtype with the trigger subject (token names infer subtypes when unregistered).

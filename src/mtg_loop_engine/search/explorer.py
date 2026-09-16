@@ -51,6 +51,7 @@ from mtg_loop_engine.semantics.ir import (
     MoveToZoneEffect,
     RemoveCounterCost,
     SacrificeCost,
+    BounceControlledCost,
     TapCost,
     TriggeredAbility,
     UntapSymbolCost,
@@ -949,6 +950,13 @@ def _sac_selector(ability: ActivatedAbility) -> str | None:
     return None
 
 
+def _bounce_cost_selector(ability: ActivatedAbility) -> str | None:
+    for cost in ability.costs:
+        if isinstance(cost, BounceControlledCost):
+            return cost.selector
+    return None
+
+
 def _fodder_ids(state: GameState, selector: str) -> list[str]:
     ids: list[str] = []
     for perm in state.permanents.values():
@@ -960,6 +968,16 @@ def _fodder_ids(state: GameState, selector: str) -> list[str]:
             ids.append(perm.object_id)
     # Prefer tokens so sac outlets do not eat essential creatures first.
     ids.sort(key=lambda oid: (not state.permanents[oid].is_token, oid))
+    return ids
+
+
+def _bounce_fodder_ids(executor: Executor, state: GameState, selector: str) -> list[str]:
+    ids = [
+        p.object_id
+        for p in state.permanents.values()
+        if executor.matches_bounce_selector(p, selector)
+    ]
+    ids.sort()
     return ids
 
 
@@ -1161,6 +1179,7 @@ def _activation_steps(
             ):
                 continue
             selector = _sac_selector(ab)
+            bounce_sel = _bounce_cost_selector(ab)
             remove_cost = _remove_counter_cost(ab)
             need_effect_target = _effect_needs_permanent_target(ab)
             need_tap_host = _tap_cost_needs_host(ab)
@@ -1200,6 +1219,41 @@ def _activation_steps(
                         )
                         if _try_apply(executor, state, step) is not None:
                             steps.append(step)
+                continue
+            # Quirion / Wirewood: bounce Forest/Elf cost × untap target creature.
+            if bounce_sel and need_effect_target:
+                fodder = _bounce_fodder_ids(executor, state, bounce_sel)
+                effect_targets = [
+                    p.object_id
+                    for p in state.permanents.values()
+                    if p.zone == Zone.BATTLEFIELD
+                    and p.controller == "you"
+                    and p.is_creature
+                ]
+                for cost_target in fodder:
+                    for target in effect_targets:
+                        if target == cost_target:
+                            continue
+                        step = ActionStep(
+                            op="activate",
+                            actor=perm.object_id,
+                            ability_id=ab.ability_id,
+                            target=target,
+                            cost_target=cost_target,
+                        )
+                        if _try_apply(executor, state, step) is not None:
+                            steps.append(step)
+                continue
+            if bounce_sel and not need_effect_target:
+                for cost_target in _bounce_fodder_ids(executor, state, bounce_sel):
+                    step = ActionStep(
+                        op="activate",
+                        actor=perm.object_id,
+                        ability_id=ab.ability_id,
+                        cost_target=cost_target,
+                    )
+                    if _try_apply(executor, state, step) is not None:
+                        steps.append(step)
                 continue
             if selector:
                 targets = _fodder_ids(state, selector)

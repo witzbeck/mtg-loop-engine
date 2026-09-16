@@ -35,7 +35,7 @@ def test_wrong_amplify_wording_stays_unsupported():
         name="False Amplify",
         oracle_text=(
             "If one or more +1/+1 counters would be put on a permanent you control, "
-            "twice that many +1/+1 counters are put on that permanent instead."
+            "that many plus two +1/+1 counters are put on that permanent instead."
         ),
         types=["Enchantment"],
     )

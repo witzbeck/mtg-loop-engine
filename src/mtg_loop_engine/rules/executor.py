@@ -36,6 +36,9 @@ from mtg_loop_engine.semantics.ir import (
     ReplacementMultiplyTapMana,
     ReplacementDoubleTokens,
     ReplacementDoubleMill,
+    ReplacementDoubleCounters,
+    ProliferateEffect,
+    BounceControlledCost,
     GrantActivatedAbility,
     ReplacementReduceM1M1Counters,
     ReturnFromGraveyardToHandEffect,
@@ -378,7 +381,41 @@ class Executor:
                 ):
                     continue
                 bonus += ab.plus
-        return quantity + bonus
+        return self.counter_put_multiplier(
+            state, quantity + bonus, permanent=permanent, counter_type="p1p1"
+        )
+
+    def counter_put_multiplier(
+        self,
+        state: GameState,
+        quantity: int,
+        *,
+        permanent: Permanent,
+        counter_type: str,
+    ) -> int:
+        """Doubling Season / Primal Vigor: multiply counters put on your permanents."""
+        if permanent.controller != "you" or quantity <= 0:
+            return quantity
+        is_p1p1 = counter_type in {"p1p1", "+1/+1"}
+        mult = 1
+        for perm in state.permanents.values():
+            if perm.zone != Zone.BATTLEFIELD or perm.controller != "you":
+                continue
+            card = self.semantics.get(perm.oracle_id)
+            if not card:
+                continue
+            for ab in card.abilities:
+                if not isinstance(ab, ReplacementDoubleCounters):
+                    continue
+                if ab.only_p1p1 and not is_p1p1:
+                    continue
+                if (
+                    ab.applies_to == "creatures_you_control"
+                    and not permanent.is_creature
+                ):
+                    continue
+                mult *= ab.multiplier
+        return quantity * mult
 
     def token_create_multiplier(self, state: GameState) -> int:
         mult = 1
@@ -826,9 +863,22 @@ class Executor:
                     put_qty = qty
                     if effect.counter_type in {"m1m1", "-1/-1"}:
                         put_qty = self.m1m1_put_quantity(state, put_qty)
+                        put_qty = self.counter_put_multiplier(
+                            state,
+                            put_qty,
+                            permanent=p,
+                            counter_type=effect.counter_type,
+                        )
                     elif effect.counter_type in {"p1p1", "+1/+1"}:
                         put_qty = self.p1p1_put_quantity(
                             state, put_qty, permanent=p
+                        )
+                    else:
+                        put_qty = self.counter_put_multiplier(
+                            state,
+                            put_qty,
+                            permanent=p,
+                            counter_type=effect.counter_type,
                         )
                     if put_qty > 0:
                         p.counters[effect.counter_type] = (
@@ -872,8 +922,15 @@ class Executor:
                 qty = trigger_amount
             if effect.counter_type in {"m1m1", "-1/-1"}:
                 qty = self.m1m1_put_quantity(state, qty)
+                qty = self.counter_put_multiplier(
+                    state, qty, permanent=p, counter_type=effect.counter_type
+                )
             elif effect.counter_type in {"p1p1", "+1/+1"}:
                 qty = self.p1p1_put_quantity(state, qty, permanent=p)
+            else:
+                qty = self.counter_put_multiplier(
+                    state, qty, permanent=p, counter_type=effect.counter_type
+                )
             if qty > 0:
                 p.counters[effect.counter_type] = (
                     p.counters.get(effect.counter_type, 0) + qty
@@ -883,6 +940,9 @@ class Executor:
                     state, TriggerEvent.COUNTER_ADDED, p, amount=qty
                 )
             return None
+
+        if isinstance(effect, ProliferateEffect):
+            return self._proliferate(state)
 
         if isinstance(effect, GrantLifelinkEffect):
             tid = target_id
@@ -1880,6 +1940,45 @@ class Executor:
                     # Do not forward fodder id as effect target (Bombardment damage).
                     if step.target == fodder_id:
                         step = step.model_copy(update={"target": None})
+            elif isinstance(cost, BounceControlledCost):
+                fodder_id = step.cost_target
+                if not fodder_id and step.target and step.target in state.permanents:
+                    # Meloku-class: sole permanent target is the bounce fodder.
+                    if not any(
+                        getattr(e, "target", None)
+                        in {
+                            "target_permanent",
+                            "target_other_creature",
+                            "controlled_creature",
+                            "other_controlled_creature",
+                        }
+                        for e in ab.effects
+                    ):
+                        fodder_id = step.target
+                if fodder_id:
+                    fodder = state.permanents.get(fodder_id)
+                    if fodder is None or not self.matches_bounce_selector(
+                        fodder, cost.selector
+                    ):
+                        return ExecError(
+                            VerificationStatus.ILLEGAL_TARGET,
+                            "bounce cost target illegal",
+                        )
+                else:
+                    fodder_id = self._pick_bounce_fodder(state, cost.selector)
+                    if not fodder_id:
+                        return ExecError(
+                            VerificationStatus.RESOURCE_DEFICIT,
+                            "no bounce cost fodder",
+                        )
+                    fodder = state.permanents[fodder_id]
+                fodder.zone = Zone.HAND
+                fodder.tapped = False
+                fodder.was_cast = False
+                fodder.summoning_sick = False
+                state.bump("bounce")
+                if step.target == fodder_id:
+                    step = step.model_copy(update={"target": None})
             elif isinstance(cost, TapCreatureCost):
                 need = max(int(cost.quantity or 1), 1)
                 tapped_ids: list[str] = []
@@ -1928,6 +2027,56 @@ class Executor:
             perm.once_per_turn_used.add(ab.ability_id)
         return None
 
+
+    def _proliferate(self, state: GameState) -> ExecError | None:
+        """Give each permanent you control another counter of each kind it has."""
+        for p in sorted(state.permanents.values(), key=lambda x: x.object_id):
+            if p.zone != Zone.BATTLEFIELD or p.controller != "you":
+                continue
+            kinds = sorted(k for k, n in p.counters.items() if n > 0)
+            for kind in kinds:
+                put_qty = 1
+                if kind in {"m1m1", "-1/-1"}:
+                    put_qty = self.m1m1_put_quantity(state, put_qty)
+                    put_qty = self.counter_put_multiplier(
+                        state, put_qty, permanent=p, counter_type=kind
+                    )
+                elif kind in {"p1p1", "+1/+1"}:
+                    put_qty = self.p1p1_put_quantity(state, put_qty, permanent=p)
+                else:
+                    put_qty = self.counter_put_multiplier(
+                        state, put_qty, permanent=p, counter_type=kind
+                    )
+                if put_qty <= 0:
+                    continue
+                p.counters[kind] = p.counters.get(kind, 0) + put_qty
+                state.bump("counter_added", put_qty)
+                self._queue_triggers(
+                    state, TriggerEvent.COUNTER_ADDED, p, amount=put_qty
+                )
+        return None
+
+    def matches_bounce_selector(self, permanent: Permanent, selector: str) -> bool:
+        if permanent.zone != Zone.BATTLEFIELD or permanent.controller != "you":
+            return False
+        if selector == "land_controlled":
+            return self._is_land_permanent(permanent)
+        if selector == "forest_controlled":
+            if not self._is_land_permanent(permanent):
+                return False
+            card = self.semantics.get(permanent.oracle_id)
+            types = {t.casefold() for t in (card.types if card else [])}
+            name = permanent.name.casefold()
+            return "forest" in types or name == "forest" or " forest" in f" {name}"
+        if selector == "elf_controlled":
+            if not permanent.is_creature:
+                return False
+            card = self.semantics.get(permanent.oracle_id)
+            if card and _is_elf(card):
+                return True
+            return "elf" in permanent.name.casefold()
+        return False
+
     def _pick_fodder(self, state: GameState, selector: str) -> str | None:
         # Prefer tokens for creature_controlled (generic fodder over essentials).
         if selector == "creature_controlled":
@@ -1939,6 +2088,13 @@ class Executor:
                     return p.object_id
         for p in state.permanents.values():
             if self.matches_sacrifice_selector(p, selector):
+                return p.object_id
+        return None
+
+
+    def _pick_bounce_fodder(self, state: GameState, selector: str) -> str | None:
+        for p in state.permanents.values():
+            if self.matches_bounce_selector(p, selector):
                 return p.object_id
         return None
 
