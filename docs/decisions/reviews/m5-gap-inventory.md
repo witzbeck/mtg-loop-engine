@@ -105,7 +105,7 @@ narrows mid-flight.
 | E58 | pending | Split second | CLOSE_BUILD | 2 | — | low | Stack lockout |
 | E59 | pending | Kicker / casualty / buyback | CLOSE_BUILD | 7 | — | mixed | Additional cast costs |
 | E60 | done | Tap-for-draw | CLOSE_BUILD | 10 | — | yes | Arcanis/Azami/Temple Bell/Kwain |
-| E61 | pending | Charge counters | CLOSE_BUILD | 3 | — | mixed | Enters with X charge |
+| E61 | done | Charge counters | CLOSE_BUILD | 3 | — | mixed | Cornucopia / Repository / Coretapper |
 | E62 | done | Discard engines | CLOSE_BUILD | 12 | — | mixed | Mind Over Matter; Skirge; Glint-Horn |
 | E63 | pending | Destroy / wrath | CLOSE_BUILD | 11 | — | low | One-shotish; Path-a rare |
 | E65 | done | Protection / hexproof | CLOSE_BUILD | 7 | — | low | Equipped/static keyword PI |

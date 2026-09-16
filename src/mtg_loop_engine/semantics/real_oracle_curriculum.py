@@ -2053,4 +2053,41 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{2}{R}{R}",
         mana_value=4,
     ),
+
+    "Astral Cornucopia": RealOracleCurriculum(
+        name="Astral Cornucopia",
+        types=["Artifact"],
+        oracle_text=(
+            "This artifact enters with X charge counters on it.\n"
+            "{T}: Choose a color. Add one mana of that color for each charge "
+            "counter on this artifact."
+        ),
+        notes="E61: charge-scaled tap mana; enters-with-X PI (seed counters).",
+        mana_cost="{X}{X}{X}",
+        mana_value=0,
+    ),
+    "Druids' Repository": RealOracleCurriculum(
+        name="Druids' Repository",
+        types=["Enchantment"],
+        oracle_text=(
+            "Whenever a creature you control attacks, put a charge counter on "
+            "this enchantment.\n"
+            "Remove a charge counter from this enchantment: Add one mana of any color."
+        ),
+        notes="E61: attacks → charge; remove charge → any mana.",
+        colors=("G",),
+        mana_cost="{1}{G}{G}",
+        mana_value=3,
+    ),
+    "Coretapper": RealOracleCurriculum(
+        name="Coretapper",
+        types=["Artifact", "Creature", "Myr"],
+        oracle_text=(
+            "{T}: Put a charge counter on target artifact.\n"
+            "Sacrifice this creature: Put two charge counters on target artifact."
+        ),
+        notes="E61: put charge counters on target artifact.",
+        mana_cost="{2}",
+        mana_value=2,
+    ),
 }

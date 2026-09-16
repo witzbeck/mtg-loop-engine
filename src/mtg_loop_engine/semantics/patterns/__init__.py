@@ -199,6 +199,39 @@ def pat_tap_add_mana(text: str, name: str) -> Ability | None:
             is_mana_ability=True,
             uses_stack=False,
         )
+    # Astral Cornucopia / Everflowing: {T}: Add {C} / any color for each charge counter.
+    m_charge_c = re.match(
+        r"^\{T\}: Add \{C\} for each charge counter on "
+        r"(?:this artifact|~|"
+        + re.escape(name)
+        + r")\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if m_charge_c:
+        return ActivatedAbility(
+            ability_id=_ability_id("tap-mana-charge-c", text),
+            costs=[TapCost()],
+            effects=[AddManaEffect(equal_to_source_charge_counters="colorless")],
+            is_mana_ability=True,
+            uses_stack=False,
+        )
+    m_charge_any = re.match(
+        r"^\{T\}: Choose a color\. Add one mana of that color for each charge "
+        r"counter on (?:this artifact|~|"
+        + re.escape(name)
+        + r")\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if m_charge_any:
+        return ActivatedAbility(
+            ability_id=_ability_id("tap-mana-charge-any", text),
+            costs=[TapCost()],
+            effects=[AddManaEffect(equal_to_source_charge_counters="any_color")],
+            is_mana_ability=True,
+            uses_stack=False,
+        )
     # M5 slice 9 — scaled tap mana (path-a).
     from mtg_loop_engine.semantics.enums import ManaScaleKind
 
@@ -537,6 +570,95 @@ def pat_untap_target_artifact(text: str, name: str) -> Ability | None:
         ability_id=_ability_id("untap-artifact", text),
         costs=[ManaCost(amount=_parse_mana_braces(m.group(1)))],
         effects=[UntapEffect(target="target_artifact")],
+    )
+
+
+def pat_remove_charge_add_mana(text: str, name: str) -> Ability | None:
+    """Druids' Repository: Remove a charge counter: Add one mana of any color."""
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
+    m = re.match(
+        r"^Remove a charge counter from (?:this (?:enchantment|artifact)|~|"
+        + re.escape(name)
+        + r"): Add one mana of any color\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("remove-charge-mana", text),
+        costs=[RemoveCounterCost(counter_type="charge", quantity=1, selector="self")],
+        effects=[AddManaEffect(amount=ManaAmount(any_color=1))],
+        is_mana_ability=True,
+        uses_stack=False,
+    )
+
+
+def pat_attacks_put_charge(text: str, name: str) -> Ability | None:
+    """Druids' Repository: Whenever a creature you control attacks, put a charge counter."""
+    cleaned = _strip_ability_word(text)
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", cleaned).strip()
+    m = re.match(
+        r"^Whenever a creature you control attacks, "
+        r"put a charge counter on (?:this (?:enchantment|artifact)|~|"
+        + re.escape(name)
+        + r")\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("attacks-put-charge", text),
+        event=TriggerEvent.ATTACKS,
+        filter="controlled_creature",
+        effects=[AddCounterEffect(counter_type="charge", quantity=1, target="self")],
+    )
+
+
+def pat_tap_put_charge_target_artifact(text: str, name: str) -> Ability | None:
+    """Coretapper: {T}: Put a charge counter on target artifact."""
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
+    m = re.match(
+        r"^\{T\}: Put a charge counter on target artifact\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("tap-put-charge", text),
+        costs=[TapCost()],
+        effects=[
+            AddCounterEffect(
+                counter_type="charge", quantity=1, target="target_permanent"
+            )
+        ],
+    )
+
+
+def pat_sac_put_charge_target_artifact(text: str, name: str) -> Ability | None:
+    """Coretapper: Sacrifice this creature: Put two charge counters on target artifact."""
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
+    m = re.match(
+        r"^Sacrifice (?:this creature|~|"
+        + re.escape(name)
+        + r"): Put (?:a|one|two|(\d+)) charge counters? on target artifact\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    raw = m.group(1)
+    qty = int(raw) if raw else (2 if "two" in cleaned.casefold() else 1)
+    return ActivatedAbility(
+        ability_id=_ability_id("sac-put-charge", text),
+        costs=[SacrificeCost(selector="self")],
+        effects=[
+            AddCounterEffect(
+                counter_type="charge", quantity=qty, target="target_permanent"
+            )
+        ],
     )
 
 
@@ -4213,6 +4335,13 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
         return _proof_irrelevant(clause)
 
     if re.match(
+        r"^This artifact enters with X charge counters on it\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
         r"^Unearth \{[^}]+\}(?: \([^)]*\))?\.?$",
         clause,
         re.IGNORECASE,
@@ -4322,6 +4451,10 @@ PATTERNS: list[Pattern] = [
     Pattern("discard_add_mana", pat_discard_add_mana),
     Pattern("discard_trigger_damage", pat_discard_trigger_damage),
     Pattern("discard_draw", pat_discard_draw),
+    Pattern("remove_charge_add_mana", pat_remove_charge_add_mana),
+    Pattern("attacks_put_charge", pat_attacks_put_charge),
+    Pattern("tap_put_charge_target_artifact", pat_tap_put_charge_target_artifact),
+    Pattern("sac_put_charge_target_artifact", pat_sac_put_charge_target_artifact),
     Pattern("tap_artifacts_untap_artifact", pat_tap_artifacts_untap_artifact),
     Pattern("mana_untap_self", pat_mana_untap_self),
     Pattern("cost_reduction", pat_cost_reduction),
