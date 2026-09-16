@@ -108,7 +108,7 @@ narrows mid-flight.
 | E60 | done | Tap-for-draw | CLOSE_BUILD | 10 | — | yes | Arcanis/Azami/Temple Bell/Kwain |
 | E61 | done | Charge counters | CLOSE_BUILD | 3 | — | mixed | Cornucopia / Repository / Coretapper |
 | E62 | done | Discard engines | CLOSE_BUILD | 12 | — | mixed | Mind Over Matter; Skirge; Glint-Horn |
-| E63 | pending | Destroy / wrath | CLOSE_BUILD | 11 | — | low | One-shotish; Path-a rare |
+| E63 | REJECT | Destroy / wrath | REJECT | 11 | — | low | One-shot; see R03 |
 | E65 | done | Protection / hexproof | CLOSE_BUILD | 7 | — | low | Equipped/static keyword PI |
 | E66 | pending | Equipment remainders | CLOSE_BUILD | 13 | — | mixed | Beyond Mantle |
 | E67 | pending | Untap remainders (umbrella) | CLOSE_BUILD | 29 | — | yes | Extra-combat untaps → E35; else E67a+ |
@@ -116,9 +116,9 @@ narrows mid-flight.
 | E68 | done | Damage-to-you payoffs | CLOSE_BUILD | 2 | — | maybe | Stuffy Doll / Mogg Maniac reflect |
 | E69 | pending | Prepared / MDFC convert | CLOSE_BUILD | 2 | — | mixed | Cast converted |
 | E70 | pending | Beginning-of-step triggers | CLOSE_BUILD | 32 | — | mixed | End step / upkeep |
-| E71 | pending | Skip step | CLOSE_BUILD | 1 | — | low | Skip untap |
-| E72 | pending | Counterspell | CLOSE_BUILD | 4 | — | low | Counter target spell |
-| E73 | pending | Mana rituals | CLOSE_BUILD | 7 | — | low | Often one-shot; may REJECT some |
+| E71 | REJECT | Skip step | REJECT | 1 | — | low | See R04 |
+| E72 | REJECT | Counterspell | REJECT | 4 | — | low | See R05 |
+| E73 | REJECT | Mana rituals | REJECT | 7 | — | low | Covered by R02 |
 | E74 | pending | Fight / enrage | CLOSE_BUILD | 4 | — | mixed | Fight target |
 | E75 | pending | Aura attach remainders | CLOSE_BUILD | 4 | — | mixed | Attach / enchanted |
 
@@ -161,7 +161,10 @@ time (effect-shape slices) while keeping this parent ID as the inventory umbrell
 | ID | Status | Item | Reason |
 | --- | --- | --- | --- |
 | R01 | open | Storm Herd (life-total X create) | One-shot; highest pair-unlock bait; runbook rejected slices 12/35 |
-| R02 | open | Pure one-shot mana rituals with no recurrence path | Reclassify from E73 at implementation if Path-a impossible |
+| R02 | open | Pure one-shot mana rituals with no recurrence path | E73 closed as REJECT into this bucket |
+| R03 | open | Destroy / wrath as sole engine | One-shot; no mandatory recurrence Path-a (E63) |
+| R04 | open | Skip next untap step | Timing lockout; not modeled loop physics (E71) |
+| R05 | open | Counter target spell / ability | Reactive stack interaction; not a loop engine (E72) |
 
 ## OOS
 
@@ -194,3 +197,4 @@ Prefer shared-IR epics over singleton curriculum rank. Notable P0 sole+pairs:
 | Date | Change |
 | --- | --- |
 | 2026-09-16 | Initial inventory from remasured frontier (88/824); ordered backlog E01–E80 + hard E30–E41 + cleanup |
+| 2026-09-16 | REJECT batch: E63/E71/E72/E73 → R03–R05 (+R02); soft/hard CLOSE continue on remaining rows |
