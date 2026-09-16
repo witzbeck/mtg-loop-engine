@@ -1858,4 +1858,30 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{5}{R}",
         mana_value=6,
     ),
+
+    "All Will Be One": RealOracleCurriculum(
+        name="All Will Be One",
+        types=["Enchantment"],
+        oracle_text=(
+            "Whenever you put one or more counters on a permanent or player, "
+            "this enchantment deals that much damage to target opponent, "
+            "creature an opponent controls, or planeswalker an opponent controls."
+        ),
+        notes="E52: COUNTER_ADDED → that much damage.",
+        colors=("R",),
+        mana_cost="{5}{R}{R}",
+        mana_value=7,
+    ),
+    "Flourishing Defenses": RealOracleCurriculum(
+        name="Flourishing Defenses",
+        types=["Enchantment"],
+        oracle_text=(
+            "Whenever a -1/-1 counter is put on a creature, "
+            "you may create a 1/1 green Elf Warrior creature token."
+        ),
+        notes="E52: m1m1 put → Elf Warrior token.",
+        colors=("G",),
+        mana_cost="{1}{G}",
+        mana_value=2,
+    ),
 }
