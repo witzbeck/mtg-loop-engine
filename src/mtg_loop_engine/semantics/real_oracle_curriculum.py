@@ -999,8 +999,12 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
     "Psychosis Crawler": RealOracleCurriculum(
         name="Psychosis Crawler",
         types=["Artifact", "Creature", "Phyrexian", "Horror"],
-        oracle_text="Whenever you draw a card, each opponent loses 1 life.",
-        notes="E04: DRAW → lose life (P/T-set clause deferred).",
+        oracle_text=(
+            "Psychosis Crawler's power and toughness are each equal to the number "
+            "of cards in your hand.\n"
+            "Whenever you draw a card, each opponent loses 1 life."
+        ),
+        notes="E04 DRAW→life; E56 hand-size CDA.",
         mana_cost="{5}",
         mana_value=5,
     ),
@@ -2265,5 +2269,63 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         colors=("R",),
         mana_cost="{1}{R}",
         mana_value=2,
+    ),
+
+    # M5 E56 — characteristic-defining */* + Ashaya Forests
+    "Ashaya, Soul of the Wild": RealOracleCurriculum(
+        name="Ashaya, Soul of the Wild",
+        types=["Legendary", "Creature", "Elemental"],
+        oracle_text=(
+            "Ashaya's power and toughness are each equal to the number of lands "
+            "you control.\n"
+            "Nontoken creatures you control are Forests in addition to their "
+            "other types."
+        ),
+        notes="E56: land-count CDA + nontoken creatures are Forests.",
+        colors=("G",),
+        mana_cost="{3}{G}{G}",
+        mana_value=5,
+    ),
+    "Soul of Eternity": RealOracleCurriculum(
+        name="Soul of Eternity",
+        types=["Creature", "Avatar"],
+        oracle_text=(
+            "Soul of Eternity's power and toughness are each equal to your life "
+            "total.\n"
+            "Encore {7}{W}{W} ({7}{W}{W}, Exile this card from your graveyard: "
+            "For each opponent, create a token copy that attacks that opponent "
+            "this turn if able. Sacrifice them at the beginning of the next end "
+            "step. Activate only as a sorcery.)"
+        ),
+        notes="E56: life-total CDA; Encore PI.",
+        colors=("W",),
+        mana_cost="{5}{W}{W}",
+        mana_value=7,
+    ),
+    "Renata, Called to the Hunt": RealOracleCurriculum(
+        name="Renata, Called to the Hunt",
+        types=["Legendary", "Enchantment", "Creature", "Demigod"],
+        oracle_text=(
+            "Renata's power is equal to your devotion to green. "
+            "(Each {G} in the mana costs of permanents you control counts toward "
+            "your devotion to green.)"
+        ),
+        notes="E56: devotion-green power CDA.",
+        colors=("G",),
+        mana_cost="{2}{G}",
+        mana_value=3,
+    ),
+    "Body of Knowledge": RealOracleCurriculum(
+        name="Body of Knowledge",
+        types=["Creature", "Avatar"],
+        oracle_text=(
+            "Body of Knowledge's power and toughness are each equal to the number "
+            "of cards in your hand.\n"
+            "Whenever this creature is dealt damage, draw that many cards."
+        ),
+        notes="E56: hand-size CDA + dealt-damage draw.",
+        colors=("U",),
+        mana_cost="{3}{U}{U}",
+        mana_value=5,
     ),
 }

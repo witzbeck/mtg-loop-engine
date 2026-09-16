@@ -294,6 +294,8 @@ class DrawEffect(BaseModel):
     amount: int = 1
     # Edgar: draw for each artifact you control.
     equal_to_controlled_artifacts: bool = False
+    # Body of Knowledge: draw equal to damage dealt.
+    amount_from_trigger: bool = False
 
 
 class LoseLifeEffect(BaseModel):
@@ -578,6 +580,38 @@ class StaticCantGainLife(BaseModel):
     supported: bool = True
 
 
+class StaticCdaPT(BaseModel):
+    """Characteristic-defining */* (Ashaya / Psychosis / Soul of Eternity / Renata)."""
+
+    kind: Literal["static_cda_pt"] = "static_cda_pt"
+    ability_id: str
+    power_from: Literal[
+        "lands_you_control",
+        "cards_in_hand",
+        "life_you",
+        "devotion_green",
+    ]
+    # None → power only (Renata).
+    toughness_from: Literal[
+        None,
+        "lands_you_control",
+        "cards_in_hand",
+        "life_you",
+        "devotion_green",
+    ] = None
+    supported: bool = True
+
+
+class StaticNontokenCreaturesAreForests(BaseModel):
+    """Ashaya: nontoken creatures you control are Forests in addition to other types."""
+
+    kind: Literal["static_nontoken_creatures_are_forests"] = (
+        "static_nontoken_creatures_are_forests"
+    )
+    ability_id: str
+    supported: bool = True
+
+
 class GrantActivatedAbility(BaseModel):
     """Cryptolith Rite / Basal Sliver: grant an activated ability to matching hosts."""
 
@@ -637,6 +671,8 @@ Ability = Annotated[
     | ReplacementDoubleOpponentLifeLoss
     | ReplacementDoubleDraw
     | StaticCantGainLife
+    | StaticCdaPT
+    | StaticNontokenCreaturesAreForests
     | GrantActivatedAbility
     | FreeCastCreaturesByManaValue
     | InstantGrantTapBounce

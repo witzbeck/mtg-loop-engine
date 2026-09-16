@@ -42,6 +42,8 @@ from mtg_loop_engine.semantics.ir import (
     ReplacementDoubleOpponentLifeLoss,
     ReplacementDoubleDraw,
     StaticCantGainLife,
+    StaticCdaPT,
+    StaticNontokenCreaturesAreForests,
     GrantActivatedAbility,
     ReplacementExileInsteadOfGraveyard,
     ReplacementMultiplyTapMana,
@@ -1158,6 +1160,62 @@ def pat_spell_cost_reduction(text: str, name: str) -> Ability | None:
         )
 
     return None
+
+
+def pat_static_cda_pt(text: str, name: str) -> Ability | None:
+    """E56: */* CDAs from lands / hand / life / devotion."""
+    clause = text.strip().rstrip(".")
+    short = name.split(",")[0].strip() if name else ""
+    name_alts = [re.escape(n) for n in {name, short, "this creature"} if n]
+    name_alt = "|".join(name_alts)
+
+    # Power only (Renata).
+    m = re.match(
+        rf"^(?:{name_alt})'s power is equal to your devotion to green"
+        rf"\.?(?: \([^)]*\))?\.?$",
+        clause,
+        re.IGNORECASE,
+    )
+    if m:
+        return StaticCdaPT(
+            ability_id=_ability_id("cda-devotion-green", text),
+            power_from="devotion_green",
+            toughness_from=None,
+        )
+
+    sources = [
+        (r"the number of lands you control", "lands_you_control"),
+        (r"the number of cards in your hand", "cards_in_hand"),
+        (r"your life total", "life_you"),
+    ]
+    for src_re, kind in sources:
+        m = re.match(
+            rf"^(?:{name_alt})'s power and toughness are each equal to {src_re}\.?$",
+            clause,
+            re.IGNORECASE,
+        )
+        if m:
+            return StaticCdaPT(
+                ability_id=_ability_id(f"cda-{kind}", text),
+                power_from=kind,  # type: ignore[arg-type]
+                toughness_from=kind,  # type: ignore[arg-type]
+            )
+    return None
+
+
+def pat_nontoken_creatures_are_forests(text: str, name: str) -> Ability | None:
+    """Ashaya: nontoken creatures you control are Forests."""
+    clause = text.strip().rstrip(".")
+    m = re.match(
+        r"^Nontoken creatures you control are Forests in addition to their other types\.?$",
+        clause,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return StaticNontokenCreaturesAreForests(
+        ability_id=_ability_id("nontoken-forests", text),
+    )
 
 
 def pat_untap_mill_controller(text: str, name: str) -> Ability | None:
@@ -3991,6 +4049,28 @@ def pat_dealt_damage_gain_life(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_dealt_damage_draw(text: str, name: str) -> Ability | None:
+    """Body of Knowledge: dealt damage → draw that many cards."""
+    short = name.split(",")[0].strip()
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^Whenever (?:{name_alt}|this creature) is dealt damage, "
+        rf"draw that many cards\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("dealt-damage-draw", text),
+        event=TriggerEvent.DEALT_DAMAGE,
+        filter="self",
+        effects=[DrawEffect(amount=1, amount_from_trigger=True)],
+    )
+
+
 def pat_replacement_double_tokens(text: str, name: str) -> Ability | None:
     """Parallel Lives / Anointed Procession / Primal Vigor token half."""
     m = re.match(
@@ -4651,6 +4731,23 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
     ):
         return _proof_irrelevant(clause)
 
+    # Encore keyword (Soul of Eternity class).
+    if re.match(
+        r"^Encore (?:\{[^}]+\})+(?: \([^)]*\))?\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    # Serra Avatar / library shuffle from GY — not modeled loop physics.
+    if re.match(
+        r"^When .+ is put into a graveyard from anywhere, "
+        r"shuffle it into its owner's library\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
     if re.match(
         r"^Indestructible\.?(?: \([^)]*\))?$",
         clause,
@@ -4780,6 +4877,7 @@ PATTERNS: list[Pattern] = [
     Pattern("dealt_damage_reflect", pat_dealt_damage_reflect),
     Pattern("tap_damage_self", pat_tap_damage_self),
     Pattern("dealt_damage_gain_life", pat_dealt_damage_gain_life),
+    Pattern("dealt_damage_draw", pat_dealt_damage_draw),
     Pattern("replacement_double_tokens", pat_replacement_double_tokens),
     Pattern("etb_create_eldrazi_tokens", pat_etb_create_eldrazi_tokens),
     Pattern("mana_create_eldrazi_tokens", pat_mana_create_eldrazi_tokens),
@@ -4832,6 +4930,8 @@ PATTERNS: list[Pattern] = [
     Pattern("zirda_cost_reduction", pat_zirda_cost_reduction),
     Pattern("power_artifact_cost_reduction", pat_power_artifact_cost_reduction),
     Pattern("spell_cost_reduction", pat_spell_cost_reduction),
+    Pattern("static_cda_pt", pat_static_cda_pt),
+    Pattern("nontoken_creatures_are_forests", pat_nontoken_creatures_are_forests),
     Pattern("untap_mill_controller", pat_untap_mill_controller),
     Pattern("cant_block_this_turn", pat_cant_block_this_turn),
     Pattern("put_m1m1_untap_self", pat_put_m1m1_untap_self),

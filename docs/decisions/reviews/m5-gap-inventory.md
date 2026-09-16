@@ -101,7 +101,7 @@ narrows mid-flight.
 | E53 | done | Adapt / levelers | CLOSE_BUILD | 5 | — | mixed | Adapt N; Broodscale/Biomancer payoffs |
 | E54 | pending | Impulse / top-deck | CLOSE_BUILD | 8 | — | mixed | Reveal/exile top |
 | E55 | done | Cost reduction / affinity | CLOSE_BUILD | 11 | — | mixed | Spell/affinity reduce; Animar/Sami/Temur/Raptor |
-| E56 | pending | P/T set equal to | CLOSE_BUILD | 5 | — | mixed | */* from lands/hand |
+| E56 | done | P/T set equal to | CLOSE_BUILD | 5 | — | mixed | CDA lands/hand/life/devotion; Ashaya Forests |
 | E57 | done | Indestructible grants | CLOSE_BUILD | 3 | — | mixed | Static/equipment grants as PI |
 | E58 | pending | Split second | CLOSE_BUILD | 2 | — | low | Stack lockout |
 | E59 | pending | Kicker / casualty / buyback | CLOSE_BUILD | 7 | — | mixed | Additional cast costs |
