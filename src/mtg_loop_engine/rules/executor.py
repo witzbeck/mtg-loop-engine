@@ -1345,6 +1345,29 @@ class Executor:
                     subject.is_token and subject.is_creature
                 ):
                     continue
+                if ab.filter == "other_controlled_nontoken_creature" and (
+                    not subject.is_creature
+                    or subject.controller != "you"
+                    or subject.object_id == perm.object_id
+                    or subject.is_token
+                ):
+                    continue
+                if ab.filter == "controlled_nontoken_creature" and (
+                    not subject.is_creature
+                    or subject.controller != "you"
+                    or subject.is_token
+                ):
+                    continue
+                if ab.filter == "other_controlled_black_creature":
+                    if (
+                        not subject.is_creature
+                        or subject.controller != "you"
+                        or subject.object_id == perm.object_id
+                    ):
+                        continue
+                    colors = self._permanent_colors(subject)
+                    if "B" not in colors:
+                        continue
                 if ab.filter == "cast_creature" and not subject.is_creature:
                     continue
                 if ab.filter == "cast_noncreature" and subject.is_creature:
