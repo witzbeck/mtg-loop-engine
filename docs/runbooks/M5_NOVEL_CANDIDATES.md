@@ -181,8 +181,9 @@ uv run python scripts/spellbook_absent_discovery.py
 79. **E36 extra turn** ✓ — Time Warp / Temporal Manipulation / Magistrate's Scepter.
 80. **E37a planeswalker loyalty** ✓ — Teferi +1 untap; Saheeli −2 copy; Aminatou −1 blink.
 81. **E34 enter-as-copy** ✓ — Clone; Mirror Image; Sculpting Steel (`BecomeCopyEffect`).
-82. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-83. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+82. **Inventory freeze** ✓ — umbrellas done; E66/E69/E75/E40/E41/E80 → R07–R11; E70 → O04; C1–C3 done; COMPLETE 233 / partial 679.
+83. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+84. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 
