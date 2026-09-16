@@ -15,6 +15,7 @@ from mtg_loop_engine.semantics.ir import (
     AdditionalCombatEffect,
     GetEnergyEffect,
     ExtraTurnEffect,
+    BecomeCopyEffect,
     CardSemantics,
     ContinuousCostReduction,
     CopyPendingTriggerEffect,
@@ -1366,6 +1367,47 @@ class Executor:
 
         if isinstance(effect, ExtraTurnEffect):
             state.bump("extra_turn")
+            return None
+
+        if isinstance(effect, BecomeCopyEffect):
+            if not target_id or target_id not in state.permanents:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET, "copy target missing"
+                )
+            template = state.permanents[target_id]
+            if template.zone != Zone.BATTLEFIELD:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "copy target must be on battlefield",
+                )
+            if effect.target == "target_creature" and not template.is_creature:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "copy target must be a creature",
+                )
+            if (
+                effect.target == "controlled_creature"
+                and (
+                    not template.is_creature
+                    or template.controller != "you"
+                )
+            ):
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "copy target must be your creature",
+                )
+            if template.object_id == source.object_id:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET, "cannot copy self"
+                )
+            source.oracle_id = template.oracle_id
+            source.name = template.name
+            source.is_creature = template.is_creature
+            source.is_artifact = template.is_artifact
+            source.power = template.power
+            source.toughness = template.toughness
+            source.colors = list(template.colors)
+            state.bump("become_copy")
             return None
 
         if isinstance(effect, DealDamageEffect):

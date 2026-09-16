@@ -109,6 +109,7 @@ graph TB;
 - `etb_or_attacks_get_energy` / `attacks_get_energy` / `pay_energy_untap_all` / `tap_pay_energy_create_token` — E38 energy.
 - `extra_turn_spell` / `remove_charge_extra_turn` / `mana_tap_put_charge_self` — E36 extra turn.
 - `loyalty_untap_permanents` / `loyalty_create_copy` / `loyalty_blink_own` — E37a planeswalker loyalty.
+- `enter_as_copy` — E34 Clone / Mirror Image / Sculpting Steel.
 - `untap_mill_controller` — Mesmeric; UNTAP → self-mill.
 
 ## Main entry points
