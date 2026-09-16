@@ -35,7 +35,7 @@ def test_aphetto_alchemist_compiles_with_morph_irrelevant():
     assert any(a.kind == "proof_irrelevant_static" for a in report.semantics.abilities)
 
 
-def test_splinter_twin_copy_grant_stays_unsupported():
+def test_splinter_twin_copy_grant_compiles_complete():
     report = compile_oracle_text(
         oracle_id="oracle:splinter-twin",
         name="Splinter Twin",
@@ -46,8 +46,8 @@ def test_splinter_twin_copy_grant_stays_unsupported():
         ),
         types=["Enchantment", "Aura"],
     )
-    assert report.coverage == SemanticCoverage.PARTIAL_RELEVANT_TO_PROOF
-    assert report.semantics.relevant_unsupported()
+    assert report.coverage == SemanticCoverage.COMPLETE
+    assert any(a.kind == "grant_activated" for a in report.semantics.abilities)
 
 
 def test_aura_host_seed_is_non_token_setup_permanent():
