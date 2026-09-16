@@ -1717,4 +1717,43 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{2}{W}{W}",
         mana_value=4,
     ),
+    "Arcanis the Omnipotent": RealOracleCurriculum(
+        name="Arcanis the Omnipotent",
+        types=["Legendary", "Creature", "Wizard"],
+        oracle_text="{T}: Draw three cards.",
+        notes="E60: tap-draw N.",
+        colors=("U",),
+        mana_cost="{3}{U}{U}{U}",
+        mana_value=6,
+    ),
+    "Azami, Lady of Scrolls": RealOracleCurriculum(
+        name="Azami, Lady of Scrolls",
+        types=["Legendary", "Creature", "Human", "Wizard"],
+        oracle_text="Tap an untapped Wizard you control: Draw a card.",
+        notes="E60: tap Wizard subtype → draw.",
+        colors=("U",),
+        mana_cost="{2}{U}{U}{U}",
+        mana_value=5,
+    ),
+    "Temple Bell": RealOracleCurriculum(
+        name="Temple Bell",
+        types=["Artifact"],
+        oracle_text="{T}: Each player draws a card.",
+        notes="E60: each-player draw modeled as you draw 1.",
+        colors=(),
+        mana_cost="{3}",
+        mana_value=3,
+    ),
+    "Kwain, Itinerant Meddler": RealOracleCurriculum(
+        name="Kwain, Itinerant Meddler",
+        types=["Legendary", "Creature", "Rabbit", "Wizard"],
+        oracle_text=(
+            "{T}: Each player may draw a card, then each player who drew a card "
+            "this way gains 1 life."
+        ),
+        notes="E60: optional each-draw → you draw 1 (life rider ignored).",
+        colors=("W", "U"),
+        mana_cost="{W}{U}",
+        mana_value=2,
+    ),
 }

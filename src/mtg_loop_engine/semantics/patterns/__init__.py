@@ -460,7 +460,8 @@ def pat_mana_tap_tap_target(text: str, name: str) -> Ability | None:
 
 def pat_mana_tap_draw(text: str, name: str) -> Ability | None:
     m = re.match(
-        r"^((?:\{[^}]+\}(?:,\s*)?)+): Draw (?:a card|(\d+) cards?)\.?$",
+        r"^((?:\{[^}]+\}(?:,\s*)?)+): Draw (?:a card|(\d+) cards?|"
+        r"(one|two|three|four|five|six|seven) cards?)\.?$",
         text,
         re.IGNORECASE,
     )
@@ -469,11 +470,50 @@ def pat_mana_tap_draw(text: str, name: str) -> Ability | None:
     costs = _parse_activation_costs(m.group(1).rstrip(", "))
     if not costs:
         return None
-    amount = int(m.group(2)) if m.group(2) else 1
+    if m.group(2):
+        amount = int(m.group(2))
+    elif m.group(3):
+        amount = _parse_count_word(m.group(3)) or 1
+    else:
+        amount = 1
     return ActivatedAbility(
         ability_id=_ability_id("tap-draw", text),
         costs=costs,
         effects=[DrawEffect(amount=amount)],
+    )
+
+
+def pat_tap_creature_subtype_draw(text: str, name: str) -> Ability | None:
+    """Azami: tap an untapped Wizard you control: draw a card."""
+    m = re.match(
+        r"^Tap an untapped ([A-Za-z][A-Za-z '-]*) you control: Draw a card\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    subtype = m.group(1).strip()
+    return ActivatedAbility(
+        ability_id=_ability_id("tap-subtype-draw", text),
+        costs=[TapCreatureCost(subtype=subtype, allow_source=True)],
+        effects=[DrawEffect(amount=1)],
+    )
+
+
+def pat_tap_each_player_draw(text: str, name: str) -> Ability | None:
+    """Temple Bell / Kwain (draw half): {T}: each player draws a card → you draw 1."""
+    m = re.match(
+        r"^\{T\}: Each player(?: may)? draw(?:s)? a card"
+        r"(?:, then each player who drew a card this way gains 1 life)?\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("tap-each-draw", text),
+        costs=[TapCost()],
+        effects=[DrawEffect(amount=1)],
     )
 
 
@@ -3703,6 +3743,8 @@ PATTERNS: list[Pattern] = [
     Pattern("mana_tap_untap_target", pat_mana_tap_untap_target),
     Pattern("mana_tap_tap_target", pat_mana_tap_tap_target),
     Pattern("mana_tap_draw", pat_mana_tap_draw),
+    Pattern("tap_creature_subtype_draw", pat_tap_creature_subtype_draw),
+    Pattern("tap_each_player_draw", pat_tap_each_player_draw),
     Pattern("mana_untap_self", pat_mana_untap_self),
     Pattern("cost_reduction", pat_cost_reduction),
     Pattern("zirda_cost_reduction", pat_zirda_cost_reduction),
