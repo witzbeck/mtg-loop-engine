@@ -104,7 +104,7 @@ narrows mid-flight.
 | E56 | done | P/T set equal to | CLOSE_BUILD | 5 | — | mixed | CDA lands/hand/life/devotion; Ashaya Forests |
 | E57 | done | Indestructible grants | CLOSE_BUILD | 3 | — | mixed | Static/equipment grants as PI |
 | E58 | done | Split second | CLOSE_BUILD | 2 | — | low | Split second PI; Angel's Grace / Legolas riders PI |
-| E59 | pending | Kicker / casualty / buyback | CLOSE_BUILD | 7 | — | mixed | Additional cast costs |
+| E59 | done | Kicker / casualty / buyback | CLOSE_BUILD | 7 | — | mixed | Buyback/Kicker/Casualty PI; Searing Touch / Clockspinning / Sprout Swarm |
 | E60 | done | Tap-for-draw | CLOSE_BUILD | 10 | — | yes | Arcanis/Azami/Temple Bell/Kwain |
 | E61 | done | Charge counters | CLOSE_BUILD | 3 | — | mixed | Cornucopia / Repository / Coretapper |
 | E62 | done | Discard engines | CLOSE_BUILD | 12 | — | mixed | Mind Over Matter; Skirge; Glint-Horn |

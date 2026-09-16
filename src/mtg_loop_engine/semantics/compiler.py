@@ -48,7 +48,7 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
         r"Other |"
         r"You have |"
         r"Equipped |"
-        r"Enchanted |Enchant |Equip |Flashback |Kicker |"
+        r"Enchanted |Enchant |Equip |Flashback |Kicker |Buyback |Casualty |"
         r"Sacrifice |Remove a |"
         r"Pay |"
         r"Players |"
@@ -85,6 +85,9 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
         r"During your turn, |"
         r"Nontoken creatures |"
         r"Encore |"
+        r"Buyback |"
+        r"Kicker |"
+        r"Casualty |"
         r"You can't |"
         r"Until end of turn, |"
         r"Protection "
@@ -115,13 +118,12 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
         parts = [
             p.strip() for p in secondary_split.split(clause) if p.strip()
         ]
-        # Keyword reminder close `.)` then Untap (Legolas); do not split
-        # mid-activated `. Untap Self` (Perpetual Apprentice).
+        # Keyword reminder close `.)` then next ability/effect sentence.
         refined: list[str] = []
-        reminder_untap = re.compile(r"(?<=\.\)) (?=Untap )", re.IGNORECASE)
+        reminder_next = re.compile(r"(?<=\.\)) (?=[A-Z])")
         for part in parts:
             refined.extend(
-                p.strip() for p in reminder_untap.split(part) if p.strip()
+                p.strip() for p in reminder_next.split(part) if p.strip()
             )
         out.extend(refined)
     return out
