@@ -130,6 +130,34 @@ def _colors_among_controlled(
     return colors
 
 
+def _devotion(
+    state: GameState,
+    semantics: dict[str, CardSemantics],
+    color: str,
+) -> int:
+    """Count mana symbols of ``color`` among controlled permanents' mana costs."""
+    key = {
+        "white": "white",
+        "blue": "blue",
+        "black": "black",
+        "red": "red",
+        "green": "green",
+        "W": "white",
+        "U": "blue",
+        "B": "black",
+        "R": "red",
+        "G": "green",
+    }.get(color, color)
+    n = 0
+    for p in _controlled_permanents(state):
+        sem = _semantics_for(semantics, p)
+        if not sem:
+            continue
+        amt = sem.mana_cost
+        n += int(getattr(amt, key, 0) or 0)
+    return n
+
+
 def _devotion_green(
     state: GameState,
     semantics: dict[str, CardSemantics],
@@ -554,12 +582,14 @@ class Executor:
     ) -> ExecError | None:
         amount = trigger_amount
         for effect in effects:
-            # Half-life lose: compute qty before apply so following gains can reuse it.
+            # Half-life / devotion lose: compute qty before apply so following gains can reuse it.
             if isinstance(effect, LoseLifeEffect) and effect.half_life_rounded_up:
                 life = (
                     state.life_opponent if effect.who == "opponent" else state.life_you
                 )
                 amount = (life + 1) // 2
+            elif isinstance(effect, LoseLifeEffect) and effect.equal_to_devotion:
+                amount = _devotion(state, self.semantics, effect.equal_to_devotion)
             err = self._apply_one(
                 state,
                 source,
@@ -892,7 +922,11 @@ class Executor:
 
         if isinstance(effect, DealDamageEffect):
             qty = effect.amount
-            if effect.amount_from_trigger:
+            if effect.equal_to_source_power:
+                qty = int(source.effective_power() or 0)
+            elif effect.equal_to_devotion:
+                qty = _devotion(state, self.semantics, effect.equal_to_devotion)
+            elif effect.amount_from_trigger:
                 if trigger_amount is None or trigger_amount <= 0:
                     return ExecError(
                         VerificationStatus.ILLEGAL_ACTION,
@@ -977,7 +1011,19 @@ class Executor:
             return None
 
         if isinstance(effect, DrawEffect):
-            for _ in range(max(int(effect.amount), 0)):
+            qty = effect.amount
+            if effect.equal_to_controlled_artifacts:
+                qty = sum(
+                    1
+                    for p in state.permanents.values()
+                    if p.zone == Zone.BATTLEFIELD
+                    and p.controller == "you"
+                    and (
+                        p.is_artifact
+                        or "artifact" in self._permanent_type_set(p)
+                    )
+                )
+            for _ in range(max(int(qty), 0)):
                 state.bump("draw", 1)
                 self._queue_triggers(state, TriggerEvent.DRAW, source, amount=1)
             return None
@@ -988,6 +1034,8 @@ class Executor:
                     state.life_opponent if effect.who == "opponent" else state.life_you
                 )
                 qty = (life + 1) // 2
+            elif effect.equal_to_devotion:
+                qty = _devotion(state, self.semantics, effect.equal_to_devotion)
             else:
                 qty = (
                     trigger_amount

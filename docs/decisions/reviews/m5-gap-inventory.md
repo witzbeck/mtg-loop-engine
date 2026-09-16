@@ -81,6 +81,7 @@ narrows mid-flight.
 | E11 | done | Scaled mana remainders | CLOSE_BUILD | 17 | 8 | yes | Power/toughness/land-count / entered-this-turn mana |
 | E12 | done | Cast-trigger family | CLOSE_BUILD | 33 | 15 | mixed | Parameterize CAST → effects |
 | E13 | pending | ETB-trigger remainders | CLOSE_BUILD | 141 | 58 | mixed | Split into sub-epics by effect shape |
+| E13a | done | Self-ETB power/devotion/artifact scale | CLOSE_BUILD | — | — | yes | Redcap / Fanatic / Gary / Edgar |
 | E14 | pending | Dies-trigger remainders | CLOSE_BUILD | 29 | 9 | mixed | Parameterize DIES → effects |
 | E15 | pending | Attack-trigger remainders | CLOSE_BUILD | 52 | 21 | mixed | May need combat model slices |
 | E16 | pending | Sac-outlet payoffs | CLOSE_BUILD | 29 | 14 | yes | Sac cost → mana/mill/damage |
