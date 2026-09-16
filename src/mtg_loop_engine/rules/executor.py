@@ -50,6 +50,7 @@ from mtg_loop_engine.semantics.ir import (
     ReplacementReduceM1M1Counters,
     ReturnFromGraveyardToHandEffect,
     ReturnToBattlefieldEffect,
+    BlinkEffect,
     SacrificeCost,
     TapCost,
     TapCreatureCost,
@@ -1252,6 +1253,14 @@ class Executor:
             self._on_etb(state, source)
             return None
 
+        if isinstance(effect, BlinkEffect):
+            return self._apply_blink(
+                state,
+                source,
+                effect,
+                target_id=target_id,
+            )
+
         if isinstance(effect, DealDamageEffect):
             qty = effect.amount
             if effect.equal_to_source_power:
@@ -1841,6 +1850,53 @@ class Executor:
                 if amount is not None:
                     entry["amount"] = amount
                 state.pending_triggers.append(entry)
+
+    def _apply_blink(
+        self,
+        state: GameState,
+        source: Permanent,
+        effect: BlinkEffect,
+        *,
+        target_id: str | None,
+    ) -> ExecError | None:
+        """Exile then return; fires ETB (and leaves-battlefield absences)."""
+        if effect.target == "self":
+            victim = source
+        else:
+            if not target_id or target_id not in state.permanents:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET, "blink needs a target"
+                )
+            victim = state.permanents[target_id]
+        if victim.zone != Zone.BATTLEFIELD or victim.controller != "you":
+            return ExecError(
+                VerificationStatus.ILLEGAL_TARGET,
+                "blink target must be a permanent you control",
+            )
+        if effect.target == "another_creature_you_control":
+            if victim.object_id == source.object_id or not victim.is_creature:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "blink needs another creature you control",
+                )
+        elif effect.target == "target_creature_you_control":
+            if not victim.is_creature:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "blink target must be a creature",
+                )
+        # Instantaneous exile → return (no dies).
+        victim.zone = Zone.EXILE
+        victim.tapped = False
+        victim.damage_marked = 0
+        state.bump("exile")
+        victim.zone = Zone.BATTLEFIELD
+        victim.tapped = bool(effect.return_tapped)
+        victim.summoning_sick = bool(victim.is_creature)
+        victim.was_cast = False
+        state.bump("return_to_battlefield")
+        self._on_etb(state, victim)
+        return None
 
     def die(self, state: GameState, permanent: Permanent) -> None:
         # CR 700.4: "dies" means BF→GY for any permanent.

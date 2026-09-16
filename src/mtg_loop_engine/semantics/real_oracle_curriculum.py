@@ -2360,4 +2360,43 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{G}",
         mana_value=1,
     ),
+
+    # M5 E30a — blink exile-return
+    "Emiel the Blessed": RealOracleCurriculum(
+        name="Emiel the Blessed",
+        types=["Legendary", "Creature", "Unicorn"],
+        oracle_text=(
+            "{3}: Exile another target creature you control, then return it to "
+            "the battlefield under its owner's control."
+        ),
+        notes="E30a: activated blink (other abilities deferred).",
+        colors=("W",),
+        mana_cost="{2}{W}{W}",
+        mana_value=4,
+    ),
+    "Eldrazi Displacer": RealOracleCurriculum(
+        name="Eldrazi Displacer",
+        types=["Creature", "Eldrazi"],
+        oracle_text=(
+            "Devoid (This card has no color.)\n"
+            "{2}{C}: Exile another target creature, then return it to the "
+            "battlefield tapped under its owner's control."
+        ),
+        notes="E30a: activated blink tapped; Devoid PI.",
+        mana_cost="{2}{W}",
+        mana_value=3,
+    ),
+    "Felidar Guardian": RealOracleCurriculum(
+        name="Felidar Guardian",
+        types=["Creature", "Cat", "Beast"],
+        oracle_text=(
+            "When this creature enters, you may exile another target permanent "
+            "you control, then return that card to the battlefield under its "
+            "owner's control."
+        ),
+        notes="E30a: ETB blink.",
+        colors=("W",),
+        mana_cost="{3}{W}",
+        mana_value=4,
+    ),
 }

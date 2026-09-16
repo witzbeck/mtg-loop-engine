@@ -51,6 +51,7 @@ from mtg_loop_engine.semantics.ir import (
     ProofIrrelevantStatic,
     ReturnFromGraveyardToHandEffect,
     ReturnToBattlefieldEffect,
+    BlinkEffect,
     SacrificeCost,
     TapCost,
     TapCreatureCost,
@@ -1215,6 +1216,50 @@ def pat_nontoken_creatures_are_forests(text: str, name: str) -> Ability | None:
         return None
     return StaticNontokenCreaturesAreForests(
         ability_id=_ability_id("nontoken-forests", text),
+    )
+
+
+def pat_blink_activated(text: str, name: str) -> Ability | None:
+    """E30: Emiel / Eldrazi Displacer activated blink."""
+    m = re.match(
+        r"^((?:\{[^}]+\})+): Exile another target creature(?: you control)?, "
+        r"then return it to the battlefield( tapped)? under (?:its|their) owner's control\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("blink-activated", text),
+        costs=[ManaCost(amount=_parse_mana_braces(m.group(1)))],
+        effects=[
+            BlinkEffect(
+                target="another_creature_you_control",
+                return_tapped=bool(m.group(2)),
+            )
+        ],
+    )
+
+
+def pat_blink_etb(text: str, name: str) -> Ability | None:
+    """Felidar Guardian: ETB may blink another permanent."""
+    short = name.split(",")[0].strip() if name else ""
+    name_alts = [re.escape(n) for n in {name, short, "this creature"} if n]
+    name_alt = "|".join(name_alts)
+    m = re.match(
+        rf"^When (?:{name_alt}) enters(?: the battlefield)?, you may exile another "
+        rf"target permanent you control, then return that card to the battlefield "
+        rf"under its owner's control\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("blink-etb", text),
+        event=TriggerEvent.ENTER_BATTLEFIELD,
+        filter="self",
+        effects=[BlinkEffect(target="target_permanent_you_control")],
     )
 
 
@@ -4972,6 +5017,8 @@ PATTERNS: list[Pattern] = [
     Pattern("spell_cost_reduction", pat_spell_cost_reduction),
     Pattern("static_cda_pt", pat_static_cda_pt),
     Pattern("nontoken_creatures_are_forests", pat_nontoken_creatures_are_forests),
+    Pattern("blink_activated", pat_blink_activated),
+    Pattern("blink_etb", pat_blink_etb),
     Pattern("untap_mill_controller", pat_untap_mill_controller),
     Pattern("cant_block_this_turn", pat_cant_block_this_turn),
     Pattern("put_m1m1_untap_self", pat_put_m1m1_untap_self),
