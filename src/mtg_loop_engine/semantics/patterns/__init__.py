@@ -1292,6 +1292,65 @@ def pat_blink_etb(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_tap_draw_put_on_library(text: str, name: str) -> Ability | None:
+    """Sensei's Divining Top: {T}: draw, then put this on library top."""
+    m = re.match(
+        r"^\{T\}: Draw a card, then put this (?:artifact|permanent|card) "
+        r"on top of its owner's library\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("tap-draw-library-top", text),
+        costs=[TapCost()],
+        effects=[
+            DrawEffect(amount=1),
+            MoveToZoneEffect(zone=Zone.LIBRARY, target="self"),
+        ],
+    )
+
+
+def pat_look_top_rearrange(text: str, name: str) -> Ability | None:
+    """Sensei's Top rearrange — proof-irrelevant ordering."""
+    clause = text.strip().rstrip(".")
+    m = re.match(
+        r"^(?:\{[^}]+\})+: Look at the top (?:\d+|one|two|three|four|five|six|seven) "
+        r"cards? of your library, then put them back in any order\.?$",
+        clause,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return _proof_irrelevant(clause)
+
+
+def pat_exile_top_may_play(text: str, name: str) -> Ability | None:
+    """Impulse: exile top N; may play this turn → abstract as draw N."""
+    clause = text.strip().rstrip(".")
+    m = re.match(
+        r"^Discard a card: Exile the top (?:\d+|one|two|three|four|five) cards? "
+        r"of your library\. You may play (?:those|that) cards? this turn\.?$",
+        clause,
+        re.IGNORECASE,
+    )
+    if m:
+        # Word amounts → int
+        word = re.search(
+            r"top (\d+|one|two|three|four|five) cards?", clause, re.I
+        )
+        raw = word.group(1).lower() if word else "1"
+        word_map = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5}
+        n = word_map[raw] if raw in word_map else int(raw)
+        return ActivatedAbility(
+            ability_id=_ability_id("impulse-discard", text),
+            costs=[DiscardCost(quantity=1)],
+            effects=[DrawEffect(amount=n)],
+        )
+    return None
+
+
 def pat_untap_mill_controller(text: str, name: str) -> Ability | None:
     """Mesmeric Orb: whenever a permanent becomes untapped, its controller mills."""
     m = re.match(
@@ -4592,6 +4651,20 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
         return _proof_irrelevant(clause)
 
     if re.match(
+        r"^You may look at the top card of your library any time\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
+        r"^You may cast (?:creature )?spells from the top of your library\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
         r"^Cycling (?:\{[^}]+\})+(?: \([^)]*\))?\.?$",
         clause,
         re.IGNORECASE,
@@ -5048,6 +5121,9 @@ PATTERNS: list[Pattern] = [
     Pattern("nontoken_creatures_are_forests", pat_nontoken_creatures_are_forests),
     Pattern("blink_activated", pat_blink_activated),
     Pattern("blink_etb", pat_blink_etb),
+    Pattern("tap_draw_put_on_library", pat_tap_draw_put_on_library),
+    Pattern("look_top_rearrange", pat_look_top_rearrange),
+    Pattern("exile_top_may_play", pat_exile_top_may_play),
     Pattern("untap_mill_controller", pat_untap_mill_controller),
     Pattern("cant_block_this_turn", pat_cant_block_this_turn),
     Pattern("put_m1m1_untap_self", pat_put_m1m1_untap_self),

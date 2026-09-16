@@ -2435,4 +2435,42 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{3}",
         mana_value=3,
     ),
+
+    # M5 E54 — impulse / top-deck
+    "Sensei's Divining Top": RealOracleCurriculum(
+        name="Sensei's Divining Top",
+        types=["Artifact"],
+        oracle_text=(
+            "{1}: Look at the top three cards of your library, then put them "
+            "back in any order.\n"
+            "{T}: Draw a card, then put this artifact on top of its owner's library."
+        ),
+        notes="E54: rearrange PI; tap draw + library top.",
+        mana_cost="{1}",
+        mana_value=1,
+    ),
+    "Harnfel, Horn of Bounty": RealOracleCurriculum(
+        name="Harnfel, Horn of Bounty",
+        types=["Legendary", "Artifact"],
+        oracle_text=(
+            "Discard a card: Exile the top two cards of your library. You may "
+            "play those cards this turn."
+        ),
+        notes="E54: discard impulse abstracted as draw 2.",
+        colors=("R",),
+        mana_cost="",
+        mana_value=0,
+    ),
+    "Elven Chorus": RealOracleCurriculum(
+        name="Elven Chorus",
+        types=["Enchantment"],
+        oracle_text=(
+            "You may look at the top card of your library any time.\n"
+            "You may cast creature spells from the top of your library."
+        ),
+        notes="E54: top-look / cast-from-top PI.",
+        colors=("G",),
+        mana_cost="{3}{G}",
+        mana_value=4,
+    ),
 }
