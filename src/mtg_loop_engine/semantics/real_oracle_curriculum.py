@@ -950,9 +950,10 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         types=["Creature", "Angel", "Cleric"],
         oracle_text=(
             "Flying, vigilance\n"
+            "You have hexproof.\n"
             "Whenever Metropolis Reformer is dealt damage, you gain that much life."
         ),
-        notes="E02: dealt damage → gain life (hexproof rider deferred).",
+        notes="E02 reflect + E65 hexproof PI.",
         colors=("W",),
         mana_cost="{2}{W}",
         mana_value=3,
@@ -1755,5 +1756,68 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         colors=("W", "U"),
         mana_cost="{W}{U}",
         mana_value=2,
+    ),
+
+    "Lightning Greaves": RealOracleCurriculum(
+        name="Lightning Greaves",
+        types=["Artifact", "Equipment"],
+        oracle_text=(
+            "Equipped creature has haste and shroud. "
+            "(It can't be the target of spells or abilities.)\n"
+            "Equip {0}"
+        ),
+        notes="E65: equipped shroud PI.",
+        mana_cost="{2}",
+        mana_value=2,
+    ),
+    "Darksteel Plate": RealOracleCurriculum(
+        name="Darksteel Plate",
+        types=["Artifact", "Equipment"],
+        oracle_text=(
+            "Indestructible\n"
+            "Equipped creature has indestructible.\n"
+            "Equip {2}"
+        ),
+        notes="E57: equipment indestructible PI.",
+        mana_cost="{3}",
+        mana_value=3,
+    ),
+    "Anara, Wolvid Familiar": RealOracleCurriculum(
+        name="Anara, Wolvid Familiar",
+        types=["Legendary", "Creature", "Wolf", "Beast"],
+        oracle_text=(
+            "During your turn, commanders you control have indestructible. "
+            '(Effects that say "destroy" don\'t destroy them. A creature with '
+            "indestructible can't be destroyed by damage.)\n"
+            "Partner (You can have two commanders if both have partner.)"
+        ),
+        notes="E57: commander indestructible PI.",
+        colors=("G",),
+        mana_cost="{3}{G}",
+        mana_value=4,
+    ),
+    "Avacyn, Angel of Hope": RealOracleCurriculum(
+        name="Avacyn, Angel of Hope",
+        types=["Legendary", "Creature", "Angel"],
+        oracle_text=(
+            "Flying, vigilance, indestructible\n"
+            "Other permanents you control have indestructible."
+        ),
+        notes="E57: mass indestructible PI.",
+        colors=("W",),
+        mana_cost="{5}{W}{W}{W}",
+        mana_value=8,
+    ),
+    "Myr Matrix": RealOracleCurriculum(
+        name="Myr Matrix",
+        types=["Artifact"],
+        oracle_text=(
+            'Indestructible (Effects that say "destroy" don\'t destroy this artifact.)\n'
+            "Myr creatures get +1/+1.\n"
+            "{5}: Create a 1/1 colorless Myr artifact creature token."
+        ),
+        notes="E57: Myr Matrix indestructible + token create.",
+        mana_cost="{5}",
+        mana_value=5,
     ),
 }

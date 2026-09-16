@@ -26,7 +26,7 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
     keyword_line = re.compile(
         r"^(Flying|Flash|Haste|Vigilance|Trample|Lifelink|Deathtouch|Reach|Defender|"
         r"Menace|Hexproof|Shroud|Indestructible|First strike|Double strike|"
-        r"Infect(?: \([^)]+\))?|Ward(?: \([^)]+\))?)$",
+        r"Infect(?: \([^)]+\))?|Indestructible(?: \([^)]+\))?|Ward(?: \([^)]+\))?)$",
         re.IGNORECASE,
     )
     ability_start = re.compile(
@@ -38,6 +38,9 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
         r"Enchantments you |"
         r"Colorless creatures |"
         r"Creatures you |"
+        r"Other |"
+        r"You have |"
+        r"Equipped |"
         r"Enchanted |Enchant |Equip |Flashback |Kicker |"
         r"Sacrifice |Remove a |"
         r"Pay |"
@@ -50,6 +53,7 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
         r"Cascade |Convoke |Delve |"
         r"Flying |Flash |Haste |Vigilance |Trample |Lifelink |Deathtouch |Reach |"
         r"Defender |Menace |Hexproof |Shroud |First strike |Double strike |Infect |"
+        r"Indestructible |"
         r"Umbra armor |Warp |Annihilator |"
         # Ability words / named abilities (incl. ALL CAPS, ?, ! — Marvel style)
         r".{1,60}? — )"
@@ -64,6 +68,10 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
             clauses.append(buf.strip())
             buf = line
         elif not buf:
+            buf = line
+        elif keyword_line.match(buf):
+            # Keyword lines are complete abilities; do not soft-wrap the next clause.
+            clauses.append(buf.strip())
             buf = line
         else:
             buf = f"{buf} {line}"

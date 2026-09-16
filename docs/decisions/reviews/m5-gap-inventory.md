@@ -99,14 +99,14 @@ narrows mid-flight.
 | E54 | pending | Impulse / top-deck | CLOSE_BUILD | 8 | — | mixed | Reveal/exile top |
 | E55 | pending | Cost reduction / affinity | CLOSE_BUILD | 11 | — | mixed | Affinity; costs less |
 | E56 | pending | P/T set equal to | CLOSE_BUILD | 5 | — | mixed | */* from lands/hand |
-| E57 | pending | Indestructible grants | CLOSE_BUILD | 3 | — | mixed | Static indestructible |
+| E57 | done | Indestructible grants | CLOSE_BUILD | 3 | — | mixed | Static/equipment grants as PI |
 | E58 | pending | Split second | CLOSE_BUILD | 2 | — | low | Stack lockout |
 | E59 | pending | Kicker / casualty / buyback | CLOSE_BUILD | 7 | — | mixed | Additional cast costs |
 | E60 | done | Tap-for-draw | CLOSE_BUILD | 10 | — | yes | Arcanis/Azami/Temple Bell/Kwain |
 | E61 | pending | Charge counters | CLOSE_BUILD | 3 | — | mixed | Enters with X charge |
 | E62 | pending | Discard engines | CLOSE_BUILD | 12 | — | mixed | Discard payoffs |
 | E63 | pending | Destroy / wrath | CLOSE_BUILD | 11 | — | low | One-shotish; Path-a rare |
-| E65 | pending | Protection / hexproof | CLOSE_BUILD | 7 | — | low | Often proof-irrelevant |
+| E65 | done | Protection / hexproof | CLOSE_BUILD | 7 | — | low | Equipped/static keyword PI |
 | E66 | pending | Equipment remainders | CLOSE_BUILD | 13 | — | mixed | Beyond Mantle |
 | E67 | pending | Untap remainders | CLOSE_BUILD | 29 | — | yes | Non-land / modified untap |
 | E68 | pending | Damage-to-you payoffs | CLOSE_BUILD | 2 | — | maybe | Auntie Blyte-class |
