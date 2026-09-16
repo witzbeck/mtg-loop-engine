@@ -26,6 +26,7 @@ from mtg_loop_engine.semantics.ir import (
     LoseLifeEffect,
     ManaAmount,
     ManaCost,
+    PayLifeCost,
     MillEffect,
     MoveToZoneEffect,
     RemoveCounterCost,
@@ -2041,6 +2042,48 @@ def pat_cast_from_gy_if_zombie(text: str, name: str) -> Ability | None:
 
 
 
+
+def pat_cast_gain_life_per_spell(text: str, name: str) -> Ability | None:
+    """Aetherflux: cast → gain 1 life per spell cast this turn."""
+    cleaned = _strip_ability_word(text)
+    m = re.match(
+        r"^Whenever you cast a spell, you gain 1 life for each spell you've cast this turn\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("cast-life-per-spell", text),
+        event=TriggerEvent.CAST,
+        filter="any",
+        effects=[GainLifeEffect(equal_to_spells_cast_this_turn=True)],
+    )
+
+
+def pat_pay_life_damage(text: str, name: str) -> Ability | None:
+    """Aetherflux: Pay N life: deals N damage to any target."""
+    cleaned = _strip_ability_word(text)
+    m = re.match(
+        r"^Pay (\d+) life: (?:This (?:artifact|creature)|~|"
+        + re.escape(name)
+        + r"|Aetherflux Reservoir) deals (\d+) damage to any target\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    pay = int(m.group(1))
+    dmg = int(m.group(2))
+    return ActivatedAbility(
+        ability_id=_ability_id("pay-life-damage", text),
+        costs=[PayLifeCost(amount=pay)],
+        effects=[DealDamageEffect(amount=dmg, target="any_target")],
+        uses_stack=True,
+        is_mana_ability=False,
+    )
+
+
 def pat_attacks_half_mill(text: str, name: str) -> Ability | None:
     """Fleet Swallower / Terisian: attacks → mill half library."""
     short = name.split(",")[0].strip()
@@ -2590,6 +2633,8 @@ PATTERNS: list[Pattern] = [
     Pattern("mana_create_token", pat_mana_create_token),
     Pattern("hybrid_remove_m1m1_pump", pat_hybrid_remove_m1m1_pump),
     Pattern("tap_two_creatures_add_mana", pat_tap_two_creatures_add_mana),
+    Pattern("cast_gain_life_per_spell", pat_cast_gain_life_per_spell),
+    Pattern("pay_life_damage", pat_pay_life_damage),
     Pattern("attacks_half_mill", pat_attacks_half_mill),
     Pattern("spell_half_mill", pat_spell_half_mill),
     Pattern("grant_activated", pat_grant_activated),

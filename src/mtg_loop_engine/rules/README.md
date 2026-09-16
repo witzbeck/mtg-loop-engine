@@ -47,6 +47,7 @@ graph TB;
 - Intervening-if `cast` (Shard): queue/resolve ETB triggers only when `subject.was_cast` (CR 603.4 check at both times).
 - `LoseLifeEffect.half_life_rounded_up`: lose `ceil(life/2)`; following `GainLifeEffect(amount_from_trigger=True)` in the same ability uses that qty.
 - `MillEffect.half_library` (`up`/`down`): mill ⌈/⌊ half of `library_you`/`library_opponent`⌋ and shrink that counter (Traumatize / Fleet Swallower class); `TriggerEvent.ATTACKS` queues when tests/explorer declare attacks.
+- `PayLifeCost` + `GainLifeEffect.equal_to_spells_cast_this_turn` (Aetherflux): pay life as cost; cast trigger gains life equal to `events.cast`.
 - `activate_granted_tap_bounce` / `seed_grant_tap_bounce`: Instant grant `{T}`: bounce nonland (`Permanent.tap_bounce_nonland`, witness-persistent).
 - BF tapped→untapped via `_untap_permanent` queues `TriggerEvent.UNTAP` (Mesmeric Orb); self-mill bumps `events.mill` only.
 - Summoning sickness blocks `{T}` / `TapCost` even on mana abilities (CR 302.6); haste not modeled.

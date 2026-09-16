@@ -102,6 +102,13 @@ class TapCreatureCost(BaseModel):
     quantity: int = 1
 
 
+class PayLifeCost(BaseModel):
+    """Pay N life (Aetherflux Reservoir class)."""
+
+    kind: Literal["pay_life"] = "pay_life"
+    amount: int
+
+
 Cost = Annotated[
     TapCost
     | ManaCost
@@ -110,7 +117,8 @@ Cost = Annotated[
     | AddCounterCost
     | RemoveCounterCost
     | UntapSymbolCost
-    | TapCreatureCost,
+    | TapCreatureCost
+    | PayLifeCost,
     Field(discriminator="kind"),
 ]
 
@@ -203,6 +211,8 @@ class GainLifeEffect(BaseModel):
     amount: int = 1
     # When True, use the pending trigger's recorded amount (Exquisite Blood class).
     amount_from_trigger: bool = False
+    # Aetherflux: gain 1 life per spell cast this turn (uses events.cast counter).
+    equal_to_spells_cast_this_turn: bool = False
 
 
 class DrawEffect(BaseModel):
