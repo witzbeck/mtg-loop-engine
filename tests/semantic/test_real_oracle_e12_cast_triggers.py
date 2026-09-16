@@ -155,6 +155,144 @@ def test_steam_kin_cap_intervening_if():
     assert state.pending_triggers == []
 
 
+def test_steam_kin_adds_when_under_cap():
+    steam = _compile("Runaway Steam-Kin").semantics
+    red = CardSemantics(
+        oracle_id="oracle:red-rock2",
+        name="Red Rock",
+        types=["Artifact"],
+        colors=["R"],
+        abilities=[],
+        coverage=SemanticCoverage.COMPLETE,
+        mana_cost=ManaAmount(),
+        mana_value=0,
+    )
+    ex = Executor({steam.oracle_id: steam, red.oracle_id: red})
+    state = GameState(
+        permanents={
+            "s": Permanent(
+                object_id="s",
+                oracle_id=steam.oracle_id,
+                name=steam.name,
+                is_creature=True,
+                counters={"p1p1": 1},
+            ),
+            "r": Permanent(
+                object_id="r",
+                oracle_id=red.oracle_id,
+                name="Red Rock",
+                zone=Zone.HAND,
+                is_artifact=True,
+                colors=["R"],
+            ),
+        },
+        mana=ManaAmount(),
+    )
+    assert ex.cast_from_hand(state, ActionStep(op="cast_from_hand", actor="r")) is None
+    assert state.pending_triggers
+    assert ex.resolve_trigger(state, ActionStep(op="resolve_trigger")) is None
+    assert state.permanents["s"].counters.get("p1p1", 0) == 2
+
+
+def test_forsaken_colorless_cast_life():
+    monument = _compile("Forsaken Monument").semantics
+    rock = CardSemantics(
+        oracle_id="oracle:colorless-rock",
+        name="Rock",
+        types=["Artifact"],
+        abilities=[],
+        coverage=SemanticCoverage.COMPLETE,
+        mana_cost=ManaAmount(),
+        mana_value=0,
+    )
+    colored = CardSemantics(
+        oracle_id="oracle:blue-rock",
+        name="Blue Rock",
+        types=["Artifact"],
+        colors=["U"],
+        abilities=[],
+        coverage=SemanticCoverage.COMPLETE,
+        mana_cost=ManaAmount(),
+        mana_value=0,
+    )
+    ex = Executor(
+        {monument.oracle_id: monument, rock.oracle_id: rock, colored.oracle_id: colored}
+    )
+    state = GameState(
+        permanents={
+            "m": Permanent(
+                object_id="m",
+                oracle_id=monument.oracle_id,
+                name=monument.name,
+                is_artifact=True,
+            ),
+            "r": Permanent(
+                object_id="r",
+                oracle_id=rock.oracle_id,
+                name="Rock",
+                zone=Zone.HAND,
+                is_artifact=True,
+            ),
+            "c": Permanent(
+                object_id="c",
+                oracle_id=colored.oracle_id,
+                name="Blue Rock",
+                zone=Zone.HAND,
+                is_artifact=True,
+                colors=["U"],
+            ),
+        },
+        mana=ManaAmount(),
+        life_you=20,
+    )
+    assert ex.cast_from_hand(state, ActionStep(op="cast_from_hand", actor="r")) is None
+    assert state.pending_triggers
+    assert ex.resolve_trigger(state, ActionStep(op="resolve_trigger")) is None
+    assert state.life_you == 22
+    assert ex.cast_from_hand(state, ActionStep(op="cast_from_hand", actor="c")) is None
+    assert state.pending_triggers == []
+    assert state.life_you == 22
+
+
+def test_vivi_noncreature_p1p1_and_damage():
+    vivi = _compile("Vivi Ornitier").semantics
+    rock = CardSemantics(
+        oracle_id="oracle:rock2",
+        name="Rock",
+        types=["Artifact"],
+        abilities=[],
+        coverage=SemanticCoverage.COMPLETE,
+        mana_cost=ManaAmount(),
+        mana_value=0,
+    )
+    ex = Executor({vivi.oracle_id: vivi, rock.oracle_id: rock})
+    state = GameState(
+        permanents={
+            "v": Permanent(
+                object_id="v",
+                oracle_id=vivi.oracle_id,
+                name=vivi.name,
+                is_creature=True,
+                power=0,
+                toughness=3,
+            ),
+            "r": Permanent(
+                object_id="r",
+                oracle_id=rock.oracle_id,
+                name="Rock",
+                zone=Zone.HAND,
+                is_artifact=True,
+            ),
+        },
+        mana=ManaAmount(),
+        life_opponent=40,
+    )
+    assert ex.cast_from_hand(state, ActionStep(op="cast_from_hand", actor="r")) is None
+    assert ex.resolve_trigger(state, ActionStep(op="resolve_trigger")) is None
+    assert state.permanents["v"].counters.get("p1p1", 0) == 1
+    assert state.life_opponent == 39
+
+
 def test_cast_trigger_wrong_wording_stays_unsupported():
     report = compile_oracle_text(
         oracle_id="oracle:fake-cast",
