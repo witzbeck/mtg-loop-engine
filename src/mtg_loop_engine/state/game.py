@@ -97,6 +97,7 @@ class GameState:
     event_counters: dict[str, int] = field(default_factory=dict)
     pending_triggers: list[dict[str, Any]] = field(default_factory=list)
     _token_seq: int = 0
+    last_sacrificed_power: int = 0
 
     @classmethod
     def from_spec(cls, spec: InitialStateSpec) -> GameState:
@@ -142,6 +143,7 @@ class GameState:
             event_counters=dict(self.event_counters),
             pending_triggers=deepcopy(self.pending_triggers),
             _token_seq=self._token_seq,
+            last_sacrificed_power=self.last_sacrificed_power,
         )
 
     def bump(self, key: str, n: int = 1) -> None:

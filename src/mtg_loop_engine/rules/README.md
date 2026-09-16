@@ -52,6 +52,7 @@ graph TB;
 - Mana scales: `CONTROLLED_SWAMPS`, `GREATEST_POWER_CONTROLLED`, `GREATEST_TOUGHNESS_OTHER`, `CARDS_DRAWN_THIS_TURN`, `GREATEST_POWER_ENTERED_THIS_TURN`; `Permanent.entered_this_turn` set on ETB.
 - CAST trigger filters `cast_creature` / `cast_noncreature` / `cast_colorless` / `cast_red` / `cast_artifact`; intervening-if `fewer_than_three_p1p1` (Steam-Kin).
 - `DealDamageEffect.equal_to_source_power` / `equal_to_devotion`; `LoseLifeEffect.equal_to_devotion` + following gain; `DrawEffect.equal_to_controlled_artifacts`; generalized `_devotion` for card mana costs (distinct from `DEVOTION_GREEN` activated-cost scale).
+- Sac outlets: clear fodder `target` after sacrifice so damage defaults to opponent; `MillEffect.amount_from_sacrificed_power` via `GameState.last_sacrificed_power`.
 - `activate_granted_tap_bounce` / `seed_grant_tap_bounce`: Instant grant `{T}`: bounce nonland (`Permanent.tap_bounce_nonland`, witness-persistent).
 - BF tapped→untapped via `_untap_permanent` queues `TriggerEvent.UNTAP` (Mesmeric Orb); self-mill bumps `events.mill` only.
 - Summoning sickness blocks `{T}` / `TapCost` even on mana abilities (CR 302.6); haste not modeled.

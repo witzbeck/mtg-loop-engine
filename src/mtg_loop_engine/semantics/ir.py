@@ -217,6 +217,7 @@ class DealDamageEffect(BaseModel):
     equal_to_source_power: bool = False
     # Fanatic of Mogis: damage = devotion to a color.
     equal_to_devotion: Literal[None, "white", "blue", "black", "red", "green"] = None
+    equal_to_sacrificed_power: bool = False
 
 
 class GainLifeEffect(BaseModel):
@@ -252,6 +253,8 @@ class MillEffect(BaseModel):
     who: Literal["opponent", "you"] = "opponent"
     # Traumatize / Fleet Swallower: mill ⌊/⌈ half library⌋ instead of fixed amount.
     half_library: Literal[None, "up", "down"] = None
+    # Altar of Dementia: mill = sacrificed creature's power.
+    amount_from_sacrificed_power: bool = False
 
 
 class MoveToZoneEffect(BaseModel):

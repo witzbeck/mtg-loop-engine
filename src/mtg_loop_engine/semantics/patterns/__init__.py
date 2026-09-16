@@ -2063,6 +2063,89 @@ def _parse_count_word(raw: str) -> int | None:
 
 
 
+
+def pat_sac_outlet_payoffs(text: str, name: str) -> Ability | None:
+    """E16: sac outlet → damage / mill / mana / draw."""
+    cleaned = _strip_ability_word(text)
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", cleaned).strip()
+    short = name.split(",")[0].strip()
+    name_alt = "|".join(re.escape(n) for n in dict.fromkeys([name, short, "this creature", "this artifact", "this enchantment", "~"]))
+
+    m = re.match(
+        rf"^Sacrifice a creature: (?:{name_alt}) deals (\d+) damage to any target\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return ActivatedAbility(
+            ability_id=_ability_id("sac-dmg", text),
+            costs=[SacrificeCost(selector="creature_controlled")],
+            effects=[DealDamageEffect(amount=int(m.group(1)), target="any_target")],
+            uses_stack=True,
+            is_mana_ability=False,
+        )
+
+    m = re.match(
+        r"^\{T\}, Sacrifice a creature: (?:"
+        + name_alt
+        + r") deals (\d+) damage to any target\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return ActivatedAbility(
+            ability_id=_ability_id("tap-sac-dmg", text),
+            costs=[TapCost(), SacrificeCost(selector="creature_controlled")],
+            effects=[DealDamageEffect(amount=int(m.group(1)), target="any_target")],
+            uses_stack=True,
+            is_mana_ability=False,
+        )
+
+    m = re.match(
+        r"^Sacrifice a creature: Target player mills cards equal to the sacrificed creature's power\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return ActivatedAbility(
+            ability_id=_ability_id("sac-mill-power", text),
+            costs=[SacrificeCost(selector="creature_controlled")],
+            effects=[MillEffect(who="opponent", amount_from_sacrificed_power=True)],
+            uses_stack=True,
+            is_mana_ability=False,
+        )
+
+    m = re.match(
+        rf"^Sacrifice (?:this creature|{name_alt}): Add ((?:\{{[^}}]+\}})+)\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return ActivatedAbility(
+            ability_id=_ability_id("sac-self-mana", text),
+            costs=[SacrificeCost(selector="self")],
+            effects=[AddManaEffect(amount=_parse_mana_braces(m.group(1)))],
+            is_mana_ability=True,
+            uses_stack=False,
+        )
+
+    m = re.match(
+        r"^\{T\}, Sacrifice another black creature: Draw a card\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return ActivatedAbility(
+            ability_id=_ability_id("tap-sac-black-draw", text),
+            costs=[TapCost(), SacrificeCost(selector="creature_controlled")],
+            effects=[DrawEffect(amount=1)],
+            uses_stack=True,
+            is_mana_ability=False,
+        )
+
+    return None
+
+
 def pat_dies_trigger_payoffs(text: str, name: str) -> Ability | None:
     """E14: dies → treasure / untap / spirit / drain."""
     cleaned = _strip_ability_word(text)
@@ -3193,6 +3276,7 @@ PATTERNS: list[Pattern] = [
     Pattern("mana_create_token", pat_mana_create_token),
     Pattern("hybrid_remove_m1m1_pump", pat_hybrid_remove_m1m1_pump),
     Pattern("tap_two_creatures_add_mana", pat_tap_two_creatures_add_mana),
+    Pattern("sac_outlet_payoffs", pat_sac_outlet_payoffs),
     Pattern("dies_trigger_payoffs", pat_dies_trigger_payoffs),
     Pattern("self_etb_scaled", pat_self_etb_scaled),
     Pattern("cast_trigger_effects", pat_cast_trigger_effects),

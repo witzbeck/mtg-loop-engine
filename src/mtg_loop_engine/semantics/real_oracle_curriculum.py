@@ -1424,4 +1424,50 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{1}{B}{B}",
         mana_value=3,
     ),
+    # M5 E16 — sac-outlet payoffs
+    "Goblin Bombardment": RealOracleCurriculum(
+        name="Goblin Bombardment",
+        types=["Enchantment"],
+        oracle_text="Sacrifice a creature: This enchantment deals 1 damage to any target.",
+        notes="E16: sac → 1 damage.",
+        colors=("R",),
+        mana_cost="{1}{R}",
+        mana_value=2,
+    ),
+    "Blasting Station": RealOracleCurriculum(
+        name="Blasting Station",
+        types=["Artifact"],
+        oracle_text="{T}, Sacrifice a creature: This artifact deals 1 damage to any target.",
+        notes="E16: tap+sac → 1 damage.",
+        mana_cost="{3}",
+        mana_value=3,
+    ),
+    "Altar of Dementia": RealOracleCurriculum(
+        name="Altar of Dementia",
+        types=["Artifact"],
+        oracle_text=(
+            "Sacrifice a creature: Target player mills cards equal to the sacrificed "
+            "creature's power."
+        ),
+        notes="E16: sac → mill = power.",
+        mana_cost="{2}",
+        mana_value=2,
+    ),
+    "Composite Golem": RealOracleCurriculum(
+        name="Composite Golem",
+        types=["Artifact", "Creature", "Golem"],
+        oracle_text="Sacrifice this creature: Add {W}{U}{B}{R}{G}.",
+        notes="E16: sac-self → rainbow mana.",
+        mana_cost="{6}",
+        mana_value=6,
+    ),
+    "Ayara, First of Locthwain": RealOracleCurriculum(
+        name="Ayara, First of Locthwain",
+        types=["Legendary", "Creature", "Elf", "Noble"],
+        oracle_text="{T}, Sacrifice another black creature: Draw a card.",
+        notes="E16: tap+sac → draw (black filter soft).",
+        colors=("B",),
+        mana_cost="{B}{B}{B}",
+        mana_value=3,
+    ),
 }
