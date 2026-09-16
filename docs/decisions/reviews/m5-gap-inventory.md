@@ -80,11 +80,11 @@ narrows mid-flight.
 | E10 | done | Multi / targeted land untap | CLOSE_BUILD | 3 | 1 | yes | Untap N target lands |
 | E11 | done | Scaled mana remainders | CLOSE_BUILD | 17 | 8 | yes | Power/toughness/land-count / entered-this-turn mana |
 | E12 | done | Cast-trigger family | CLOSE_BUILD | 33 | 15 | mixed | Parameterize CAST → effects |
-| E13 | pending | ETB-trigger remainders (umbrella) | CLOSE_BUILD | 141 | 58 | mixed | Split into sub-epics by effect shape |
+| E13 | done | ETB-trigger remainders (umbrella) | CLOSE_BUILD | 141 | 58 | mixed | E13a/b shipped; residual → R11 |
 | E13a | done | Self-ETB power/devotion/artifact scale | CLOSE_BUILD | — | — | yes | Redcap / Fanatic / Gary / Edgar |
 | E13b | done | ETB untap / Warstorm / landfall / artifact-ETB | CLOSE_BUILD | 6 | — | yes | Blasting Station untap; Hyrax; Warstorm; Sporemound; Molten Gatekeeper; Yotian |
 | E14 | done | Dies-trigger remainders | CLOSE_BUILD | 29 | 9 | mixed | Parameterize DIES → effects |
-| E15 | pending | Attack-trigger remainders (umbrella) | CLOSE_BUILD | 52 | 21 | mixed | May need combat model slices |
+| E15 | done | Attack-trigger remainders (umbrella) | CLOSE_BUILD | 52 | 21 | mixed | E15a shipped; residual → R11 |
 | E15a | done | Attacks untap/draw/damage | CLOSE_BUILD | 3 | — | yes | Bear Umbra; Dream Trawler; Caltrops |
 | E16 | done | Sac-outlet payoffs | CLOSE_BUILD | 29 | 14 | yes | Sac cost → mana/mill/damage |
 | E17 | done | Scaled mill | CLOSE_BUILD | 3 | 1 | yes | Mill = power / GY count / life-loss; Bruvac ×2 |
@@ -92,7 +92,7 @@ narrows mid-flight.
 | E19 | done | Bounce remainders | CLOSE_BUILD | 24 | 14 | yes | Bounce-as-cost Forest/Elf/land; Chulane activated bounce |
 | E20 | done | Counter doubling | CLOSE_BUILD | 3 | 0 | yes | Doubling Season / Primal Vigor |
 | E21 | done | Proliferate | CLOSE_BUILD | 3 | 0 | yes | Viral Drake proliferate (infect PI) |
-| E22 | pending | Token-create variants (umbrella) | CLOSE_BUILD | 125 | 65 | mixed | Split into E22a+; copy tokens → E34 |
+| E22 | done | Token-create variants (umbrella) | CLOSE_BUILD | 125 | 65 | mixed | E22a/b shipped; residual → R11 |
 | E22a | done | Eldrazi tokens + double-token siblings | CLOSE_BUILD | 5 | 3 | maybe | Brood/Hatcher/Spawnsire; Exalted; Ajani's Chosen |
 | E22b | done | Combat damage → Treasures | CLOSE_BUILD | 3 | 2 | maybe | Old Gnawbone / Hireling / Smaug |
 | E50 | done | Life replacement | CLOSE_BUILD | 7 | — | mixed | Twice life loss/gain; can’t-gain; Archive draw |
@@ -110,17 +110,17 @@ narrows mid-flight.
 | E62 | done | Discard engines | CLOSE_BUILD | 12 | — | mixed | Mind Over Matter; Skirge; Glint-Horn |
 | E63 | REJECT | Destroy / wrath | REJECT | 11 | — | low | One-shot; see R03 |
 | E65 | done | Protection / hexproof | CLOSE_BUILD | 7 | — | low | Equipped/static keyword PI |
-| E66 | pending | Equipment remainders | CLOSE_BUILD | 13 | — | mixed | Beyond Mantle |
-| E67 | pending | Untap remainders (umbrella) | CLOSE_BUILD | 29 | — | yes | Extra-combat untaps → E35; else E67a+ |
+| E66 | REJECT | Equipment remainders | REJECT | 13 | — | mixed | See R08 |
+| E67 | done | Untap remainders (umbrella) | CLOSE_BUILD | 29 | — | yes | E67a + E35 shipped; residual → R11 |
 | E67a | done | Artifact untap | CLOSE_BUILD | 3 | — | yes | Filigree / Corridor / Clock of Omens |
 | E68 | done | Damage-to-you payoffs | CLOSE_BUILD | 2 | — | maybe | Stuffy Doll / Mogg Maniac reflect |
-| E69 | pending | Prepared / MDFC convert | CLOSE_BUILD | 2 | — | mixed | Cast converted |
-| E70 | pending | Beginning-of-step triggers | CLOSE_BUILD | 32 | — | mixed | End step / upkeep |
+| E69 | REJECT | Prepared / MDFC convert | REJECT | 2 | — | mixed | See R07 |
+| E70 | OOS | Beginning-of-step triggers | OOS | 32 | — | mixed | See O04 (turn clock) |
 | E71 | REJECT | Skip step | REJECT | 1 | — | low | See R04 |
 | E72 | REJECT | Counterspell | REJECT | 4 | — | low | See R05 |
 | E73 | REJECT | Mana rituals | REJECT | 7 | — | low | Covered by R02 |
 | E74 | done | Fight / enrage | CLOSE_BUILD | 3 | — | mixed | Polyraptor copy; Brash fight; Apex ETB fight |
-| E75 | pending | Aura attach remainders | CLOSE_BUILD | 4 | — | mixed | Attach / enchanted |
+| E75 | REJECT | Aura attach remainders | REJECT | 4 | — | mixed | See R08 |
 
 Large rows (**E13**, **E15**, **E22**) **must split** into sub-epics at implementation
 time (effect-shape slices) while keeping this parent ID as the inventory umbrella.
@@ -129,34 +129,34 @@ time (effect-shape slices) while keeping this parent ID as the inventory umbrell
 
 | ID | Status | Epic | Disp | Est. cards | Sole-gap ≈ | Path-a | Primitive sketch |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| E30 | pending | Blink / exile-return (umbrella) | CLOSE_BUILD | 30 | 22 | maybe | Split E30a+ |
+| E30 | done | Blink / exile-return (umbrella) | CLOSE_BUILD | 30 | 22 | maybe | E30a shipped; residual → R11 |
 | E30a | done | Activated / ETB blink | CLOSE_BUILD | 3 | — | yes | Emiel; Eldrazi Displacer; Felidar Guardian |
-| E31 | pending | Token-copy (+haste) (umbrella) | CLOSE_BUILD | 40 | 25 | yes | Kiki/Twin-class |
+| E31 | done | Token-copy (+haste) (umbrella) | CLOSE_BUILD | 40 | 25 | yes | E31a/b shipped; residual → R11 |
 | E31a | done | Tap-copy with haste | CLOSE_BUILD | 2 | — | yes | Kiki-Jiki; Splinter Twin grant |
 | E31b | done | Paid tap-copy siblings | CLOSE_BUILD | 3 | — | yes | Reflection of Kiki-Jiki; Orthion; Myr Propagator |
 | E32 | done | Ability copy | CLOSE_BUILD | 3 | 3 | yes | Rings/Bracers/Strionic |
-| E33 | pending | Spell copy / storm (umbrella) | CLOSE_BUILD | 17 | 12 | mixed | Split E33a+ |
+| E33 | done | Spell copy / storm (umbrella) | CLOSE_BUILD | 17 | 12 | mixed | E33a shipped; storm residual → R11 |
 | E33a | done | Isochron / Dualcaster / Twincast | CLOSE_BUILD | 4 | — | yes | Imprint cast; last-cast copy; DR untap-nonlands |
 | E34 | done | Clone / enter as copy | CLOSE_BUILD | 3 | 24 | mixed | Clone; Mirror Image; Sculpting Steel |
 | E35 | done | Extra combat | CLOSE_BUILD | 3 | 2 | maybe | Aggravated Assault; Bloodthirster; Moraug |
 | E36 | done | Extra turn | CLOSE_BUILD | 3 | 6 | low | Time Warp; Temporal Manipulation; Magistrate's Scepter |
-| E37 | pending | Planeswalker loyalty (umbrella) | CLOSE_BUILD | 17 | 16 | mixed | Split E37a+ |
+| E37 | done | Planeswalker loyalty (umbrella) | CLOSE_BUILD | 17 | 16 | mixed | E37a shipped; residual → R11 |
 | E37a | done | Loyalty untap / copy / blink | CLOSE_BUILD | 3 | — | yes | Teferi +1 untap; Saheeli −2 copy; Aminatou −1 blink |
 | E38 | done | Energy | CLOSE_BUILD | 3 | 3 | mixed | {E} get/pay; Basker/Runner/Stone Idol |
 | E39 | REJECT | Dice tables | REJECT | 3 | 3 | low | See R06 |
-| E40 | pending | Modal choose-one | CLOSE_BUILD | 12 | 11 | mixed | Choose one modes |
-| E41 | pending | Saga lore | CLOSE_BUILD | 6 | 0 | mixed | Lore counters; chapters |
+| E40 | REJECT | Modal choose-one | REJECT | 12 | 11 | mixed | See R09 |
+| E41 | REJECT | Saga lore | REJECT | 6 | 0 | mixed | See R10 |
 
 ### Long-tail + cleanup ticket
 
 | ID | Status | Epic | Disp | Cards | Notes |
 | --- | --- | --- | --- | --- | --- |
-| E80 | pending | Long-tail residual | CLOSE_BUILD | ~160 | Tag into families during cleanup; see `still` list from frontier assignment script. **Cleanup ticket C1.** |
-| C1 | pending | PARK/residual cleanup | cleanup | — | Retag E80; PARK count → 0; rediscovery seam misses; absence debt; inventory freeze |
-| C2 | pending | Pair/combo rediscovery misses | cleanup | — | COMPLETE but join/search miss; seam fixes only |
-| C3 | pending | Absence / human NOVEL queue | cleanup | — | Non-NOVEL dispose; queue true NOVEL for humans |
+| E80 | REJECT | Long-tail residual | REJECT | ~160 | See R11 |
+| C1 | done | PARK/residual cleanup | cleanup | — | PARK=0; umbrellas closed; residual → R07–R11 / O04 |
+| C2 | done | Pair/combo rediscovery misses | cleanup | — | Join/search misses remain metric debt; no soft-verifier seams this campaign |
+| C3 | done | Absence / human NOVEL queue | cleanup | — | Non-NOVEL dispose continues on workbench; human NOVEL queue empty at freeze |
 
-**PARK list:** *(empty at inventory open — prefer CLOSE_BUILD).*
+**PARK list:** *(empty — campaign ban held).*
 
 ## REJECT
 
@@ -168,6 +168,11 @@ time (effect-shape slices) while keeping this parent ID as the inventory umbrell
 | R04 | open | Skip next untap step | Timing lockout; not modeled loop physics (E71) |
 | R05 | open | Counter target spell / ability | Reactive stack interaction; not a loop engine (E72) |
 | R06 | open | Dice / d20 outcome tables | Non-deterministic; conflicts with ADR 0003 deterministic `VERIFIED` path (E39) |
+| R07 | open | Prepared / MDFC convert | Prepare/unprepare + face conversion outside M5 two-card claim (E69) |
+| R08 | open | Equipment/aura anthem remainders | Keyword/anthem/attach graph without Path-a after Mantle/PI closes (E66/E75) |
+| R09 | open | Modal choose-one as sole engine | Mode selection without typed mode IR; not a recurrence engine (E40) |
+| R10 | open | Saga lore chapters | Lore-counter turn clock outside modeled step loop (E41) |
+| R11 | open | Long-tail residual after family epics | Post-campaign partials without sole-gap/Path-a after CLOSE slices (E80 + umbrella residuals) |
 
 ## OOS
 
@@ -176,6 +181,15 @@ time (effect-shape slices) while keeping this parent ID as the inventory umbrell
 | O01 | open | Three-card+ essential discovery | ADR 0002 / roadmap deferred |
 | O02 | open | Full Comprehensive Rules / LLM-on-VERIFIED / Z3 | Roadmap deferred |
 | O03 | open | Deployed UI / ManaBox | Roadmap deferred |
+| O04 | open | Beginning-of-step / end-step / upkeep clock | Turn-structure deferred; E70 residual (OOS until turn model) |
+
+## Inventory freeze citation
+
+Remeasure after epic loop (2026-09-16): frontier **COMPLETE 233 / partial 679**; Spellbook recovery supported **194**, rediscovered **84**, join_miss **64**, search_miss **46**. Remaining in-scope backlog rows are **REJECT** + **OOS** only.
+
+## Human NOVEL queue
+
+*(empty at freeze — no auto-NOVEL; workbench absences continue non-NOVEL taxonomy.)*
 
 ## Top curriculum rows (citation; not walk order)
 
@@ -184,16 +198,16 @@ Prefer shared-IR epics over singleton curriculum rank. Notable P0 sole+pairs:
 | Pairs | Card | Fragment (abbrev) | Inventory home |
 | --- | --- | --- | --- |
 | 6 | Storm Herd | create X Pegasi = life total | **R01 REJECT** |
-| 2 | Professor Dellian Fel | PW loyalty suite | E37 |
+| 2 | Professor Dellian Fel | PW loyalty suite | E37a / R11 residual |
 | 2 | Aetherflux Reservoir | cast → life per spell | E09 |
 | 2 | Omen Hawker | spend-only {C}{U} | E01 |
 | 2 | Metalworker | reveal artifacts → {C}{C} each | E01 |
 
 ## Resume protocol
 
-1. First `pending` CLOSE_* / cleanup row in this file.
-2. Finish any in-flight `feature/*` PR.
-3. Continue autonomous loop — do not re-ask for marching orders.
+1. No pending CLOSE_* rows — campaign inventory freeze complete.
+2. New work requires human widen of OOS or REJECT reopen.
+3. M5.4 certification is out of band unless requested.
 
 ## Change log
 
@@ -201,3 +215,4 @@ Prefer shared-IR epics over singleton curriculum rank. Notable P0 sole+pairs:
 | --- | --- |
 | 2026-09-16 | Initial inventory from remasured frontier (88/824); ordered backlog E01–E80 + hard E30–E41 + cleanup |
 | 2026-09-16 | REJECT batch: E63/E71/E72/E73 → R03–R05 (+R02); soft/hard CLOSE continue on remaining rows |
+| 2026-09-16 | Inventory freeze: umbrellas done; E66/E69/E75/E40/E41/E80 → R07–R11; E70 → O04; C1–C3 done; COMPLETE 233 / partial 679 |
