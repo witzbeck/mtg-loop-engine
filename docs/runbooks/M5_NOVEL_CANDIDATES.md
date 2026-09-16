@@ -127,8 +127,10 @@ uv run python scripts/spellbook_absent_discovery.py
     Anointed Procession `ReplacementDoubleTokens`.
 37. **E04–E05 draw triggers + Curiosity** ✓ — `TriggerEvent.DRAW` effect family; Curiosity auras on
     `DAMAGE_OPPONENT`.
-38. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-39. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+38. **E06–E07 grants + Krenko** ✓ — `GrantActivatedAbility` (Cryptolith/Basal/Mentor); Krenko
+    `{T}` X=Goblins + Intruder Alarm rediscovery.
+39. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+40. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 
