@@ -125,8 +125,10 @@ uv run python scripts/spellbook_absent_discovery.py
     Omen Hawker spend-only activate pool; Supportive Parents tap-two; Staff/Freed rediscovery.
 36. **E02–E03 reflect + token×2** ✓ — `TriggerEvent.DEALT_DAMAGE` reflect family; Parallel Lives /
     Anointed Procession `ReplacementDoubleTokens`.
-37. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-38. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+37. **E04–E05 draw triggers + Curiosity** ✓ — `TriggerEvent.DRAW` effect family; Curiosity auras on
+    `DAMAGE_OPPONENT`.
+38. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+39. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 

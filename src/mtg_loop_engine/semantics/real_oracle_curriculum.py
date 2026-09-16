@@ -945,4 +945,95 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{3}{W}",
         mana_value=4,
     ),
+    # M5 E04 — draw triggers
+    "Niv-Mizzet, the Firemind": RealOracleCurriculum(
+        name="Niv-Mizzet, the Firemind",
+        types=["Creature", "Dragon", "Wizard"],
+        oracle_text=(
+            "Flying\n"
+            "Whenever you draw a card, Niv-Mizzet deals 1 damage to any target."
+        ),
+        notes="E04: DRAW → damage.",
+        colors=("U", "R"),
+        mana_cost="{2}{U}{U}{R}{R}",
+        mana_value=6,
+    ),
+    "Psychosis Crawler": RealOracleCurriculum(
+        name="Psychosis Crawler",
+        types=["Artifact", "Creature", "Phyrexian", "Horror"],
+        oracle_text="Whenever you draw a card, each opponent loses 1 life.",
+        notes="E04: DRAW → lose life (P/T-set clause deferred).",
+        mana_cost="{5}",
+        mana_value=5,
+    ),
+    "Horizon Chimera": RealOracleCurriculum(
+        name="Horizon Chimera",
+        types=["Creature", "Chimera"],
+        oracle_text=(
+            "Flash\n"
+            "Flying, trample\n"
+            "Whenever you draw a card, you gain 1 life."
+        ),
+        notes="E04: DRAW → gain life.",
+        colors=("G", "U"),
+        mana_cost="{2}{G}{U}",
+        mana_value=4,
+    ),
+    "Queza, Augur of Agonies": RealOracleCurriculum(
+        name="Queza, Augur of Agonies",
+        types=["Creature", "Cephalid", "Cleric"],
+        oracle_text=(
+            "Whenever you draw a card, target opponent loses 1 life and you gain 1 life."
+        ),
+        notes="E04: DRAW → drain.",
+        colors=("W", "U", "B"),
+        mana_cost="{1}{W}{U}{B}",
+        mana_value=4,
+    ),
+    "Psychic Corrosion": RealOracleCurriculum(
+        name="Psychic Corrosion",
+        types=["Enchantment"],
+        oracle_text="Whenever you draw a card, each opponent mills two cards.",
+        notes="E04: DRAW → mill.",
+        colors=("U",),
+        mana_cost="{2}{U}",
+        mana_value=3,
+    ),
+    # M5 E05 — Curiosity auras
+    "Curiosity": RealOracleCurriculum(
+        name="Curiosity",
+        types=["Enchantment", "Aura"],
+        oracle_text=(
+            "Enchant creature\n"
+            "Whenever enchanted creature deals damage to an opponent, you may draw a card."
+        ),
+        notes="E05: DAMAGE_OPPONENT → may draw.",
+        colors=("U",),
+        mana_cost="{U}",
+        mana_value=1,
+    ),
+    "Keen Sense": RealOracleCurriculum(
+        name="Keen Sense",
+        types=["Enchantment", "Aura"],
+        oracle_text=(
+            "Enchant creature\n"
+            "Whenever enchanted creature deals damage to an opponent, you may draw a card."
+        ),
+        notes="E05: Curiosity reprint text.",
+        colors=("G",),
+        mana_cost="{G}",
+        mana_value=1,
+    ),
+    "Ophidian Eye": RealOracleCurriculum(
+        name="Ophidian Eye",
+        types=["Enchantment", "Aura"],
+        oracle_text=(
+            "Enchant creature\n"
+            "Whenever enchanted creature deals damage to an opponent, you may draw a card."
+        ),
+        notes="E05: Curiosity reprint text.",
+        colors=("U",),
+        mana_cost="{2}{U}",
+        mana_value=3,
+    ),
 }
