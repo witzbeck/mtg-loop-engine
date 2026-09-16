@@ -946,9 +946,20 @@ class Executor:
 
         if isinstance(effect, MillEffect):
             qty = effect.amount
+            if effect.half_library is not None:
+                lib = (
+                    state.library_opponent
+                    if effect.who == "opponent"
+                    else state.library_you
+                )
+                if effect.half_library == "up":
+                    qty = (lib + 1) // 2
+                else:
+                    qty = lib // 2
             if qty <= 0:
-                return ExecError(VerificationStatus.ILLEGAL_ACTION, "mill amount")
+                return None
             if effect.who == "opponent":
+                state.library_opponent = max(0, state.library_opponent - qty)
                 state.bump("mill", qty)
                 for _ in range(qty):
                     self._queue_triggers(
@@ -957,7 +968,7 @@ class Executor:
                         source,
                     )
             else:
-                # Self-mill: count only (no library model) — Mesmeric Orb class.
+                state.library_you = max(0, state.library_you - qty)
                 state.bump("mill", qty)
             return None
 

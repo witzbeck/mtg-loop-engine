@@ -124,6 +124,7 @@ class TriggerEvent(StrEnum):
     DEALT_DAMAGE = "dealt_damage"
     DRAW = "draw"
     DAMAGE_OPPONENT = "damage_opponent"
+    ATTACKS = "attacks"
 
 
 class ChoiceController(StrEnum):

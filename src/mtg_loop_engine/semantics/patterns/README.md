@@ -67,6 +67,7 @@ graph TB;
 - `counters_put_damage_opponent` — Shalai; COUNTER_ADDED on controlled creature → that-much damage (`amount_from_trigger`).
 - `cast_bounce_target_permanent` — Tidespout; CAST → bounce target permanent.
 - `etb_if_cast_half_life_drain` — Shard; ETB + `intervening_if=cast` → half-life lose + gain that much.
+- `attacks_half_mill` / `spell_half_mill` — Traumatize / Fleet Swallower; mill ⌊/⌈ half library⌋.
 - `etb_or_attacks_create_token` — Squirrel Girl; ETB create (attacks not modeled).
 - `mana_create_tokens_equal_subtype` — Squirrel Girl; `{cost}: Create X` equal to controlled subtype count.
 - Wirewood Channeler matches scaled `BATTLEFIELD_ELF` any-color (slice-9 sibling).

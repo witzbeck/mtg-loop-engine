@@ -28,7 +28,9 @@ graph TB;
 
 ## Responsibilities
 
-- Represent permanents, mana pools, life, pending triggers, and event counters needed by the modeled rules surface.
+- Represent permanents, mana pools, life, synthetic library sizes (`library_you` /
+  `library_opponent` for half-library mill), pending triggers, and event counters
+  needed by the modeled rules surface.
 - Track `damage_marked`, `lifelink`, `undying`, and `tap_bounce_nonland` on `Permanent` for SBA / keyword / Instant-grant physics (rules executor).
 - Provide `from_spec`, `copy`, and `get_path` for recurrence.
 - Own the allowed `LoopRelevantState` path grammar (`paths.py` / `is_valid_state_path`) matching `get_path`:

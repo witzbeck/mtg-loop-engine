@@ -2040,6 +2040,56 @@ def pat_cast_from_gy_if_zombie(text: str, name: str) -> Ability | None:
 
 
 
+
+def pat_attacks_half_mill(text: str, name: str) -> Ability | None:
+    """Fleet Swallower / Terisian: attacks → mill half library."""
+    short = name.split(",")[0].strip()
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^Whenever (?:{name_alt}|this creature) attacks, "
+        rf"(?:target player|defending player) mills half their library, "
+        rf"rounded (up|down)\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("attacks-half-mill", text),
+        event=TriggerEvent.ATTACKS,
+        filter="self",
+        effects=[
+            MillEffect(who="opponent", half_library=m.group(1).lower())  # type: ignore[arg-type]
+        ],
+    )
+
+
+def pat_spell_half_mill(text: str, name: str) -> Ability | None:
+    """Traumatize-class spell text compiled as a once-style activated stand-in is out of scope;
+    match only the mill clause for permanent-attached wordings / curriculum sorcery bodies.
+    """
+    m = re.match(
+        r"^(?:Target player|Target opponent) mills half their library, rounded (up|down)\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    # Model as activated {0} for curriculum COMPLETE of the mill clause alone.
+    return ActivatedAbility(
+        ability_id=_ability_id("half-mill", text),
+        costs=[],
+        effects=[
+            MillEffect(who="opponent", half_library=m.group(1).lower())  # type: ignore[arg-type]
+        ],
+        uses_stack=True,
+        is_mana_ability=False,
+        once_per_turn=True,
+    )
+
+
 def pat_grant_activated(text: str, name: str) -> Ability | None:
     """Cryptolith Rite / Basal Sliver / Resplendent Mentor grants."""
     m = re.match(
@@ -2540,6 +2590,8 @@ PATTERNS: list[Pattern] = [
     Pattern("mana_create_token", pat_mana_create_token),
     Pattern("hybrid_remove_m1m1_pump", pat_hybrid_remove_m1m1_pump),
     Pattern("tap_two_creatures_add_mana", pat_tap_two_creatures_add_mana),
+    Pattern("attacks_half_mill", pat_attacks_half_mill),
+    Pattern("spell_half_mill", pat_spell_half_mill),
     Pattern("grant_activated", pat_grant_activated),
     Pattern("draw_trigger_effect", pat_draw_trigger_effect),
     Pattern("curiosity_draw", pat_curiosity_draw),
