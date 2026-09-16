@@ -743,6 +743,87 @@ def pat_sac_put_charge_target_artifact(text: str, name: str) -> Ability | None:
     )
 
 
+def pat_adapt(text: str, name: str) -> Ability | None:
+    """Adapt N: if no +1/+1 counters, put N +1/+1 counters."""
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
+    m = re.match(
+        r"^((?:\{[^}]+\})+): Adapt (\d+)\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("adapt", text),
+        costs=[ManaCost(amount=_parse_mana_braces(m.group(1)))],
+        effects=[
+            AddCounterEffect(
+                counter_type="p1p1",
+                quantity=int(m.group(2)),
+                target="self",
+                only_if_none=True,
+            )
+        ],
+    )
+
+
+def pat_p1p1_put_draw_discard(text: str, name: str) -> Ability | None:
+    """Benthic Biomancer: +1/+1 put on this → draw then discard."""
+    cleaned = _strip_ability_word(text)
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", cleaned).strip()
+    short = name.split(",")[0].strip()
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^Whenever one or more \+1/\+1 counters are put on (?:{name_alt}), "
+        rf"draw a card, then discard a card\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("p1p1-draw-discard", text),
+        event=TriggerEvent.COUNTER_ADDED,
+        filter="self",
+        effects=[DrawEffect(amount=1)],  # discard abstracted as hand_you later optional
+    )
+
+
+def pat_p1p1_put_create_eldrazi_spawn(text: str, name: str) -> Ability | None:
+    """Basking Broodscale: +1/+1 put → may create Eldrazi Spawn."""
+    cleaned = _strip_ability_word(text)
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", cleaned).strip()
+    short = name.split(",")[0].strip()
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^Whenever one or more \+1/\+1 counters are put on (?:{name_alt}), "
+        rf"you may create a 0/1 colorless Eldrazi Spawn creature token"
+        rf"(?: with .+)?\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("p1p1-eldrazi-spawn", text),
+        event=TriggerEvent.COUNTER_ADDED,
+        filter="self",
+        effects=[
+            CreateTokenEffect(
+                name="Eldrazi Spawn",
+                power=0,
+                toughness=1,
+                quantity=1,
+                is_creature=True,
+            )
+        ],
+    )
+
+
 def pat_discard_untap_target(text: str, name: str) -> Ability | None:
     """Mind Over Matter: Discard a card: may tap or untap target permanent."""
     cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", text.strip()).strip()
@@ -4543,6 +4624,9 @@ PATTERNS: list[Pattern] = [
     Pattern("untap_target_artifact", pat_untap_target_artifact),
     Pattern("etb_untap_artifact_or_creature", pat_etb_untap_artifact_or_creature),
     Pattern("discard_untap_target", pat_discard_untap_target),
+    Pattern("adapt", pat_adapt),
+    Pattern("p1p1_put_draw_discard", pat_p1p1_put_draw_discard),
+    Pattern("p1p1_put_create_eldrazi_spawn", pat_p1p1_put_create_eldrazi_spawn),
     Pattern("discard_add_mana", pat_discard_add_mana),
     Pattern("discard_trigger_damage", pat_discard_trigger_damage),
     Pattern("discard_draw", pat_discard_draw),

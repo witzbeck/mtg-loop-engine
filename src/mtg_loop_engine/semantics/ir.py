@@ -231,6 +231,8 @@ class AddCounterEffect(BaseModel):
     ] = "self"
     # When True, use the pending trigger's recorded amount (Sunbond / Light of Promise).
     amount_from_trigger: bool = False
+    # Adapt N: only put counters if the host currently has zero of this type.
+    only_if_none: bool = False
 
 
 class RemoveCounterEffect(BaseModel):
