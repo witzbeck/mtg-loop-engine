@@ -174,8 +174,9 @@ uv run python scripts/spellbook_absent_discovery.py
 72. **E59 buyback/kicker** ✓ — Buyback reminder split + PI; Searing Touch / Clockspinning / Sprout Swarm.
 73. **E32 ability copy** ✓ — Rings pay-{2}; Bracers free equipped; Strionic copy pending trigger.
 74. **E33a Isochron / spell copy** ✓ — Dramatic Reversal; Isochron imprint+cast; Dualcaster/Twincast last-cast copy.
-75. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-76. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+75. **E74 fight / enrage** ✓ — Polyraptor copy-token; Brash Taunter fight; Apex ETB fight.
+76. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+77. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 

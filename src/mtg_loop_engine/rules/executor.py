@@ -20,6 +20,7 @@ from mtg_loop_engine.semantics.ir import (
     CopyLastCastSpellEffect,
     DealDamageEffect,
     DrawEffect,
+    FightEffect,
     FreeCastCreaturesByManaValue,
     GainLifeEffect,
     GrantLifelinkEffect,
@@ -1305,6 +1306,39 @@ class Executor:
 
         if isinstance(effect, CopyLastCastSpellEffect):
             return self._copy_last_cast_spell(state, source, target_id=target_id)
+
+        if isinstance(effect, FightEffect):
+            if not target_id or target_id not in state.permanents:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET, "fight needs creature target"
+                )
+            other = state.permanents[target_id]
+            if other.zone != Zone.BATTLEFIELD or not other.is_creature:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "fight target must be a BF creature",
+                )
+            if effect.target == "another_creature" and other.object_id == source.object_id:
+                return ExecError(
+                    VerificationStatus.ILLEGAL_TARGET,
+                    "cannot fight self",
+                )
+            src_pwr = int(self._effective_power(state, source) or 0)
+            oth_pwr = int(self._effective_power(state, other) or 0)
+            if src_pwr > 0:
+                other.damage_marked += src_pwr
+                self._queue_triggers(
+                    state, TriggerEvent.DEALT_DAMAGE, other, amount=src_pwr
+                )
+                state.bump("damage", src_pwr)
+            if oth_pwr > 0:
+                source.damage_marked += oth_pwr
+                self._queue_triggers(
+                    state, TriggerEvent.DEALT_DAMAGE, source, amount=oth_pwr
+                )
+                state.bump("damage", oth_pwr)
+            state.bump("fight")
+            return None
 
         if isinstance(effect, DealDamageEffect):
             qty = effect.amount
