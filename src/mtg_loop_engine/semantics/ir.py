@@ -193,7 +193,7 @@ class ReturnToBattlefieldEffect(BaseModel):
 class DealDamageEffect(BaseModel):
     kind: Literal["deal_damage"] = "deal_damage"
     amount: int = 1
-    target: Literal["opponent", "any_target"] = "opponent"
+    target: Literal["opponent", "any_target", "each_player"] = "opponent"
     # When True, use the pending trigger's recorded amount (Shalai / "that much").
     amount_from_trigger: bool = False
 
@@ -378,6 +378,15 @@ class ReplacementMultiplyTapMana(BaseModel):
     supported: bool = True
 
 
+class ReplacementDoubleTokens(BaseModel):
+    """Parallel Lives / Anointed Procession: create twice as many tokens."""
+
+    kind: Literal["replacement_double_tokens"] = "replacement_double_tokens"
+    ability_id: str
+    multiplier: int = 2
+    supported: bool = True
+
+
 class FreeCastCreaturesByManaValue(BaseModel):
     """Aluren: cast creatures with mana value ≤ N without paying mana."""
 
@@ -412,6 +421,7 @@ Ability = Annotated[
     | ReplacementReduceM1M1Counters
     | ReplacementAmplifyP1P1Counters
     | ReplacementMultiplyTapMana
+    | ReplacementDoubleTokens
     | FreeCastCreaturesByManaValue
     | InstantGrantTapBounce
     | ProofIrrelevantStatic,

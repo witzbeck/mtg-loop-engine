@@ -33,6 +33,7 @@ from mtg_loop_engine.semantics.ir import (
     ReplacementAmplifyP1P1Counters,
     ReplacementExileInsteadOfGraveyard,
     ReplacementMultiplyTapMana,
+    ReplacementDoubleTokens,
     ReplacementReduceM1M1Counters,
     ReturnToBattlefieldEffect,
     SacrificeCost,
@@ -297,6 +298,19 @@ class Executor:
                     continue
                 bonus += ab.plus
         return quantity + bonus
+
+    def token_create_multiplier(self, state: GameState) -> int:
+        mult = 1
+        for perm in state.permanents.values():
+            if perm.zone != Zone.BATTLEFIELD or perm.controller != "you":
+                continue
+            card = self.semantics.get(perm.oracle_id)
+            if not card:
+                continue
+            for ab in card.abilities:
+                if isinstance(ab, ReplacementDoubleTokens):
+                    mult *= ab.multiplier
+        return mult
 
     def tap_mana_multiplier(self, state: GameState) -> int:
         """Product of active tap-mana multipliers (Mana Reflection / Nyxbloom class)."""
@@ -576,6 +590,7 @@ class Executor:
                     and p.is_creature
                     and subtype in self._creature_subtypes(p)
                 )
+            qty *= self.token_create_multiplier(state)
             if qty <= 0:
                 return None
             for _ in range(qty):
@@ -738,11 +753,8 @@ class Executor:
                         "damage amount_from_trigger needs trigger amount",
                     )
                 qty = trigger_amount
-            to_opponent = effect.target == "opponent" or (
-                effect.target == "any_target"
-                and target_id in (None, "opponent")
-            )
-            if to_opponent:
+            if effect.target == "each_player":
+                state.life_you -= qty
                 state.life_opponent -= qty
                 self._queue_triggers(
                     state,
@@ -750,24 +762,43 @@ class Executor:
                     source,
                     amount=qty,
                 )
-            elif effect.target == "any_target" and target_id is not None:
-                # CR 702.92 / Triskelion-class: any-target may include the source.
-                victim = state.permanents.get(target_id)
-                if (
-                    victim is None
-                    or victim.zone != Zone.BATTLEFIELD
-                    or not victim.is_creature
-                ):
+            else:
+                to_opponent = effect.target == "opponent" or (
+                    effect.target == "any_target"
+                    and target_id in (None, "opponent")
+                )
+                if to_opponent:
+                    state.life_opponent -= qty
+                    self._queue_triggers(
+                        state,
+                        TriggerEvent.OPPONENT_LOSE_LIFE,
+                        source,
+                        amount=qty,
+                    )
+                elif effect.target == "any_target" and target_id is not None:
+                    # CR 702.92 / Triskelion-class: any-target may include the source.
+                    victim = state.permanents.get(target_id)
+                    if (
+                        victim is None
+                        or victim.zone != Zone.BATTLEFIELD
+                        or not victim.is_creature
+                    ):
+                        return ExecError(
+                            VerificationStatus.ILLEGAL_TARGET,
+                            "damage target must be a battlefield creature",
+                        )
+                    victim.damage_marked += qty
+                    self._queue_triggers(
+                        state,
+                        TriggerEvent.DEALT_DAMAGE,
+                        victim,
+                        amount=qty,
+                    )
+                else:
                     return ExecError(
                         VerificationStatus.ILLEGAL_TARGET,
-                        "damage target must be a battlefield creature",
+                        "deal damage needs opponent or creature target",
                     )
-                victim.damage_marked += qty
-            else:
-                return ExecError(
-                    VerificationStatus.ILLEGAL_TARGET,
-                    "deal damage needs opponent or creature target",
-                )
             state.bump("damage", qty)
             if source.lifelink and qty > 0:
                 state.life_you += qty
