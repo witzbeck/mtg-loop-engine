@@ -43,6 +43,7 @@ from mtg_loop_engine.semantics.ir import (
     ReplacementDoubleDraw,
     StaticCantGainLife,
     StaticCdaPT,
+    StaticCopyActivatedAbility,
     StaticNontokenCreaturesAreForests,
     GrantActivatedAbility,
     ReplacementExileInsteadOfGraveyard,
@@ -52,6 +53,7 @@ from mtg_loop_engine.semantics.ir import (
     ReturnFromGraveyardToHandEffect,
     ReturnToBattlefieldEffect,
     BlinkEffect,
+    CopyPendingTriggerEffect,
     SacrificeCost,
     TapCost,
     TapCreatureCost,
@@ -1245,6 +1247,58 @@ def pat_nontoken_creatures_are_forests(text: str, name: str) -> Ability | None:
         return None
     return StaticNontokenCreaturesAreForests(
         ability_id=_ability_id("nontoken-forests", text),
+    )
+
+
+def pat_copy_activated_ability(text: str, name: str) -> Ability | None:
+    """Rings of Brighthearth / Illusionist's Bracers ability-copy statics."""
+    clause = text.strip()
+    m = re.match(
+        r"^Whenever you activate an ability, if it isn't a mana ability, "
+        r"you may pay ((?:\{[^}]+\})+)\. If you do, copy that ability\. "
+        r"You may choose new targets for the copy\.?$",
+        clause,
+        re.IGNORECASE,
+    )
+    if m:
+        mana = _parse_mana_braces(m.group(1))
+        return StaticCopyActivatedAbility(
+            ability_id=_ability_id("copy-activated", text),
+            pay_generic=int(mana.generic),
+            exclude_mana_abilities=True,
+            only_other_creatures=False,
+        )
+    m = re.match(
+        r"^Whenever an ability of equipped creature is activated, "
+        r"if it isn't a mana ability, copy that ability\. "
+        r"You may choose new targets for the copy\.?$",
+        clause,
+        re.IGNORECASE,
+    )
+    if m:
+        return StaticCopyActivatedAbility(
+            ability_id=_ability_id("copy-activated-equipped", text),
+            pay_generic=0,
+            exclude_mana_abilities=True,
+            only_other_creatures=True,
+        )
+    return None
+
+
+def pat_copy_pending_trigger(text: str, name: str) -> Ability | None:
+    """Strionic Resonator: pay + tap to copy a pending trigger."""
+    m = re.match(
+        r"^((?:\{[^}]+\})+), \{T\}: Copy target triggered ability you control\. "
+        r"You may choose new targets for the copy\.?$",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return ActivatedAbility(
+        ability_id=_ability_id("copy-pending-trigger", text),
+        costs=[ManaCost(amount=_parse_mana_braces(m.group(1))), TapCost()],
+        effects=[CopyPendingTriggerEffect()],
     )
 
 
@@ -5195,6 +5249,8 @@ PATTERNS: list[Pattern] = [
     Pattern("spell_cost_reduction", pat_spell_cost_reduction),
     Pattern("static_cda_pt", pat_static_cda_pt),
     Pattern("nontoken_creatures_are_forests", pat_nontoken_creatures_are_forests),
+    Pattern("copy_activated_ability", pat_copy_activated_ability),
+    Pattern("copy_pending_trigger", pat_copy_pending_trigger),
     Pattern("blink_activated", pat_blink_activated),
     Pattern("blink_etb", pat_blink_etb),
     Pattern("tap_draw_put_on_library", pat_tap_draw_put_on_library),
