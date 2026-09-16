@@ -138,7 +138,9 @@ class AddManaEffect(BaseModel):
     # Scaled tap mana (Circle / Priest / Bloom Tender class).
     # Also Mana Echoes ETB → colorless × sharing creature type (trigger subject).
     mana_scale: ManaScaleKind | None = None
-    scale_color: Literal["green", "any_color", "colorless"] = "green"
+    scale_color: Literal[
+        "white", "blue", "black", "red", "green", "any_color", "colorless"
+    ] = "green"
     # Metalworker: each hand artifact adds this many of scale_color (usually 2×{C}).
     scale_multiplier: int = 1
     # Omen Hawker: mana may only pay activated abilities (not casts).

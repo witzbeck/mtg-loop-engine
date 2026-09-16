@@ -135,8 +135,10 @@ uv run python scripts/spellbook_absent_discovery.py
     splits `Pay ` ability lines.
 41. **E10 multi land untap** ✓ — `UntapEffect.controlled_lands` + quantity (Drake/Palinchron/
     Argothian); bounce-self; Cycling proof-irrelevant split.
-42. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-43. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+42. **E11 scaled mana remainders** ✓ — swamp-count / greatest power-toughness / drawn /
+    entered-this-turn mana scales; Partner irrelevant.
+43. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+44. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 

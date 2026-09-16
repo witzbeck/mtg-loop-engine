@@ -1188,4 +1188,74 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{3}{G}",
         mana_value=4,
     ),
+    # M5 E11 — scaled mana remainders
+    "Magus of the Coffers": RealOracleCurriculum(
+        name="Magus of the Coffers",
+        types=["Creature", "Human", "Wizard"],
+        oracle_text="{2}, {T}: Add {B} for each Swamp you control.",
+        notes="E11: swamp-count mana.",
+        colors=("B",),
+        mana_cost="{3}{B}",
+        mana_value=4,
+    ),
+    "Bighorner Rancher": RealOracleCurriculum(
+        name="Bighorner Rancher",
+        types=["Creature", "Human", "Ranger"],
+        oracle_text=(
+            "{T}: Add an amount of {G} equal to the greatest power among creatures you control."
+        ),
+        notes="E11: greatest-power green mana.",
+        colors=("G",),
+        mana_cost="{4}{G}",
+        mana_value=5,
+    ),
+    "Arbor Adherent": RealOracleCurriculum(
+        name="Arbor Adherent",
+        types=["Creature", "Human", "Druid"],
+        oracle_text=(
+            "{T}: Add X mana of any one color, where X is the greatest toughness among "
+            "other creatures you control."
+        ),
+        notes="E11: greatest toughness among others → any color.",
+        colors=("G",),
+        mana_cost="{3}{G}",
+        mana_value=4,
+    ),
+    "Kydele, Chosen of Kruphix": RealOracleCurriculum(
+        name="Kydele, Chosen of Kruphix",
+        types=["Creature", "Human", "Wizard"],
+        oracle_text=(
+            "{T}: Add {C} for each card you've drawn this turn.\n"
+            "Partner (You can have two commanders if both have partner.)"
+        ),
+        notes="E11: cards-drawn mana; Partner irrelevant.",
+        colors=("G", "U"),
+        mana_cost="{2}{G}{U}",
+        mana_value=4,
+    ),
+    "Alena, Kessig Trapper": RealOracleCurriculum(
+        name="Alena, Kessig Trapper",
+        types=["Creature", "Human", "Ranger"],
+        oracle_text=(
+            "{T}: Add an amount of {R} equal to the greatest power among creatures you "
+            "control that entered this turn.\n"
+            "Partner (You can have two commanders if both have partner.)"
+        ),
+        notes="E11: entered-this-turn greatest power → red.",
+        colors=("R",),
+        mana_cost="{4}{R}",
+        mana_value=5,
+    ),
+    "Selvala, Heart of the Wilds": RealOracleCurriculum(
+        name="Selvala, Heart of the Wilds",
+        types=["Creature", "Elf", "Scout"],
+        oracle_text=(
+            "{G}, {T}: Add X mana in any combination of colors, where X is the greatest "
+            "power among creatures you control."
+        ),
+        notes="E11: Selvala greatest-power any-color (modeled as any_color pool).",
+        colors=("G",),
+        mana_cost="{1}{G}{G}",
+        mana_value=3,
+    ),
 }

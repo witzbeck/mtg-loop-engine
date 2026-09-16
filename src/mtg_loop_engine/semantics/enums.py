@@ -106,6 +106,11 @@ class ManaScaleKind(StrEnum):
     CONTROLLED_SHARING_CREATURE_TYPE = "controlled_sharing_creature_type"
     # Metalworker: artifact cards in hand (combo player reveals all).
     HAND_ARTIFACTS = "hand_artifacts"
+    CONTROLLED_SWAMPS = "controlled_swamps"
+    GREATEST_POWER_CONTROLLED = "greatest_power_controlled"
+    GREATEST_TOUGHNESS_OTHER = "greatest_toughness_other"
+    CARDS_DRAWN_THIS_TURN = "cards_drawn_this_turn"
+    GREATEST_POWER_ENTERED_THIS_TURN = "greatest_power_entered_this_turn"
 
 
 class TriggerEvent(StrEnum):
