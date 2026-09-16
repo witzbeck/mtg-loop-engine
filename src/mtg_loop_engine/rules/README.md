@@ -81,6 +81,7 @@ graph TB;
 - `GetEnergyEffect` / `EnergyCost`: `{E}` pool on `GameState.energy_you`.
 - `ExtraTurnEffect`: bumps `extra_turn` (Time Warp / Scepter).
 - `LoyaltyCost`: ±loyalty on activating planeswalker; hard-negative insufficient loyalty.
+- `BecomeCopyEffect`: Clone-class enter-as-copy (ETB become); hard-negative self-copy.
 - `ReplacementAmplifyP1P1Counters` (Kami / Hardened Scales): +1/+1 puts become that many plus one; creature vs permanent scope; multiple sources stack.
 - Power-scaled tap mana (`equal_to_source_power`) uses `Permanent.effective_power()` (printed ± counters).
 - `AddCounterEffect.amount_from_trigger` + `target=enchanted_creature`: Sunbond / Light of Promise put that many +1/+1 on the host creature (explorer supplies the host target; no attachment graph yet).
