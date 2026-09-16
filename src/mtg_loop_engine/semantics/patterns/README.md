@@ -107,6 +107,7 @@ graph TB;
 - `dealt_damage_create_copy` / `fight_activated` / `etb_fight` — E74 Polyraptor / Brash / Apex.
 - `additional_combat_untap_activated` / `combat_damage_untap_extra_combat` / `landfall_extra_combat` — E35 extra combat.
 - `etb_or_attacks_get_energy` / `attacks_get_energy` / `pay_energy_untap_all` / `tap_pay_energy_create_token` — E38 energy.
+- `extra_turn_spell` / `remove_charge_extra_turn` / `mana_tap_put_charge_self` — E36 extra turn.
 - `untap_mill_controller` — Mesmeric; UNTAP → self-mill.
 
 ## Main entry points

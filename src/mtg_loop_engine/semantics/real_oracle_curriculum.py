@@ -2651,6 +2651,38 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_value=5,
     ),
 
+    # M5 E36 — extra turn
+    "Time Warp": RealOracleCurriculum(
+        name="Time Warp",
+        types=["Sorcery"],
+        oracle_text="Target player takes an extra turn after this one.",
+        notes="E36: extra-turn spell body.",
+        colors=("U",),
+        mana_cost="{3}{U}{U}",
+        mana_value=5,
+    ),
+    "Temporal Manipulation": RealOracleCurriculum(
+        name="Temporal Manipulation",
+        types=["Sorcery"],
+        oracle_text="Take an extra turn after this one.",
+        notes="E36: extra-turn spell body.",
+        colors=("U",),
+        mana_cost="{3}{U}{U}",
+        mana_value=5,
+    ),
+    "Magistrate's Scepter": RealOracleCurriculum(
+        name="Magistrate's Scepter",
+        types=["Artifact"],
+        oracle_text=(
+            "{4}, {T}: Put a charge counter on this artifact.\n"
+            "{T}, Remove three charge counters from this artifact: Take an extra "
+            "turn after this one."
+        ),
+        notes="E36: charge → extra turn.",
+        mana_cost="{3}",
+        mana_value=3,
+    ),
+
     # M5 E54 — impulse / top-deck
     "Sensei's Divining Top": RealOracleCurriculum(
         name="Sensei's Divining Top",
