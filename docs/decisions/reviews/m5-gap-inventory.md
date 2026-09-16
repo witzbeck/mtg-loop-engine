@@ -68,8 +68,8 @@ narrows mid-flight.
 | E03 | done | Token-create ×2 | CLOSE_NOW | 5 | 3 | yes | Parallel Lives, Anointed Procession (+ Doubling Season token half) |
 | E04 | done | Draw-trigger effects | CLOSE_NOW | 14 | 5 | maybe | Niv-Mizzet, Psychosis Crawler, Queza, … |
 | E05 | done | Curiosity combat-draw auras | CLOSE_NOW | 3 | 3 | maybe | Curiosity, Keen Sense, Ophidian Eye |
-| E06 | pending | Grant activated abilities | CLOSE_NOW | 5 | 3 | yes | Basal Sliver, Cryptolith Rite-class |
-| E07 | pending | Count-scaled tap-create | CLOSE_NOW | 6 | 2 | yes | Krenko; **exclude** life-total create |
+| E06 | done | Grant activated abilities | CLOSE_NOW | 5 | 3 | yes | Basal Sliver, Cryptolith Rite-class |
+| E07 | done | Count-scaled tap-create | CLOSE_NOW | 6 | 2 | yes | Krenko; **exclude** life-total create |
 
 ### CLOSE_BUILD soft / mid
 

@@ -34,6 +34,7 @@ from mtg_loop_engine.semantics.ir import (
     ReplacementExileInsteadOfGraveyard,
     ReplacementMultiplyTapMana,
     ReplacementDoubleTokens,
+    GrantActivatedAbility,
     ReplacementReduceM1M1Counters,
     ReturnToBattlefieldEffect,
     SacrificeCost,
@@ -341,6 +342,89 @@ class Executor:
             if getattr(ab, "ability_id", None) == ability_id:
                 return ab  # type: ignore[return-value]
         return None
+
+    def find_activated_ability(
+        self, state: GameState, perm: Permanent, ability_id: str
+    ) -> ActivatedAbility | None:
+        """Resolve printed or granted activated abilities for ``perm``."""
+        ab = self.find_ability(perm.oracle_id, ability_id)
+        if isinstance(ab, ActivatedAbility):
+            return ab
+        # Granted abilities use ids like grant:<source_oid>:<grant_ability_id>
+        if not ability_id.startswith("grant:"):
+            return None
+        parts = ability_id.split(":", 2)
+        if len(parts) != 3:
+            return None
+        _, source_oid, grant_id = parts
+        source = state.permanents.get(source_oid)
+        if source is None or source.zone != Zone.BATTLEFIELD:
+            return None
+        card = self.semantics.get(source.oracle_id)
+        if not card:
+            return None
+        for gab in card.abilities:
+            if not isinstance(gab, GrantActivatedAbility):
+                continue
+            if gab.ability_id != grant_id:
+                continue
+            if not self._grant_applies(state, gab, perm):
+                return None
+            return ActivatedAbility(
+                ability_id=ability_id,
+                costs=list(gab.costs),
+                effects=list(gab.effects),
+                is_mana_ability=gab.is_mana_ability,
+                uses_stack=gab.uses_stack,
+            )
+        return None
+
+    def _grant_applies(
+        self, state: GameState, grant: GrantActivatedAbility, host: Permanent
+    ) -> bool:
+        if host.zone != Zone.BATTLEFIELD or host.controller != "you":
+            return False
+        if grant.host_filter == "creatures_you_control":
+            return host.is_creature
+        if grant.host_filter == "white_creatures_you_control":
+            return host.is_creature and "W" in (host.colors or [])
+        if grant.host_filter == "slivers_you_control":
+            if not host.is_creature:
+                return False
+            types = {t.casefold() for t in self._creature_subtypes(host)}
+            # also check card types list for Sliver
+            card = self.semantics.get(host.oracle_id)
+            if card:
+                types |= {t.casefold() for t in card.types}
+            return "sliver" in types
+        return False
+
+    def iter_granted_activated(
+        self, state: GameState, host: Permanent
+    ) -> list[ActivatedAbility]:
+        out: list[ActivatedAbility] = []
+        for source in state.permanents.values():
+            if source.zone != Zone.BATTLEFIELD or source.controller != "you":
+                continue
+            card = self.semantics.get(source.oracle_id)
+            if not card:
+                continue
+            for gab in card.abilities:
+                if not isinstance(gab, GrantActivatedAbility):
+                    continue
+                if not self._grant_applies(state, gab, host):
+                    continue
+                aid = f"grant:{source.object_id}:{gab.ability_id}"
+                out.append(
+                    ActivatedAbility(
+                        ability_id=aid,
+                        costs=list(gab.costs),
+                        effects=list(gab.effects),
+                        is_mana_ability=gab.is_mana_ability,
+                        uses_stack=gab.uses_stack,
+                    )
+                )
+        return out
 
     def pay_mana(
         self,
@@ -1354,7 +1438,7 @@ class Executor:
                 VerificationStatus.ILLEGAL_ACTION,
                 "cannot activate opponent-controlled permanent",
             )
-        ab = self.find_ability(perm.oracle_id, step.ability_id)
+        ab = self.find_activated_ability(state, perm, step.ability_id)
         if not isinstance(ab, ActivatedAbility):
             return ExecError(VerificationStatus.ILLEGAL_ACTION, "ability not activated")
         if not ab.supported:

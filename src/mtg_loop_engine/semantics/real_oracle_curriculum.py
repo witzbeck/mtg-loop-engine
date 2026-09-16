@@ -1036,4 +1036,45 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{2}{U}",
         mana_value=3,
     ),
+    # M5 E06 — grant activated
+    "Cryptolith Rite": RealOracleCurriculum(
+        name="Cryptolith Rite",
+        types=["Enchantment"],
+        oracle_text='Creatures you control have "{T}: Add one mana of any color."',
+        notes="E06: GrantActivatedAbility tap-any-mana.",
+        colors=("G",),
+        mana_cost="{1}{G}",
+        mana_value=2,
+    ),
+    "Basal Sliver": RealOracleCurriculum(
+        name="Basal Sliver",
+        types=["Creature", "Sliver"],
+        oracle_text='All Slivers have "Sacrifice this permanent: Add {B}{B}."',
+        notes="E06: grant sac-for-mana to Slivers.",
+        colors=("B",),
+        mana_cost="{2}{B}",
+        mana_value=3,
+    ),
+    "Resplendent Mentor": RealOracleCurriculum(
+        name="Resplendent Mentor",
+        types=["Creature", "Human", "Cleric"],
+        oracle_text='White creatures you control have "{T}: You gain 1 life."',
+        notes="E06: grant tap-gain-life to white creatures.",
+        colors=("W",),
+        mana_cost="{2}{W}",
+        mana_value=3,
+    ),
+    # M5 E07 — Krenko-scale
+    "Krenko, Mob Boss": RealOracleCurriculum(
+        name="Krenko, Mob Boss",
+        types=["Creature", "Goblin", "Warrior"],
+        oracle_text=(
+            "{T}: Create X 1/1 red Goblin creature tokens, "
+            "where X is the number of Goblins you control."
+        ),
+        notes="E07: tap create X = controlled Goblins.",
+        colors=("R",),
+        mana_cost="{2}{R}{R}",
+        mana_value=4,
+    ),
 }

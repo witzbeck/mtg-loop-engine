@@ -32,6 +32,7 @@ from mtg_loop_engine.semantics.ir import (
     RemoveCounterEffect,
     ReplacementAmplifyP1P1Counters,
     ReplacementDoubleTokens,
+    GrantActivatedAbility,
     ReplacementExileInsteadOfGraveyard,
     ReplacementMultiplyTapMana,
     ReplacementReduceM1M1Counters,
@@ -1253,8 +1254,47 @@ def pat_etb_or_attacks_create_token(text: str, name: str) -> Ability | None:
 
 
 def pat_mana_create_tokens_equal_subtype(text: str, name: str) -> Ability | None:
-    """Squirrel Girl: {cost}: Create X tokens equal to controlled subtype count."""
+    """Squirrel Girl / Krenko: create X tokens equal to controlled subtype count."""
     cleaned = _strip_ability_word(text)
+    # {T}: Create X …
+    m_tap = re.match(
+        r"^\{T\}: Create X(?: (\d+)/(\d+))? "
+        r"(?:(?:white|blue|black|red|green|colorless) )?"
+        r"(.+?) creature tokens?, where X is the number of (.+?) you control\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m_tap:
+        power = int(m_tap.group(1) or 1)
+        toughness = int(m_tap.group(2) or 1)
+        token_name = m_tap.group(3).strip()
+        subtype_phrase = m_tap.group(4).strip()
+        if subtype_phrase.casefold() in {
+            token_name.casefold(),
+            f"{token_name}s".casefold(),
+        }:
+            subtype = token_name
+        else:
+            subtype = (
+                subtype_phrase.rstrip("s")
+                if subtype_phrase.endswith("s")
+                else subtype_phrase
+            )
+        return ActivatedAbility(
+            ability_id=_ability_id("tap-tokens-eq-subtype", text),
+            costs=[TapCost()],
+            effects=[
+                CreateTokenEffect(
+                    name=token_name,
+                    power=power,
+                    toughness=toughness,
+                    quantity=1,
+                    quantity_equal_to_controlled_subtype=subtype,
+                )
+            ],
+            is_mana_ability=False,
+            uses_stack=True,
+        )
     m = re.match(
         r"^((?:\{[^}]+\})+): Create X(?: (\d+)/(\d+))? "
         r"(?:(?:white|blue|black|red|green|colorless) )?"
@@ -1999,6 +2039,55 @@ def pat_cast_from_gy_if_zombie(text: str, name: str) -> Ability | None:
 
 
 
+
+def pat_grant_activated(text: str, name: str) -> Ability | None:
+    """Cryptolith Rite / Basal Sliver / Resplendent Mentor grants."""
+    m = re.match(
+        r'^Creatures you control have "\{T\}: Add one mana of any color\."?$',
+        text,
+        re.IGNORECASE,
+    )
+    if m:
+        return GrantActivatedAbility(
+            ability_id=_ability_id("grant-tap-any-mana", text),
+            host_filter="creatures_you_control",
+            costs=[TapCost()],
+            effects=[AddManaEffect(amount=ManaAmount(any_color=1))],
+            is_mana_ability=True,
+            uses_stack=False,
+        )
+    m = re.match(
+        r'^All [Ss]livers have "Sacrifice this permanent: Add ((?:\{[^}]+\})+)\."?$',
+        text,
+        re.IGNORECASE,
+    )
+    if m:
+        amount = _parse_mana_braces(m.group(1))
+        return GrantActivatedAbility(
+            ability_id=_ability_id("grant-sac-mana", text),
+            host_filter="slivers_you_control",
+            costs=[SacrificeCost(selector="self")],
+            effects=[AddManaEffect(amount=amount)],
+            is_mana_ability=True,
+            uses_stack=False,
+        )
+    m = re.match(
+        r'^White creatures you control have "\{T\}: You gain (\d+) life\."?$',
+        text,
+        re.IGNORECASE,
+    )
+    if m:
+        return GrantActivatedAbility(
+            ability_id=_ability_id("grant-tap-gain-life", text),
+            host_filter="white_creatures_you_control",
+            costs=[TapCost()],
+            effects=[GainLifeEffect(amount=int(m.group(1)))],
+            is_mana_ability=False,
+            uses_stack=True,
+        )
+    return None
+
+
 def pat_draw_trigger_effect(text: str, name: str) -> Ability | None:
     """Whenever you draw a card → damage / life / mill / counters / lose life."""
     short = name.split(",")[0].strip()
@@ -2451,6 +2540,7 @@ PATTERNS: list[Pattern] = [
     Pattern("mana_create_token", pat_mana_create_token),
     Pattern("hybrid_remove_m1m1_pump", pat_hybrid_remove_m1m1_pump),
     Pattern("tap_two_creatures_add_mana", pat_tap_two_creatures_add_mana),
+    Pattern("grant_activated", pat_grant_activated),
     Pattern("draw_trigger_effect", pat_draw_trigger_effect),
     Pattern("curiosity_draw", pat_curiosity_draw),
     Pattern("dealt_damage_reflect", pat_dealt_damage_reflect),

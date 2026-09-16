@@ -387,6 +387,23 @@ class ReplacementDoubleTokens(BaseModel):
     supported: bool = True
 
 
+class GrantActivatedAbility(BaseModel):
+    """Cryptolith Rite / Basal Sliver: grant an activated ability to matching hosts."""
+
+    kind: Literal["grant_activated"] = "grant_activated"
+    ability_id: str
+    host_filter: Literal[
+        "creatures_you_control",
+        "slivers_you_control",
+        "white_creatures_you_control",
+    ] = "creatures_you_control"
+    costs: list[Cost] = Field(default_factory=list)
+    effects: list[Effect] = Field(default_factory=list)
+    is_mana_ability: bool = False
+    uses_stack: bool = True
+    supported: bool = True
+
+
 class FreeCastCreaturesByManaValue(BaseModel):
     """Aluren: cast creatures with mana value ≤ N without paying mana."""
 
@@ -422,6 +439,7 @@ Ability = Annotated[
     | ReplacementAmplifyP1P1Counters
     | ReplacementMultiplyTapMana
     | ReplacementDoubleTokens
+    | GrantActivatedAbility
     | FreeCastCreaturesByManaValue
     | InstantGrantTapBounce
     | ProofIrrelevantStatic,

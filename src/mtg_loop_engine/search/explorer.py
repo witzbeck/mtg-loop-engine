@@ -1149,9 +1149,13 @@ def _activation_steps(
         card = executor.semantics.get(perm.oracle_id)
         if not card:
             continue
-        for ab in card.abilities:
-            if not isinstance(ab, ActivatedAbility) or not ab.supported:
-                continue
+        activated: list = [
+            ab
+            for ab in card.abilities
+            if isinstance(ab, ActivatedAbility) and ab.supported
+        ]
+        activated.extend(executor.iter_granted_activated(state, perm))
+        for ab in activated:
             if tap_creature_cost_only and not (
                 _has_tap_creature_cost(ab) or ab.is_mana_ability
             ):
