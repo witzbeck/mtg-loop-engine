@@ -72,6 +72,7 @@ graph TB;
 - `etb_untap_up_to_lands` / `tap_untap_n_lands` / `tap_untap_target_land` / `bounce_self_activated` — Palinchron / Drake / Argothian class.
 - `scaled_mana_remainders` — Magus/Selvala/Kydele/Alena/Arbor/Bighorner mana scales.
 - `cast_trigger_effects` — Birgi/Animar/Steam-Kin/Vivi/Forsaken CAST → effect family.
+- `self_etb_scaled` — Redcap/Fanatic/Gary/Edgar self-ETB scaled damage/life/draw.
 - `etb_or_attacks_create_token` — Squirrel Girl; ETB create (attacks not modeled).
 - `mana_create_tokens_equal_subtype` — Squirrel Girl; `{cost}: Create X` equal to controlled subtype count.
 - Wirewood Channeler matches scaled `BATTLEFIELD_ELF` any-color (slice-9 sibling).

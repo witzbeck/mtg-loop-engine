@@ -42,6 +42,7 @@ def split_oracle_abilities(oracle_text: str) -> list[str]:
         r"Sacrifice |Remove a |"
         r"Pay |"
         r"Cycling |Partner |"
+        r"Persist |"
         r"Activated abilities |"
         r"Put a |"
         r"Morph |"

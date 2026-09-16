@@ -213,6 +213,10 @@ class DealDamageEffect(BaseModel):
     target: Literal["opponent", "any_target", "each_player"] = "opponent"
     # When True, use the pending trigger's recorded amount (Shalai / "that much").
     amount_from_trigger: bool = False
+    # Murderous Redcap: damage = source effective power.
+    equal_to_source_power: bool = False
+    # Fanatic of Mogis: damage = devotion to a color.
+    equal_to_devotion: Literal[None, "white", "blue", "black", "red", "green"] = None
 
 
 class GainLifeEffect(BaseModel):
@@ -227,6 +231,8 @@ class GainLifeEffect(BaseModel):
 class DrawEffect(BaseModel):
     kind: Literal["draw"] = "draw"
     amount: int = 1
+    # Edgar: draw for each artifact you control.
+    equal_to_controlled_artifacts: bool = False
 
 
 class LoseLifeEffect(BaseModel):
@@ -236,6 +242,8 @@ class LoseLifeEffect(BaseModel):
     amount_from_trigger: bool = False
     # Shard-class: lose ceil(current_life / 2); amount recorded for following gains.
     half_life_rounded_up: bool = False
+    # Gray Merchant: lose/gain equal to devotion.
+    equal_to_devotion: Literal[None, "white", "blue", "black", "red", "green"] = None
 
 
 class MillEffect(BaseModel):

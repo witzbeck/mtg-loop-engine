@@ -2061,6 +2061,79 @@ def _parse_count_word(raw: str) -> int | None:
 
 
 
+
+def pat_self_etb_scaled(text: str, name: str) -> Ability | None:
+    """E13a: self-ETB damage/life/draw scaled by power, devotion, or artifacts."""
+    cleaned = _strip_ability_word(text)
+    cleaned = re.sub(r"\s*\([^)]*\)\s*$", "", cleaned).strip()
+    short = name.split(",")[0].strip()
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "it", "~"])
+    )
+
+    m = re.match(
+        rf"^When (?:{name_alt}) enters(?: the battlefield)?, "
+        rf"(?:{name_alt}) deals damage equal to its power to any target\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("etb-power-damage", text),
+            event=TriggerEvent.ENTER_BATTLEFIELD,
+            filter="self",
+            effects=[DealDamageEffect(equal_to_source_power=True, target="any_target")],
+        )
+
+    m = re.match(
+        rf"^When (?:{name_alt}) enters(?: the battlefield)?, "
+        rf"(?:{name_alt}) deals damage to each opponent equal to your devotion to red\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("etb-devotion-red-damage", text),
+            event=TriggerEvent.ENTER_BATTLEFIELD,
+            filter="self",
+            effects=[DealDamageEffect(equal_to_devotion="red", target="opponent")],
+        )
+
+    m = re.match(
+        rf"^When (?:{name_alt}) enters(?: the battlefield)?, "
+        rf"each opponent loses X life, where X is your devotion to black\. "
+        rf"You gain life equal to the life lost this way\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("etb-gary", text),
+            event=TriggerEvent.ENTER_BATTLEFIELD,
+            filter="self",
+            effects=[
+                LoseLifeEffect(who="opponent", equal_to_devotion="black"),
+                GainLifeEffect(amount_from_trigger=True),
+            ],
+        )
+
+    m = re.match(
+        rf"^When (?:{name_alt}) enters(?: the battlefield)?, "
+        rf"draw a card for each artifact you control\.?$",
+        cleaned,
+        re.IGNORECASE,
+    )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("etb-draw-artifacts", text),
+            event=TriggerEvent.ENTER_BATTLEFIELD,
+            filter="self",
+            effects=[DrawEffect(equal_to_controlled_artifacts=True)],
+        )
+
+    return None
+
+
 def pat_cast_trigger_effects(text: str, name: str) -> Ability | None:
     """E12: parameterized whenever-you-cast → mana / life / counters / damage."""
     cleaned = _strip_ability_word(text)
@@ -2806,6 +2879,13 @@ def pat_proof_irrelevant_static(text: str, name: str) -> Ability | None:
         return _proof_irrelevant(clause)
 
     if re.match(
+        r"^Persist(?: \([^)]*\))?\.?$",
+        clause,
+        re.IGNORECASE,
+    ):
+        return _proof_irrelevant(clause)
+
+    if re.match(
         r"^Creatures you control have haste\.?(?: \([^)]*\))?$",
         clause,
         re.IGNORECASE,
@@ -3003,6 +3083,7 @@ PATTERNS: list[Pattern] = [
     Pattern("mana_create_token", pat_mana_create_token),
     Pattern("hybrid_remove_m1m1_pump", pat_hybrid_remove_m1m1_pump),
     Pattern("tap_two_creatures_add_mana", pat_tap_two_creatures_add_mana),
+    Pattern("self_etb_scaled", pat_self_etb_scaled),
     Pattern("cast_trigger_effects", pat_cast_trigger_effects),
     Pattern("scaled_mana_remainders", pat_scaled_mana_remainders),
     Pattern("etb_untap_up_to_lands", pat_etb_untap_up_to_lands),

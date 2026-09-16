@@ -1318,4 +1318,52 @@ REAL_ORACLE_CURRICULUM: dict[str, RealOracleCurriculum] = {
         mana_cost="{1}{U}{R}",
         mana_value=3,
     ),
+    # M5 E13a — self-ETB scaled damage / life / draw
+    "Murderous Redcap": RealOracleCurriculum(
+        name="Murderous Redcap",
+        types=["Creature", "Goblin", "Assassin"],
+        oracle_text=(
+            "When this creature enters, it deals damage equal to its power to any target.\n"
+            "Persist (When this creature dies, if it had no -1/-1 counters on it, return it "
+            "to the battlefield under its owner's control with a -1/-1 counter on it.)"
+        ),
+        notes="E13a: ETB power damage; Persist irrelevant.",
+        colors=("B", "R"),
+        mana_cost="{2}{B}{R}",
+        mana_value=4,
+    ),
+    "Fanatic of Mogis": RealOracleCurriculum(
+        name="Fanatic of Mogis",
+        types=["Creature", "Minotaur", "Shaman"],
+        oracle_text=(
+            "When this creature enters, it deals damage to each opponent equal to your "
+            "devotion to red. (Each {R} in the mana costs of permanents you control "
+            "counts toward your devotion to red.)"
+        ),
+        notes="E13a: ETB devotion-red damage.",
+        colors=("R",),
+        mana_cost="{3}{R}",
+        mana_value=4,
+    ),
+    "Gray Merchant of Asphodel": RealOracleCurriculum(
+        name="Gray Merchant of Asphodel",
+        types=["Creature", "Zombie"],
+        oracle_text=(
+            "When this creature enters, each opponent loses X life, where X is your "
+            "devotion to black. You gain life equal to the life lost this way."
+        ),
+        notes="E13a: Gary devotion drain.",
+        colors=("B",),
+        mana_cost="{3}{B}{B}",
+        mana_value=5,
+    ),
+    "Edgar, King of Figaro": RealOracleCurriculum(
+        name="Edgar, King of Figaro",
+        types=["Legendary", "Creature", "Human", "Noble"],
+        oracle_text="When Edgar enters, draw a card for each artifact you control.",
+        notes="E13a: ETB draw = artifacts.",
+        colors=("U",),
+        mana_cost="{4}{U}",
+        mana_value=5,
+    ),
 }
