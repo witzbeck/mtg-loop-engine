@@ -340,6 +340,11 @@ class TriggeredAbility(BaseModel):
         "other_controlled_creature",
         "other_controlled_human",
         "other_controlled_green",
+        "cast_creature",
+        "cast_noncreature",
+        "cast_colorless",
+        "cast_red",
+        "cast_artifact",
     ] = "any"
     effects: list[Effect] = Field(default_factory=list)
     intervening_if: str | None = None

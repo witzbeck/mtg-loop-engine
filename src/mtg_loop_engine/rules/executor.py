@@ -1297,9 +1297,28 @@ class Executor:
                     subject.is_token and subject.is_creature
                 ):
                     continue
+                if ab.filter == "cast_creature" and not subject.is_creature:
+                    continue
+                if ab.filter == "cast_noncreature" and subject.is_creature:
+                    continue
+                if ab.filter == "cast_artifact" and not (
+                    subject.is_artifact or "artifact" in self._permanent_type_set(subject)
+                ):
+                    continue
+                if ab.filter == "cast_colorless":
+                    colors = self._permanent_colors(subject)
+                    if colors:
+                        continue
+                if ab.filter == "cast_red":
+                    colors = self._permanent_colors(subject)
+                    if "R" not in colors:
+                        continue
                 # CR 603.4 intervening-if (cast): only if subject entered via cast_from_hand.
                 if ab.intervening_if == "cast" and not subject.was_cast:
                     continue
+                if ab.intervening_if == "fewer_than_three_p1p1":
+                    if perm.counters.get("p1p1", 0) >= 3:
+                        continue
                 entry = {
                     "source_id": perm.object_id,
                     "ability_id": ab.ability_id,
