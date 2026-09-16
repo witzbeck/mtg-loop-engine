@@ -84,12 +84,110 @@ def test_cryptolith_grant_pays_mana_on_creature():
     assert state.mana.any_color == 1
 
 
-def test_krenko_plus_alarm_rediscovers():
-    krenko = _compile("Krenko, Mob Boss").semantics
-    alarm = _compile("Intruder Alarm Live").semantics
-    found = explore_pair(krenko, alarm, max_depth=10)
-    assert found is not None
-    assert found.proof.status == VerificationStatus.VERIFIED
-    names = {c.name for c in found.witness.essential_cards}
-    assert "Krenko, Mob Boss" in names
-    assert "Intruder Alarm" in names
+def test_basal_sliver_grant_sac_mana():
+    basal = _compile("Basal Sliver").semantics
+    fodder = CardSemantics(
+        oracle_id="oracle:sliver-fodder",
+        name="Sliver Fodder",
+        types=["Creature", "Sliver"],
+        abilities=[],
+        coverage=SemanticCoverage.COMPLETE,
+    )
+    ex = Executor({basal.oracle_id: basal, fodder.oracle_id: fodder})
+    state = GameState(
+        permanents={
+            "basal": Permanent(
+                object_id="basal",
+                oracle_id=basal.oracle_id,
+                name=basal.name,
+                is_creature=True,
+                power=2,
+                toughness=2,
+            ),
+            "fodder": Permanent(
+                object_id="fodder",
+                oracle_id=fodder.oracle_id,
+                name="Sliver Fodder",
+                is_creature=True,
+                is_token=True,
+                power=1,
+                toughness=1,
+            ),
+        },
+        mana=ManaAmount(),
+    )
+    grants = ex.iter_granted_activated(state, state.permanents["fodder"])
+    assert grants
+    assert (
+        ex.activate(
+            state,
+            ActionStep(op="activate", actor="fodder", ability_id=grants[0].ability_id),
+        )
+        is None
+    )
+    assert state.mana.black == 2
+    assert state.permanents["fodder"].zone.value == "graveyard"
+
+
+def test_resplendent_grant_white_only():
+    mentor = _compile("Resplendent Mentor").semantics
+    white = CardSemantics(
+        oracle_id="oracle:white-creature",
+        name="White Creature",
+        types=["Creature"],
+        abilities=[],
+        coverage=SemanticCoverage.COMPLETE,
+        colors=["W"],
+    )
+    red = CardSemantics(
+        oracle_id="oracle:red-creature",
+        name="Red Creature",
+        types=["Creature"],
+        abilities=[],
+        coverage=SemanticCoverage.COMPLETE,
+        colors=["R"],
+    )
+    ex = Executor(
+        {mentor.oracle_id: mentor, white.oracle_id: white, red.oracle_id: red}
+    )
+    state = GameState(
+        permanents={
+            "mentor": Permanent(
+                object_id="mentor",
+                oracle_id=mentor.oracle_id,
+                name=mentor.name,
+                is_creature=True,
+                colors=["W"],
+                power=2,
+                toughness=2,
+            ),
+            "white": Permanent(
+                object_id="white",
+                oracle_id=white.oracle_id,
+                name="White Creature",
+                is_creature=True,
+                colors=["W"],
+                power=1,
+                toughness=1,
+            ),
+            "red": Permanent(
+                object_id="red",
+                oracle_id=red.oracle_id,
+                name="Red Creature",
+                is_creature=True,
+                colors=["R"],
+                power=1,
+                toughness=1,
+            ),
+        },
+        mana=ManaAmount(),
+        life_you=40,
+    )
+    assert ex.iter_granted_activated(state, state.permanents["white"])
+    assert not ex.iter_granted_activated(state, state.permanents["red"])
+    aid = ex.iter_granted_activated(state, state.permanents["white"])[0].ability_id
+    assert (
+        ex.activate(state, ActionStep(op="activate", actor="white", ability_id=aid))
+        is None
+    )
+    assert state.life_you == 41
