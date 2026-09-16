@@ -122,6 +122,8 @@ class TriggerEvent(StrEnum):
     CARD_TO_OPPONENT_GRAVEYARD = "card_to_opponent_graveyard"
     CAST = "cast"
     DEALT_DAMAGE = "dealt_damage"
+    DRAW = "draw"
+    DAMAGE_OPPONENT = "damage_opponent"
 
 
 class ChoiceController(StrEnum):

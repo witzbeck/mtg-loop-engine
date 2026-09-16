@@ -1998,6 +1998,135 @@ def pat_cast_from_gy_if_zombie(text: str, name: str) -> Ability | None:
 
 
 
+
+def pat_draw_trigger_effect(text: str, name: str) -> Ability | None:
+    """Whenever you draw a card → damage / life / mill / counters / lose life."""
+    short = name.split(",")[0].strip()
+    name_alt = "|".join(
+        re.escape(n) for n in dict.fromkeys([name, short, "this creature", "~"])
+    )
+    m = re.match(
+        rf"^Whenever you draw a card, (?:{name_alt}) deals (\d+) damage to any target\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("draw-damage", text),
+            event=TriggerEvent.DRAW,
+            filter="any",
+            effects=[DealDamageEffect(amount=int(m.group(1)), target="any_target")],
+        )
+    m = re.match(
+        r"^Whenever you draw a card, you gain (\d+) life\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("draw-gain-life", text),
+            event=TriggerEvent.DRAW,
+            filter="any",
+            effects=[GainLifeEffect(amount=int(m.group(1)))],
+        )
+    m = re.match(
+        r"^Whenever you draw a card, each opponent loses (\d+) life\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("draw-opp-lose-life", text),
+            event=TriggerEvent.DRAW,
+            filter="any",
+            effects=[LoseLifeEffect(who="opponent", amount=int(m.group(1)))],
+        )
+    m = re.match(
+        r"^Whenever you draw a card, target opponent loses (\d+) life and you gain (\d+) life\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("draw-drain", text),
+            event=TriggerEvent.DRAW,
+            filter="any",
+            effects=[
+                LoseLifeEffect(who="opponent", amount=int(m.group(1))),
+                GainLifeEffect(amount=int(m.group(2))),
+            ],
+        )
+    m = re.match(
+        r"^Whenever you draw a card, each opponent mills (?:(\d+)|two|three) cards?\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if m:
+        raw = (m.group(1) or "").lower()
+        if raw.isdigit():
+            amt = int(raw)
+        elif "three" in text.lower():
+            amt = 3
+        else:
+            amt = 2
+        return TriggeredAbility(
+            ability_id=_ability_id("draw-mill", text),
+            event=TriggerEvent.DRAW,
+            filter="any",
+            effects=[MillEffect(amount=amt, who="opponent")],
+        )
+    m = re.match(
+        rf"^Whenever you draw a card, put a \+1/\+1 counter on (?:{name_alt})(?: and you gain (\d+) life)?\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if m:
+        effects: list = [AddCounterEffect(counter_type="p1p1", quantity=1, target="self")]
+        if m.group(1):
+            effects.append(GainLifeEffect(amount=int(m.group(1))))
+        return TriggeredAbility(
+            ability_id=_ability_id("draw-p1p1-self", text),
+            event=TriggerEvent.DRAW,
+            filter="any",
+            effects=effects,
+        )
+    m = re.match(
+        r"^Whenever you draw a card, put a \+1/\+1 counter on target creature(?: you control)?\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if m:
+        return TriggeredAbility(
+            ability_id=_ability_id("draw-p1p1", text),
+            event=TriggerEvent.DRAW,
+            filter="any",
+            effects=[
+                AddCounterEffect(
+                    counter_type="p1p1", quantity=1, target="target_other_creature"
+                )
+            ],
+        )
+    return None
+
+
+def pat_curiosity_draw(text: str, name: str) -> Ability | None:
+    """Curiosity family: enchanted creature damages opponent → may draw."""
+    m = re.match(
+        r"^Whenever enchanted creature deals damage to an opponent, "
+        r"you may draw a card\.?$",
+        text,
+        re.IGNORECASE,
+    )
+    if not m:
+        return None
+    return TriggeredAbility(
+        ability_id=_ability_id("curiosity-draw", text),
+        event=TriggerEvent.DAMAGE_OPPONENT,
+        filter="controlled_creature",
+        effects=[DrawEffect(amount=1)],
+    )
+
+
 def pat_dealt_damage_reflect(text: str, name: str) -> Ability | None:
     """Spitemare / Reckoner class: dealt damage → that much damage elsewhere."""
     short = name.split("//")[0].strip()
@@ -2322,6 +2451,8 @@ PATTERNS: list[Pattern] = [
     Pattern("mana_create_token", pat_mana_create_token),
     Pattern("hybrid_remove_m1m1_pump", pat_hybrid_remove_m1m1_pump),
     Pattern("tap_two_creatures_add_mana", pat_tap_two_creatures_add_mana),
+    Pattern("draw_trigger_effect", pat_draw_trigger_effect),
+    Pattern("curiosity_draw", pat_curiosity_draw),
     Pattern("dealt_damage_reflect", pat_dealt_damage_reflect),
     Pattern("dealt_damage_gain_life", pat_dealt_damage_gain_life),
     Pattern("replacement_double_tokens", pat_replacement_double_tokens),

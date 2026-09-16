@@ -775,6 +775,12 @@ class Executor:
                         source,
                         amount=qty,
                     )
+                    self._queue_triggers(
+                        state,
+                        TriggerEvent.DAMAGE_OPPONENT,
+                        source,
+                        amount=qty,
+                    )
                 elif effect.target == "any_target" and target_id is not None:
                     # CR 702.92 / Triskelion-class: any-target may include the source.
                     victim = state.permanents.get(target_id)
@@ -822,7 +828,9 @@ class Executor:
             return None
 
         if isinstance(effect, DrawEffect):
-            state.bump("draw", effect.amount)
+            for _ in range(max(int(effect.amount), 0)):
+                state.bump("draw", 1)
+                self._queue_triggers(state, TriggerEvent.DRAW, source, amount=1)
             return None
 
         if isinstance(effect, LoseLifeEffect):
