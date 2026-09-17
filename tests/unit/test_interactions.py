@@ -288,3 +288,144 @@ def test_bounce_free_cast_and_grant_neighborhoods():
     key3 = tuple(sorted((drake.oracle_id, alarm.oracle_id)))
     assert key3 in pairs3
     assert "bounce_untap" in pairs3[key3]
+
+
+def test_c2_seams_copy_multiply_untap_cast_blink():
+    """Modeled IR families that previously sat in candidate_join_miss."""
+    from mtg_loop_engine.semantics.ir import (
+        BecomeCopyEffect,
+        BlinkEffect,
+        ReplacementMultiplyTapMana,
+        StaticCopyActivatedAbility,
+    )
+
+    rings = CardSemantics(
+        oracle_id="t:rings",
+        name="Rings",
+        types=["Enchantment"],
+        abilities=[
+            StaticCopyActivatedAbility(ability_id="copy", pay_generic=2),
+        ],
+    )
+    rock = CardSemantics(
+        oracle_id="t:rock",
+        name="Rock",
+        types=["Artifact"],
+        abilities=[
+            ActivatedAbility(
+                ability_id="tap-mana",
+                costs=[TapCost()],
+                effects=[AddManaEffect(amount=ManaAmount(colorless=3))],
+                is_mana_ability=True,
+            ),
+            ActivatedAbility(
+                ability_id="untap",
+                costs=[ManaCost(amount=ManaAmount(generic=3))],
+                effects=[UntapEffect(target="self")],
+            ),
+        ],
+    )
+    multiplier = CardSemantics(
+        oracle_id="t:mult",
+        name="Multiplier",
+        types=["Enchantment"],
+        abilities=[
+            ReplacementMultiplyTapMana(ability_id="x2", multiplier=2),
+        ],
+    )
+    mill_caps_card = CardSemantics(
+        oracle_id="t:orb2",
+        name="Orb2",
+        types=["Artifact"],
+        abilities=[
+            TriggeredAbility(
+                ability_id="untap-mill",
+                event=TriggerEvent.UNTAP,
+                filter="any",
+                effects=[],
+            )
+        ],
+    )
+    from mtg_loop_engine.semantics.enums import Zone
+    from mtg_loop_engine.semantics.ir import MoveToZoneEffect
+
+    tyrant = CardSemantics(
+        oracle_id="t:tide",
+        name="Tyrant",
+        types=["Creature"],
+        abilities=[
+            TriggeredAbility(
+                ability_id="cast-bounce",
+                event=TriggerEvent.CAST,
+                filter="any",
+                effects=[MoveToZoneEffect(zone=Zone.HAND, target="target_permanent")],
+            )
+        ],
+    )
+    felidar = CardSemantics(
+        oracle_id="t:feli",
+        name="Felidar",
+        types=["Creature"],
+        abilities=[
+            TriggeredAbility(
+                ability_id="blink",
+                event=TriggerEvent.ENTER_BATTLEFIELD,
+                filter="self",
+                effects=[BlinkEffect(target="target_permanent_you_control")],
+            )
+        ],
+    )
+    spark = CardSemantics(
+        oracle_id="t:spark",
+        name="Spark",
+        types=["Creature"],
+        abilities=[
+            TriggeredAbility(
+                ability_id="copy",
+                event=TriggerEvent.ENTER_BATTLEFIELD,
+                filter="self",
+                effects=[BecomeCopyEffect(target="target_creature")],
+            )
+        ],
+    )
+
+    rings_caps = extract_capabilities(rings)
+    assert "copy_activated" in rings_caps.modifies
+    rock_caps = extract_capabilities(rock)
+    assert "untap" in rock_caps.produces and "mana" in rock_caps.produces
+    assert "copy_activated_untap" in join_reasons(rings_caps, rock_caps)
+
+    mult_caps = extract_capabilities(multiplier)
+    assert "multiply_tap_mana" in mult_caps.modifies
+    assert "multiply_tap_mana" in join_reasons(mult_caps, rock_caps)
+
+    idx = InteractionIndex([rings, rock, multiplier])
+    pairs = {(p.left_id, p.right_id): p.reasons for p in idx.candidate_pairs()}
+    assert "copy_activated_untap" in pairs[tuple(sorted((rings.oracle_id, rock.oracle_id)))]
+    assert "multiply_tap_mana" in pairs[tuple(sorted((multiplier.oracle_id, rock.oracle_id)))]
+
+    orb_caps = extract_capabilities(mill_caps_card)
+    assert "untap" in orb_caps.triggers_on
+    assert "untap_trigger" in join_reasons(rock_caps, orb_caps)
+    idx_orb = InteractionIndex([rock, mill_caps_card])
+    assert any(
+        set(p.reasons) & {"untap_trigger"} for p in idx_orb.candidate_pairs()
+    )
+
+    tide_caps = extract_capabilities(tyrant)
+    assert "cast" in tide_caps.triggers_on
+    assert "bounce_to_hand" in tide_caps.produces
+    assert "cast_mana_rock" in join_reasons(tide_caps, rock_caps)
+    assert "bounce_mana_rock" in join_reasons(tide_caps, rock_caps)
+    idx_tide = InteractionIndex([tyrant, rock])
+    assert any(
+        {"cast_mana_rock", "bounce_mana_rock"} & set(p.reasons)
+        for p in idx_tide.candidate_pairs()
+    )
+
+    f_caps = extract_capabilities(felidar)
+    s_caps = extract_capabilities(spark)
+    assert "blink" in f_caps.produces and "enter_as_copy" in s_caps.produces
+    assert "blink_copy" in join_reasons(f_caps, s_caps)
+    idx_blink = InteractionIndex([felidar, spark])
+    assert any("blink_copy" in p.reasons for p in idx_blink.candidate_pairs())

@@ -182,8 +182,9 @@ uv run python scripts/spellbook_absent_discovery.py
 80. **E37a planeswalker loyalty** ✓ — Teferi +1 untap; Saheeli −2 copy; Aminatou −1 blink.
 81. **E34 enter-as-copy** ✓ — Clone; Mirror Image; Sculpting Steel (`BecomeCopyEffect`).
 82. **Inventory freeze** ✓ — umbrellas done; E66/E69/E75/E40/E41/E80 → R07–R11; E70 → O04; C1–C3 done; COMPLETE 233 / partial 679.
-83. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
-84. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
+83. **Truth sync + C2 join seams** ✓ — docs cite live 233/679; join funnel for copy/multiply/untap-trigger/cast-rock/blink-copy; recovery rediscovered **84→92**, join_miss **64→42**. Residual search_miss explorer debt (Rings+Basalt, Isochron+DR, Felidar+Spark).
+84. **Path b (Bond/Blood)** ✓ — generic life-gain seed; disclosed on witness.
+85. **Path b′ (Mindcrank / Bloodchief)** ✓ — generic opponent life-loss seed (drain-sized); disclosed on witness.
 
 #### Per-slice ritual
 
@@ -248,20 +249,27 @@ Trigger after every meaningful curriculum/physics PR (COMPLETE growth, new verif
 
 **DuckDB lock:** if Streamlit workbench is already running, stop it (Ctrl+C in that terminal — closing the browser tab is not enough) before `--persist-workbench`, or persist to a scratch `--db` path and re-run without `--db` after restart so the main store upserts.
 
-#### Current queue (remeasured post–waves + M5.3 batch)
+#### Current queue (remeasured 2026-09-17 post–inventory + C2)
 
-Probe: **88** COMPLETE · **95** verified · **73** in_reference · **22** absent (post–classify zone-assumption fix refresh). Workbench `spellbook_absent`: **22** unique pairs persisted.
+Probe: **233** COMPLETE · **204** verified · **82** in_reference · **122** absent. Scratch workbench persist (main DuckDB locked): `data/eval/adjudications_m53_scratch.duckdb` + `spellbook_absent_m53.jsonl` (**122** pairs). Re-upsert into the main store after stopping Streamlit.
 
-| Adjudication | Count | Notes |
+| Cluster (join reasons among absents) | Approx | Notes |
 | --- | ---: | --- |
-| `valid_generic_prerequisite` | 21 | Scaled mana / dork / grant / Temur / Wirewood / Alarm / Shalai life seeds |
-| `valid_strict_two_card` | 1 | Aluren + Dream Stalker (no generics; `repeatable_event` self-bounce; keep `ABSENT_FROM_REFERENCE`) |
-| `duplicate_or_equivalent_interaction` | 2 | Basalt/Impact + Gond bystanders (prior) |
-| `needs_rules_research` | 1 | Warleader's Call + Gond (prior) |
+| `tap_untap` | 91 | Dominated by Dramatic Reversal / Mind Over Matter + scaled mana rocks |
+| `mana_pay` | 23 | Cost/mana channel absences |
+| `etb_trigger` | 12 | Token / ETB untap families |
+| Other | ≤3 each | cost_reduce, bounce/grant, counters |
 
-Keep `ABSENT_FROM_REFERENCE` (not `NOVEL`). Run `--persist-workbench` after each curriculum PR.
+Prior classifications still apply where pairs overlap:
 
-**Wave 1 recovery note:** `join_reasons` for bounce/free-cast/grant existed, but `InteractionIndex._complement_ids` omitted those tags → Spellbook `join_miss`. Fix + Drake/Alarm mana-dork seeds + recovery `max_depth` 12.
+| Adjudication | Notes |
+| --- | --- |
+| `valid_strict_two_card` | Aluren + Dream Stalker still absent (`repeatable_event` self-bounce) |
+| `valid_generic_prerequisite` | Prior scaled-mana / Alarm / Temur / Wirewood batch — re-check after bulk pass |
+
+**Bulk M5.3 pass is open** — dispose all 122 with [`docs/ADJUDICATION.md`](../ADJUDICATION.md) taxonomy; keep `ABSENT_FROM_REFERENCE` (not `NOVEL`). False `VERIFIED` → owning-suite regressions.
+
+**C2 recovery note (2026-09-17):** copy-activated / multiply-tap-mana / untap-trigger / cast-mana-rock / blink-copy joins closed former `candidate_join_miss` Path-a pairs (Basalt+Reflection/Nyxbloom, Mesmeric+Basalt/Aphetto, Tidespout+rocks). Rings+Basalt / Isochron+DR / Felidar+Spark now join but remain `search_miss` (explorer seed debt).
 
 Absences are curriculum: finite / bystander / illegal activation failures feed the next frontier pass and should become regressions at the lowest useful layer.
 

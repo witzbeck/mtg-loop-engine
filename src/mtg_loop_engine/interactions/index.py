@@ -99,7 +99,11 @@ class InteractionIndex:
             out |= self.by_produces["mill"]
         # Bounce / free-cast / Instant grant (slices 24–25).
         if "bounce_to_hand" in cap.produces:
-            out |= self.by_modifies["free_cast_creature"] | self.by_produces["untap"]
+            out |= (
+                self.by_modifies["free_cast_creature"]
+                | self.by_produces["untap"]
+                | self.by_produces["mana"]
+            )
         if "free_cast_creature" in cap.modifies:
             out |= self.by_produces["bounce_to_hand"] | self.by_triggers["enter_battlefield"]
         if "enter_battlefield" in cap.triggers_on:
@@ -107,7 +111,29 @@ class InteractionIndex:
         if "grant_tap_bounce" in cap.produces:
             out |= self.by_triggers["enter_battlefield"] | self.by_produces["untap"]
         if "untap" in cap.produces:
-            out |= self.by_produces["bounce_to_hand"] | self.by_produces["grant_tap_bounce"]
+            out |= (
+                self.by_produces["bounce_to_hand"]
+                | self.by_produces["grant_tap_bounce"]
+                | self.by_triggers["untap"]
+                | self.by_modifies["copy_activated"]
+            )
+        # Post–inventory C2 seams (modeled IR that missed the join funnel).
+        if "copy_activated" in cap.modifies:
+            out |= self.by_produces["untap"]
+        if "multiply_tap_mana" in cap.modifies:
+            out |= self.by_produces["mana"]
+        if "mana" in cap.produces:
+            out |= self.by_modifies["multiply_tap_mana"]
+            if "tap" in cap.requires:
+                out |= self.by_triggers["cast"] | self.by_produces["bounce_to_hand"]
+        if "untap" in cap.triggers_on:
+            out |= self.by_produces["untap"]
+        if "cast" in cap.triggers_on:
+            out |= {oid for oid in self.by_produces["mana"] if "tap" in self.caps[oid].requires}
+        if "blink" in cap.produces:
+            out |= self.by_produces["enter_as_copy"]
+        if "enter_as_copy" in cap.produces:
+            out |= self.by_produces["blink"]
         out.discard(oid)
         return out
 
