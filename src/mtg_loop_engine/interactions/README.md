@@ -23,7 +23,7 @@ graph TB;
 
 ## Outputs
 
-- Unordered candidate pairs with non-empty `join_reasons` (`etb_trigger`, cost reduce, mana complements, bounce/free-cast/grant, …)
+- Unordered candidate pairs with non-empty `join_reasons` (`etb_trigger`, cost reduce, mana complements, bounce/free-cast/grant, copy-activated, multiply-tap-mana, untap-trigger, cast/bounce mana-rock, blink-copy, …)
 
 ## Responsibilities
 

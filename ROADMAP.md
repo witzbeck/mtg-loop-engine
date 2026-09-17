@@ -23,7 +23,7 @@ graph TB;
   M6 --> M7[M7 Explorer];
 ```
 
-**Active milestone:** M5 — Novel candidates ◐ **IN PROGRESS** (active stage: **M5.2 curriculum + continuous M5.3**)
+**Active milestone:** M5 — Novel candidates ◐ **IN PROGRESS** (active stage: **M5.3 adjudication**; M5.2 CLOSE queue frozen — reopen only via REJECT/OOS)
 
 Quantitative snapshot (baselines): [`docs/STATUS.md`](docs/STATUS.md). Keep volatile counts out of this file.
 
@@ -189,7 +189,8 @@ measure frontier → smallest reusable gap → discover → adjudicate → contr
    - **Slice 39 (Squirrel Girl)** ✓ — ETB create (attacks not modeled) + mana create X=Squirrels; Altar rediscovery.
    - **Slice 40 (Shard cast intervening-if)** ✓ — ETB `intervening_if=cast` + half-life drain; Vito/Bond COMPLETE unlock (2-card rediscovery needs bounce/recast).
    - **Slice 41 (Tidespout CAST bounce)** ✓ — `TriggerEvent.CAST` + artifact `cast_from_hand`; Sol Ring rediscovery (hold-priority mana abilities).
-   - **Slice 42+** ○ — cite live P0/P1; Path **a** preference.
+   - **Slice 42+ (Gap Inventory campaign)** ✓ — IR-family epics through inventory freeze ([#119](https://github.com/witzbeck/mtg-loop-engine/pull/119)); remaining rows **REJECT** + **OOS** only. Durable backlog: [`docs/decisions/reviews/m5-gap-inventory.md`](docs/decisions/reviews/m5-gap-inventory.md). Live pool **COMPLETE 233 / partial 679**.
+   - **C2 join seams (post-freeze)** ✓ — capability tags + `join_reasons` for copy-activated, multiply-tap-mana, untap-trigger, cast/bounce mana-rock, blink↔enter-as-copy. Remeasure: rediscovered **84→92**, join_miss **64→42**. Residual explorer search_miss (Rings+Basalt, Isochron+DR, Felidar+Spark) tracked in inventory readiness.
    - **Path b (Bond/Blood)** ✓ — explicit generic life-gain seed; `core_bond_blood` frozen; disclosed on witness.
    - **Path b (Mindcrank / Bloodchief)** ✓ — explicit generic opponent life-loss seed (`seed_lose_life`, drain-sized); disclosed on witness.
    - **Rules-evidence rails** ✓ — [`docs/RULES_EVIDENCE.md`](docs/RULES_EVIDENCE.md), [`AGENTS.md`](AGENTS.md), [`.cursor/rules/rules-evidence.mdc`](.cursor/rules/rules-evidence.mdc), [`.agents/skills/rules-evidence/`](.agents/skills/rules-evidence/).
@@ -210,8 +211,8 @@ measure frontier → smallest reusable gap → discover → adjudicate → contr
      card forces a **third** sibling filter (e.g. another Elf / white creature) or
      when colored/typed token ETB is required for unlock — not as a standalone epic.
 
-3. **Workbench adjudication (M5.3)** ◐ — live probe post–classify zone-assumption refresh (**88** COMPLETE · **95** verified · **73** in_reference · **22** absent); Aluren+Dream Stalker remains **`valid_strict_two_card`** / `ABSENT_FROM_REFERENCE` (`repeatable_event`). Run `--persist-workbench` after each curriculum PR.
-4. **Optional baseline / M5.4 exit** — freeze an absent-discovery summary only when intentionally certifying; then apply the M5 exit gate above.
+3. **Workbench adjudication (M5.3)** ◐ — post–inventory + C2 probe (**233** COMPLETE · **204** verified · **82** in_reference · **122** absent). Aluren+Dream Stalker remains **`valid_strict_two_card`** / `ABSENT_FROM_REFERENCE`. Dominant absent cluster: Dramatic Reversal / Mind Over Matter `tap_untap` generics. Bulk disposal still open (scratch persist when main DuckDB locked). Run `--persist-workbench` after each curriculum PR.
+4. **Optional baseline / M5.4 exit** — blocked on M5.3 disposal of the certified-run absences; then apply the M5 exit gate above.
 
 Playbook: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDIDATES.md).
 

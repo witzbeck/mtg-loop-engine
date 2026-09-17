@@ -1,14 +1,14 @@
 # M5 Gap Inventory (compiler partials)
 
 Campaign inventory for M5.2 autonomous IR-family epics. Live frontier citation
-(remeasured 2026-09-16 via `scripts/spellbook_compiler_priority.py`):
+(remeasured 2026-09-17 via `scripts/spellbook_compiler_priority.py` after C2 join seams):
 
 | Metric | Value |
 | --- | --- |
-| COMPLETE | **88** |
-| Partial | **824** |
-| Fragments | **1213** (P0 228 / P1 185 / P2 800) |
-| Gap kinds | pattern_existing_physics 564 / reusable_new_primitive 523 / substantial_rules 126 |
+| COMPLETE | **233** |
+| Partial | **679** |
+| Fragments | **1063** (P0 157 / P1 154 / P2 752) |
+| Gap kinds | pattern_existing_physics 448 / reusable_new_primitive 502 / substantial_rules 113 |
 
 **Authority:** `ROADMAP.md` M5.2–M5.4; runbook
 [`../../runbooks/M5_NOVEL_CANDIDATES.md`](../../runbooks/M5_NOVEL_CANDIDATES.md).
@@ -41,7 +41,7 @@ graph TB;
 **or** one parameterized pattern covering ≥3 cards (unless family is truly singleton);
 compile + positive verify + hard negative; remasure; never auto-`NOVEL`.
 
-## Coverage vs 824
+## Coverage vs partial pool
 
 | Bucket | Approx cards touched | Notes |
 | --- | --- | --- |
@@ -153,7 +153,7 @@ time (effect-shape slices) while keeping this parent ID as the inventory umbrell
 | --- | --- | --- | --- | --- | --- |
 | E80 | REJECT | Long-tail residual | REJECT | ~160 | See R11 |
 | C1 | done | PARK/residual cleanup | cleanup | — | PARK=0; umbrellas closed; residual → R07–R11 / O04 |
-| C2 | done | Pair/combo rediscovery misses | cleanup | — | Join/search misses remain metric debt; no soft-verifier seams this campaign |
+| C2 | done | Pair/combo rediscovery misses | cleanup | — | Join funnel wired for copy/multiply/untap-trigger/cast-rock/blink-copy (2026-09-17); residual search_miss (Rings+Basalt, Isochron+DR, Felidar+Spark) is explorer-seed debt |
 | C3 | done | Absence / human NOVEL queue | cleanup | — | Non-NOVEL dispose continues on workbench; human NOVEL queue empty at freeze |
 
 **PARK list:** *(empty — campaign ban held).*
@@ -185,11 +185,25 @@ time (effect-shape slices) while keeping this parent ID as the inventory umbrell
 
 ## Inventory freeze citation
 
-Remeasure after epic loop (2026-09-16): frontier **COMPLETE 233 / partial 679**; Spellbook recovery supported **194**, rediscovered **84**, join_miss **64**, search_miss **46**. Remaining in-scope backlog rows are **REJECT** + **OOS** only.
+Epic-loop freeze (2026-09-16): frontier **COMPLETE 233 / partial 679**; recovery supported **194**, rediscovered **84**, join_miss **64**, search_miss **46**. Remaining backlog rows **REJECT** + **OOS** only.
+
+Post–C2 join seams (2026-09-17): same COMPLETE/partial; recovery supported **194**, rediscovered **92** (+8), join_miss **42** (−22), search_miss **60** (+14 from former join misses that now propose but miss explore). Path-a rediscoveries newly recovered include Basalt/Grim+Mana Reflection/Nyxbloom, Basalt/Aphetto+Mesmeric Orb, Tidespout+Sol Ring/Mox Opal/Grim.
 
 ## Human NOVEL queue
 
-*(empty at freeze — no auto-NOVEL; workbench absences continue non-NOVEL taxonomy.)*
+*(empty — no auto-NOVEL; workbench absences continue non-NOVEL taxonomy.)*
+
+## M5.3 / M5.4 readiness (2026-09-17)
+
+| Gate | Status | Evidence |
+| --- | --- | --- |
+| CLOSE_* emptied | ✓ | Inventory freeze #119 |
+| Truth sync | ✓ | This citation + ROADMAP/runbook probe refresh |
+| C2 join funnel | ◐ | +8 rediscovered; residual search_miss explorer debt |
+| M5.3 absences disposed | ○ | Probe **122** absent (was 22); bulk workbench pass still open — main DuckDB was locked; scratch persist `data/eval/adjudications_m53_scratch.duckdb` + `spellbook_absent_m53.jsonl` |
+| M5.4 exit | ○ | Blocked on M5.3 disposal + residual high-priority search_miss triage |
+
+**Next steps (decision order):** (1) human/workbench M5.3 pass on the 122 absents (taxonomy only; no auto-`NOVEL`); (2) explorer-seed slice for Rings+Basalt / Isochron+DR / Bracers+Aphetto if recovery recall matters; (3) M5.4 certification when absences are disposed.
 
 ## Top curriculum rows (citation; not walk order)
 
@@ -199,15 +213,16 @@ Prefer shared-IR epics over singleton curriculum rank. Notable P0 sole+pairs:
 | --- | --- | --- | --- |
 | 6 | Storm Herd | create X Pegasi = life total | **R01 REJECT** |
 | 2 | Professor Dellian Fel | PW loyalty suite | E37a / R11 residual |
-| 2 | Aetherflux Reservoir | cast → life per spell | E09 |
+| 2 | Aetherflux Reservoir | cast → life per spell | E09 / still join_miss |
 | 2 | Omen Hawker | spend-only {C}{U} | E01 |
 | 2 | Metalworker | reveal artifacts → {C}{C} each | E01 |
 
 ## Resume protocol
 
 1. No pending CLOSE_* rows — campaign inventory freeze complete.
-2. New work requires human widen of OOS or REJECT reopen.
-3. M5.4 certification is out of band unless requested.
+2. New physics requires human widen of OOS or REJECT reopen.
+3. Button-up path: M5.3 bulk adjudication → optional explorer-seed C2 → M5.4.
+4. M5.4 certification is out of band until M5.3 absences are disposed.
 
 ## Change log
 
@@ -216,3 +231,4 @@ Prefer shared-IR epics over singleton curriculum rank. Notable P0 sole+pairs:
 | 2026-09-16 | Initial inventory from remasured frontier (88/824); ordered backlog E01–E80 + hard E30–E41 + cleanup |
 | 2026-09-16 | REJECT batch: E63/E71/E72/E73 → R03–R05 (+R02); soft/hard CLOSE continue on remaining rows |
 | 2026-09-16 | Inventory freeze: umbrellas done; E66/E69/E75/E40/E41/E80 → R07–R11; E70 → O04; C1–C3 done; COMPLETE 233 / partial 679 |
+| 2026-09-17 | Truth sync + C2 join seams; recovery 84→92 rediscovered / 64→42 join_miss; M5.3 probe 122 absent; M5.4 readiness table |

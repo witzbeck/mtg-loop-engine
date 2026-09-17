@@ -10,6 +10,8 @@ from mtg_loop_engine.semantics.ir import (
     AddCounterCost,
     AddCounterEffect,
     AddManaEffect,
+    BecomeCopyEffect,
+    BlinkEffect,
     CardSemantics,
     ContinuousCostReduction,
     CreateTokenEffect,
@@ -31,6 +33,7 @@ from mtg_loop_engine.semantics.ir import (
     ReturnToBattlefieldEffect,
     SacrificeCost,
     BounceControlledCost,
+    StaticCopyActivatedAbility,
     TapCost,
     TapCreatureCost,
     TriggeredAbility,
@@ -95,6 +98,10 @@ def extract_capabilities(card: CardSemantics) -> CardCapabilities:
             continue
         if isinstance(ab, InstantGrantTapBounce):
             caps.produces.add("grant_tap_bounce")
+            continue
+        if isinstance(ab, StaticCopyActivatedAbility):
+            # Rings / Bracers: copy non-mana activations (Basalt untap, Aphetto, …).
+            caps.modifies.add("copy_activated")
             continue
         if isinstance(ab, ReplacementReduceM1M1Counters):
             caps.modifies.add("m1m1_put")
@@ -214,6 +221,13 @@ def _effects(effects: list, caps: CardCapabilities) -> None:
             caps.produces.add("draw")
         elif isinstance(effect, ReturnToBattlefieldEffect):
             caps.produces.add("etb")
+        elif isinstance(effect, BlinkEffect):
+            # Blink re-enters the returned permanent (Felidar / Emiel class).
+            caps.produces.add("blink")
+            caps.produces.add("etb")
+        elif isinstance(effect, BecomeCopyEffect):
+            caps.produces.add("enter_as_copy")
+            caps.produces.add("etb")
         elif isinstance(effect, MoveToZoneEffect):
             from mtg_loop_engine.semantics.enums import Zone as _Zone
 
@@ -263,4 +277,17 @@ def join_reasons(left: CardCapabilities, right: CardCapabilities) -> list[str]:
         reasons.append("grant_bounce_etb")
     if "grant_tap_bounce" in right.produces and "untap" in left.produces:
         reasons.append("grant_bounce_untap")
+    # Post–inventory C2 seams: modeled physics that never entered the join funnel.
+    if "copy_activated" in left.modifies and "untap" in right.produces:
+        reasons.append("copy_activated_untap")
+    if "multiply_tap_mana" in left.modifies and "mana" in right.produces:
+        reasons.append("multiply_tap_mana")
+    if "untap" in left.produces and "untap" in right.triggers_on:
+        reasons.append("untap_trigger")
+    if "cast" in left.triggers_on and "mana" in right.produces and "tap" in right.requires:
+        reasons.append("cast_mana_rock")
+    if "bounce_to_hand" in left.produces and "mana" in right.produces and "tap" in right.requires:
+        reasons.append("bounce_mana_rock")
+    if "blink" in left.produces and "enter_as_copy" in right.produces:
+        reasons.append("blink_copy")
     return reasons
