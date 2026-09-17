@@ -50,6 +50,7 @@ REQUIRED_FILES = [
     ROOT / "CONTRIBUTING.md",
     ROOT / "ROADMAP.md",
     ROOT / "docs" / "PHILOSOPHY.md",
+    ROOT / "docs" / "HOW_IT_WORKS.md",
     ROOT / "docs" / "ARCHITECTURE.md",
     ROOT / "docs" / "TERMINOLOGY.md",
     ROOT / "docs" / "STATUS.md",

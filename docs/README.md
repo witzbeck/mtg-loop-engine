@@ -10,9 +10,12 @@ Package-local operating contracts live next to code under `src/mtg_loop_engine/*
 
 ```mermaid
 graph TB;
-  readme[RootREADME] --> philosophy[PHILOSOPHY];
+  readme[RootREADME] --> howItWorks[HOW_IT_WORKS];
+  readme --> philosophy[PHILOSOPHY];
   readme --> terminology[TERMINOLOGY];
   readme --> architecture[ARCHITECTURE];
+  howItWorks --> philosophy;
+  howItWorks --> terminology;
   philosophy --> adjudication[ADJUDICATION];
   philosophy --> rulesEvidence[RULES_EVIDENCE];
   terminology --> evaluation[EVALUATION];
@@ -32,6 +35,7 @@ graph TB;
 | Doc | What it answers |
 | --- | --------------- |
 | [`../README.md`](../README.md) | Product pitch, maturity, quick start, source hierarchy |
+| [`HOW_IT_WORKS.md`](HOW_IT_WORKS.md) | Progressive ELI5 → player / engineer ladders (pedagogical) |
 | [`PHILOSOPHY.md`](PHILOSOPHY.md) | Why precision-first discovery + proof; AI–human flourishing |
 | [`TERMINOLOGY.md`](TERMINOLOGY.md) | Shared vocabulary (loop, witness, coverage, precision, …) |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Package boundaries and data flow |
