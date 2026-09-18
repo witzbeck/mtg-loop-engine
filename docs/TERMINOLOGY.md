@@ -72,6 +72,28 @@ Exactly **two essential functional pieces** participate; generics may appear; fu
 
 Semantics or rules needed for the claim are outside the modeled surface. Common surfaces: unmatched Oracle fragments, `UNSUPPORTED_SEMANTICS` / `UNSUPPORTED_RULE` rejection statuses, or assumption kind `unsupported`. Prefer this outcome over inventing behavior.
 
+### Typed rejections
+
+Non-`VERIFIED` statuses are first-class outcomes. Adjudicator-facing narration leads with the status and `rejection_reason` (see `eval/explain.py`); compiler coverage is separate completeness metadata.
+
+| Status | Plain meaning |
+| --- | --- |
+| `NOT_A_LOOP` | Sequence ran, but it is not a productive / claimed loop (wrong consequence, empty body, etc.) |
+| `RESOURCE_DEFICIT` | Could not pay a cost (mana, counters, sacrifice fodder, …) |
+| `STATE_NOT_RECURRENT` | After the lap, proof-relevant board state did not return to a usable shape |
+| `ILLEGAL_ACTION` | Modeled rules forbid that activation or step |
+| `ILLEGAL_TARGET` | Required target missing or illegal under the model |
+| `TIMING_VIOLATION` | Action outside its allowed timing window |
+| `MANA_RESTRICTION` | Mana pool color / restriction blocked the payment |
+| `FINITE_RESOURCE_CONSUMED` | Loop depends on a finite resource that runs out |
+| `ONCE_PER_TURN_LIMIT` | Once-per-turn (or similar) gate stops free repetition |
+| `OPPONENT_COOPERATION_REQUIRED` | Claim needs opponent choices the model treats as adversarial |
+| `EXTERNAL_FUNCTIONAL_PIECE_REQUIRED` | Needs a third functional piece beyond strict two-card |
+| `UNSUPPORTED_SEMANTICS` | Proof-relevant card text is not modeled (`PARTIAL_RELEVANT_TO_PROOF` fail-closed) |
+| `UNSUPPORTED_RULE` | Needed Comprehensive Rules behavior is outside the modeled surface |
+| `NONDETERMINISTIC` | Outcome depends on chance / unordered nondeterminism the V1 path rejects |
+| `INDETERMINATE` | Model cannot decide under current assumptions |
+
 ---
 
 ## Compiler coverage
