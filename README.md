@@ -30,7 +30,7 @@ graph LR;
 
 First, a pattern library turns each card’s Oracle text into activations the engine can run (from Scryfall, not from memory or Spellbook write-ups). Cards with complementary abilities—untap paired with tap-for-mana, and similar—are matched as potential partners. Search then tries legal activation sequences within bounded limits. When it finds a promising sequence, it writes a **witness**: a structured recipe for the verifier. The verifier runs setup and the loop body once; it accepts or rejects with a specific reason. Machine-accepted hits become candidates for human review.
 
-Search proposes; the verifier decides. The project prefers fewer trustworthy **`VERIFIED`** results over broad, untrusted recall. If the engine does not understand a line of Oracle text, it **rejects rather than guesses**. Deeper product stance: [docs/PHILOSOPHY.md](docs/PHILOSOPHY.md). Package and dependency map: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Search proposes; the verifier decides. The project prefers fewer trustworthy **`VERIFIED`** results over broad, untrusted recall. If the engine does not understand a line of Oracle text, it **rejects rather than guesses**. Progressive walkthrough (ELI5 → player / engineer): [docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md). Deeper product stance: [docs/PHILOSOPHY.md](docs/PHILOSOPHY.md). Package and dependency map: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ### What is a witness?
 

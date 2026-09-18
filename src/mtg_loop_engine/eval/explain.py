@@ -5,6 +5,7 @@ from __future__ import annotations
 from mtg_loop_engine.eval.classify import analyze_prerequisites
 from mtg_loop_engine.eval.schema import CandidateRecord, PrerequisiteAnalysis
 from mtg_loop_engine.proofs.models import LoopProof, LoopWitness
+from mtg_loop_engine.semantics.enums import VerificationStatus
 from mtg_loop_engine.semantics.oracle_fixtures import GOLD_ORACLE_FIXTURES
 
 
@@ -20,12 +21,22 @@ def explain_proof(witness: LoopWitness, proof: LoopProof) -> str:
     return _render(witness, proof, analysis)
 
 
+def _status_lead(names: str, proof: LoopProof) -> str:
+    status = proof.status.value
+    if proof.status == VerificationStatus.VERIFIED:
+        return f"{names} verified ({status})."
+    reason = (proof.rejection_reason or "").strip()
+    if reason:
+        return f"{names} rejected as {status}: {reason}"
+    return f"{names} rejected as {status}."
+
+
 def _render(
     witness: LoopWitness, proof: LoopProof, analysis: PrerequisiteAnalysis
 ) -> str:
     names = " + ".join(c.name for c in witness.essential_cards)
     lines = [
-        f"{names} was accepted as {proof.status.value}.",
+        _status_lead(names, proof),
         "",
         "Object map (ids in loop steps; not Card 1/Card 2 display order):",
     ]
@@ -91,10 +102,11 @@ def _render(
             lines.append(f"- {item}")
     lines.append("")
     lines.append(
-        f"Semantic coverage: {proof.semantic_coverage.value}. "
-        f"Proof hash {proof.proof_hash}."
+        f"Compiler coverage (not the reject reason): {proof.semantic_coverage.value}."
     )
+    lines.append(f"Proof hash {proof.proof_hash}.")
     return "\n".join(lines)
+
 
 
 def record_from_hit(
