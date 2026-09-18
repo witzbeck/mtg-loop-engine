@@ -152,11 +152,17 @@ def _render_verifier_details(st, candidate) -> None:
     with st.expander(":material/verified: Verifier details", expanded=False):
         claim = candidate.proof.claim_consequence
         claim_val = claim.value if claim is not None else "(none)"
-        st.markdown(
-            f"**Status:** `{candidate.proof.status.value}`  \n"
-            f"**Coverage:** `{candidate.proof.semantic_coverage.value}`  \n"
-            f"**Claim consequence:** `{claim_val}`  \n"
-            f"**Proof hash:** `{candidate.proof.proof_hash}`"
+        status_lines = [f"**Status:** `{candidate.proof.status.value}`"]
+        if candidate.proof.rejection_reason:
+            status_lines.append(
+                f"**Rejection reason:** `{candidate.proof.rejection_reason}`"
+            )
+        status_lines.append(f"**Claim consequence:** `{claim_val}`")
+        status_lines.append(f"**Proof hash:** `{candidate.proof.proof_hash}`")
+        st.markdown("  \n".join(status_lines))
+        st.caption(
+            f"Compiler coverage (completeness, not the reject reason): "
+            f"`{candidate.proof.semantic_coverage.value}`"
         )
         analysis = candidate.analysis
         st.markdown(
@@ -368,7 +374,13 @@ def _render_study_tab(st) -> None:
     st.markdown(full_narrative(w, proof))
 
     with st.expander(":material/verified: Proof details", expanded=False):
-        st.markdown(f"**Status:** `{proof.status.value}` · Coverage `{proof.semantic_coverage.value}`")
+        st.markdown(f"**Status:** `{proof.status.value}`")
+        if proof.rejection_reason:
+            st.markdown(f"**Rejection reason:** `{proof.rejection_reason}`")
+        st.caption(
+            f"Compiler coverage (completeness, not the reject reason): "
+            f"`{proof.semantic_coverage.value}`"
+        )
         st.markdown("**Recurrence dimensions:**")
         for detail in proof.recurrence.details:
             st.write(f"- {detail}")
