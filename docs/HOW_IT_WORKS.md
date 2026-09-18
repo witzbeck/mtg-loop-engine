@@ -34,8 +34,6 @@ The **Waker** toy watches for new stickers. Whenever a sticker gets stamped, the
 
 So the story goes: push → sticker → button pops up → push again. One full time around that circle is a **lap**. Each lap, you get another sticker. The stickers are the **prize**.
 
-There is also a **Duck** sitting next to them. The Duck has a button too, but nobody presses it during the lap. It only watches. Watching does not make it part of the team.
-
 If someone says “these toys make stickers forever,” you do not just believe them. You try it yourself: push, get a sticker, see the button come back up, push again. Can you do another lap the same way? Only then do you trust the prize keeps coming.
 
 ---
@@ -50,7 +48,7 @@ Often you must **spend** something—coins, points, energy—before a piece can 
 
 When piece A’s move sets up piece B’s move, and B’s move sets A up again, they make a little closed circle—like the Stamp and the Waker. Each lap should give a clear prize you can name and count (another token, more points), not a vague “you win somehow.”
 
-If a piece is listed as part of the team but never takes a turn in the circle, it is still just watching. It does not count.
+Now picture a third piece on the roster: the **Duck**. It has a button too, but nobody presses it during the lap. It only watches. A piece listed as part of the team that never takes a turn in the circle does not count.
 
 ### Level 3 — Casual Magic / EDH
 
@@ -66,7 +64,7 @@ Serious players look past flavor story text and past the little italic reminders
 
 A **strict two-card** combo means exactly those two cards are the essential engines of the loop. Extra generic “fodder” (tokens you make, a free host for an aura) can sit on the board without changing the claim. A real third functional piece—another card the loop needs to keep working—means it is no longer a strict two-card claim.
 
-**Basalt Monolith** next to **Phyrexian Altar** is the bystander trap: the Monolith can untap itself for mana forever while the Altar never activates in the lap, so naming both as a pair is a false “two-card” story. The Altar is the Duck from Level 1.
+**Basalt Monolith** next to **Phyrexian Altar** is the bystander trap: the Monolith can untap itself for mana forever while the Altar never activates in the lap, so naming both as a pair is a false “two-card” story. The Altar is the Duck from Level 2.
 
 A good check is a **recipe**: starting board, the sequence of activations and triggers for one lap, and what typed thing you gain each lap (mana, a token, and so on). Someone may **propose** a pair; someone else (or you) must **check** the recipe against the cards’ official wording and against the requirement that both essentials actually act.
 
@@ -94,7 +92,7 @@ A “card” here is just a labeled list of rules: what you may spend, what you 
 
 For a candidate pair, it builds a tiny pretend table and follows a short script. After one lap it asks: did both named helpers actually run? Did you get a prize? Can you run the same script again without the setup falling apart?
 
-Sometimes a second list is named in the pair, but only the first list’s abilities fire. That is the Duck: one worker, one spectator. A real pair needs **both** named helpers to take part in the lap.
+Sometimes a second list is named in the pair, but only the first list’s abilities fire. Call that unused list the **Duck**: one worker, one spectator. A real pair needs **both** named helpers to take part in the lap.
 
 No trading-card game yet—only read lists, match them, try a lap, check the prize, reject spectators.
 
@@ -142,6 +140,6 @@ Machine accept is **necessary** for “the model says this witness repeats under
 
 ## How the ladders connect
 
-Shared Level 1 carries lap / prize / Duck / try-and-check. Branch A turns that into Magic, then into combo-claim discipline. Branch B turns the same story into propose-vs-check, then into trust boundaries.
+Shared Level 1 carries lap / prize / try-and-check. Level 2 on each branch adds the Duck (listed but never acts). Branch A turns that into Magic, then into combo-claim discipline. Branch B turns the same story into propose-vs-check, then into trust boundaries.
 
 For contracts and vocabulary after you have the intuition: [`PHILOSOPHY.md`](PHILOSOPHY.md), [`TERMINOLOGY.md`](TERMINOLOGY.md), [`ARCHITECTURE.md`](ARCHITECTURE.md).

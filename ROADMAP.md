@@ -212,6 +212,10 @@ measure frontier → smallest reusable gap → discover → adjudicate → contr
      when colored/typed token ETB is required for unlock — not as a standalone epic.
 
 3. **Workbench adjudication (M5.3)** ◐ — post–inventory + C2 probe (**233** COMPLETE · **204** verified · **82** in_reference · **122** absent). Aluren+Dream Stalker remains **`valid_strict_two_card`** / `ABSENT_FROM_REFERENCE`. Dominant absent cluster: Dramatic Reversal / Mind Over Matter `tap_untap` generics. Bulk disposal still open (scratch persist when main DuckDB locked). Run `--persist-workbench` after each curriculum PR.
+   - **Operator clarity (opportunistic follow-ups; not curriculum gates):**
+     - **Reject narration:** `eval/explain.py` must not say “accepted as” for non-`VERIFIED`; lead with typed status + `rejection_reason`. Demote coverage enums beside status in the workbench (compiler completeness, not the primary failure story).
+     - **Typed-reject glossary:** short plain-English entries in [`docs/TERMINOLOGY.md`](docs/TERMINOLOGY.md) for reject statuses (when convenient).
+     - **Optional orientation polish:** root README lead with “official rules wording” before the Oracle alias if newcomers still bounce after [`docs/HOW_IT_WORKS.md`](docs/HOW_IT_WORKS.md) is linked.
 4. **Optional baseline / M5.4 exit** — blocked on M5.3 disposal of the certified-run absences; then apply the M5 exit gate above.
 
 Playbook: [`docs/runbooks/M5_NOVEL_CANDIDATES.md`](docs/runbooks/M5_NOVEL_CANDIDATES.md).
